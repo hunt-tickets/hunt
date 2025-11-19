@@ -1,12 +1,10 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getAllUsers, getUsersWithPurchasesStats } from "@/lib/supabase/actions/profile";
+import { createClient } from "@/supabase/server";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  getAllUsers,
+  getUsersWithPurchasesStats,
+} from "@/supabase/actions/profile";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserCircle, Users, Shield } from "lucide-react";
 import { UsersTable } from "@/components/users-table";
 import { AnalyticsCharts } from "@/components/analytics-charts";
@@ -66,9 +64,9 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     );
   }
 
-  const adminCount = users?.filter(u => u.admin).length || 0;
+  const adminCount = users?.filter((u) => u.admin).length || 0;
   const totalUsers = users?.length || 0;
-  const usersWithPhone = users?.filter(u => u.phone).length || 0;
+  const usersWithPhone = users?.filter((u) => u.phone).length || 0;
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
@@ -115,7 +113,9 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{usersWithPhone}</div>
-            <p className="text-xs text-[#404040] mt-1">Con teléfono registrado</p>
+            <p className="text-xs text-[#404040] mt-1">
+              Con teléfono registrado
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -123,21 +123,31 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
       {/* Analytics Section */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold text-white">Analíticas de Público</h2>
-          <p className="text-sm text-[#404040] mt-1">Estadísticas de usuarios que han comprado entradas</p>
+          <h2 className="text-lg font-semibold text-white">
+            Analíticas de Público
+          </h2>
+          <p className="text-sm text-[#404040] mt-1">
+            Estadísticas de usuarios que han comprado entradas
+          </p>
         </div>
 
         {purchaseStats.error ? (
           <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
             <CardContent className="py-12 text-center">
-              <p className="text-red-500">Error al cargar estadísticas: {purchaseStats.error}</p>
+              <p className="text-red-500">
+                Error al cargar estadísticas: {purchaseStats.error}
+              </p>
             </CardContent>
           </Card>
         ) : !purchaseStats.ageGroups || purchaseStats.ageGroups.length === 0 ? (
           <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
             <CardContent className="py-12 text-center">
-              <p className="text-white/40">No hay usuarios con compras registradas aún</p>
-              <p className="text-xs text-white/30 mt-2">Los gráficos aparecerán cuando haya datos de compras</p>
+              <p className="text-white/40">
+                No hay usuarios con compras registradas aún
+              </p>
+              <p className="text-xs text-white/30 mt-2">
+                Los gráficos aparecerán cuando haya datos de compras
+              </p>
             </CardContent>
           </Card>
         ) : (
@@ -153,7 +163,9 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
       {/* Users Table */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Listado de Usuarios</h2>
+          <h2 className="text-lg font-semibold text-white">
+            Listado de Usuarios
+          </h2>
         </div>
 
         {users && users.length > 0 ? (

@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getEventAdvances } from "@/lib/supabase/actions/advances";
-import { getEventFinancialReport } from "@/lib/supabase/actions/events";
+import { createClient } from "@/supabase/server";
+import { getEventAdvances } from "@/supabase/actions/advances";
+import { getEventFinancialReport } from "@/supabase/actions/events";
 import { EventAdvancesContent } from "@/components/event-advances-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 

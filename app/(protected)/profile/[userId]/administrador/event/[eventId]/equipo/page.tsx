@@ -1,6 +1,11 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getEventProducers, getEventArtists, getAllProducers, getAllArtists } from "@/lib/supabase/actions/tickets";
+import { createClient } from "@/supabase/server";
+import {
+  getEventProducers,
+  getEventArtists,
+  getAllProducers,
+  getAllArtists,
+} from "@/supabase/actions/tickets";
 import { EventTeamContent } from "@/components/event-team-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -39,17 +44,18 @@ export default async function EquipoPage({ params }: EquipoPageProps) {
   }
 
   // Fetch event details, producers, and artists
-  const [eventData, producers, artists, allProducers, allArtists] = await Promise.all([
-    supabase
-      .from("events")
-      .select("id, name, status, date, end_date")
-      .eq("id", eventId)
-      .single(),
-    getEventProducers(eventId),
-    getEventArtists(eventId),
-    getAllProducers(),
-    getAllArtists(),
-  ]);
+  const [eventData, producers, artists, allProducers, allArtists] =
+    await Promise.all([
+      supabase
+        .from("events")
+        .select("id, name, status, date, end_date")
+        .eq("id", eventId)
+        .single(),
+      getEventProducers(eventId),
+      getEventArtists(eventId),
+      getAllProducers(),
+      getAllArtists(),
+    ]);
 
   if (eventData.error || !eventData.data) {
     notFound();
@@ -60,10 +66,7 @@ export default async function EquipoPage({ params }: EquipoPageProps) {
   return (
     <>
       {/* Sticky Header */}
-      <EventStickyHeader
-        eventName={event.name}
-        subtitle="Gestión de Equipo"
-      >
+      <EventStickyHeader eventName={event.name} subtitle="Gestión de Equipo">
         <EventTeamContent
           eventId={eventId}
           producers={producers || []}

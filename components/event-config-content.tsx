@@ -242,7 +242,7 @@ export function EventConfigContent({
 
     try {
       const { updateEventConfiguration } = await import(
-        "@/lib/supabase/actions/events"
+        "@/supabase/actions/events"
       );
 
       const result = await updateEventConfiguration(eventId, {
@@ -265,7 +265,7 @@ export function EventConfigContent({
     try {
       if (section === "información") {
         const { updateEventConfiguration } = await import(
-          "@/lib/supabase/actions/events"
+          "@/supabase/actions/events"
         );
 
         const result = await updateEventConfiguration(eventId, {

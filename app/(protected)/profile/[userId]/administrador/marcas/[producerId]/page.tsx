@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getProducerTeam } from "@/lib/supabase/actions/tickets";
+import { createClient } from "@/supabase/server";
+import { getProducerTeam } from "@/supabase/actions/tickets";
 import { ProducerProfileContent } from "@/components/producer-profile-content";
 
 interface ProducerProfilePageProps {
@@ -10,7 +10,9 @@ interface ProducerProfilePageProps {
   }>;
 }
 
-export default async function ProducerProfilePage({ params }: ProducerProfilePageProps) {
+export default async function ProducerProfilePage({
+  params,
+}: ProducerProfilePageProps) {
   const { userId, producerId } = await params;
   const supabase = await createClient();
 

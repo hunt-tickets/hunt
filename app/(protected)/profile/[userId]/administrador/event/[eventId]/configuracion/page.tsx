@@ -1,5 +1,5 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import { EventConfigContent } from "@/components/event-config-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -10,7 +10,9 @@ interface ConfiguracionPageProps {
   }>;
 }
 
-export default async function ConfiguracionPage({ params }: ConfiguracionPageProps) {
+export default async function ConfiguracionPage({
+  params,
+}: ConfiguracionPageProps) {
   const { userId, eventId } = await params;
   const supabase = await createClient();
 
@@ -40,7 +42,8 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
   // Fetch event details with all configuration fields
   const { data: event, error } = await supabase
     .from("events")
-    .select(`
+    .select(
+      `
       id,
       name,
       description,
@@ -60,7 +63,8 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
         address,
         city
       )
-    `)
+    `
+    )
     .eq("id", eventId)
     .single();
 
@@ -71,7 +75,10 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
   // Transform the event data to match EventData interface
   const eventData = {
     ...event,
-    venues: Array.isArray(event.venues) && event.venues.length > 0 ? event.venues[0] : undefined,
+    venues:
+      Array.isArray(event.venues) && event.venues.length > 0
+        ? event.venues[0]
+        : undefined,
   };
 
   return (
@@ -86,7 +93,11 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
 
       {/* Content */}
       <div className="px-3 py-3 sm:px-6 sm:py-4">
-        <EventConfigContent showContentOnly eventData={eventData} eventId={eventId} />
+        <EventConfigContent
+          showContentOnly
+          eventData={eventData}
+          eventId={eventId}
+        />
       </div>
     </>
   );

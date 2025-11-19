@@ -1,5 +1,5 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import { getEventAccessControl } from "@/lib/supabase/actions/access-control";
 import { EventAccessControlContent } from "@/components/event-access-control-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
@@ -57,10 +57,7 @@ export default async function AccesosPage({ params }: AccesosPageProps) {
   return (
     <>
       {/* Sticky Header */}
-      <EventStickyHeader
-        eventName={event.name}
-        subtitle="Control de Acceso"
-      >
+      <EventStickyHeader eventName={event.name} subtitle="Control de Acceso">
         <EventAccessControlContent
           qrCodes={accessData?.qrCodes || []}
           transactionsWithoutQR={accessData?.transactionsMissingQR || []}

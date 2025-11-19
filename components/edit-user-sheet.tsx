@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Pencil } from "lucide-react";
-import { updateUserAsAdmin } from "@/lib/supabase/actions/profile";
+import { updateUserAsAdmin } from "@/supabase/actions/profile";
 import { useRouter } from "next/navigation";
 
 interface User {
@@ -96,8 +96,12 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
         email: formData.email,
         phone: formData.phone || undefined,
         birthdate: formData.birthdate || undefined,
-        gender: formData.gender === "no_decir" ? undefined : formData.gender || undefined,
-        prefix: formData.prefix === "none" ? undefined : formData.prefix || undefined,
+        gender:
+          formData.gender === "no_decir"
+            ? undefined
+            : formData.gender || undefined,
+        prefix:
+          formData.prefix === "none" ? undefined : formData.prefix || undefined,
         document_id: formData.document_id || undefined,
         admin: formData.admin,
       });
@@ -137,7 +141,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
         <form onSubmit={handleSubmit} className="space-y-6 pr-2">
           {/* Información Personal */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Información Personal</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Información Personal
+            </h3>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -147,7 +153,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="Juan"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -160,7 +168,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
                   placeholder="Pérez"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -175,7 +185,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 placeholder="usuario@ejemplo.com"
                 className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 required
@@ -189,7 +201,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
                 </Label>
                 <Select
                   value={formData.prefix}
-                  onValueChange={(value) => setFormData({ ...formData, prefix: value })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, prefix: value })
+                  }
                 >
                   <SelectTrigger className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
                     <SelectValue placeholder="Código" />
@@ -216,7 +230,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
                   id="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   placeholder="3001234567"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -232,7 +248,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
                   id="birthdate"
                   type="date"
                   value={formData.birthdate}
-                  onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, birthdate: e.target.value })
+                  }
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
               </div>
@@ -243,7 +261,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
                 </Label>
                 <Select
                   value={formData.gender || "no_decir"}
-                  onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, gender: value })
+                  }
                 >
                   <SelectTrigger className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
                     <SelectValue placeholder="Seleccionar" />
@@ -261,7 +281,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
 
           {/* Documento */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Documento de Identidad</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Documento de Identidad
+            </h3>
 
             <div className="space-y-2">
               <Label htmlFor="document_id" className="text-sm font-medium">
@@ -270,7 +292,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
               <Input
                 id="document_id"
                 value={formData.document_id}
-                onChange={(e) => setFormData({ ...formData, document_id: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, document_id: e.target.value })
+                }
                 placeholder="1234567890"
                 className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
               />
@@ -279,7 +303,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
 
           {/* Permisos */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Permisos</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Permisos
+            </h3>
 
             <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/5">
               <div className="space-y-0.5">
@@ -293,7 +319,9 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
               <Switch
                 id="admin"
                 checked={formData.admin}
-                onCheckedChange={(checked) => setFormData({ ...formData, admin: checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, admin: checked })
+                }
               />
             </div>
           </div>

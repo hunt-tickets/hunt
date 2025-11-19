@@ -11,7 +11,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Ticket } from "@/lib/supabase/types";
+import { Ticket } from "@/supabase/types";
 import { useBoldCheckout } from "@/hooks/useBoldCheckout";
 
 interface User {
@@ -90,7 +90,7 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
       if (!response.ok || !result.success || !result.boldCheckoutData) {
         throw new Error(result.error || "Error al crear la transacción");
       }
-      console.log(result)
+      console.log(result);
 
       // Open Bold checkout with server-generated data
       await openCheckout(result.boldCheckoutData);

@@ -1,6 +1,10 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getEventTickets, getTicketsSalesAnalytics, getTicketTypes } from "@/lib/supabase/actions/tickets";
+import { createClient } from "@/supabase/server";
+import {
+  getEventTickets,
+  getTicketsSalesAnalytics,
+  getTicketTypes,
+} from "@/supabase/actions/tickets";
 import { EventTicketsContent } from "@/components/event-tickets-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -39,16 +43,18 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
   }
 
   // Fetch event details, tickets, and analytics
-  const [eventData, tickets, ticketsAnalytics, ticketTypes] = await Promise.all([
-    supabase
-      .from("events")
-      .select("id, name, status, variable_fee")
-      .eq("id", eventId)
-      .single(),
-    getEventTickets(eventId),
-    getTicketsSalesAnalytics(eventId),
-    getTicketTypes(),
-  ]);
+  const [eventData, tickets, ticketsAnalytics, ticketTypes] = await Promise.all(
+    [
+      supabase
+        .from("events")
+        .select("id, name, status, variable_fee")
+        .eq("id", eventId)
+        .single(),
+      getEventTickets(eventId),
+      getTicketsSalesAnalytics(eventId),
+      getTicketTypes(),
+    ]
+  );
 
   if (eventData.error || !eventData.data) {
     notFound();

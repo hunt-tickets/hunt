@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserPlus, Users } from "lucide-react";
-import { addArtistToEvent } from "@/lib/supabase/actions/events";
+import { addArtistToEvent } from "@/supabase/actions/events";
 import { useRouter } from "next/navigation";
 
 interface Artist {

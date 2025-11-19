@@ -1,5 +1,5 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import { VenueCircularEditor } from "@/components/venue-circular-editor";
 
 interface MapaPageProps {

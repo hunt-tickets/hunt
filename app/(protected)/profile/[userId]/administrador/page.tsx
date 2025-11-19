@@ -1,15 +1,12 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { createClient } from "@/supabase/server";
+import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
-import { getVenues } from "@/lib/supabase/queries/server/venues";
+import { getVenues } from "@/supabase/queries/server/venues";
 import { AdminEventsList } from "@/components/admin-events-list";
 import { CreateEventDialog } from "@/components/create-event-dialog";
 import { AdminHeader } from "@/components/admin-header";
-import type { EventFull } from "@/lib/supabase/types";
+import type { EventFull } from "@/supabase/types";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -111,19 +108,21 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
 
   // If user is producer (not admin), filter by their producer_id
   if (isProducer && !profile?.admin && producerData?.id) {
-    eventsQuery = eventsQuery.eq("events_producers.producer_id", producerData.id);
+    eventsQuery = eventsQuery.eq(
+      "events_producers.producer_id",
+      producerData.id
+    );
   }
 
-  const [eventsData, venues] = await Promise.all([
-    eventsQuery,
-    getVenues(),
-  ]);
+  const [eventsData, venues] = await Promise.all([eventsQuery, getVenues()]);
 
   // Map events with metadata for sorting
   const eventsWithMetadata = (eventsData.data || []).map(
     (event: Record<string, unknown>) => {
       const eventDate = new Date(event.date as string);
-      const endDate = new Date((event.end_date as string) || (event.date as string));
+      const endDate = new Date(
+        (event.end_date as string) || (event.date as string)
+      );
 
       return {
         eventData: {
@@ -153,9 +152,11 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
             "Venue por confirmar",
           venue_logo: "",
           venue_latitude:
-            ((event.venues as Record<string, unknown>)?.latitude as number) || 0,
+            ((event.venues as Record<string, unknown>)?.latitude as number) ||
+            0,
           venue_longitude:
-            ((event.venues as Record<string, unknown>)?.longitude as number) || 0,
+            ((event.venues as Record<string, unknown>)?.longitude as number) ||
+            0,
           venue_address:
             ((event.venues as Record<string, unknown>)?.address as string) ||
             "Dirección por confirmar",
@@ -167,16 +168,14 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
               >
             )?.name as string) || "Ciudad",
           producers: [],
-          tickets: (
-            ((event.tickets as Array<Record<string, unknown>>) || [])
-              .filter((ticket: Record<string, unknown>) => ticket.status === true)
-              .map((ticket: Record<string, unknown>) => ({
-                id: ticket.id as string,
-                name: ticket.name as string,
-                price: ticket.price as number,
-                description: (ticket.description as string) || "",
-              }))
-          ),
+          tickets: ((event.tickets as Array<Record<string, unknown>>) || [])
+            .filter((ticket: Record<string, unknown>) => ticket.status === true)
+            .map((ticket: Record<string, unknown>) => ({
+              id: ticket.id as string,
+              name: ticket.name as string,
+              price: ticket.price as number,
+              description: (ticket.description as string) || "",
+            })),
         } as EventFull,
         originalDate: event.date as string | null | undefined,
         originalEndDate: event.end_date as string | null | undefined,
@@ -206,17 +205,17 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
       {/* Page Header */}
-      <AdminHeader
-        title="Mis Eventos"
-        subtitle="Crea y gestiona tus eventos"
-      />
-
+      <AdminHeader title="Mis Eventos" subtitle="Crea y gestiona tus eventos" />
 
       {/* User Events */}
       {(isProducer || profile?.admin) && (
         <div className="space-y-4">
           {userEvents.length > 0 ? (
-            <AdminEventsList events={userEvents} userId={userId} eventVenues={venues} />
+            <AdminEventsList
+              events={userEvents}
+              userId={userId}
+              eventVenues={venues}
+            />
           ) : (
             <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
               <CardContent className="pt-6">

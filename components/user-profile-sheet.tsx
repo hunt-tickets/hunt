@@ -11,8 +11,20 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Mail, Phone, FileText, Calendar, Cake, ShoppingBag, Ticket } from "lucide-react";
-import { getUserTransactions, type UserTransaction } from "@/lib/supabase/actions/profile";
+import {
+  Eye,
+  Mail,
+  Phone,
+  FileText,
+  Calendar,
+  Cake,
+  ShoppingBag,
+  Ticket,
+} from "lucide-react";
+import {
+  getUserTransactions,
+  type UserTransaction,
+} from "@/supabase/actions/profile";
 
 interface User {
   id: string;
@@ -79,7 +91,8 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
     }
   };
 
-  const fullName = [user.name, user.lastName].filter(Boolean).join(' ') || 'Sin nombre';
+  const fullName =
+    [user.name, user.lastName].filter(Boolean).join(" ") || "Sin nombre";
   const phoneNumber = user.phone
     ? user.prefix
       ? `${user.prefix} ${user.phone}`
@@ -99,7 +112,9 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-xl border-white/10 p-6">
         <SheetHeader className="space-y-3 pb-6">
-          <SheetTitle className="text-2xl font-bold">Perfil de Usuario</SheetTitle>
+          <SheetTitle className="text-2xl font-bold">
+            Perfil de Usuario
+          </SheetTitle>
           <SheetDescription className="text-base text-muted-foreground">
             Información detallada del usuario e historial de compras.
           </SheetDescription>
@@ -108,12 +123,16 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
         <div className="space-y-6 pr-2">
           {/* User Info */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Información Personal</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Información Personal
+            </h3>
 
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-2 flex-1">
-                  <div className="text-lg font-semibold text-white">{fullName}</div>
+                  <div className="text-lg font-semibold text-white">
+                    {fullName}
+                  </div>
 
                   {user.email && (
                     <div className="flex items-center gap-2 text-sm text-white/60">
@@ -139,20 +158,22 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
                   {user.birthdate && (
                     <div className="flex items-center gap-2 text-sm text-white/60">
                       <Cake className="h-4 w-4 text-white/40" />
-                      {calculateAge(user.birthdate)} años • {new Date(user.birthdate).toLocaleDateString('es-CO', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
+                      {calculateAge(user.birthdate)} años •{" "}
+                      {new Date(user.birthdate).toLocaleDateString("es-CO", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
                       })}
                     </div>
                   )}
 
                   <div className="flex items-center gap-2 text-sm text-white/60">
                     <Calendar className="h-4 w-4 text-white/40" />
-                    Registrado el {new Date(user.created_at).toLocaleDateString('es-CO', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
+                    Registrado el{" "}
+                    {new Date(user.created_at).toLocaleDateString("es-CO", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
                     })}
                   </div>
                 </div>
@@ -171,7 +192,9 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
 
           {/* Purchase Stats */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Estadísticas de Compra</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Estadísticas de Compra
+            </h3>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
@@ -198,12 +221,16 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
 
           {/* Transaction History */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Historial de Compras</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Historial de Compras
+            </h3>
 
             {loading ? (
               <div className="text-center py-12">
                 <div className="h-8 w-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
-                <p className="text-sm text-white/40 mt-2">Cargando transacciones...</p>
+                <p className="text-sm text-white/40 mt-2">
+                  Cargando transacciones...
+                </p>
               </div>
             ) : error ? (
               <div className="text-center py-12">
@@ -218,29 +245,39 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-white truncate">{tx.event_name}</div>
-                        <div className="text-sm text-white/60 truncate">{tx.ticket_name}</div>
+                        <div className="font-medium text-white truncate">
+                          {tx.event_name}
+                        </div>
+                        <div className="text-sm text-white/60 truncate">
+                          {tx.ticket_name}
+                        </div>
                       </div>
                       <Badge
                         variant="outline"
                         className="border-white/10 text-white/50 text-xs ml-2"
                       >
-                        {tx.source === 'app' ? 'App' : tx.source === 'web' ? 'Web' : 'Efectivo'}
+                        {tx.source === "app"
+                          ? "App"
+                          : tx.source === "web"
+                          ? "Web"
+                          : "Efectivo"}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-white/40">
-                        {tx.quantity} ticket{tx.quantity > 1 ? 's' : ''}
+                        {tx.quantity} ticket{tx.quantity > 1 ? "s" : ""}
                       </span>
-                      <span className="font-semibold text-white">${tx.total.toLocaleString()}</span>
+                      <span className="font-semibold text-white">
+                        ${tx.total.toLocaleString()}
+                      </span>
                     </div>
                     <div className="text-xs text-white/30 mt-2">
-                      {new Date(tx.created_at).toLocaleDateString('es-CO', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
+                      {new Date(tx.created_at).toLocaleDateString("es-CO", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </div>
                   </div>
@@ -249,7 +286,9 @@ export function UserProfileSheet({ user }: UserProfileSheetProps) {
             ) : (
               <div className="text-center py-12 rounded-xl bg-white/[0.02] border border-white/5">
                 <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                <p className="text-sm text-white/40">Este usuario no ha realizado compras</p>
+                <p className="text-sm text-white/40">
+                  Este usuario no ha realizado compras
+                </p>
               </div>
             )}
           </div>

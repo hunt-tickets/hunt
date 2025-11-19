@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import { EventLayoutWrapper } from "@/components/event-layout-wrapper";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 
 interface EventLayoutProps {
   children: ReactNode;

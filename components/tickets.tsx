@@ -1,4 +1,4 @@
-import { Ticket } from "@/lib/supabase/types";
+import { Ticket } from "@/supabase/types";
 import { TicketsContainer } from "./tickets-container";
 
 interface TicketsProps {

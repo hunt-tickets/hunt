@@ -5,7 +5,7 @@ import { Filter } from "lucide-react";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EventCard } from "@/components/event-card";
 import { CreateEventDialog } from "@/components/create-event-dialog";
-import type { EventFull } from "@/lib/supabase/types";
+import type { EventFull } from "@/supabase/types";
 
 interface VenueOption {
   id: string;
@@ -18,9 +18,13 @@ interface AdminEventsListProps {
   eventVenues?: VenueOption[];
 }
 
-const SCROLL_POSITION_KEY = 'admin-events-list-scroll';
+const SCROLL_POSITION_KEY = "admin-events-list-scroll";
 
-export function AdminEventsList({ events, userId, eventVenues = [] }: AdminEventsListProps) {
+export function AdminEventsList({
+  events,
+  userId,
+  eventVenues = [],
+}: AdminEventsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Restore scroll position when component mounts
@@ -60,7 +64,10 @@ export function AdminEventsList({ events, userId, eventVenues = [] }: AdminEvent
           />
         </div>
         <div className="flex items-center">
-          <CreateEventDialog eventVenues={eventVenues} className="sm:px-6 px-3 sm:rounded-full rounded-full" />
+          <CreateEventDialog
+            eventVenues={eventVenues}
+            className="sm:px-6 px-3 sm:rounded-full rounded-full"
+          />
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import { ConfiguracionTabs } from "@/components/configuracion-tabs";
 import { AdminHeader } from "@/components/admin-header";
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabaseClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Ticket } from "@/lib/supabase/types";
+import { Ticket } from "@/supabase/types";
 import { TicketQuantitySelector } from "./ticket-quantity-selector";
 import { BuyTicketsButton } from "./buy-tickets-button";
 import { AuthRequiredDialog } from "./auth-required-dialog";

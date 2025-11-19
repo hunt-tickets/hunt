@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateProfile } from "@/lib/supabase/actions/profile";
+import { updateProfile } from "@/supabase/actions/profile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Check, X, User, Phone, Calendar, FileText } from "lucide-react";
 
@@ -39,7 +39,10 @@ export function EditProfileForm({ profile, onSuccess }: EditProfileFormProps) {
   }, [state.success]);
 
   return (
-    <form action={formAction} className="space-y-4 sm:space-y-6 w-full overflow-x-hidden">
+    <form
+      action={formAction}
+      className="space-y-4 sm:space-y-6 w-full overflow-x-hidden"
+    >
       {/* Personal Information Section */}
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
@@ -81,7 +84,10 @@ export function EditProfileForm({ profile, onSuccess }: EditProfileFormProps) {
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="lastName" className="text-xs sm:text-sm font-medium">
+            <Label
+              htmlFor="lastName"
+              className="text-xs sm:text-sm font-medium"
+            >
               Apellido <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -125,7 +131,10 @@ export function EditProfileForm({ profile, onSuccess }: EditProfileFormProps) {
         </div>
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="birthdate" className="text-xs sm:text-sm font-medium">
+            <Label
+              htmlFor="birthdate"
+              className="text-xs sm:text-sm font-medium"
+            >
               Fecha de Nacimiento
             </Label>
             <Input
@@ -167,7 +176,10 @@ export function EditProfileForm({ profile, onSuccess }: EditProfileFormProps) {
           <span>Identificación</span>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="document_id" className="text-xs sm:text-sm font-medium">
+          <Label
+            htmlFor="document_id"
+            className="text-xs sm:text-sm font-medium"
+          >
             Número de Documento
           </Label>
           <Input

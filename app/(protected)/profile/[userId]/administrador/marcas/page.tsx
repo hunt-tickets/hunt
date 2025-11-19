@@ -1,6 +1,10 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getAllProducers, getAllArtists, getAllVenues } from "@/lib/supabase/actions/tickets";
+import { createClient } from "@/supabase/server";
+import {
+  getAllProducers,
+  getAllArtists,
+  getAllVenues,
+} from "@/supabase/actions/tickets";
 import { MarcasTabs } from "@/components/marcas-tabs";
 import { AdminHeader } from "@/components/admin-header";
 

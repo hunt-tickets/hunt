@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import { PaymentConfirmContent } from "./payment-confirm-content";
 
 /**
@@ -78,7 +78,10 @@ export default async function PaymentConfirmPage({
     );
   }
 
-  console.log("[Payment Confirm] Transaction status from DB:", dbTransaction.status);
+  console.log(
+    "[Payment Confirm] Transaction status from DB:",
+    dbTransaction.status
+  );
   console.log("[Payment Confirm] Bold URL status parameter:", urlStatus);
 
   // Determine the actual payment status

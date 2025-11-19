@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import Link from "next/link";
 import {
   Card,
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Ticket, Calendar, Clock, QrCode } from "lucide-react";
 import Image from "next/image";
-import {QRCodesModal} from "@/components/qr-codes-modal"
+import { QRCodesModal } from "@/components/qr-codes-modal";
 
 interface QRCodeData {
   id: string;

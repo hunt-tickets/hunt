@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Pencil } from "lucide-react";
-import { updateTicket } from "@/lib/supabase/actions/tickets";
+import { updateTicket } from "@/supabase/actions/tickets";
 import { useRouter } from "next/navigation";
 
 interface Ticket {
@@ -151,7 +151,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
         <form onSubmit={handleSubmit} className="space-y-6 pr-2">
           {/* Información Básica */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Información Básica</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Información Básica
+            </h3>
 
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">
@@ -160,7 +162,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Ej: VIP, General, Palco..."
                 className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 required
@@ -174,7 +178,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Descripción de la entrada..."
                 className="min-h-[80px] rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors resize-none"
               />
@@ -189,7 +195,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   id="price"
                   type="number"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
                   placeholder="50000"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                   required
@@ -204,7 +212,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   id="quantity"
                   type="number"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quantity: e.target.value })
+                  }
                   placeholder="100"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                   required
@@ -221,7 +231,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   id="capacity"
                   type="number"
                   value={formData.capacity}
-                  onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, capacity: e.target.value })
+                  }
                   placeholder="100"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -235,7 +247,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   id="max_date"
                   type="datetime-local"
                   value={formData.max_date}
-                  onChange={(e) => setFormData({ ...formData, max_date: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, max_date: e.target.value })
+                  }
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
               </div>
@@ -250,7 +264,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   id="hex"
                   type="color"
                   value={formData.hex}
-                  onChange={(e) => setFormData({ ...formData, hex: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, hex: e.target.value })
+                  }
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
               </div>
@@ -262,7 +278,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                 <Input
                   id="family"
                   value={formData.family}
-                  onChange={(e) => setFormData({ ...formData, family: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, family: e.target.value })
+                  }
                   placeholder="Ej: Platino, Premium..."
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -272,7 +290,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
 
           {/* Ubicación */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Ubicación</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Ubicación
+            </h3>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -282,7 +302,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                 <Input
                   id="section"
                   value={formData.section}
-                  onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, section: e.target.value })
+                  }
                   placeholder="A, B, C..."
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -295,7 +317,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                 <Input
                   id="palco"
                   value={formData.palco}
-                  onChange={(e) => setFormData({ ...formData, palco: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, palco: e.target.value })
+                  }
                   placeholder="1, 2, 3..."
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -310,7 +334,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                 <Input
                   id="row"
                   value={formData.row}
-                  onChange={(e) => setFormData({ ...formData, row: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, row: e.target.value })
+                  }
                   placeholder="1, 2, 3..."
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -323,7 +349,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                 <Input
                   id="seat"
                   value={formData.seat}
-                  onChange={(e) => setFormData({ ...formData, seat: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, seat: e.target.value })
+                  }
                   placeholder="1, 2, 3..."
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -333,7 +361,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
 
           {/* Otros */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Otros</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Otros
+            </h3>
 
             <div className="space-y-2">
               <Label htmlFor="reference" className="text-sm font-medium">
@@ -342,7 +372,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               <Input
                 id="reference"
                 value={formData.reference}
-                onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, reference: e.target.value })
+                }
                 placeholder="REF-001"
                 className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
               />
@@ -360,7 +392,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               <Switch
                 id="status"
                 checked={formData.status}
-                onCheckedChange={(checked) => setFormData({ ...formData, status: checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, status: checked })
+                }
               />
             </div>
           </div>

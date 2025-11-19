@@ -1,14 +1,14 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getEventFinancialReport } from "@/lib/supabase/actions/events";
+import { getEventFinancialReport } from "@/supabase/actions/events";
 import {
   getCompleteEventTransactions,
   getEventTickets,
   getTicketsSalesAnalytics,
-} from "@/lib/supabase/actions/tickets";
+} from "@/supabase/actions/tickets";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 

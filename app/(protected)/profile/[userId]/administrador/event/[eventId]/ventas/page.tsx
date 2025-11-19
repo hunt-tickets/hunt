@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getCompleteEventTransactions } from "@/lib/supabase/actions/tickets";
+import { createClient } from "@/supabase/server";
+import { getCompleteEventTransactions } from "@/supabase/actions/tickets";
 import { EventSalesContent } from "@/components/event-sales-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -57,10 +57,7 @@ export default async function VentasPage({ params }: VentasPageProps) {
   return (
     <>
       {/* Sticky Header with Tabs */}
-      <EventStickyHeader
-        eventName={event.name}
-        subtitle="Gestión de ventas"
-      >
+      <EventStickyHeader eventName={event.name} subtitle="Gestión de ventas">
         <EventSalesContent
           eventId={eventId}
           transactions={transactions || []}

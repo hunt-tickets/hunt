@@ -5,7 +5,7 @@ import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
 import { Filter } from "lucide-react";
-import type { EventFull } from "@/lib/supabase/types";
+import type { EventFull } from "@/supabase/types";
 
 interface EventsWithSearchProps {
   // All events from server
@@ -124,7 +124,10 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
         {/* Search and filter row */}
         <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full">
           <div className="flex-1">
-            <EnhancedSearchBar searchQuery={searchQuery} onSearchChange={handleSearch} />
+            <EnhancedSearchBar
+              searchQuery={searchQuery}
+              onSearchChange={handleSearch}
+            />
           </div>
           <div className="w-full sm:w-64 lg:w-72">
             <EnhancedCityFilter
@@ -162,8 +165,12 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
           </h3>
           <p className="text-sm sm:text-base text-white/60 mb-5 sm:mb-6 max-w-md mx-auto px-4">
             {selectedCity && `No hay eventos disponibles en ${selectedCity}`}
-            {searchQuery && !selectedCity && `No hay eventos que coincidan con "${searchQuery}"`}
-            {searchQuery && selectedCity && ` que coincidan con "${searchQuery}"`}
+            {searchQuery &&
+              !selectedCity &&
+              `No hay eventos que coincidan con "${searchQuery}"`}
+            {searchQuery &&
+              selectedCity &&
+              ` que coincidan con "${searchQuery}"`}
           </p>
           <button
             onClick={resetFilters}

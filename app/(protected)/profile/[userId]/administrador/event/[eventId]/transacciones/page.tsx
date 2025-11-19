@@ -1,6 +1,9 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getAllEventTransactions, getCompleteEventTransactions } from "@/lib/supabase/actions/tickets";
+import { createClient } from "@/supabase/server";
+import {
+  getAllEventTransactions,
+  getCompleteEventTransactions,
+} from "@/supabase/actions/tickets";
 import { EventTransactionsContent } from "@/components/event-transactions-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -11,7 +14,9 @@ interface TransaccionesPageProps {
   }>;
 }
 
-export default async function TransaccionesPage({ params }: TransaccionesPageProps) {
+export default async function TransaccionesPage({
+  params,
+}: TransaccionesPageProps) {
   const { userId, eventId } = await params;
   const supabase = await createClient();
 
