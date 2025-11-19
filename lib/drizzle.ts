@@ -19,6 +19,7 @@ const client = postgres(connectionString!, {
   max: 1, // Limit to 1 connection per serverless instance
   idle_timeout: 20, // Close idle connections after 20s
   connect_timeout: 10, // Connection timeout in seconds
+  ssl: "require", // Required for Supabase
 });
 
 export const db = drizzle(client, { schema });

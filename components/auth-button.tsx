@@ -1,22 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CURRENT_USER } from "@/lib/dummy-data";
+import { authClient } from "@/lib/auth-client";
 
-/**
- * Mock Auth Button - Always shows user as logged in
- * Replace with better-auth implementation later
- */
 export function AuthButton() {
-  const user = CURRENT_USER;
+  const { data: session, isPending } = authClient.useSession();
+
+  const handleSignOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          window.location.href = "/sign-in";
+        },
+      },
+    });
+  };
+
+  // Show nothing while loading
+  if (isPending) {
+    return (
+      <Button variant="ghost" size="icon" className="rounded-full" disabled>
+        <User className="h-5 w-5" />
+      </Button>
+    );
+  }
+
+  // If not logged in, show sign in button
+  if (!session?.user) {
+    return (
+      <Button asChild variant="ghost" size="sm">
+        <Link href="/sign-in">Iniciar Sesión</Link>
+      </Button>
+    );
+  }
+
+  const user = session.user;
 
   return (
     <DropdownMenu>
@@ -26,25 +53,26 @@ export function AuthButton() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <div className="px-2 py-1.5 text-sm font-medium">
+          {user.name || user.email}
+        </div>
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}`}>
-            Mi Perfil
-          </Link>
+          <Link href={`/profile/${user.id}`}>Mi Perfil</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}/administrador`}>
-            Administrador
-          </Link>
+          <Link href={`/profile/${user.id}/administrador`}>Administrador</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}/tickets`}>
-            Mis Tickets
-          </Link>
+          <Link href={`/profile/${user.id}/tickets`}>Mis Tickets</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}/ajustes`}>
-            Ajustes
-          </Link>
+          <Link href={`/profile/${user.id}/ajustes`}>Ajustes</Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Cerrar Sesión
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
