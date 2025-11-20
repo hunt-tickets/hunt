@@ -588,6 +588,15 @@ export const auth = betterAuth({
     }),
   ],
 
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"], // Auto-link if email is verified
+      // allowDifferentEmails: false is the default (more secure)
+      // Only allows linking if emails match
+    },
+  },
+
   user: {
     additionalFields: {
       userMetadata: {
@@ -609,6 +618,31 @@ export const auth = betterAuth({
         type: "date",
         required: false,
         input: false,
+      },
+    },
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailVerification: async ({ user, newEmail, url }) => {
+        await resend.emails.send({
+          from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+          to: user.email, // Send to current email for verification
+          subject: "Aprueba el cambio de correo electrónico",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2>Solicitud de cambio de correo electrónico</h2>
+              <p>Hola ${user.name},</p>
+              <p>Recibimos una solicitud para cambiar tu correo electrónico de <strong>${user.email}</strong> a <strong>${newEmail}</strong>.</p>
+              <p>Si fuiste tú, haz clic en el siguiente enlace para aprobar el cambio:</p>
+              <div style="margin: 30px 0;">
+                <a href="${url}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                  Aprobar cambio de correo
+                </a>
+              </div>
+              <p>Este enlace expirará en 24 horas.</p>
+              <p>Si no solicitaste este cambio, ignora este correo.</p>
+            </div>
+          `,
+        });
       },
     },
   },

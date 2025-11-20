@@ -18,8 +18,14 @@ import {
   Calendar,
   Key,
   Fingerprint,
+  Link2,
 } from "lucide-react";
+import { SiGoogle, SiFacebook, SiGithub, SiApple } from "react-icons/si";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
+import { UnlinkAccountButton } from "@/components/unlink-account-button";
+import { LinkAccountButton } from "@/components/link-account-button";
+import { ChangeEmailDialog } from "@/components/change-email-dialog";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -33,6 +39,27 @@ export default async function ProfilePage() {
 
   const user = session.user;
 
+  // Fetch user's connected accounts using Better Auth API
+  const oauthAccounts = await auth.api.listUserAccounts({
+    headers: await headers(),
+  });
+
+  // Helper to decode JWT and extract user info
+  const decodeIdToken = (idToken: string | null) => {
+    if (!idToken) return null;
+    try {
+      // JWT has 3 parts separated by dots: header.payload.signature
+      const payload = idToken.split(".")[1];
+      if (!payload) return null;
+
+      // Decode base64url
+      const decoded = Buffer.from(payload, "base64").toString("utf-8");
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
+  };
+
   // Format dates
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "No disponible";
@@ -44,6 +71,44 @@ export default async function ProfilePage() {
       minute: "2-digit",
     });
   };
+
+  // Get provider icon component
+  const getProviderIcon = (providerId: string) => {
+    const iconMap: { [key: string]: React.ReactNode } = {
+      google: <SiGoogle className="h-5 w-5" />,
+      facebook: <SiFacebook className="h-5 w-5" />,
+      github: <SiGithub className="h-5 w-5" />,
+      apple: <SiApple className="h-5 w-5" />,
+    };
+    return iconMap[providerId] || <Link2 className="h-5 w-5" />;
+  };
+
+  // Format provider name for display
+  const formatProviderName = (providerId: string) => {
+    const providerNames: { [key: string]: string } = {
+      google: "Google",
+      facebook: "Facebook",
+      github: "GitHub",
+      twitter: "Twitter",
+      apple: "Apple",
+    };
+    return (
+      providerNames[providerId] ||
+      providerId.charAt(0).toUpperCase() + providerId.slice(1)
+    );
+  };
+
+  // Define available social providers
+  const availableProviders = [
+    { id: "google", name: "Google" },
+    // Add more providers here as needed
+  ];
+
+  // Find providers that are not yet connected
+  const connectedProviderIds = oauthAccounts.map((acc) => acc.providerId);
+  const availableToLink = availableProviders.filter(
+    (provider) => !connectedProviderIds.includes(provider.id)
+  );
 
   return (
     <div className="space-y-6 overflow-x-hidden">
@@ -63,11 +128,15 @@ export default async function ProfilePage() {
           </div>
           <div className="hidden sm:flex gap-2">
             <EditProfileDialog user={user} />
+            <ChangeEmailDialog currentEmail={user.email} />
+            <ChangePasswordDialog />
           </div>
         </div>
         {/* Mobile buttons */}
         <div className="flex sm:hidden flex-col gap-2">
           <EditProfileDialog user={user} />
+          <ChangeEmailDialog currentEmail={user.email} />
+          <ChangePasswordDialog />
         </div>
       </div>
 
@@ -219,6 +288,135 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Connected Accounts Section */}
+      {oauthAccounts.length > 0 && (
+        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5" />
+              Cuentas Conectadas
+            </CardTitle>
+            <CardDescription>
+              Servicios y proveedores vinculados a tu cuenta
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* OAuth Accounts */}
+              {oauthAccounts.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground">
+                    Proveedores de Autenticación
+                  </h3>
+                  {oauthAccounts.map((account: {
+                    id: string;
+                    providerId: string;
+                    accountId: string;
+                    createdAt: Date;
+                    idToken?: string | null;
+                  }) => {
+                    const tokenData = decodeIdToken(account.idToken || null);
+                    const accountEmail = tokenData?.email;
+                    const accountName = tokenData?.name;
+
+                    return (
+                      <div
+                        key={account.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-[#303030] bg-background/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0">
+                            {getProviderIcon(account.providerId)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {formatProviderName(account.providerId)}
+                              {accountName && (
+                                <span className="text-muted-foreground font-normal">
+                                  {" "}
+                                  - {accountName}
+                                </span>
+                              )}
+                            </p>
+                            {accountEmail && (
+                              <p className="text-xs text-muted-foreground">
+                                {accountEmail}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              Conectado el{" "}
+                              {formatDate(account.createdAt?.toString())}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className="bg-green-500/10 text-green-500 border-green-500/20"
+                          >
+                            Activo
+                          </Badge>
+                          {account.providerId !== "credential" && (
+                            <UnlinkAccountButton
+                              accountId={account.id}
+                              providerName={formatProviderName(
+                                account.providerId
+                              )}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Available Providers to Link Section */}
+      {availableToLink.length > 0 && (
+        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5" />
+              Vincular Cuenta
+            </CardTitle>
+            <CardDescription>
+              Conecta proveedores adicionales a tu cuenta para más opciones de
+              inicio de sesión
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {availableToLink.map((provider) => (
+                <div
+                  key={provider.id}
+                  className="flex items-center justify-between p-3 rounded-lg border border-[#303030] bg-background/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      {getProviderIcon(provider.id)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{provider.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        No conectado
+                      </p>
+                    </div>
+                  </div>
+                  <LinkAccountButton
+                    providerId={provider.id}
+                    providerName={provider.name}
+                  />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Metadata Cards - Admin Only */}
       {user.role === "admin" && (
