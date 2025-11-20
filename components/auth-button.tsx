@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,12 +15,14 @@ import { authClient } from "@/lib/auth-client";
 
 export function AuthButton() {
   const { data: session, isPending } = authClient.useSession();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          window.location.href = "/";
+          router.push("/");
+          router.refresh();
         },
       },
     });

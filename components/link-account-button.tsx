@@ -25,6 +25,7 @@ export function LinkAccountButton({
       await authClient.linkSocial({
         provider: providerId,
         callbackURL: "/profile", // Redirect back to profile after linking
+        errorCallbackURL: "/auth-error", // Custom error page
       });
 
       // The above will redirect to the OAuth provider

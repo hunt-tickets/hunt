@@ -26,6 +26,7 @@ import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
 import { ChangeEmailDialog } from "@/components/change-email-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { ActiveSessionsCard } from "@/components/active-sessions-card";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -417,6 +418,9 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Active Sessions */}
+      <ActiveSessionsCard />
 
       {/* Metadata Cards - Admin Only */}
       {user.role === "admin" && (

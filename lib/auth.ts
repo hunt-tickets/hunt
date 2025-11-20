@@ -33,6 +33,8 @@ export const auth = betterAuth({
     schema: schema,
   }),
 
+  
+
   // Server-side requests made using auth.api aren't affected by rate limiting. Rate limits only apply to client-initiated requests.
   // Rate limiting is disabled in development mode by default. In order to enable it, set enabled to true:
   // Rate limiting uses the connecting IP address to track the number of requests made by a user.

@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 
 interface SignOutButtonProps {
@@ -8,11 +9,14 @@ interface SignOutButtonProps {
 }
 
 export function SignOutButton({ children }: SignOutButtonProps) {
+  const router = useRouter();
+
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          window.location.href = "/";
+          router.push("/");
+          router.refresh();
         },
       },
     });
