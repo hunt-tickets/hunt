@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getEventById } from "@/lib/supabase/queries/server/events";
+import { getEventById } from "@/lib/db/mock-db";
 import { ShareButton } from "@/components/share-button";
 import { TicketsContainer } from "@/components/tickets-container";
 
@@ -19,7 +19,7 @@ export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
   const { eventId } = await params;
-  const event = await getEventById(eventId);
+  const { data: event } = await getEventById(eventId);
 
   if (!event) {
     return {
@@ -59,7 +59,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const { eventId } = await params;
 
   // Fetch event data from the server
-  const event = await getEventById(eventId);
+  const { data: event } = await getEventById(eventId);
 
   // If event not found, show 404 page
   if (!event) {

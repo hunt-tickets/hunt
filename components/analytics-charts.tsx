@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { AgeGroupData, GenderData } from "@/supabase/actions/profile";
+import type { AgeGroupData, GenderData } from "@/actions/profile";
 import { Users, Ticket } from "lucide-react";
 
 interface AnalyticsChartsProps {

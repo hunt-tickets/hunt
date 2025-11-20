@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/supabase/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import {
   Card,
   CardDescription,
@@ -27,25 +28,18 @@ interface SettingsPageProps {
 
 const SettingsPage = async ({ params }: SettingsPageProps) => {
   const { userId } = await params;
-  const supabase = await createClient();
 
   // Auth check
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!user || user.id !== userId) {
-    redirect("/login");
+  if (!session?.user || session.user.id !== userId) {
+    redirect("/sign-in");
   }
 
-  // Get profile to check admin status
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("admin")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin = profile?.admin ?? false;
+  const user = session.user;
+  const isAdmin = user.role === "admin";
 
   // Admin options
   const adminOptions = [

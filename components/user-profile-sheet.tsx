@@ -21,10 +21,7 @@ import {
   ShoppingBag,
   Ticket,
 } from "lucide-react";
-import {
-  getUserTransactions,
-  type UserTransaction,
-} from "@/supabase/actions/profile";
+import { getUserTransactions, type UserTransaction } from "@/actions/profile";
 
 interface User {
   id: string;

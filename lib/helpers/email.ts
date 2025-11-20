@@ -10,12 +10,18 @@ export async function sendMagicLinkEmail({
   url: string;
 }) {
   // In development, log the magic link instead of sending email
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔗 Magic Link for", email);
-    console.log("URL:", url);
-    console.log("---");
-    return { id: "dev-mode" };
-  }
+  // Temporarily disabled to test real email sending
+  // if (process.env.NODE_ENV === "development") {
+  //   console.log("🔗 Magic Link for", email);
+  //   console.log("URL:", url);
+  //   console.log("---");
+  //   return { id: "dev-mode" };
+  // }
+
+  // Always log for debugging
+  console.log("🔗 Magic Link for", email);
+  console.log("URL:", url);
+  console.log("---");
 
   try {
     const { data, error } = await resend.emails.send({

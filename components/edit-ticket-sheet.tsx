@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Pencil } from "lucide-react";
-import { updateTicket } from "@/supabase/actions/tickets";
+import { updateTicket } from "@/actions/tickets";
 import { useRouter } from "next/navigation";
 
 interface Ticket {

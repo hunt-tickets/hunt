@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { EventFinancialReport } from "@/supabase/types";
+import type { EventFinancialReport } from "@/lib/types";
 
 export function useEventFinancialReport(eventId: string) {
   const [data, setData] = useState<EventFinancialReport | null>(null);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUser } from "@/lib/auth/mock-auth";
+import { auth } from "@/lib/auth";
 import { createTransaction, getTicketById } from "@/lib/db/mock-db";
 import crypto from "crypto";
 
@@ -28,17 +28,19 @@ interface BoldCheckoutData {
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Verify user is authenticated (mock - always authenticated)
-    const {
-      data: { user },
-    } = await getUser();
+    // 1. Verify user is authenticated
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
 
-    if (!user) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Usuario no autenticado" },
         { status: 401 }
       );
     }
+
+    const user = session.user;
 
     // 2. Parse request body
     const body: CreateTransactionBody = await request.json();
@@ -145,16 +147,11 @@ export async function POST(request: NextRequest) {
     // Prepare customer data
     const customerData = {
       email: user.email || "",
-      fullName:
-        `${user.user_metadata?.name || ""} ${
-          user.user_metadata?.lastName || ""
-        }`.trim() ||
-        user.email ||
-        "Usuario",
-      phone: user.user_metadata?.phone || "",
+      fullName: user.name || user.email || "Usuario",
+      phone: user.phoneNumber || "",
       dialCode: "+57",
-      documentNumber: user.user_metadata?.document_id || "",
-      documentType: user.user_metadata?.document_type_id || "CC",
+      documentNumber: "", // Not in Better Auth base schema
+      documentType: "CC",
     };
 
     const boldCheckoutData: BoldCheckoutData = {

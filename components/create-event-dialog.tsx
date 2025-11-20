@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { createEvent, type EventFormState } from "@/supabase/actions/events";
+import { createEvent, type EventFormState } from "@/actions/events";
 import { CreateEventSubmitButton } from "@/components/create-event-submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle, Plus } from "lucide-react";

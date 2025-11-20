@@ -35,11 +35,11 @@ function SignInForm() {
           return redirect;
         }
       } catch (e) {
-        // Invalid URL, fall back to dashboard
+        // Invalid URL, fall back to profile
         console.log("Invalid redirect URL:", e);
       }
     }
-    return "/dashboard";
+    return "/profile";
   };
 
   // Helper to handle redirects (internal vs external)

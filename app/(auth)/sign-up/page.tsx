@@ -155,7 +155,7 @@ export default function RouteComponent() {
               // Don't fail the entire flow if profile update fails
             }
 
-            router.push("/dashboard");
+            router.push("/profile");
           },
           onError: (error) => {
             console.error("Email OTP verification failed:", error);

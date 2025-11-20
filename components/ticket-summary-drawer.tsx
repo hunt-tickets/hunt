@@ -11,7 +11,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Ticket } from "@/supabase/types";
+import { Ticket } from "@/lib/types";
 import { useBoldCheckout } from "@/hooks/useBoldCheckout";
 
 interface User {

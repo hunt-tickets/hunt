@@ -15,18 +15,14 @@ import { Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface EditProfileDialogProps {
-  profile: {
-    name?: string | null;
-    lastName?: string | null;
-    phone?: string | null;
-    birthdate?: string | null;
-    gender?: string | null;
-    prefix?: string | null;
-    document_id?: string | null;
+  user: {
+    name: string;
+    email: string;
+    phoneNumber?: string | null;
   };
 }
 
-export function EditProfileDialog({ profile }: EditProfileDialogProps) {
+export function EditProfileDialog({ user }: EditProfileDialogProps) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
@@ -53,7 +49,7 @@ export function EditProfileDialog({ profile }: EditProfileDialogProps) {
             Actualiza tu información personal
           </DialogDescription>
         </DialogHeader>
-        <EditProfileForm profile={profile} onSuccess={handleSuccess} />
+        <EditProfileForm user={user} onSuccess={handleSuccess} />
       </DialogContent>
     </Dialog>
   );

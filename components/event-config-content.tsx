@@ -241,9 +241,7 @@ export function EventConfigContent({
     if (!eventId) return;
 
     try {
-      const { updateEventConfiguration } = await import(
-        "@/supabase/actions/events"
-      );
+      const { updateEventConfiguration } = await import("@/actions/events");
 
       const result = await updateEventConfiguration(eventId, {
         faqs: updatedFaqs,
@@ -264,9 +262,7 @@ export function EventConfigContent({
 
     try {
       if (section === "información") {
-        const { updateEventConfiguration } = await import(
-          "@/supabase/actions/events"
-        );
+        const { updateEventConfiguration } = await import("@/actions/events");
 
         const result = await updateEventConfiguration(eventId, {
           name: formData.eventName,

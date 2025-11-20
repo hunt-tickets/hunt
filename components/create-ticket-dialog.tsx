@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, X } from "lucide-react";
-import { createTicket } from "@/supabase/actions/tickets";
+import { createTicket } from "@/actions/tickets";
 import { useRouter } from "next/navigation";
 
 interface TicketType {

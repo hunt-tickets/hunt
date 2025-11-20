@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Pencil } from "lucide-react";
-import { updateUserAsAdmin } from "@/supabase/actions/profile";
+import { updateUserAsAdmin } from "@/actions/profile";
 import { useRouter } from "next/navigation";
 
 interface User {

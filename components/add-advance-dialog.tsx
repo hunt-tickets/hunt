@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { createEventAdvance } from "@/supabase/actions/advances";
+import { createEventAdvance } from "@/actions/advances";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 

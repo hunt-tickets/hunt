@@ -5,7 +5,7 @@ import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
 import { Filter } from "lucide-react";
-import type { EventFull } from "@/supabase/types";
+import type { EventFull } from "@/lib/types";
 
 interface EventsWithSearchProps {
   // All events from server
