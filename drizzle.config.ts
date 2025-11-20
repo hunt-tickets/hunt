@@ -7,7 +7,7 @@ export default defineConfig({
   dbCredentials: {
     // Use direct connection for drizzle-kit commands (not the pooler)
     url: process.env.DIRECT_DATABASE_URL!,
-    ssl: true,
+    ssl: "require",
   },
   // schemaFilter: ["public"], // Only use public schema, ignore auth and other Supabase schemas
 });

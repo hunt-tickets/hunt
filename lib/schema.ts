@@ -152,6 +152,7 @@ export const session = pgTable(
     userAgent: text(),
     userId: text().notNull(),
     impersonatedBy: text(),
+    activeOrganizationId: text(),
   },
   (table) => [
     foreignKey({
@@ -230,6 +231,71 @@ export const passkey = pgTable(
   ]
 );
 
+export const organization = pgTable(
+  "organization",
+  {
+    id: text().primaryKey().notNull(),
+    name: text().notNull(),
+    slug: text().notNull(),
+    logo: text(),
+    createdAt: timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    metadata: text(),
+  },
+  (table) => [unique("organization_slug_key").on(table.slug)]
+);
+
+export const member = pgTable(
+  "member",
+  {
+    id: text().primaryKey().notNull(),
+    organizationId: text().notNull(),
+    userId: text().notNull(),
+    role: text().default("member").notNull(),
+    createdAt: timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.organizationId],
+      foreignColumns: [organization.id],
+      name: "member_organizationId_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: "member_userId_fkey",
+    }).onDelete("cascade"),
+  ]
+);
+
+export const invitation = pgTable(
+  "invitation",
+  {
+    id: text().primaryKey().notNull(),
+    organizationId: text().notNull(),
+    email: text().notNull(),
+    role: text(),
+    status: text().default("pending").notNull(),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    inviterId: text().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.organizationId],
+      foreignColumns: [organization.id],
+      name: "invitation_organizationId_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.inviterId],
+      foreignColumns: [user.id],
+      name: "invitation_inviterId_fkey",
+    }).onDelete("cascade"),
+  ]
+);
+
 export const paymentProcessorAccount = pgTable("payment_processor_account", {
   id: text("id").primaryKey(),
   userId: text("user_id")
@@ -254,5 +320,8 @@ export const schema = {
   account,
   verification,
   passkey,
+  organization,
+  member,
+  invitation,
   paymentProcessorAccount,
 };
