@@ -95,7 +95,11 @@ export const refundStatus = pgEnum("refund_status", [
   "accepted",
   "rejected",
 ]);
-export const role = pgEnum("role", ["seller", "admin", "owner"]);
+export const memberRole = pgEnum("member_role", [
+  "seller",
+  "administrator",
+  "owner",
+]);
 export const themeModeType = pgEnum("theme_mode_type", [
   "light",
   "dark",
@@ -252,7 +256,7 @@ export const member = pgTable(
     id: text().primaryKey().notNull(),
     organizationId: text().notNull(),
     userId: text().notNull(),
-    role: text().default("member").notNull(),
+    role: memberRole("role").default("seller").notNull(),
     createdAt: timestamp({ withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -277,7 +281,7 @@ export const invitation = pgTable(
     id: text().primaryKey().notNull(),
     organizationId: text().notNull(),
     email: text().notNull(),
-    role: text(),
+    role: memberRole("role").default("seller"),
     status: text().default("pending").notNull(),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
     inviterId: text().notNull(),
