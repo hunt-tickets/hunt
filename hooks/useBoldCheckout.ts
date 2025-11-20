@@ -68,7 +68,9 @@ export const useBoldCheckout = () => {
         description: checkoutData.description,
         renderMode: "embedded", // Open as embedded iframe instead of redirect
         originUrl: window.location.href, // Required for embedded mode
-        redirectionUrl: `${window.location.origin}/payment/confirm`,
+        // TODO: Payment confirmation page was deleted during refactoring
+        // Need to recreate /payment/confirm page or update to new route
+        redirectionUrl: `${window.location.origin}/`, // Temporarily redirect to home
         expirationDate: (Date.now() + 10 * 60 * 1000) * 1_000_000, // 10 minutes in nanoseconds
         customerData: JSON.stringify(checkoutData.customerData),
       };

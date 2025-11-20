@@ -12,7 +12,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Ticket } from "@/lib/types";
-import { useBoldCheckout } from "@/hooks/useBoldCheckout";
+// import { useBoldCheckout } from "@/hooks/useBoldCheckout"; // Temporarily disabled
 
 interface User {
   id: string;
@@ -45,8 +45,9 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   total,
   open,
   close,
-  eventId,
-  sellerUid,
+  // eventId and sellerUid temporarily unused - needed when payment is re-enabled
+  // eventId,
+  // sellerUid,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,13 +57,19 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   const iva = serviceFee * 0.19;
   const finalTotal = Math.ceil(total + serviceFee + iva);
 
-  const { openCheckout } = useBoldCheckout();
+  // openCheckout temporarily unused - needed when payment is re-enabled
+  // const { openCheckout } = useBoldCheckout();
 
   const handlePayment = async () => {
     setIsProcessing(true);
     setError(null);
 
     try {
+      // TODO: Payment API routes were deleted during refactoring
+      // Need to recreate /api/transactions/create route for payment processing
+      setError("Payment functionality is temporarily disabled");
+
+      /* COMMENTED OUT - API route /api/transactions/create was deleted
       // Create ticket selections object from tickets array
       const ticketSelections: Record<string, number> = {};
       tickets.forEach((ticket) => {
@@ -97,6 +104,7 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
 
       // Close the drawer after opening checkout
       close();
+      */
     } catch (err) {
       console.error("Error al procesar el pago:", err);
       setError(

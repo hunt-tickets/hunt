@@ -8,3 +8,18 @@
 export async function getEventAdvances(eventId: string) {
   return [];
 }
+
+export async function createEventAdvance(
+  _eventId: string,
+  _data: {
+    amount: number;
+    concept: string;
+    date: string;
+    payment_method: string;
+    notes?: string;
+    file?: string;
+    debt: boolean;
+  }
+) {
+  return { success: true };
+}

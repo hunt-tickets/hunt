@@ -1,7 +1,13 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./drizzle";
-import { admin, anonymous, phoneNumber, emailOTP } from "better-auth/plugins";
+import {
+  admin,
+  anonymous,
+  phoneNumber,
+  emailOTP,
+  organization,
+} from "better-auth/plugins";
 import bcrypt from "bcrypt";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink, openAPI } from "better-auth/plugins";
@@ -10,9 +16,12 @@ import { Resend } from "resend";
 import twilio from "twilio";
 import { sendMagicLinkEmail } from "./helpers/email";
 import { schema } from "./schema";
+import ForgotPasswordEmail from "@/components/email-reset-password";
+import OrganizationInvitationEmail from "@/components/email-organization-invitation";
+import { ac, administrator, seller, owner } from "@/lib/auth-permissions";
 
 // Initialize Resend lazily
-const getResend = () => new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY as string);
 
 // Initialize Twilio lazily
 const getTwilioClient = () =>
@@ -21,8 +30,19 @@ const getTwilioClient = () =>
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: schema
+    schema: schema,
   }),
+
+  // Server-side requests made using auth.api aren't affected by rate limiting. Rate limits only apply to client-initiated requests.
+  // Rate limiting is disabled in development mode by default. In order to enable it, set enabled to true:
+  // Rate limiting uses the connecting IP address to track the number of requests made by a user.
+  // Rate limiting uses the connecting IP address to track the number of requests made by a user. The default header checked is x-forwarded-for, which is commonly used in production environments. If you are using a different header to track the user's IP address, you'll need to specify it.
+  // By default, rate limit data is stored in memory, which may not be suitable for many use cases, particularly in serverless environments. To address this, you can use a database, secondary storage, or custom storage for storing rate limit data.
+  rateLimit: {
+    enabled: true,
+    window: 60, // time window in seconds
+    max: 100, // max requests in the window
+  },
 
   emailAndPassword: {
     enabled: true,
@@ -34,6 +54,19 @@ export const auth = betterAuth({
         return await bcrypt.compare(password, hash);
       },
     },
+    sendResetPassword: async ({ user, url }) => {
+      resend.emails.send({
+        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        to: user.email,
+        subject: "Reset your password",
+        react: ForgotPasswordEmail({
+          username: user.name,
+          resetUrl: url,
+          userEmail: user.email,
+        }),
+      });
+    },
+    requireEmailVerification: true,
   },
 
   socialProviders: {
@@ -435,7 +468,7 @@ export const auth = betterAuth({
         }
 
         try {
-          await getResend().emails.send({
+          await resend.emails.send({
             from:
               process.env.FROM_EMAIL ||
               "Hunt Auth <team@support.hunttickets.com>",
@@ -497,6 +530,61 @@ export const auth = betterAuth({
       },
       otpLength: 6,
       expiresIn: 300, // 5 minutes
+    }),
+
+    organization({
+      // If the requireEmailVerificationOnInvitation option is enabled in your organization configuration, users must verify their email address before they can accept invitations. This adds an extra security layer to ensure that only verified users can join your organization.
+      requireEmailVerificationOnInvitation: true,
+
+      // To add a member to an organization, we first need to send an invitation to the user. The user will receive an email/sms with the invitation link. Once the user accepts the invitation, they will be added to the organization.
+      async sendInvitationEmail(data) {
+        // Invitation link
+        // When a user receives an invitation email, they can click on the invitation link to accept the invitation. The invitation link should include the invitation ID, which will be used to accept the invitation.
+        const inviteLink = `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/accept-invitation/${data.id}`;
+
+        // Send the email
+        resend.emails.send({
+          to: data.email,
+          from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+          subject: "You've been invited to join our organization",
+          react: OrganizationInvitationEmail({
+            email: data.email,
+            invitedByUsername: data.inviter.user.name,
+            invitedByEmail: data.inviter.user.email,
+            teamName: data.organization.name,
+            inviteLink,
+          }),
+        });
+      },
+
+      // execute a callback function when an invitation is accepted. This is useful for logging events, updating analytics, sending notifications, or any other custom logic you need to run when someone joins your organization.
+      // async onInvitationAccepted(data) {
+      //   // The callback receives the following data:
+      //   // id: The invitation ID
+      //   // role: The role assigned to the user
+      //   // organization: The organization the user joined
+      //   // invitation: The invitation object
+      //   // inviter: The member who sent the invitation (including user details)
+      //   // acceptedUser: The user who accepted the invitation
+      //   console.log(data);
+      // },
+      teams: {
+        enabled: false,
+      },
+
+      // Access control and roles configuration
+      // Define three roles: seller, administrator, owner
+      // - seller: basic access
+      // - administrator: can invite members
+      // - owner: can invite members and manage organization
+      ac,
+      roles: {
+        owner,
+        administrator,
+        seller,
+      },
     }),
   ],
 

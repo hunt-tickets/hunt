@@ -88,7 +88,7 @@ export function AddAdvanceDialog({
           debt: false,
         });
       } else {
-        alert(result.message);
+        alert(result);
       }
     } catch (error) {
       console.error("Error creating advance:", error);
