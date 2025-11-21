@@ -4,9 +4,9 @@ import {
   Button,
   Container,
   Head,
-  Heading,
+  Hr,
   Html,
-  Link,
+  Img,
   Preview,
   Section,
   Text,
@@ -25,94 +25,125 @@ const OrganizationInvitationEmail = (
   props: OrganizationInvitationEmailProps
 ) => {
   return (
-    <Html lang="en" dir="ltr">
+    <Html lang="es" dir="ltr">
       <Tailwind>
         <Head />
-        <Preview>You&apos;ve been invited to join {props.teamName}</Preview>
-        <Body className="bg-gray-100 font-sans py-[40px]">
-          <Container className="bg-white rounded-[8px] shadow-sm max-w-[600px] mx-auto p-[40px]">
-            {/* Header */}
-            <Section className="text-center mb-[32px]">
-              <Heading className="text-[28px] font-bold text-gray-900 m-0 mb-[8px]">
-                You&apos;re invited!
-              </Heading>
-              <Text className="text-[16px] text-gray-600 m-0">
-                Join {props.teamName} and start collaborating
-              </Text>
-            </Section>
+        <Preview>Has sido invitado a unirte a {props.teamName}</Preview>
+        <Body className="bg-gray-50 font-sans py-[40px]">
+          <Container className="bg-white rounded-[16px] p-[40px] max-w-[580px] mx-auto shadow-lg">
+            <Section>
+              {/* Header with Logo */}
+              <div className="text-center mb-[32px]">
+                <Img
+                  src="https://jtfcfsnksywotlbsddqb.supabase.co/storage/v1/object/public/default/hunt_logo.png"
+                  alt="Hunt Tickets"
+                  width="140"
+                  height="46"
+                  className="mx-auto"
+                />
+              </div>
 
-            {/* Main Content */}
-            <Section className="mb-[32px]">
-              <Text className="text-[16px] text-gray-700 mb-[16px] m-0">
-                Hi there,
+              {/* Invitation Message */}
+              <Text className="text-[28px] font-bold text-gray-900 mb-[8px] mt-0 text-center">
+                ¡Has sido invitado!
               </Text>
-              <Text className="text-[16px] text-gray-700 mb-[16px] m-0">
-                <strong>{props.invitedByUsername}</strong> (
-                {props.invitedByEmail}) has invited you to join{" "}
-                <strong>{props.teamName}</strong> on our platform.
-              </Text>
-              <Text className="text-[16px] text-gray-700 mb-[24px] m-0">
-                Accept this invitation to start collaborating with your team
-                members and access all the tools and resources available in your
-                organization.
-              </Text>
-            </Section>
 
-            {/* CTA Button */}
-            <Section className="text-center mb-[32px]">
-              <Button
-                href={props.inviteLink}
-                className="bg-blue-600 text-white px-[24px] py-[12px] rounded-[6px] text-[16px] font-medium no-underline box-border inline-block"
-              >
-                Accept Invitation
-              </Button>
-            </Section>
-
-            {/* Alternative Link */}
-            <Section className="mb-[32px]">
-              <Text className="text-[14px] text-gray-600 mb-[8px] m-0">
-                If the button above doesn&apos;t work, you can also copy and
-                paste this link into your browser:
+              <Text className="text-[16px] text-gray-600 mb-[32px] mt-0 text-center leading-[26px]">
+                Únete a <strong>{props.teamName}</strong> en Hunt Tickets
               </Text>
-              <Text className="text-[14px] break-all m-0">
-                <Link
+
+              {/* Inviter Info Section */}
+              <Section className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-[12px] p-[24px] mb-[24px] border border-purple-200">
+                <Text className="text-[14px] font-semibold text-gray-900 mb-[12px] mt-0">
+                  👋 Invitado por:
+                </Text>
+                <Text className="text-[14px] text-gray-700 m-0">
+                  <strong>{props.invitedByUsername}</strong>
+                </Text>
+                <Text className="text-[13px] text-gray-600 m-0">
+                  {props.invitedByEmail}
+                </Text>
+              </Section>
+
+              {/* Main CTA Button */}
+              <Section className="text-center mb-[32px]">
+                <Button
                   href={props.inviteLink}
-                  className="text-blue-600 underline"
+                  style={{
+                    backgroundColor: "#000000",
+                    color: "#ffffff",
+                    padding: "16px 48px",
+                    borderRadius: "12px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    textDecoration: "none",
+                    display: "inline-block",
+                  }}
                 >
+                  Aceptar Invitación →
+                </Button>
+              </Section>
+
+              {/* Info Section */}
+              <Section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[12px] p-[24px] mb-[24px] border border-blue-200">
+                <Text className="text-[14px] font-semibold text-gray-900 mb-[12px] mt-0">
+                  📋 ¿Qué obtienes?
+                </Text>
+                <div className="space-y-[8px]">
+                  <Text className="text-[14px] text-gray-600 m-0 leading-[20px]">
+                    ✓ Acceso a la organización {props.teamName}
+                  </Text>
+                  <Text className="text-[14px] text-gray-600 m-0 leading-[20px]">
+                    ✓ Colabora con tu equipo
+                  </Text>
+                  <Text className="text-[14px] text-gray-600 m-0 leading-[20px]">
+                    ✓ Gestiona eventos y entradas
+                  </Text>
+                </div>
+              </Section>
+
+              {/* Alternative Link Section */}
+              <Section className="bg-amber-50 border border-amber-200 rounded-[8px] p-[16px] mb-[24px]">
+                <Text className="text-[13px] text-gray-700 m-0 mb-[8px]">
+                  ¿El botón no funciona? Copia este enlace:
+                </Text>
+                <Text className="text-[12px] text-blue-600 m-0 break-all font-mono">
                   {props.inviteLink}
-                </Link>
-              </Text>
-            </Section>
+                </Text>
+              </Section>
 
-            {/* Additional Info */}
-            <Section className="border-t border-gray-200 pt-[24px] mb-[24px]">
-              <Text className="text-[14px] text-gray-600 mb-[8px] m-0">
-                <strong>Organization:</strong> {props.teamName}
-              </Text>
-              <Text className="text-[14px] text-gray-600 mb-[8px] m-0">
-                <strong>Invited by:</strong> {props.invitedByUsername} (
-                {props.invitedByEmail})
-              </Text>
-              <Text className="text-[14px] text-gray-600 m-0">
-                <strong>Your email:</strong> {props.email}
-              </Text>
-            </Section>
+              {/* Not You Section */}
+              <Section className="bg-gray-50 border border-gray-200 rounded-[8px] p-[16px] mb-[24px]">
+                <Text className="text-[13px] text-gray-700 m-0">
+                  <strong>¿No esperabas esta invitación?</strong> Puedes ignorar
+                  este correo de forma segura. No se realizará ningún cambio en
+                  tu cuenta.
+                </Text>
+              </Section>
 
-            {/* Footer */}
-            <Section className="border-t border-gray-200 pt-[24px]">
-              <Text className="text-[12px] text-gray-500 text-center m-0 mb-[8px]">
-                This invitation was sent to {props.email}. If you weren&apos;t
-                expecting this invitation, you can safely ignore this email.
+              {/* Account Info */}
+              <Text className="text-[13px] text-gray-500 text-center mb-[24px] mt-0">
+                Esta invitación fue enviada a: {props.email}
               </Text>
-              <Text className="text-[12px] text-gray-500 text-center m-0 mb-[8px]">
-                © {new Date().getFullYear()} Your Company Name. All rights
-                reserved.
-              </Text>
-              <Text className="text-[12px] text-gray-500 text-center m-0">
-                123 Business Street, Suite 100, City, State 12345
+
+              <Hr className="border-gray-200 my-[24px]" />
+
+              {/* Footer */}
+              <Text className="text-[14px] text-gray-600 text-center m-0">
+                ¿Necesitas ayuda? Escríbenos a info@hunt-tickets.com
+                <br />
+                <span className="text-[13px] text-gray-400">
+                  Hunt Tickets - Tu plataforma de eventos
+                </span>
               </Text>
             </Section>
           </Container>
+
+          {/* Copyright Footer */}
+          <Text className="text-[11px] text-gray-400 text-center mt-[24px] mb-0">
+            © {new Date().getFullYear()} Hunt Tickets S.A.S. NIT 901881747-0.
+            Todos los derechos reservados.
+          </Text>
         </Body>
       </Tailwind>
     </Html>

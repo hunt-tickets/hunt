@@ -33,8 +33,6 @@ export const auth = betterAuth({
     schema: schema,
   }),
 
-  
-
   // Server-side requests made using auth.api aren't affected by rate limiting. Rate limits only apply to client-initiated requests.
   // Rate limiting is disabled in development mode by default. In order to enable it, set enabled to true:
   // Rate limiting uses the connecting IP address to track the number of requests made by a user.
@@ -544,13 +542,12 @@ export const auth = betterAuth({
         // When a user receives an invitation email, they can click on the invitation link to accept the invitation. The invitation link should include the invitation ID, which will be used to accept the invitation.
         const inviteLink = `${
           process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/accept-invitation/${data.id}`;
+        }/accept-invitation/${data.id}?org=${encodeURIComponent(data.organization.name)}`;
 
-        // Send the email
         resend.emails.send({
           to: data.email,
           from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
-          subject: "You've been invited to join our organization",
+          subject: "Te han invitado a una Organizacion en Hunt-Tickets",
           react: OrganizationInvitationEmail({
             email: data.email,
             invitedByUsername: data.inviter.user.name,

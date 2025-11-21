@@ -61,7 +61,7 @@ export function AuthButton() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}`}>Mi Perfil</Link>
+          <Link href={`/profile/`}>Mi Perfil</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href={`/profile/${user.id}/administrador`}>Administrador</Link>

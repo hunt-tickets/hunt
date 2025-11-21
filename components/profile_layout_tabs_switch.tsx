@@ -1,7 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { User, Ticket, HelpCircle, Settings } from "lucide-react";
+import { User, Ticket, HelpCircle, Settings, Building2 } from "lucide-react";
 
 const ProfileTabs = () => {
   const pathname = usePathname();
@@ -14,6 +14,7 @@ const ProfileTabs = () => {
   // Determine current tab from pathname
   const getCurrentTab = () => {
     if (pathname.includes("/tickets")) return "tickets";
+    if (pathname.includes("/organizaciones")) return "organizaciones";
     if (pathname.includes("/soporte")) return "soporte";
     if (pathname.includes("/ajustes")) return "ajustes";
 
@@ -39,6 +40,7 @@ const ProfileTabs = () => {
   const tabs = [
     { value: "general", icon: User, label: "General" },
     { value: "tickets", icon: Ticket, label: "Entradas" },
+    { value: "organizaciones", icon: Building2, label: "Organizaciones" },
     { value: "soporte", icon: HelpCircle, label: "Soporte" },
     { value: "ajustes", icon: Settings, label: "Ajustes" },
   ];
