@@ -35,9 +35,8 @@ export function EditProfileDialog({ user }: EditProfileDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="gap-2">
-          <Edit className="h-4 w-4" />
-          <span className="hidden sm:inline">Editar Perfil</span>
+        <Button variant="outline" className="gap-2">
+          Update profile
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md max-h-[75vh] sm:max-h-[85vh] overflow-y-auto overflow-x-hidden p-5 sm:p-6">
