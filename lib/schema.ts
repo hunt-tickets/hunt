@@ -221,8 +221,9 @@ export const passkey = pgTable(
     deviceType: text().notNull(),
     backedUp: boolean().notNull(),
     transports: text(),
-    createdAt: timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`),
+    createdAt: timestamp({ withTimezone: true }).default(
+      sql`CURRENT_TIMESTAMP`
+    ),
     aaguid: text(),
   },
   (table) => [
@@ -300,21 +301,25 @@ export const invitation = pgTable(
   ]
 );
 
+// Payment processor account linking (OAuth-based)
 export const paymentProcessorAccount = pgTable("payment_processor_account", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
   processorType: paymentProcessorType("processor_type").notNull(),
-  processorAccountId: text("processor_account_id").notNull(),
-  accessToken: text("access_token").notNull(),
-  refreshToken: text("refresh_token"),
+  processorAccountId: text("processor_account_id").notNull(), // e.g., Stripe Connect account ID
+  accessToken: text("access_token").notNull(), // Encrypted OAuth access token
+  refreshToken: text("refresh_token"), // Encrypted OAuth refresh token
   tokenExpiresAt: timestamp("token_expires_at"),
-  scope: text("scope"),
-  status: paymentProcessorStatus("status").notNull().default("active"),
-  metadata: text("metadata"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  scope: text("scope"), // OAuth scopes granted
+  status: paymentProcessorStatus("status").notNull().default("inactive"),
+  metadata: jsonb("metadata"), // Processor-specific metadata (account details, capabilities, etc.)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Export schema object for Drizzle

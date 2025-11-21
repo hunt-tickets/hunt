@@ -10,15 +10,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Building2,
-  Calendar,
-  Users,
-  ArrowLeft,
-  Settings,
-} from "lucide-react";
+import { Building2, Calendar, Users, ArrowLeft, Settings } from "lucide-react";
 import Link from "next/link";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
+import PaymentSettings from "@/components/organization-payment-accounts-settings";
+import { db } from "@/lib/drizzle";
+import { paymentProcessorAccount } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
 export default async function OrganizationPage({
   params,
@@ -38,6 +36,12 @@ export default async function OrganizationPage({
   if (!organization) {
     redirect("/profile");
   }
+
+  // Fetch payment accounts for this organization
+  const paymentAccounts = await db
+    .select()
+    .from(paymentProcessorAccount)
+    .where(eq(paymentProcessorAccount.organizationId, organizationId));
 
   // Format dates
   const formatDate = (dateString: string | Date | undefined) => {
@@ -67,7 +71,9 @@ export default async function OrganizationPage({
   const currentUserRole = currentUserMember?.role || "member";
 
   // Check if user can invite members (owner or administrator)
-  const canInvite = currentUserRole === "owner" || currentUserRole === "administrator";
+  const canInvite =
+    currentUserRole === "owner" || currentUserRole === "administrator";
+  const canManagePaymentProcessorAccount = currentUserRole === "owner";
 
   return (
     <div className="min-h-screen bg-background">
@@ -204,6 +210,13 @@ export default async function OrganizationPage({
               </CardContent>
             </Card>
           </div>
+
+          {/* Payment Settings - Only for owners */}
+          {canManagePaymentProcessorAccount && (
+            <PaymentSettings
+              org={{ ...organization, paymentAccounts: paymentAccounts }}
+            />
+          )}
 
           {/* Metadata (if exists) */}
           {organization.metadata && (
