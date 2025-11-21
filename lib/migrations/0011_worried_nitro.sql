@@ -1,0 +1,1 @@
+ALTER TABLE "legacy_events" ADD CONSTRAINT "legacy_events_legacy_venueId_fkey" FOREIGN KEY ("venue_id") REFERENCES "public"."legacy_venues"("id") ON DELETE cascade ON UPDATE no action;

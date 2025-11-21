@@ -1,4 +1,6 @@
 import {
+  uuid,
+  index,
   pgTable,
   unique,
   text,
@@ -6,6 +8,8 @@ import {
   timestamp,
   jsonb,
   foreignKey,
+  decimal,
+  // varchar,
   pgEnum,
   integer,
 } from "drizzle-orm/pg-core";
@@ -322,6 +326,226 @@ export const paymentProcessorAccount = pgTable("payment_processor_account", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Hunt-Tickets specific tables
+
+// Legacy Venues table - Archive of old venues with original schema
+export const legacyVenues = pgTable(
+  "legacy_venues",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    description: text("description"),
+    address: text("address").notNull(),
+    city: uuid("city"), // UUID reference to old cities table (no FK constraint)
+    logo: text("logo"),
+    latitude: text("latitude"),
+    longitude: text("longitude"),
+    banner: text("banner"),
+    link: text("link"),
+    staticMapUrl: text("static_map_url"),
+    googleName: text("google_name"),
+    googleStreetNumber: text("google_street_number"),
+    googleNeighborhood: text("google_neighborhood"),
+    googleRoute: text("google_route"),
+    googleSublocality: text("google_sublocality"),
+    googleLocality: text("google_locality"),
+    googleAreaLevel1: text("google_area_level_1"),
+    googleAreaLevel2: text("google_area_level_2"),
+    googlePostalCode: text("google_postal_code"),
+    googleCountry: text("google_country"),
+    googleCountryCode: text("google_country_code"),
+    googleId: text("google_id"),
+    googleMapsLink: text("google_maps_link"),
+    timezoneId: text("timezone_id"),
+    timezoneName: text("timezone_name"),
+    utcOffset: decimal("utc_offset"),
+    dtsOffset: decimal("dts_offset"),
+    googleTotalReviews: text("google_total_reviews"),
+    googleAvgRating: text("google_avg_rating"),
+    googleWebsiteUrl: text("google_website_url"),
+    googlePhoneNumber: text("google_phone_number"),
+    currencyCode: text("currency_code"),
+    wheelchairAccessible: boolean("wheelchair_accessible"),
+    venueType: text("venue_type"),
+    aiDescription: text("ai_description"),
+    instagram: text("instagram"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index("idx_legacy_venues_name").on(table.name)]
+);
+
+// Legacy Events table - Archive of old events without organization link
+export const legacyEvents = pgTable(
+  "legacy_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+    name: text("name"),
+    description: text("description"),
+    date: timestamp("date", { withTimezone: true }),
+    endDate: timestamp("end_date", { withTimezone: true }),
+    status: boolean("status").default(false),
+    flyer: text("flyer"),
+    venueId: uuid("venue_id"), // No foreign key for legacy data
+    variableFee: decimal("variable_fee"),
+    fixedFee: decimal("fixed_fee"),
+    age: decimal("age"),
+    cash: boolean("cash").notNull().default(false),
+    extraInfo: text("extra_info"),
+    ics: text("ics"),
+    flyerApple: text("flyer_apple"),
+    flyerGoogle: text("flyer_google"),
+    flyerOverlay: text("flyer_overlay"),
+    flyerBackground: text("flyer_background"),
+    flyerBanner: text("flyer_banner"),
+    posFee: decimal("pos_fee"),
+    hex: text("hex"),
+    priority: boolean("priority").notNull().default(false),
+    hexText: text("hex_text"),
+    guestList: boolean("guest_list").notNull().default(false),
+    privateList: boolean("private_list").notNull().default(false),
+    accessPass: boolean("access_pass").notNull().default(false),
+    guestListMaxHour: timestamp("guest_list_max_hour", { withTimezone: true }),
+    guestListQuantity: decimal("guest_list_quantity"),
+    guestListInfo: text("guest_list_info"),
+    hexTextSecondary: text("hex_text_secondary").notNull().default("A3A3A3"),
+    lateFee: decimal("late_fee"),
+    guestEmail: text("guest_email"),
+    guestName: text("guest_name"),
+    faqs: jsonb("faqs").$type<Array<Record<string, unknown>>>(),
+  },
+  (table) => [
+    // Indexes for query performance
+    index("idx_legacy_events_date").on(table.date),
+    index("idx_legacy_events_end_date").on(table.endDate),
+    index("idx_legacy_events_status_end_date").on(table.status, table.endDate),
+    // Foreign keys
+    foreignKey({
+      columns: [table.venueId],
+      foreignColumns: [legacyVenues.id],
+      name: "legacy_events_legacy_venuId_fkey",
+    }).onDelete("cascade"),
+  ]
+);
+
+// Venues table
+export const venues = pgTable(
+  "venues",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    description: text("description"),
+    address: text("address"),
+    city: text("city"),
+    country: text("country"),
+    postalCode: text("postal_code"),
+    state: text("state"),
+    latitude: text("latitude"),
+    longitude: text("longitude"),
+    logo: text("logo"),
+    banner: text("banner"),
+    link: text("link"),
+    staticMapUrl: text("static_map_url"),
+    // Google Places integration
+    googleId: text("google_id"),
+    googleName: text("google_name"),
+    googleMapsLink: text("google_maps_link"),
+    googleLocality: text("google_locality"),
+    googleAreaLevel1: text("google_area_level_1"),
+    googlePostalCode: text("google_postal_code"),
+    googleCountry: text("google_country"),
+    googleCountryCode: text("google_country_code"),
+    googlePhoneNumber: text("google_phone_number"),
+    googleWebsiteUrl: text("google_website_url"),
+    googleAvgRating: text("google_avg_rating"),
+    googleTotalReviews: text("google_total_reviews"),
+    // Timezone information
+    timezoneId: text("timezone_id"),
+    timezoneName: text("timezone_name"),
+    utcOffset: decimal("utc_offset"),
+    dtsOffset: decimal("dts_offset"),
+    // Additional metadata
+    currencyCode: text("currency_code"),
+    wheelchairAccessible: boolean("wheelchair_accessible"),
+    venueType: text("venue_type"),
+    aiDescription: text("ai_description"),
+    instagram: text("instagram"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index("idx_venues_name").on(table.name)]
+);
+
+// Events table - NEW events linked to organizations
+export const events = pgTable(
+  "events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+    name: text("name"),
+    description: text("description"),
+    date: timestamp("date", { withTimezone: true }),
+    endDate: timestamp("end_date", { withTimezone: true }),
+    status: boolean("status").default(false),
+    city: text("city"),
+    country: text("country"),
+    flyer: text("flyer"),
+    venueId: uuid("venue_id").references(() => venues.id),
+    variableFee: decimal("variable_fee"),
+    fixedFee: decimal("fixed_fee"),
+    age: decimal("age"),
+    cash: boolean("cash").notNull().default(false),
+    extraInfo: text("extra_info"),
+    ics: text("ics"),
+    flyerApple: text("flyer_apple"),
+    flyerGoogle: text("flyer_google"),
+    flyerOverlay: text("flyer_overlay"),
+    flyerBackground: text("flyer_background"),
+    flyerBanner: text("flyer_banner"),
+    posFee: decimal("pos_fee"),
+    hex: text("hex"),
+    priority: boolean("priority").notNull().default(false),
+    hexText: text("hex_text"),
+    guestList: boolean("guest_list").notNull().default(false),
+    privateList: boolean("private_list").notNull().default(false),
+    accessPass: boolean("access_pass").notNull().default(false),
+    guestListMaxHour: timestamp("guest_list_max_hour", { withTimezone: true }),
+    guestListQuantity: decimal("guest_list_quantity"),
+    guestListInfo: text("guest_list_info"),
+    hexTextSecondary: text("hex_text_secondary").notNull().default("A3A3A3"),
+    lateFee: decimal("late_fee"),
+    guestEmail: text("guest_email"),
+    guestName: text("guest_name"),
+    faqs: jsonb("faqs").$type<Array<Record<string, unknown>>>(),
+  },
+  (table) => [
+    // Indexes for query performance (matching your original schema)
+    index("idx_events_organization_id").on(table.organizationId),
+    index("idx_events_date").on(table.date),
+    index("idx_events_end_date").on(table.endDate),
+    index("idx_events_status_end_date").on(table.status, table.endDate),
+    index("idx_events_date_range").on(table.date, table.endDate),
+    // Composite index for common query: "show active events for this organization"
+    index("idx_events_org_status_date").on(
+      table.organizationId,
+      table.status,
+      table.date
+    ),
+  ]
+);
+
 // Export schema object for Drizzle
 export const schema = {
   user,
@@ -333,4 +557,8 @@ export const schema = {
   member,
   invitation,
   paymentProcessorAccount,
+  legacyVenues,
+  venues,
+  legacyEvents,
+  events,
 };

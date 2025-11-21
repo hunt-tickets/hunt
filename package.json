@@ -68,6 +68,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.180.0",
     "autoprefixer": "^10.4.20",
+    "csv-parse": "^6.1.0",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.7",
     "eslint": "^9",
