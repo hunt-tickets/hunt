@@ -13,7 +13,7 @@ export async function getMercadopagoAuthorizationUrl(organizationId?: string) {
   const url = new OAuth(mercadopago).getAuthorizationURL({
     options: {
       client_id: process.env.NEXT_PUBLIC_MP_CLIENT_ID,
-      redirect_uri: `${process.env.APP_URL}/api/mercadopago/connect/`,
+      redirect_uri: `${process.env.APP_URL}/api/mercadopago/connect`,
       state,
     },
   });

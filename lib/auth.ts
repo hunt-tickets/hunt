@@ -33,6 +33,12 @@ export const auth = betterAuth({
     schema: schema,
   }),
 
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://192.168.0.7:3000",
+    "https://f702gzlr-3000.use2.devtunnels.ms/",
+  ],
+
   // Server-side requests made using auth.api aren't affected by rate limiting. Rate limits only apply to client-initiated requests.
   // Rate limiting is disabled in development mode by default. In order to enable it, set enabled to true:
   // Rate limiting uses the connecting IP address to track the number of requests made by a user.
@@ -56,7 +62,8 @@ export const auth = betterAuth({
     },
     sendResetPassword: async ({ user, url }) => {
       resend.emails.send({
-        from: process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
+        from:
+          process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
         to: user.email,
         subject: "Reset your password",
         react: ForgotPasswordEmail({
@@ -538,9 +545,14 @@ export const auth = betterAuth({
 
       // To add a member to an organization, we first need to send an invitation to the user. The user will receive an email/sms with the invitation link. Once the user accepts the invitation, they will be added to the organization.
       async sendInvitationEmail(data) {
-        console.log("📧 [INVITATION EMAIL] Starting to send invitation email...");
+        console.log(
+          "📧 [INVITATION EMAIL] Starting to send invitation email..."
+        );
         console.log("📧 [INVITATION EMAIL] Recipient:", data.email);
-        console.log("📧 [INVITATION EMAIL] Organization:", data.organization.name);
+        console.log(
+          "📧 [INVITATION EMAIL] Organization:",
+          data.organization.name
+        );
         console.log("📧 [INVITATION EMAIL] Inviter:", data.inviter.user.name);
         console.log("📧 [INVITATION EMAIL] Invitation ID:", data.id);
 
@@ -551,13 +563,18 @@ export const auth = betterAuth({
         }/accept-invitation/${data.id}?org=${encodeURIComponent(data.organization.name)}`;
 
         console.log("📧 [INVITATION EMAIL] Invite link:", inviteLink);
-        console.log("📧 [INVITATION EMAIL] From email:", process.env.FROM_EMAIL);
+        console.log(
+          "📧 [INVITATION EMAIL] From email:",
+          process.env.FROM_EMAIL
+        );
 
         try {
           console.log("📧 [INVITATION EMAIL] Calling Resend API...");
           const result = await resend.emails.send({
             to: data.email,
-            from: process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
+            from:
+              process.env.FROM_EMAIL ||
+              "Hunt Auth <team@support.hunttickets.com>",
             subject: "Te han invitado a una Organizacion en Hunt-Tickets",
             react: OrganizationInvitationEmail({
               email: data.email,
@@ -567,13 +584,23 @@ export const auth = betterAuth({
               inviteLink,
             }),
           });
-          console.log(`✅ [INVITATION EMAIL] Email sent successfully to ${data.email}`);
-          console.log("✅ [INVITATION EMAIL] Resend response:", JSON.stringify(result, null, 2));
+          console.log(
+            `✅ [INVITATION EMAIL] Email sent successfully to ${data.email}`
+          );
+          console.log(
+            "✅ [INVITATION EMAIL] Resend response:",
+            JSON.stringify(result, null, 2)
+          );
         } catch (error) {
-          console.error(`❌ [INVITATION EMAIL] Failed to send invitation email to ${data.email}`);
+          console.error(
+            `❌ [INVITATION EMAIL] Failed to send invitation email to ${data.email}`
+          );
           console.error("❌ [INVITATION EMAIL] Error details:", error);
           if (error instanceof Error) {
-            console.error("❌ [INVITATION EMAIL] Error message:", error.message);
+            console.error(
+              "❌ [INVITATION EMAIL] Error message:",
+              error.message
+            );
             console.error("❌ [INVITATION EMAIL] Error stack:", error.stack);
           }
           throw new Error("Failed to send invitation email");
@@ -645,7 +672,9 @@ export const auth = betterAuth({
       enabled: true,
       sendChangeEmailVerification: async ({ user, newEmail, url }) => {
         await resend.emails.send({
-          from: process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
+          from:
+            process.env.FROM_EMAIL ||
+            "Hunt Auth <team@support.hunttickets.com>",
           to: user.email, // Send to current email for verification
           subject: "Aprueba el cambio de correo electrónico",
           html: `
