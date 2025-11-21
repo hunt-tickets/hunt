@@ -56,7 +56,7 @@ export const auth = betterAuth({
     },
     sendResetPassword: async ({ user, url }) => {
       resend.emails.send({
-        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        from: process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
         to: user.email,
         subject: "Reset your password",
         react: ForgotPasswordEmail({
@@ -538,24 +538,46 @@ export const auth = betterAuth({
 
       // To add a member to an organization, we first need to send an invitation to the user. The user will receive an email/sms with the invitation link. Once the user accepts the invitation, they will be added to the organization.
       async sendInvitationEmail(data) {
+        console.log("📧 [INVITATION EMAIL] Starting to send invitation email...");
+        console.log("📧 [INVITATION EMAIL] Recipient:", data.email);
+        console.log("📧 [INVITATION EMAIL] Organization:", data.organization.name);
+        console.log("📧 [INVITATION EMAIL] Inviter:", data.inviter.user.name);
+        console.log("📧 [INVITATION EMAIL] Invitation ID:", data.id);
+
         // Invitation link
         // When a user receives an invitation email, they can click on the invitation link to accept the invitation. The invitation link should include the invitation ID, which will be used to accept the invitation.
         const inviteLink = `${
           process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
         }/accept-invitation/${data.id}?org=${encodeURIComponent(data.organization.name)}`;
 
-        resend.emails.send({
-          to: data.email,
-          from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
-          subject: "Te han invitado a una Organizacion en Hunt-Tickets",
-          react: OrganizationInvitationEmail({
-            email: data.email,
-            invitedByUsername: data.inviter.user.name,
-            invitedByEmail: data.inviter.user.email,
-            teamName: data.organization.name,
-            inviteLink,
-          }),
-        });
+        console.log("📧 [INVITATION EMAIL] Invite link:", inviteLink);
+        console.log("📧 [INVITATION EMAIL] From email:", process.env.FROM_EMAIL);
+
+        try {
+          console.log("📧 [INVITATION EMAIL] Calling Resend API...");
+          const result = await resend.emails.send({
+            to: data.email,
+            from: process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
+            subject: "Te han invitado a una Organizacion en Hunt-Tickets",
+            react: OrganizationInvitationEmail({
+              email: data.email,
+              invitedByUsername: data.inviter.user.name,
+              invitedByEmail: data.inviter.user.email,
+              teamName: data.organization.name,
+              inviteLink,
+            }),
+          });
+          console.log(`✅ [INVITATION EMAIL] Email sent successfully to ${data.email}`);
+          console.log("✅ [INVITATION EMAIL] Resend response:", JSON.stringify(result, null, 2));
+        } catch (error) {
+          console.error(`❌ [INVITATION EMAIL] Failed to send invitation email to ${data.email}`);
+          console.error("❌ [INVITATION EMAIL] Error details:", error);
+          if (error instanceof Error) {
+            console.error("❌ [INVITATION EMAIL] Error message:", error.message);
+            console.error("❌ [INVITATION EMAIL] Error stack:", error.stack);
+          }
+          throw new Error("Failed to send invitation email");
+        }
       },
 
       // execute a callback function when an invitation is accepted. This is useful for logging events, updating analytics, sending notifications, or any other custom logic you need to run when someone joins your organization.
@@ -623,7 +645,7 @@ export const auth = betterAuth({
       enabled: true,
       sendChangeEmailVerification: async ({ user, newEmail, url }) => {
         await resend.emails.send({
-          from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+          from: process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
           to: user.email, // Send to current email for verification
           subject: "Aprueba el cambio de correo electrónico",
           html: `
