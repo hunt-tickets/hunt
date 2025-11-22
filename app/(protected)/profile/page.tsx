@@ -380,8 +380,8 @@ export default async function ProfilePage() {
             </button>
           </div>
 
-          {/* Passkey */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          {/* FIXME: Passkey - disabled until plugin is available in better-auth */}
+          {/* <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <Fingerprint className="h-5 w-5 text-gray-400" />
               <div>
@@ -394,7 +394,7 @@ export default async function ProfilePage() {
             <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
               <span className="text-xl">⋯</span>
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 
