@@ -9,7 +9,6 @@ import {
   organization,
   magicLink,
   openAPI,
-  passkey,
 } from "better-auth/plugins";
 import bcrypt from "bcrypt";
 import { nextCookies } from "better-auth/next-js";
@@ -89,20 +88,6 @@ export const auth = betterAuth({
     anonymous(),
     nextCookies(),
     openAPI(),
-
-    passkey({
-      rpID:
-        process.env.NODE_ENV === "production" && process.env.BETTER_AUTH_URL
-          ? new URL(process.env.BETTER_AUTH_URL).hostname
-          : "localhost",
-      rpName: "Hunt Tickets",
-      origin: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-      authenticatorSelection: {
-        authenticatorAttachment: undefined, // Allow both platform and cross-platform
-        residentKey: "preferred",
-        userVerification: "preferred",
-      },
-    }),
 
     magicLink({
       sendMagicLink: async ({ email, url }) => {

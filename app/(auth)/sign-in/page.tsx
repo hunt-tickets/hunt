@@ -90,7 +90,7 @@ function SignInForm() {
           onSuccess: () => {
             handleRedirect(getRedirectUrl());
           },
-          onError: (error) => {
+          onError: (error: unknown) => {
             console.error("OTP login failed:", error);
           },
         }
