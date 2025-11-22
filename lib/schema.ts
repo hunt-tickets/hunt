@@ -113,6 +113,43 @@ export const ticketTriggerType = pgEnum("ticket_trigger_type", [
   "automatic",
   "manually",
 ]);
+export const genderType = pgEnum("gender_type", [
+  "masculino",
+  "femenino",
+  "otro",
+  "prefiero_no_decir",
+]);
+
+// Countries table
+export const countries = pgTable(
+  "countries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    countryName: text("country_name").notNull(),
+    countryCode: text("country_code"),
+    currency: text("currency").notNull(),
+  },
+  (table) => [unique("countries_country_name_key").on(table.countryName)]
+);
+
+// Document Type table
+export const documentType = pgTable(
+  "document_type",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    countryId: uuid("country_id")
+      .notNull()
+      .references(() => countries.id),
+    name: text("name").notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.countryId],
+      foreignColumns: [countries.id],
+      name: "document_type_country_id_fkey",
+    }),
+  ]
+);
 
 export const user = pgTable(
   "user",
@@ -139,10 +176,20 @@ export const user = pgTable(
     appMetadata: jsonb(),
     invitedAt: timestamp({ withTimezone: true }),
     lastSignInAt: timestamp({ withTimezone: true }),
+    // New user profile fields
+    documentId: text("document_id"),
+    documentTypeId: uuid("document_type_id").references(() => documentType.id),
+    gender: genderType("gender"),
+    birthdate: timestamp("birthdate", { withTimezone: true }),
   },
   (table) => [
     unique("user_email_key").on(table.email),
     unique("user_phoneNumber_key").on(table.phoneNumber),
+    foreignKey({
+      columns: [table.documentTypeId],
+      foreignColumns: [documentType.id],
+      name: "user_document_type_id_fkey",
+    }),
   ]
 );
 
@@ -557,6 +604,8 @@ export const schema = {
   member,
   invitation,
   paymentProcessorAccount,
+  countries,
+  documentType,
   legacyVenues,
   venues,
   legacyEvents,

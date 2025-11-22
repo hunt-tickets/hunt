@@ -12,21 +12,19 @@ import { Badge } from "@/components/ui/badge";
 import {
   User,
   Mail,
-  Phone,
   Shield,
-  Clock,
   Calendar,
   Key,
   Fingerprint,
   Link2,
 } from "lucide-react";
-import { SiGoogle, SiFacebook, SiGithub, SiApple } from "react-icons/si";
+import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
-import { ChangeEmailDialog } from "@/components/change-email-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ActiveSessionsCard } from "@/components/active-sessions-card";
+import { PhoneVerificationManager } from "@/components/phone-verification-manager";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -62,16 +60,16 @@ export default async function ProfilePage() {
   };
 
   // Format dates
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "No disponible";
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // const formatDate = (dateString: string | undefined) => {
+  //   if (!dateString) return "No disponible";
+  //   return new Date(dateString).toLocaleDateString("es-ES", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //   });
+  // };
 
   // Get provider icon component
   const getProviderIcon = (providerId: string) => {
@@ -153,9 +151,14 @@ export default async function ProfilePage() {
 
           {/* Name and Email */}
           <div>
-            <h1 className="text-3xl font-bold leading-tight">{user.name || "Usuario sin nombre"}</h1>
+            <h1 className="text-3xl font-bold leading-tight">
+              {user.name || "Usuario sin nombre"}
+            </h1>
             {user.role === "admin" && (
-              <Badge variant="default" className="mt-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 border-purple-500/20">
+              <Badge
+                variant="default"
+                className="mt-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 border-purple-500/20"
+              >
                 <Shield className="h-3 w-3 mr-1" />
                 Administrador
               </Badge>
@@ -176,7 +179,9 @@ export default async function ProfilePage() {
 
       {/* User Data Section */}
       <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight">Datos de usuario</h2>
+        <h2 className="text-xl font-semibold leading-tight">
+          Datos de usuario
+        </h2>
         <div className="space-y-3">
           {/* Name and Last Name - Two columns */}
           <div className="grid grid-cols-2 gap-3">
@@ -186,7 +191,7 @@ export default async function ProfilePage() {
                 <User className="h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  defaultValue={user.name?.split(' ')[0] || ''}
+                  defaultValue={user.name?.split(" ")[0] || ""}
                   placeholder="Nombre"
                   className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
                 />
@@ -199,14 +204,13 @@ export default async function ProfilePage() {
                 <User className="h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  defaultValue={user.name?.split(' ').slice(1).join(' ') || ''}
+                  defaultValue={user.name?.split(" ").slice(1).join(" ") || ""}
                   placeholder="Apellido"
                   className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
                 />
               </div>
             </div>
           </div>
-
           {/* Email */}
           <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
@@ -214,7 +218,12 @@ export default async function ProfilePage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{user.email}</span>
-                  <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20">Principal</Badge>
+                  <Badge
+                    variant="secondary"
+                    className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
+                  >
+                    Principal
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -224,22 +233,10 @@ export default async function ProfilePage() {
           </div>
 
           {/* Phone Number */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-gray-400" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{user.phoneNumber || "Agregar número de teléfono"}</span>
-                  {user.phoneNumberVerified && (
-                    <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-green-500/10 text-green-400 border-green-500/20">Verificado</Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
-              <span className="text-xl">⋯</span>
-            </button>
-          </div>
+          <PhoneVerificationManager
+            phoneNumber={user.phoneNumber}
+            phoneNumberVerified={user.phoneNumberVerified ?? false}
+          />
 
           {/* Birth Date */}
           <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
@@ -247,7 +244,9 @@ export default async function ProfilePage() {
               <Calendar className="h-5 w-5 text-gray-400" />
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-500">Agregar fecha de nacimiento</span>
+                  <span className="text-sm font-medium text-gray-500">
+                    Agregar fecha de nacimiento
+                  </span>
                 </div>
               </div>
             </div>
@@ -260,57 +259,61 @@ export default async function ProfilePage() {
 
       {/* Connected Accounts Section */}
       <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight">Cuentas conectadas</h2>
+        <h2 className="text-xl font-semibold leading-tight">
+          Cuentas conectadas
+        </h2>
         <div className="space-y-3">
-          {oauthAccounts.map((account: {
-            id: string;
-            providerId: string;
-            accountId: string;
-            createdAt: Date;
-            idToken?: string | null;
-          }) => {
-            const tokenData = decodeIdToken(account.idToken || null);
-            const accountEmail = tokenData?.email;
+          {oauthAccounts.map(
+            (account: {
+              id: string;
+              providerId: string;
+              accountId: string;
+              createdAt: Date;
+              idToken?: string | null;
+            }) => {
+              const tokenData = decodeIdToken(account.idToken || null);
+              const accountEmail = tokenData?.email;
 
-            return (
-              <div
-                key={account.id}
-                className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0">
-                    {getProviderIcon(account.providerId)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">
-                        {formatProviderName(account.providerId)}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <span className="relative flex h-1.5 w-1.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+              return (
+                <div
+                  key={account.id}
+                  className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      {getProviderIcon(account.providerId)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium">
+                          {formatProviderName(account.providerId)}
                         </span>
-                        {accountEmail && (
-                          <span className="text-sm text-gray-500">
-                            {accountEmail}
+                        <span className="flex items-center gap-2">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
                           </span>
-                        )}
-                      </span>
+                          {accountEmail && (
+                            <span className="text-sm text-gray-500">
+                              {accountEmail}
+                            </span>
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
+                    {account.providerId !== "credential" && (
+                      <UnlinkAccountButton
+                        accountId={account.id}
+                        providerName={formatProviderName(account.providerId)}
+                      />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {account.providerId !== "credential" && (
-                    <UnlinkAccountButton
-                      accountId={account.id}
-                      providerName={formatProviderName(account.providerId)}
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
 
           {/* Available Providers to Link */}
           {availableToLink.map((provider) => (
@@ -351,7 +354,9 @@ export default async function ProfilePage() {
               <Key className="h-5 w-5 text-gray-400" />
               <div>
                 <p className="text-sm font-medium">Contraseña</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">••••••••••</p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  ••••••••••
+                </p>
               </div>
             </div>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -365,7 +370,9 @@ export default async function ProfilePage() {
               <Shield className="h-5 w-5 text-gray-400" />
               <div>
                 <p className="text-sm font-medium">Verificación en dos pasos</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Google Authenticator, Outlook, etc.</p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Google Authenticator, Outlook, etc.
+                </p>
               </div>
             </div>
             <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
@@ -379,7 +386,9 @@ export default async function ProfilePage() {
               <Fingerprint className="h-5 w-5 text-gray-400" />
               <div>
                 <p className="text-sm font-medium">Passkey</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Inicio de sesión sin contraseña</p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Inicio de sesión sin contraseña
+                </p>
               </div>
             </div>
             <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
@@ -391,21 +400,29 @@ export default async function ProfilePage() {
 
       {/* Active Devices */}
       <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight">Dispositivos activos</h2>
+        <h2 className="text-xl font-semibold leading-tight">
+          Dispositivos activos
+        </h2>
         <ActiveSessionsCard />
       </div>
 
       {/* Danger Zone */}
       <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight text-red-500">Danger Zone</h2>
+        <h2 className="text-xl font-semibold leading-tight text-red-500">
+          Danger Zone
+        </h2>
 
         <div className="space-y-3">
           {/* Logout all sessions */}
           <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <div>
-                <p className="text-sm font-medium">Cerrar sesión en todos los dispositivos</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Cierra tu sesión en todos los dispositivos excepto este</p>
+                <p className="text-sm font-medium">
+                  Cerrar sesión en todos los dispositivos
+                </p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Cierra tu sesión en todos los dispositivos excepto este
+                </p>
               </div>
             </div>
             <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors">
@@ -417,8 +434,12 @@ export default async function ProfilePage() {
           <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <div>
-                <p className="text-sm font-medium">Eliminar cuenta permanentemente</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Una vez eliminada, no podrás recuperar tu cuenta</p>
+                <p className="text-sm font-medium">
+                  Eliminar cuenta permanentemente
+                </p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Una vez eliminada, no podrás recuperar tu cuenta
+                </p>
               </div>
             </div>
             <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors">

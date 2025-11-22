@@ -11,7 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { EditProfileForm } from "./edit-profile-form";
-import { Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface EditProfileDialogProps {

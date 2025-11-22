@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ChangePasswordForm } from "./change-password-form";
-import { Lock } from "lucide-react";
 
 export function ChangePasswordDialog() {
   const [open, setOpen] = useState(false);
