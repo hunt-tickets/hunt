@@ -149,48 +149,6 @@ function SignInForm() {
     }
   };
 
-  const handlePasskeyLogin = async () => {
-    setLoading(true);
-    try {
-      const response = await authClient.signIn.passkey();
-
-      if (response?.data) {
-        handleRedirect(getRedirectUrl());
-      } else if (response?.error) {
-        console.error("Passkey login failed:", response.error);
-
-        if (
-          response.error.message &&
-          response.error.message.includes("cancelled")
-        ) {
-          alert(
-            "Passkey authentication was cancelled. Please try again or use a different sign-in method."
-          );
-        } else if (
-          response.error.message &&
-          response.error.message.includes("not found")
-        ) {
-          alert(
-            "No passkey found for this email address. Please register a passkey first or use a different sign-in method."
-          );
-        } else {
-          alert(
-            `Passkey login failed: ${
-              response.error.message || "Unknown error"
-            }. Please try again or use a different sign-in method.`
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Passkey login error:", error);
-      alert(
-        "An error occurred during passkey authentication. Please try again or use a different sign-in method."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (showMagicLink) {
@@ -318,29 +276,6 @@ function SignInForm() {
               {error}
             </div>
           )}
-
-          {/* Passkey Option */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
-            </div>
-            <div className="relative flex justify-center">
-              <span className="px-2 py-0.5 bg-[#424242] border border-[#424242] rounded text-xs text-[#7a7a7a]">
-                o
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={handlePasskeyLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-white/10 rounded-md bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-50 text-xs text-[#A0A0A0]"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-            </svg>
-            Usar Passkey
-          </button>
         </div>
 
         {/* Footer */}
