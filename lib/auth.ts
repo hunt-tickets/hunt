@@ -11,7 +11,8 @@ import {
 import bcrypt from "bcrypt";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink, openAPI } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
+// FIXME: passkey plugin not available in better-auth 1.4.0
+// import { passkey } from "better-auth/plugins/passkey";
 import { Resend } from "resend";
 import twilio from "twilio";
 import { sendMagicLinkEmail } from "./helpers/email";
@@ -89,19 +90,20 @@ export const auth = betterAuth({
     nextCookies(),
     openAPI(),
 
-    passkey({
-      rpID:
-        process.env.NODE_ENV === "production" && process.env.BETTER_AUTH_URL
-          ? new URL(process.env.BETTER_AUTH_URL).hostname
-          : "localhost",
-      rpName: "Hunt Tickets",
-      origin: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-      authenticatorSelection: {
-        authenticatorAttachment: undefined, // Allow both platform and cross-platform
-        residentKey: "preferred",
-        userVerification: "preferred",
-      },
-    }),
+    // FIXME: passkey plugin not available in better-auth 1.4.0
+    // passkey({
+    //   rpID:
+    //     process.env.NODE_ENV === "production" && process.env.BETTER_AUTH_URL
+    //       ? new URL(process.env.BETTER_AUTH_URL).hostname
+    //       : "localhost",
+    //   rpName: "Hunt Tickets",
+    //   origin: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    //   authenticatorSelection: {
+    //     authenticatorAttachment: undefined, // Allow both platform and cross-platform
+    //     residentKey: "preferred",
+    //     userVerification: "preferred",
+    //   },
+    // }),
 
     magicLink({
       sendMagicLink: async ({ email, url }) => {

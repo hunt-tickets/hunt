@@ -5,7 +5,8 @@ import { createAuthClient } from "better-auth/react";
 import {
   emailOTPClient,
   magicLinkClient,
-  passkeyClient,
+  // FIXME: passkeyClient not available in better-auth 1.4.0
+  // passkeyClient,
   phoneNumberClient,
   adminClient,
   organizationClient,
@@ -17,7 +18,8 @@ export const authClient = createAuthClient({
   plugins: [
     magicLinkClient(),
     emailOTPClient(),
-    passkeyClient(),
+    // FIXME: passkeyClient not available in better-auth 1.4.0
+    // passkeyClient(),
     phoneNumberClient(),
     organizationClient({
       ac,
