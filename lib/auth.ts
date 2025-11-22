@@ -142,7 +142,7 @@ export const auth = betterAuth({
                   phoneNumber
                 );
               }
-              if (!phoneNumber && request.url) {
+              if (!phoneNumber && "url" in request && typeof request.url === "string") {
                 const url = new URL(request.url, "http://localhost:3000");
                 phoneNumber = url.searchParams.get("phoneNumber");
                 console.log("🔍 Debug - Phone from URL:", phoneNumber);
