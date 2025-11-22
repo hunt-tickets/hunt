@@ -21,7 +21,7 @@ import OrganizationInvitationEmail from "@/components/email-organization-invitat
 import { ac, administrator, seller, owner } from "@/lib/auth-permissions";
 
 // Initialize Resend lazily
-const resend = new Resend(process.env.RESEND_API_KEY as string);
+const getResendClient = () => new Resend(process.env.RESEND_API_KEY || "");
 
 // Initialize Twilio lazily
 const getTwilioClient = () =>
@@ -61,7 +61,7 @@ export const auth = betterAuth({
       },
     },
     sendResetPassword: async ({ user, url }) => {
-      resend.emails.send({
+      getResendClient().emails.send({
         from:
           process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
         to: user.email,
@@ -461,7 +461,7 @@ export const auth = betterAuth({
         }
 
         try {
-          await resend.emails.send({
+          await getResendClient().emails.send({
             from:
               process.env.FROM_EMAIL ||
               "Hunt Auth <team@support.hunttickets.com>",
@@ -556,7 +556,7 @@ export const auth = betterAuth({
 
         try {
           console.log("📧 [INVITATION EMAIL] Calling Resend API...");
-          const result = await resend.emails.send({
+          const result = await getResendClient().emails.send({
             to: data.email,
             from:
               process.env.FROM_EMAIL ||
@@ -657,7 +657,7 @@ export const auth = betterAuth({
     changeEmail: {
       enabled: true,
       sendChangeEmailVerification: async ({ user, newEmail, url }) => {
-        await resend.emails.send({
+        await getResendClient().emails.send({
           from:
             process.env.FROM_EMAIL ||
             "Hunt Auth <team@support.hunttickets.com>",
