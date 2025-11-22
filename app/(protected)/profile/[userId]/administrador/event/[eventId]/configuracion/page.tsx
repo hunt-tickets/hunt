@@ -1,5 +1,10 @@
 import { redirect, notFound } from "next/navigation";
+<<<<<<< HEAD
 import { createClient } from "@/lib/supabase/server";
+=======
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 import { EventConfigContent } from "@/components/event-config-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -12,6 +17,7 @@ interface ConfiguracionPageProps {
 
 export default async function ConfiguracionPage({ params }: ConfiguracionPageProps) {
   const { userId, eventId } = await params;
+<<<<<<< HEAD
   const supabase = await createClient();
 
   // Auth check
@@ -25,6 +31,24 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     .select("id, admin, producers_admin(producer_id)")
     .eq("id", userId)
     .single();
+=======
+
+  // Auth check using Better Auth
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session || session.user.id !== userId) {
+    redirect("/sign-in");
+  }
+
+  // Mock: Get user profile to verify admin/producer access
+  const profile = {
+    id: userId,
+    admin: true,
+    producers_admin: [{ producer_id: "mock-producer-1" }],
+  };
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const producersAdmin = Array.isArray(profile?.producers_admin)
     ? profile.producers_admin
@@ -37,6 +61,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     notFound();
   }
 
+<<<<<<< HEAD
   // Fetch event details with all configuration fields
   const { data: event, error } = await supabase
     .from("events")
@@ -72,13 +97,40 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
   const eventData = {
     ...event,
     venues: Array.isArray(event.venues) && event.venues.length > 0 ? event.venues[0] : undefined,
+=======
+  // Mock event data - In production, fetch from database
+  const eventData = {
+    id: eventId,
+    name: "Concierto de Rock",
+    description: "Gran concierto de rock con bandas locales",
+    date: "2025-12-15",
+    end_date: "2025-12-15",
+    status: true,
+    age: 18,
+    variable_fee: 8,
+    fixed_fee: 3000,
+    flyer: "/placeholder.svg",
+    flyer_apple: null,
+    venue_id: "venue-1",
+    faqs: [],
+    venues: {
+      id: "venue-1",
+      name: "Teatro Principal",
+      address: "Calle 100 #10-20",
+      city: "Bogotá",
+    },
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
   };
 
   return (
     <>
       {/* Sticky Header */}
       <EventStickyHeader
+<<<<<<< HEAD
         eventName={event.name}
+=======
+        eventName={eventData.name}
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
         subtitle="Configuración del Evento"
       >
         <EventConfigContent showTabsOnly />

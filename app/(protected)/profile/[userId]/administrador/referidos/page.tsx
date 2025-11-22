@@ -1,5 +1,10 @@
 import { redirect, notFound } from "next/navigation";
+<<<<<<< HEAD
 import { createClient } from "@/lib/supabase/server";
+=======
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 import { ReferralAdminContent } from "@/components/referral-admin-content";
 import { AdminHeader } from "@/components/admin-header";
 
@@ -11,6 +16,7 @@ interface ReferidosPageProps {
 
 export default async function ReferidosPage({ params }: ReferidosPageProps) {
   const { userId } = await params;
+<<<<<<< HEAD
   const supabase = await createClient();
 
   // Auth check
@@ -24,6 +30,28 @@ export default async function ReferidosPage({ params }: ReferidosPageProps) {
     .select("id, admin, producers_admin(producer_id)")
     .eq("id", userId)
     .single();
+=======
+
+  // Auth check using Better Auth
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session || session.user.id !== userId) {
+    redirect("/sign-in");
+  }
+
+  // Mock: Get user profile to verify admin/producer access
+  const profile = {
+    id: userId,
+    admin: true,
+    producers_admin: [
+      {
+        producer_id: "mock-producer-1",
+      },
+    ],
+  };
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const producersAdmin = Array.isArray(profile?.producers_admin)
     ? profile.producers_admin

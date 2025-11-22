@@ -1,6 +1,11 @@
 import { redirect, notFound } from "next/navigation";
+<<<<<<< HEAD
 import { createClient } from "@/lib/supabase/server";
 import { getAllUsers, getUsersWithPurchasesStats } from "@/lib/supabase/actions/profile";
+=======
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 import {
   Card,
   CardContent,
@@ -20,6 +25,7 @@ interface UsuariosPageProps {
 
 const UsuariosPage = async ({ params }: UsuariosPageProps) => {
   const { userId } = await params;
+<<<<<<< HEAD
   const supabase = await createClient();
 
   // Auth check
@@ -37,11 +43,28 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     .select("admin")
     .eq("id", user.id)
     .single();
+=======
+
+  // Auth check using Better Auth
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session || session.user.id !== userId) {
+    redirect("/sign-in");
+  }
+
+  // Mock: Check if user is admin
+  const profile = {
+    admin: true, // In production, fetch from database
+  };
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   if (!profile?.admin) {
     notFound();
   }
 
+<<<<<<< HEAD
   // Get all users and purchase stats
   const [usersResult, purchaseStats] = await Promise.all([
     getAllUsers(),
@@ -65,6 +88,52 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
       </div>
     );
   }
+=======
+  // Mock users data - In production, fetch from database
+  const users = [
+    {
+      id: "user-1",
+      name: "María García",
+      email: "maria@example.com",
+      phone: "+57 300 123 4567",
+      admin: false,
+      created_at: "2025-01-15T10:30:00Z",
+    },
+    {
+      id: "user-2",
+      name: "Carlos Rodríguez",
+      email: "carlos@example.com",
+      phone: "+57 301 234 5678",
+      admin: true,
+      created_at: "2025-01-10T08:20:00Z",
+    },
+    {
+      id: "user-3",
+      name: "Ana López",
+      email: "ana@example.com",
+      phone: null,
+      admin: false,
+      created_at: "2025-01-20T14:15:00Z",
+    },
+  ];
+
+  // Mock purchase stats - In production, fetch from database
+  const purchaseStats = {
+    ageGroups: [
+      { age_group: "18-24", count: 45 },
+      { age_group: "25-34", count: 78 },
+      { age_group: "35-44", count: 32 },
+      { age_group: "45+", count: 15 },
+    ],
+    genderGroups: [
+      { gender: "Masculino", count: 90 },
+      { gender: "Femenino", count: 70 },
+      { gender: "Otro", count: 10 },
+    ],
+    totalUsers: 170,
+    totalTicketsSold: 245,
+  };
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const adminCount = users?.filter(u => u.admin).length || 0;
   const totalUsers = users?.length || 0;
@@ -127,6 +196,7 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
           <p className="text-sm text-[#404040] mt-1">Estadísticas de usuarios que han comprado entradas</p>
         </div>
 
+<<<<<<< HEAD
         {purchaseStats.error ? (
           <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
             <CardContent className="py-12 text-center">
@@ -134,6 +204,9 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
             </CardContent>
           </Card>
         ) : !purchaseStats.ageGroups || purchaseStats.ageGroups.length === 0 ? (
+=======
+        {!purchaseStats.ageGroups || purchaseStats.ageGroups.length === 0 ? (
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
           <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
             <CardContent className="py-12 text-center">
               <p className="text-white/40">No hay usuarios con compras registradas aún</p>

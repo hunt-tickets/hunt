@@ -1,4 +1,5 @@
 import { redirect, notFound } from "next/navigation";
+<<<<<<< HEAD
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
@@ -9,6 +10,13 @@ import {
   getEventTickets,
   getTicketsSalesAnalytics,
 } from "@/lib/supabase/actions/tickets";
+=======
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { Card, CardContent } from "@/components/ui/card";
+import { BarChart3 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -21,6 +29,7 @@ interface EventPageProps {
 
 export default async function EventFinancialPage({ params }: EventPageProps) {
   const { userId, eventId } = await params;
+<<<<<<< HEAD
   const supabase = await createClient();
 
   // Auth check
@@ -34,6 +43,24 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
     .select("id, admin, producers_admin(producer_id)")
     .eq("id", userId)
     .single();
+=======
+
+  // Auth check using Better Auth
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session || session.user.id !== userId) {
+    redirect("/sign-in");
+  }
+
+  // Mock: Get user profile to verify admin/producer access
+  const profile = {
+    id: userId,
+    admin: true,
+    producers_admin: [{ producer_id: "mock-producer-1" }],
+  };
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const producersAdmin = Array.isArray(profile?.producers_admin)
     ? profile.producers_admin
@@ -46,6 +73,7 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
     notFound();
   }
 
+<<<<<<< HEAD
   // Fetch event details, financial report, transactions, tickets, and analytics
   const [eventData, financialReport, transactions, tickets, ticketsAnalytics] =
     await Promise.all([
@@ -79,6 +107,72 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
   const event = eventData.data;
 
   // Empty state
+=======
+  // Mock event data - In production, fetch from database
+  const event = {
+    id: eventId,
+    name: "Concierto de Rock",
+    status: true,
+    flyer: "/placeholder.svg",
+  };
+
+  // Mock financial report - In production, fetch from database
+  const financialReport = {
+    timestamp: new Date().toISOString(),
+    totalRevenue: 5000000,
+    totalTicketsSold: 100,
+    platformFee: 400000,
+    netRevenue: 4600000,
+    ticketBreakdown: [
+      { ticketName: "General", ticketsSold: 60, revenue: 3000000 },
+      { ticketName: "VIP", ticketsSold: 40, revenue: 2000000 },
+    ],
+  };
+
+  // Mock transactions - In production, fetch from database
+  const transactions = [
+    {
+      id: "trans-1",
+      created_at: new Date().toISOString(),
+      amount: 50000,
+      status: "completed",
+      user: { name: "María García", email: "maria@example.com" },
+      ticket: { name: "General" },
+    },
+  ];
+
+  // Mock tickets with analytics - In production, fetch from database
+  const ticketsWithAnalytics = [
+    {
+      id: "ticket-1",
+      name: "General",
+      price: 50000,
+      description: "Entrada general",
+      status: true,
+      analytics: {
+        total: { quantity: 60, total: 3000000 },
+        app: { quantity: 40, total: 2000000 },
+        web: { quantity: 20, total: 1000000 },
+        cash: { quantity: 0, total: 0 },
+      },
+    },
+    {
+      id: "ticket-2",
+      name: "VIP",
+      price: 100000,
+      description: "Entrada VIP",
+      status: true,
+      analytics: {
+        total: { quantity: 40, total: 4000000 },
+        app: { quantity: 25, total: 2500000 },
+        web: { quantity: 15, total: 1500000 },
+        cash: { quantity: 0, total: 0 },
+      },
+    },
+  ];
+
+  // Empty state check
+>>>>>>> a903bf6 (temp: admin config tabs implementation)
   if (!financialReport) {
     return (
       <div className="min-h-screen">
