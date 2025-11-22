@@ -7,11 +7,12 @@ import {
   phoneNumber,
   emailOTP,
   organization,
+  magicLink,
+  openAPI,
+  passkey,
 } from "better-auth/plugins";
 import bcrypt from "bcrypt";
 import { nextCookies } from "better-auth/next-js";
-import { magicLink, openAPI } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
 import { Resend } from "resend";
 import twilio from "twilio";
 import { sendMagicLinkEmail } from "./helpers/email";
