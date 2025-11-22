@@ -158,11 +158,12 @@ export const auth = betterAuth({
                   phoneNumber
                 );
               }
-              if (!phoneNumber && request.url) {
-                const url = new URL(request.url, "http://localhost:3000");
-                phoneNumber = url.searchParams.get("phoneNumber");
-                console.log("🔍 Debug - Phone from URL:", phoneNumber);
-              }
+              // FIXME: request.url is not available in GenericEndpointContext
+              // if (!phoneNumber && request.url) {
+              //   const url = new URL(request.url, "http://localhost:3000");
+              //   phoneNumber = url.searchParams.get("phoneNumber");
+              //   console.log("🔍 Debug - Phone from URL:", phoneNumber);
+              // }
             }
           } catch (e) {
             console.log("🔍 Debug - Error extracting phone:", e);
