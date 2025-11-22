@@ -15,7 +15,8 @@ import {
   Shield,
   Calendar,
   Key,
-  Fingerprint,
+  // FIXME: Fingerprint not needed while passkey is disabled
+  // Fingerprint,
   Link2,
 } from "lucide-react";
 import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
