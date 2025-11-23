@@ -1,11 +1,6 @@
 import { redirect, notFound } from "next/navigation";
-<<<<<<< HEAD
-import { createClient } from "@/lib/supabase/server";
-import { getAllProducers, getAllArtists, getAllVenues } from "@/lib/supabase/actions/tickets";
-=======
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 import { MarcasTabs } from "@/components/marcas-tabs";
 import { AdminHeader } from "@/components/admin-header";
 
@@ -17,21 +12,6 @@ interface MarcasPageProps {
 
 export default async function MarcasPage({ params }: MarcasPageProps) {
   const { userId } = await params;
-<<<<<<< HEAD
-  const supabase = await createClient();
-
-  // Auth check
-  if (!userId) {
-    redirect("/login");
-  }
-
-  // Get user profile to verify admin/producer access
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, admin, producers_admin(producer_id)")
-    .eq("id", userId)
-    .single();
-=======
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
@@ -52,7 +32,6 @@ export default async function MarcasPage({ params }: MarcasPageProps) {
       },
     ],
   };
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const producersAdmin = Array.isArray(profile?.producers_admin)
     ? profile.producers_admin
@@ -65,14 +44,6 @@ export default async function MarcasPage({ params }: MarcasPageProps) {
     notFound();
   }
 
-<<<<<<< HEAD
-  // Fetch all producers, artists, and venues
-  const [producers, artists, venues] = await Promise.all([
-    getAllProducers(),
-    getAllArtists(),
-    getAllVenues(),
-  ]);
-=======
   // Mock data - In production, fetch from database
   const producers = [
     {
@@ -106,7 +77,6 @@ export default async function MarcasPage({ params }: MarcasPageProps) {
       created_at: "2025-01-01T00:00:00Z",
     },
   ];
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">

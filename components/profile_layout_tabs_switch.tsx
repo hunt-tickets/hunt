@@ -1,13 +1,12 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { supabaseClient } from "@/lib/supabase/client";
-import { User, Ticket, HelpCircle, Settings } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { User, Ticket, HelpCircle, Settings, Building2 } from "lucide-react";
 
 const ProfileTabs = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const [userId, setUserId] = useState<string | null>(null);
+  const { data: session } = authClient.useSession();
 
   // Hide tabs if in administrador section
   const isAdministrador = pathname.includes("/administrador");
@@ -15,6 +14,7 @@ const ProfileTabs = () => {
   // Determine current tab from pathname
   const getCurrentTab = () => {
     if (pathname.includes("/tickets")) return "tickets";
+    if (pathname.includes("/organizaciones")) return "organizaciones";
     if (pathname.includes("/soporte")) return "soporte";
     if (pathname.includes("/ajustes")) return "ajustes";
 
@@ -23,37 +23,24 @@ const ProfileTabs = () => {
 
   const currentTab = getCurrentTab();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabaseClient.auth.getUser();
-
-      if (user) {
-        setUserId(user.id);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
   const handleTabChange = (value: string) => {
-    if (!userId) return;
+    if (!session?.user?.id) return;
 
     if (value === "general") {
       router.push("/profile");
     } else {
-      router.push(`/profile/${userId}/${value}`);
+      router.push(`/profile/${session.user.id}/${value}`);
     }
   };
 
-  if (!userId || isAdministrador) {
+  if (!session?.user || isAdministrador) {
     return null;
   }
 
   const tabs = [
     { value: "general", icon: User, label: "General" },
     { value: "tickets", icon: Ticket, label: "Entradas" },
+    { value: "organizaciones", icon: Building2, label: "Organizaciones" },
     { value: "soporte", icon: HelpCircle, label: "Soporte" },
     { value: "ajustes", icon: Settings, label: "Ajustes" },
   ];

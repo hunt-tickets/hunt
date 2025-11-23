@@ -1,15 +1,22 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { supabaseClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
-import { Ticket } from "@/lib/supabase/types";
+import { useState, useMemo } from "react";
+import { authClient } from "@/lib/auth-client";
+import { Ticket } from "@/lib/types";
 import { TicketQuantitySelector } from "./ticket-quantity-selector";
 import { BuyTicketsButton } from "./buy-tickets-button";
-import { AuthRequiredDialog } from "./auth-required-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import TicketSummaryDrawer from "./ticket-summary-drawer";
 import { Checkbox } from "./ui/checkbox";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface TicketsContainerProps {
   tickets: Ticket[];
@@ -26,32 +33,13 @@ export function TicketsContainer({
     Record<string, number>
   >({});
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showSummaryDrawer, setShowSummaryDrawer] = useState(false);
+  const router = useRouter();
 
-  // Subscribe to Auth
-  useEffect(() => {
-    // Get initial user
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabaseClient.auth.getUser();
-      setUser(user);
-    };
-
-    getUser();
-
-    // Listen for auth state changes (login/logout)
-    const {
-      data: { subscription },
-    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    // Cleanup subscription on unmount
-    return () => subscription.unsubscribe();
-  }, []);
+  // Get session from Better Auth
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const handleQuantityChange = (ticketId: string, quantity: number) => {
     setTicketSelections((prev) => ({
@@ -108,11 +96,11 @@ export function TicketsContainer({
         ? {
             id: user.id,
             email: user.email || "",
-            phone: user.user_metadata?.phone,
-            name: user.user_metadata?.name,
-            lastName: user.user_metadata?.lastName,
-            document_type_id: user.user_metadata?.document_type_id,
-            document_id: user.user_metadata?.document_id,
+            phone: user.phoneNumber || undefined,
+            name: user.name,
+            lastName: "", // Better Auth doesn't have lastName in base schema
+            document_type_id: "", // Not in Better Auth base schema
+            document_id: "", // Not in Better Auth base schema
           }
         : null,
     [user]
@@ -121,10 +109,28 @@ export function TicketsContainer({
   return (
     <>
       {/* Auth Required Dialog */}
-      <AuthRequiredDialog
-        open={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
-      />
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Inicia sesión para continuar</DialogTitle>
+            <DialogDescription>
+              Necesitas iniciar sesión para comprar tickets
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <Button onClick={() => router.push("/sign-in")} className="w-full">
+              Iniciar Sesión
+            </Button>
+            <Button
+              onClick={() => router.push("/sign-up")}
+              variant="outline"
+              className="w-full"
+            >
+              Crear Cuenta
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Ticket Summary Drawer */}
       {userData && (

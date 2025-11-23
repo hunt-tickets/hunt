@@ -1,14 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { createEventAdvance } from "@/lib/supabase/actions/advances";
+import { createEventAdvance } from "@/actions/advances";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
@@ -18,13 +29,17 @@ interface AddAdvanceDialogProps {
   onClose: () => void;
 }
 
-export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogProps) {
+export function AddAdvanceDialog({
+  eventId,
+  isOpen,
+  onClose,
+}: AddAdvanceDialogProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     amount: "",
     concept: "",
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
     payment_method: "transferencia",
     notes: "",
     file: "",
@@ -33,15 +48,15 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
 
   const formatNumberWithCommas = (value: string) => {
     // Remove all non-digits
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     // Format with thousands separator
-    return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Remove all non-digits
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     setFormData({ ...formData, amount: numbers });
   };
 
@@ -66,14 +81,14 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
         setFormData({
           amount: "",
           concept: "",
-          date: new Date().toISOString().split('T')[0],
+          date: new Date().toISOString().split("T")[0],
           payment_method: "transferencia",
           notes: "",
           file: "",
           debt: false,
         });
       } else {
-        alert(result.message);
+        alert(result);
       }
     } catch (error) {
       console.error("Error creating advance:", error);
@@ -93,7 +108,9 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
           <div className="space-y-2">
             <Label htmlFor="amount">Monto *</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                $
+              </span>
               <Input
                 id="amount"
                 type="text"
@@ -106,7 +123,11 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
             </div>
             {formData.amount && (
               <p className="text-xs text-white/40">
-                {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(parseInt(formData.amount) || 0)}
+                {new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                  minimumFractionDigits: 0,
+                }).format(parseInt(formData.amount) || 0)}
               </p>
             )}
           </div>
@@ -117,7 +138,9 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
               id="concept"
               placeholder="Ej: Anticipo 1 - Gastos de producción"
               value={formData.concept}
-              onChange={(e) => setFormData({ ...formData, concept: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, concept: e.target.value })
+              }
               required
               className="bg-white/5 border-white/10"
             />
@@ -130,7 +153,9 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
                 id="date"
                 type="date"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 required
                 className="bg-white/5 border-white/10"
               />
@@ -140,7 +165,9 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
               <Label htmlFor="payment_method">Método de Pago *</Label>
               <Select
                 value={formData.payment_method}
-                onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, payment_method: value })
+                }
               >
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
@@ -168,7 +195,9 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
             <Switch
               id="debt"
               checked={formData.debt}
-              onCheckedChange={(checked) => setFormData({ ...formData, debt: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, debt: checked })
+              }
             />
           </div>
 
@@ -178,7 +207,9 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
               id="notes"
               placeholder="Información adicional sobre este avance..."
               value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, notes: e.target.value })
+              }
               rows={3}
               className="bg-white/5 border-white/10"
             />
@@ -190,7 +221,9 @@ export function AddAdvanceDialog({ eventId, isOpen, onClose }: AddAdvanceDialogP
               id="file"
               placeholder="URL del archivo o comprobante"
               value={formData.file}
-              onChange={(e) => setFormData({ ...formData, file: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, file: e.target.value })
+              }
               className="bg-white/5 border-white/10"
             />
           </div>

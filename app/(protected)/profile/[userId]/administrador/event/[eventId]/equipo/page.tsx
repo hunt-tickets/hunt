@@ -1,11 +1,6 @@
 import { redirect, notFound } from "next/navigation";
-<<<<<<< HEAD
-import { createClient } from "@/lib/supabase/server";
-import { getEventProducers, getEventArtists, getAllProducers, getAllArtists } from "@/lib/supabase/actions/tickets";
-=======
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 import { EventTeamContent } from "@/components/event-team-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -18,21 +13,6 @@ interface EquipoPageProps {
 
 export default async function EquipoPage({ params }: EquipoPageProps) {
   const { userId, eventId } = await params;
-<<<<<<< HEAD
-  const supabase = await createClient();
-
-  // Auth check
-  if (!userId) {
-    redirect("/login");
-  }
-
-  // Get user profile to verify admin/producer access
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, admin, producers_admin(producer_id)")
-    .eq("id", userId)
-    .single();
-=======
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
@@ -49,7 +29,6 @@ export default async function EquipoPage({ params }: EquipoPageProps) {
     admin: true,
     producers_admin: [{ producer_id: "mock-producer-1" }],
   };
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const producersAdmin = Array.isArray(profile?.producers_admin)
     ? profile.producers_admin
@@ -62,26 +41,6 @@ export default async function EquipoPage({ params }: EquipoPageProps) {
     notFound();
   }
 
-<<<<<<< HEAD
-  // Fetch event details, producers, and artists
-  const [eventData, producers, artists, allProducers, allArtists] = await Promise.all([
-    supabase
-      .from("events")
-      .select("id, name, status, date, end_date")
-      .eq("id", eventId)
-      .single(),
-    getEventProducers(eventId),
-    getEventArtists(eventId),
-    getAllProducers(),
-    getAllArtists(),
-  ]);
-
-  if (eventData.error || !eventData.data) {
-    notFound();
-  }
-
-  const event = eventData.data;
-=======
   // Mock event data - In production, fetch from database
   const event = {
     id: eventId,
@@ -133,7 +92,6 @@ export default async function EquipoPage({ params }: EquipoPageProps) {
       logo: null,
     },
   ];
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   return (
     <>

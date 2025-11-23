@@ -1,11 +1,6 @@
 import { redirect, notFound } from "next/navigation";
-<<<<<<< HEAD
-import { createClient } from "@/lib/supabase/server";
-import { getAllUsers, getUsersWithPurchasesStats } from "@/lib/supabase/actions/profile";
-=======
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 import {
   Card,
   CardContent,
@@ -25,25 +20,6 @@ interface UsuariosPageProps {
 
 const UsuariosPage = async ({ params }: UsuariosPageProps) => {
   const { userId } = await params;
-<<<<<<< HEAD
-  const supabase = await createClient();
-
-  // Auth check
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user || user.id !== userId) {
-    redirect("/login");
-  }
-
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("admin")
-    .eq("id", user.id)
-    .single();
-=======
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
@@ -58,37 +34,11 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
   const profile = {
     admin: true, // In production, fetch from database
   };
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   if (!profile?.admin) {
     notFound();
   }
 
-<<<<<<< HEAD
-  // Get all users and purchase stats
-  const [usersResult, purchaseStats] = await Promise.all([
-    getAllUsers(),
-    getUsersWithPurchasesStats(),
-  ]);
-
-  const { users, error } = usersResult;
-
-  if (error) {
-    return (
-      <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
-        <AdminHeader
-          title="USUARIOS"
-          subtitle="Listado completo de usuarios del sistema"
-        />
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardContent className="py-12 text-center">
-            <p className="text-red-500">{error}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-=======
   // Mock users data - In production, fetch from database
   const users = [
     {
@@ -133,7 +83,6 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     totalUsers: 170,
     totalTicketsSold: 245,
   };
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const adminCount = users?.filter(u => u.admin).length || 0;
   const totalUsers = users?.length || 0;
@@ -196,17 +145,7 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
           <p className="text-sm text-[#404040] mt-1">Estadísticas de usuarios que han comprado entradas</p>
         </div>
 
-<<<<<<< HEAD
-        {purchaseStats.error ? (
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardContent className="py-12 text-center">
-              <p className="text-red-500">Error al cargar estadísticas: {purchaseStats.error}</p>
-            </CardContent>
-          </Card>
-        ) : !purchaseStats.ageGroups || purchaseStats.ageGroups.length === 0 ? (
-=======
         {!purchaseStats.ageGroups || purchaseStats.ageGroups.length === 0 ? (
->>>>>>> a903bf6 (temp: admin config tabs implementation)
           <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
             <CardContent className="py-12 text-center">
               <p className="text-white/40">No hay usuarios con compras registradas aún</p>

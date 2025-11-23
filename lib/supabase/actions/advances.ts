@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-/**
- * Mock Server Actions for Advances
- * These are stub functions to prevent import errors
- */
-
-"use server";
-
-export async function getEventAdvances(eventId: string) {
-  return [];
-=======
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
@@ -145,5 +134,4 @@ export async function deleteEventAdvance(advanceId: string) {
   revalidatePath(`/profile/[userId]/administrador/event`);
 
   return { success: true, message: "Avance eliminado exitosamente" };
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 }

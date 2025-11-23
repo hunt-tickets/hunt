@@ -1,22 +1,9 @@
 import { redirect, notFound } from "next/navigation";
-<<<<<<< HEAD
-import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent } from "@/components/ui/card";
-import { BarChart3 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { getEventFinancialReport } from "@/lib/supabase/actions/events";
-import {
-  getCompleteEventTransactions,
-  getEventTickets,
-  getTicketsSalesAnalytics,
-} from "@/lib/supabase/actions/tickets";
-=======
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 
@@ -29,21 +16,6 @@ interface EventPageProps {
 
 export default async function EventFinancialPage({ params }: EventPageProps) {
   const { userId, eventId } = await params;
-<<<<<<< HEAD
-  const supabase = await createClient();
-
-  // Auth check
-  if (!userId) {
-    redirect("/login");
-  }
-
-  // Get user profile to verify admin/producer access
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, admin, producers_admin(producer_id)")
-    .eq("id", userId)
-    .single();
-=======
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
@@ -60,7 +32,6 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
     admin: true,
     producers_admin: [{ producer_id: "mock-producer-1" }],
   };
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
   const producersAdmin = Array.isArray(profile?.producers_admin)
     ? profile.producers_admin
@@ -73,41 +44,6 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
     notFound();
   }
 
-<<<<<<< HEAD
-  // Fetch event details, financial report, transactions, tickets, and analytics
-  const [eventData, financialReport, transactions, tickets, ticketsAnalytics] =
-    await Promise.all([
-      supabase
-        .from("events")
-        .select("id, name, status, flyer")
-        .eq("id", eventId)
-        .single(),
-      getEventFinancialReport(eventId),
-      getCompleteEventTransactions(eventId),
-      getEventTickets(eventId),
-      getTicketsSalesAnalytics(eventId),
-    ]);
-
-  // Combine tickets with their analytics
-  const ticketsWithAnalytics =
-    tickets?.map((ticket) => ({
-      ...ticket,
-      analytics: ticketsAnalytics?.[ticket.id] || {
-        total: { quantity: 0, total: 0 },
-        app: { quantity: 0, total: 0 },
-        web: { quantity: 0, total: 0 },
-        cash: { quantity: 0, total: 0 },
-      },
-    })) || [];
-
-  if (eventData.error || !eventData.data) {
-    notFound();
-  }
-
-  const event = eventData.data;
-
-  // Empty state
-=======
   // Mock event data - In production, fetch from database
   const event = {
     id: eventId,
@@ -172,7 +108,6 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
   ];
 
   // Empty state check
->>>>>>> a903bf6 (temp: admin config tabs implementation)
   if (!financialReport) {
     return (
       <div className="min-h-screen">

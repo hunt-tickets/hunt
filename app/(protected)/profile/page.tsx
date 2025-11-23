@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import {
   Card,
   CardContent,
@@ -11,452 +12,448 @@ import { Badge } from "@/components/ui/badge";
 import {
   User,
   Mail,
-  Phone,
   Shield,
-  Clock,
   Calendar,
   Key,
-  UserCircle,
   Fingerprint,
+  Link2,
 } from "lucide-react";
+import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
-import Image from "next/image";
+import { UnlinkAccountButton } from "@/components/unlink-account-button";
+import { LinkAccountButton } from "@/components/link-account-button";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { ActiveSessionsCard } from "@/components/active-sessions-card";
+import { PhoneVerificationManager } from "@/components/phone-verification-manager";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
-
   // Secure authentication - validates with server
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (error || !user) {
-    redirect("/login");
+  if (!session?.user) {
+    redirect("/sign-in");
   }
 
-  // Get session only for display purposes
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const user = session.user;
 
-  // Single database query - gets profile + producer access
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(
-      `
-      *,
-      producers_admin (
-        producer_id,
-        producers (
-          id,
-          name,
-          logo
-        )
-      )
-    `
-    )
-    .eq("id", user.id)
-    .single();
+  // Fetch user's connected accounts using Better Auth API
+  const oauthAccounts = await auth.api.listUserAccounts({
+    headers: await headers(),
+  });
 
-  const isProducer = (profile?.producers_admin?.length ?? 0) > 0;
-  const producerData = profile?.producers_admin?.[0]?.producers;
+  // Helper to decode JWT and extract user info
+  const decodeIdToken = (idToken: string | null) => {
+    if (!idToken) return null;
+    try {
+      // JWT has 3 parts separated by dots: header.payload.signature
+      const payload = idToken.split(".")[1];
+      if (!payload) return null;
 
-  // Format dates
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "No disponible";
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+      // Decode base64url
+      const decoded = Buffer.from(payload, "base64").toString("utf-8");
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
   };
 
+  // Format dates
+  // const formatDate = (dateString: string | undefined) => {
+  //   if (!dateString) return "No disponible";
+  //   return new Date(dateString).toLocaleDateString("es-ES", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //   });
+  // };
+
+  // Get provider icon component
+  const getProviderIcon = (providerId: string) => {
+    const iconMap: { [key: string]: React.ReactNode } = {
+      google: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            fill="#4285F4"
+          />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853"
+          />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            fill="#FBBC05"
+          />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335"
+          />
+        </svg>
+      ),
+      github: <SiGithub className="h-5 w-5" />,
+      facebook: <SiFacebook className="h-5 w-5" />,
+      apple: <SiApple className="h-5 w-5" />,
+    };
+    return iconMap[providerId] || <Link2 className="h-5 w-5" />;
+  };
+
+  // Format provider name for display
+  const formatProviderName = (providerId: string) => {
+    const providerNames: { [key: string]: string } = {
+      google: "Google",
+      facebook: "Facebook",
+      github: "GitHub",
+      twitter: "Twitter",
+      apple: "Apple",
+    };
+    return (
+      providerNames[providerId] ||
+      providerId.charAt(0).toUpperCase() + providerId.slice(1)
+    );
+  };
+
+  // Define available social providers
+  const availableProviders = [
+    { id: "google", name: "Google" },
+    { id: "apple", name: "Apple" },
+    // Add more providers here as needed
+  ];
+
+  // Find providers that are not yet connected
+  const connectedProviderIds = oauthAccounts.map((acc) => acc.providerId);
+  const availableToLink = availableProviders.filter(
+    (provider) => !connectedProviderIds.includes(provider.id)
+  );
+
   return (
-    <div className="space-y-6 overflow-x-hidden">
-      {/* Page Header */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ fontFamily: 'LOT, sans-serif' }}>
-              MI PERFIL
-            </h1>
-            <p className="text-[#404040] mt-1 text-sm sm:text-base">
-              Información de tu cuenta y sesiones activas
-            </p>
+    <div className="max-w-5xl mx-auto space-y-10 overflow-x-hidden py-8">
+      {/* Profile Header */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-6">
+          {/* Avatar */}
+          <div className="relative">
+            {user.image ? (
+              <img
+                src={user.image}
+                alt={user.name || "Usuario"}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-primary/20"
+              />
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/20 flex items-center justify-center">
+                <User className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+              </div>
+            )}
           </div>
-          <div className="hidden sm:flex gap-2">
-            <EditProfileDialog profile={profile} />
+
+          {/* Name and Email */}
+          <div>
+            <h1 className="text-3xl font-bold leading-tight">
+              {user.name || "Usuario sin nombre"}
+            </h1>
+            {user.role === "admin" && (
+              <Badge
+                variant="default"
+                className="mt-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 border-purple-500/20"
+              >
+                <Shield className="h-3 w-3 mr-1" />
+                Administrador
+              </Badge>
+            )}
           </div>
         </div>
-        {/* Mobile buttons */}
-        <div className="flex sm:hidden flex-col gap-2">
-          <EditProfileDialog profile={profile} />
+
+        {/* Update Profile Button */}
+        <div className="hidden sm:block">
+          <EditProfileDialog user={user} />
         </div>
       </div>
 
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-        {/* Profile Header Card */}
-        <Card className="lg:col-span-3 bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-6">
-              <div className="flex-1 space-y-4">
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h2 className="text-xl sm:text-2xl font-bold break-words">
-                        {profile?.name && profile?.lastName
-                          ? `${profile.name} ${profile.lastName}`
-                          : "Usuario sin nombre"}
-                      </h2>
-                      <p className="text-muted-foreground text-sm sm:text-base break-all">
-                        {profile?.email || user.email || "Sin correo"}
-                      </p>
+      {/* Mobile Update Profile Button */}
+      <div className="sm:hidden">
+        <EditProfileDialog user={user} />
+      </div>
+
+      {/* User Data Section */}
+      <div className="space-y-5">
+        <h2 className="text-xl font-semibold leading-tight">
+          Datos de usuario
+        </h2>
+        <div className="space-y-3">
+          {/* Name and Last Name - Two columns */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* First Name */}
+            <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+              <div className="flex items-center gap-3 flex-1">
+                <User className="h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  defaultValue={user.name?.split(" ")[0] || ""}
+                  placeholder="Nombre"
+                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
+                />
+              </div>
+            </div>
+
+            {/* Last Name */}
+            <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+              <div className="flex items-center gap-3 flex-1">
+                <User className="h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  defaultValue={user.name?.split(" ").slice(1).join(" ") || ""}
+                  placeholder="Apellido"
+                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
+                />
+              </div>
+            </div>
+          </div>
+          {/* Email */}
+          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <Mail className="h-5 w-5 text-gray-400" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">{user.email}</span>
+                  <Badge
+                    variant="secondary"
+                    className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
+                  >
+                    Principal
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
+              <span className="text-xl">⋯</span>
+            </button>
+          </div>
+
+          {/* Phone Number */}
+          <PhoneVerificationManager
+            phoneNumber={user.phoneNumber}
+            phoneNumberVerified={user.phoneNumberVerified ?? false}
+          />
+
+          {/* Birth Date */}
+          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-gray-400" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-500">
+                    Agregar fecha de nacimiento
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
+              <span className="text-xl">⋯</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Connected Accounts Section */}
+      <div className="space-y-5">
+        <h2 className="text-xl font-semibold leading-tight">
+          Cuentas conectadas
+        </h2>
+        <div className="space-y-3">
+          {oauthAccounts.map(
+            (account: {
+              id: string;
+              providerId: string;
+              accountId: string;
+              createdAt: Date;
+              idToken?: string | null;
+            }) => {
+              const tokenData = decodeIdToken(account.idToken || null);
+              const accountEmail = tokenData?.email;
+
+              return (
+                <div
+                  key={account.id}
+                  className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      {getProviderIcon(account.providerId)}
                     </div>
-                    {profile?.admin && (
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                        <Badge variant="default" className="text-xs sm:text-sm">
-                          Administrador
-                        </Badge>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium">
+                          {formatProviderName(account.providerId)}
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                          </span>
+                          {accountEmail && (
+                            <span className="text-sm text-gray-500">
+                              {accountEmail}
+                            </span>
+                          )}
+                        </span>
                       </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {account.providerId !== "credential" && (
+                      <UnlinkAccountButton
+                        accountId={account.id}
+                        providerName={formatProviderName(account.providerId)}
+                      />
                     )}
                   </div>
-                  {profile?.admin && (
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-                      Tienes permisos completos de administrador del sistema
-                    </p>
+                </div>
+              );
+            }
+          )}
+
+          {/* Available Providers to Link */}
+          {availableToLink.map((provider) => (
+            <div
+              key={provider.id}
+              className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  {getProviderIcon(provider.id)}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">{provider.name}</span>
+                  {provider.id === "apple" && (
+                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-orange-500"></span>
                   )}
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  {profile?.scanner && (
-                    <Badge variant="secondary">Escáner</Badge>
-                  )}
-                  {isProducer && <Badge variant="outline">Productor</Badge>}
-                  {profile?.new && (
-                    <Badge variant="outline">Cuenta Nueva</Badge>
-                  )}
-                </div>
+              </div>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <LinkAccountButton
+                  providerId={provider.id}
+                  providerName={provider.name}
+                />
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Personal Information Card */}
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Información Personal
-            </CardTitle>
-            <CardDescription>Datos personales del perfil</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Mail className="h-4 w-4 mt-1 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Correo electrónico</p>
-                <p className="text-sm text-muted-foreground">
-                  {profile?.email || user.email || "No disponible"}
-                </p>
-                {user.email_confirmed_at && (
-                  <Badge variant="outline" className="mt-1">
-                    Verificado
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Phone className="h-4 w-4 mt-1 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Teléfono</p>
-                <p className="text-sm text-muted-foreground">
-                  {profile?.phone || user.phone || "No disponible"}
-                </p>
-                {user.phone_confirmed_at && (
-                  <Badge variant="outline" className="mt-1">
-                    Verificado
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {profile?.birthdate && (
-              <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Fecha de Nacimiento</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(profile.birthdate)}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {profile?.gender && (
-              <div className="flex items-start gap-3">
-                <User className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Género</p>
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {profile.gender}
-                  </p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Document Information Card */}
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Fingerprint className="h-5 w-5" />
-              Identificación
-            </CardTitle>
-            <CardDescription>Documentos y verificación</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {profile?.document_id && (
-              <div className="flex items-start gap-3">
-                <Fingerprint className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Documento</p>
-                  <p className="text-sm text-muted-foreground">
-                    {profile.document_id}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-start gap-3">
-              <Key className="h-4 w-4 mt-1 text-muted-foreground" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">ID de Usuario</p>
-                <p className="text-xs text-muted-foreground font-mono break-all">
-                  {user.id}
-                </p>
-              </div>
-            </div>
-
-            {profile?.alegra_id && (
-              <div className="flex items-start gap-3">
-                <Key className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">ID Alegra</p>
-                  <p className="text-sm text-muted-foreground">
-                    {profile.alegra_id}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {profile?.tyc !== undefined && (
-              <div className="flex items-start gap-3">
-                <Shield className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Términos y Condiciones</p>
-                  <Badge variant={profile.tyc ? "default" : "secondary"}>
-                    {profile.tyc ? "Aceptado" : "No aceptado"}
-                  </Badge>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Account Activity Card */}
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Actividad de la Cuenta
-            </CardTitle>
-            <CardDescription>
-              Historial de acceso y actualizaciones
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Calendar className="h-4 w-4 mt-1 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Cuenta creada</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatDate(profile?.created_at || user.created_at)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Clock className="h-4 w-4 mt-1 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Último acceso</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatDate(user.last_sign_in_at)}
-                </p>
-              </div>
-            </div>
-
-            {profile?.updated_at && (
-              <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Perfil actualizado</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(profile.updated_at)}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {user.confirmed_at && (
-              <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Cuenta confirmada</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(user.confirmed_at)}
-                  </p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          ))}
+        </div>
       </div>
 
-      {/* Secondary Information Grid */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-        {/* Identities Card */}
-        {user.identities && user.identities.length > 0 && (
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                Métodos de Acceso
-              </CardTitle>
-              <CardDescription>
-                Formas en las que puedes iniciar sesión
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {user.identities.map((identity) => (
-                  <div key={identity.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium capitalize">
-                          {identity.provider}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {identity.identity_data?.email ||
-                            identity.identity_data?.phone ||
-                            "Sin información"}
-                        </p>
-                      </div>
-                      <Badge variant="outline">
-                        {formatDate(identity.created_at)}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+      {/* Security Section */}
+      <div className="space-y-5">
+        <h2 className="text-xl font-semibold leading-tight">Seguridad</h2>
+
+        <div className="space-y-3">
+          {/* Password */}
+          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <Key className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium">Contraseña</p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  ••••••••••
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <ChangePasswordDialog />
+            </div>
+          </div>
 
-        {/* Producer Information Card */}
-        {isProducer && producerData && (
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCircle className="h-5 w-5" />
-                Información del Productor
-              </CardTitle>
-              <CardDescription>Productor asociado a tu cuenta</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                {producerData.logo && (
-                  <Image
-                    src={producerData.logo}
-                    alt={producerData.name}
-                    width={64}
-                    height={64}
-                    className="h-16 w-16 rounded-lg object-cover"
-                  />
-                )}
-                <div>
-                  <p className="font-semibold text-lg">{producerData.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    ID: {producerData.id}
-                  </p>
-                </div>
+          {/* Two-step verification */}
+          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium">Verificación en dos pasos</p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Google Authenticator, Outlook, etc.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
+              <span className="text-xl">⋯</span>
+            </button>
+          </div>
 
-        {/* Session Information Card */}
-        {session && (
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Sesión Actual
-              </CardTitle>
-              <CardDescription>Información de tu sesión activa</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <Key className="h-4 w-4 mt-1 text-muted-foreground" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Token de acceso</p>
-                    <p className="text-xs text-muted-foreground font-mono break-all overflow-wrap-anywhere">
-                      {session.access_token.substring(0, 40)}...
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Clock className="h-4 w-4 mt-1 text-muted-foreground" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Expira en</p>
-                    <p className="text-sm text-muted-foreground">
-                      {session.expires_in
-                        ? `${Math.floor(session.expires_in / 60)} minutos`
-                        : "No disponible"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 mt-1 text-muted-foreground" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Expira el</p>
-                    <p className="text-sm text-muted-foreground">
-                      {session.expires_at
-                        ? formatDate(
-                            new Date(session.expires_at * 1000).toISOString()
-                          )
-                        : "No disponible"}
-                    </p>
-                  </div>
-                </div>
+          {/* Passkey */}
+          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <Fingerprint className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium">Passkey</p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Inicio de sesión sin contraseña
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
+              <span className="text-xl">⋯</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Active Devices */}
+      <div className="space-y-5">
+        <h2 className="text-xl font-semibold leading-tight">
+          Dispositivos activos
+        </h2>
+        <ActiveSessionsCard />
+      </div>
+
+      {/* Danger Zone */}
+      <div className="space-y-5">
+        <h2 className="text-xl font-semibold leading-tight text-red-500">
+          Danger Zone
+        </h2>
+
+        <div className="space-y-3">
+          {/* Logout all sessions */}
+          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <div>
+                <p className="text-sm font-medium">
+                  Cerrar sesión en todos los dispositivos
+                </p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Cierra tu sesión en todos los dispositivos excepto este
+                </p>
+              </div>
+            </div>
+            <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors">
+              Cerrar sesiones
+            </button>
+          </div>
+
+          {/* Delete Account */}
+          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <div>
+                <p className="text-sm font-medium">
+                  Eliminar cuenta permanentemente
+                </p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Una vez eliminada, no podrás recuperar tu cuenta
+                </p>
+              </div>
+            </div>
+            <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors">
+              Eliminar cuenta
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Metadata Cards - Admin Only */}
-      {profile?.admin && (
+      {user.role === "admin" && (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {/* App Metadata */}
-          {user.app_metadata && Object.keys(user.app_metadata).length > 0 && (
+          {user.appMetadata && Object.keys(user.appMetadata).length > 0 && (
             <Card className="overflow-hidden bg-background/50 backdrop-blur-sm border-[#303030]">
               <CardHeader>
                 <CardTitle>Metadata de la Aplicación</CardTitle>
@@ -466,14 +463,14 @@ export default async function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <pre className="text-xs font-mono p-3 rounded-md bg-muted overflow-x-auto max-h-64">
-                  {JSON.stringify(user.app_metadata, null, 2)}
+                  {JSON.stringify(user.appMetadata, null, 2)}
                 </pre>
               </CardContent>
             </Card>
           )}
 
           {/* User Metadata */}
-          {user.user_metadata && Object.keys(user.user_metadata).length > 0 && (
+          {user.userMetadata && Object.keys(user.userMetadata).length > 0 && (
             <Card className="overflow-hidden bg-background/50 backdrop-blur-sm border-[#303030]">
               <CardHeader>
                 <CardTitle>Metadata del Usuario</CardTitle>
@@ -483,7 +480,7 @@ export default async function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <pre className="text-xs font-mono p-3 rounded-md bg-muted overflow-x-auto max-h-64">
-                  {JSON.stringify(user.user_metadata, null, 2)}
+                  {JSON.stringify(user.userMetadata, null, 2)}
                 </pre>
               </CardContent>
             </Card>

@@ -1,16 +1,10 @@
 import { redirect, notFound } from "next/navigation";
-<<<<<<< HEAD
-import { createClient } from "@/lib/supabase/server";
-import { ConfiguracionTabs } from "@/components/configuracion-tabs";
-import { AdminHeader } from "@/components/admin-header";
-=======
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { AdminConfigTabs } from "@/components/admin-config-tabs";
 import { db } from "@/lib/drizzle";
 import { paymentProcessorAccount } from "@/lib/schema";
 import { eq } from "drizzle-orm";
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 
 interface ConfiguracionPageProps {
   params: Promise<{
@@ -20,40 +14,6 @@ interface ConfiguracionPageProps {
 
 const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   const { userId } = await params;
-<<<<<<< HEAD
-  const supabase = await createClient();
-
-  // Auth check
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user || user.id !== userId) {
-    redirect("/login");
-  }
-
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.admin) {
-    notFound();
-  }
-
-  return (
-    <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-4">
-      {/* Page Header */}
-      <AdminHeader
-        title="CONFIGURACIÓN"
-        subtitle="Administra la configuración del sistema"
-      />
-
-      {/* Configuration Tabs */}
-      <ConfiguracionTabs />
-=======
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
@@ -130,13 +90,8 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
         invitations={invitations}
         currentUserRole={currentUserRole}
       />
->>>>>>> a903bf6 (temp: admin config tabs implementation)
     </div>
   );
 };
 
-<<<<<<< HEAD
 export default ConfiguracionPage;
-=======
-export default ConfiguracionPage;
->>>>>>> a903bf6 (temp: admin config tabs implementation)

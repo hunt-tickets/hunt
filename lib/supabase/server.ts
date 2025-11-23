@@ -1,24 +1,3 @@
-<<<<<<< HEAD
-/**
- * Mock Supabase Server Client
- * This file provides a mock implementation to prevent import errors
- * All functions return empty data or mock responses
- */
-
-import { createMockQueryBuilder } from "@/lib/db/mock-db";
-import { getUser } from "@/lib/auth/mock-auth";
-
-export async function createClient() {
-  return {
-    auth: {
-      getUser,
-      signOut: async () => ({ error: null }),
-    },
-    from: createMockQueryBuilder().from,
-    rpc: createMockQueryBuilder().rpc,
-  };
-}
-=======
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { cache } from "react";
@@ -60,4 +39,3 @@ export const createClient = cache(async () => {
     }
   );
 });
->>>>>>> a903bf6 (temp: admin config tabs implementation)

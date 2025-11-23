@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-/**
- * Mock Server Actions for Events
- * These are stub functions to prevent import errors
- */
-
-"use server";
-
-export async function getEventFinancialReport(eventId: string) {
-  return {
-    totalSales: 0,
-    totalTickets: 0,
-    revenue: 0,
-  };
-=======
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -640,5 +625,4 @@ export async function updateEventConfiguration(eventId: string, formData: {
   revalidatePath(`/profile/[userId]/administrador/event/${eventId}/configuracion`);
 
   return { success: true, message: "Configuración actualizada exitosamente" };
->>>>>>> a903bf6 (temp: admin config tabs implementation)
 }
