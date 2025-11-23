@@ -1,10 +1,12 @@
+-- Run this entire file as a transaction (all-or-nothing)
+BEGIN;
+
 -- Create gender enum type (only if it doesn't exist)
 DO $$ BEGIN
     CREATE TYPE "public"."gender_type" AS ENUM('masculino', 'femenino', 'otro', 'prefiero_no_decir');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
---> statement-breakpoint
 
 -- Create countries table (only if it doesn't exist)
 CREATE TABLE IF NOT EXISTS "countries" (
@@ -14,7 +16,6 @@ CREATE TABLE IF NOT EXISTS "countries" (
 	"currency" text NOT NULL,
 	CONSTRAINT "countries_country_name_key" UNIQUE("country_name")
 );
---> statement-breakpoint
 
 -- Create document_type table (only if it doesn't exist)
 CREATE TABLE IF NOT EXISTS "document_type" (
@@ -22,7 +23,6 @@ CREATE TABLE IF NOT EXISTS "document_type" (
 	"country_id" uuid NOT NULL,
 	"name" text NOT NULL
 );
---> statement-breakpoint
 
 -- Add new user profile fields (only if they don't exist)
 DO $$ BEGIN
@@ -30,28 +30,24 @@ DO $$ BEGIN
 EXCEPTION
     WHEN duplicate_column THEN null;
 END $$;
---> statement-breakpoint
 
 DO $$ BEGIN
     ALTER TABLE "user" ADD COLUMN "document_type_id" uuid;
 EXCEPTION
     WHEN duplicate_column THEN null;
 END $$;
---> statement-breakpoint
 
 DO $$ BEGIN
     ALTER TABLE "user" ADD COLUMN "gender" "gender_type";
 EXCEPTION
     WHEN duplicate_column THEN null;
 END $$;
---> statement-breakpoint
 
 DO $$ BEGIN
     ALTER TABLE "user" ADD COLUMN "birthdate" timestamp with time zone;
 EXCEPTION
     WHEN duplicate_column THEN null;
 END $$;
---> statement-breakpoint
 
 -- Add foreign key constraints (only if they don't exist)
 DO $$ BEGIN
@@ -60,7 +56,6 @@ DO $$ BEGIN
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
---> statement-breakpoint
 
 DO $$ BEGIN
     ALTER TABLE "user" ADD CONSTRAINT "user_document_type_id_document_type_id_fk"
@@ -68,3 +63,8 @@ DO $$ BEGIN
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
+
+-- If you got here without errors, commit all changes
+COMMIT;
+
+-- If there was any error above, you can run: ROLLBACK;
