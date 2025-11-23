@@ -8,7 +8,8 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // Hide header and footer for auth routes
-  const isAuthRoute = pathname?.startsWith("/login") ||
+  const isAuthRoute = pathname?.startsWith("/sign-in") ||
+                      pathname?.startsWith("/login") ||
                       pathname?.startsWith("/sign-up") ||
                       pathname?.startsWith("/forgot-password") ||
                       pathname?.startsWith("/update-password") ||
