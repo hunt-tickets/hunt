@@ -69,7 +69,7 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
 
   // Get current user's role in the organization
   const currentUserMember = fullOrganization.members?.find(
-    (m) => m.userId === userId
+    (m: { userId: string }) => m.userId === userId
   );
   const currentUserRole = currentUserMember?.role || "member";
 
