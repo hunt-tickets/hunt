@@ -54,9 +54,14 @@ export default async function AvancesPage({ params }: AvancesPageProps) {
     {
       id: "advance-1",
       amount: 2000000,
-      status: "completed",
+      concept: "Anticipo inicial",
+      payment_date: new Date().toISOString(),
+      payment_method: "Transferencia bancaria",
+      notes: null,
       created_at: new Date().toISOString(),
-      description: "Anticipo inicial",
+      file: null,
+      event_id: eventId,
+      debt: false,
     },
   ];
 

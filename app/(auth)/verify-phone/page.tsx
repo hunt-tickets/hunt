@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { sanitizePhoneNumber, sanitizeOTP, sanitizeEmail } from "@/lib/utils/sanitize";
+import { sanitizePhoneNumber, sanitizeOTP } from "@/lib/utils/sanitize";
 
 function VerifyPhoneForm() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -45,7 +45,10 @@ function VerifyPhoneForm() {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -68,44 +71,36 @@ function VerifyPhoneForm() {
 
     try {
       // Verify phone OTP and sign in/up
-      await authClient.signIn.phoneNumber(
-        {
-          phoneNumber,
-          otp: sanitizedOtp,
-        },
-        {
-          onSuccess: async () => {
-            // Get the pending sign-up data
-            const pendingDataStr = sessionStorage.getItem('pendingSignUpData');
-            if (pendingDataStr) {
-              const pendingData = JSON.parse(pendingDataStr);
+      await authClient.phoneNumber.verify({
+        phoneNumber,
+        code: sanitizedOtp,
+        disableSession: false,
+        updatePhoneNumber: false,
+      });
 
-              // Update user with additional info
-              try {
-                await authClient.updateUser({
-                  name: pendingData.name,
-                  email: pendingData.email,
-                  phoneNumber: pendingData.phoneNumber,
-                  // Note: Better Auth doesn't support custom fields by default
-                  // You may need to store birthday, documentType, documentNumber separately
-                  // or extend the user schema
-                });
+      // Get the pending sign-up data
+      const pendingDataStr = sessionStorage.getItem("pendingSignUpData");
+      if (pendingDataStr) {
+        const pendingData = JSON.parse(pendingDataStr);
 
-                // Clear the pending data
-                sessionStorage.removeItem('pendingSignUpData');
-              } catch (updateError) {
-                console.error("Failed to update user profile:", updateError);
-              }
-            }
+        // Update user with additional info
+        try {
+          await authClient.updateUser({
+            name: pendingData.name,
+            phoneNumber: pendingData.phoneNumber,
+            // Note: Better Auth doesn't support custom fields by default
+            // You may need to store birthday, documentType, documentNumber separately
+            // or extend the user schema
+          });
 
-            router.push("/profile");
-          },
-          onError: (ctx) => {
-            console.error("Phone verification failed:", ctx.error);
-            setError("Código inválido. Por favor verifica e intenta de nuevo.");
-          },
+          // Clear the pending data
+          sessionStorage.removeItem("pendingSignUpData");
+        } catch (updateError) {
+          console.error("Failed to update user profile:", updateError);
         }
-      );
+      }
+
+      router.push("/profile");
     } catch (err) {
       console.error("Phone verification error:", err);
       setError("Error al verificar el código");
@@ -153,7 +148,9 @@ function VerifyPhoneForm() {
         <div className="flex flex-col gap-6">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-3">
-              <span className="font-light text-foreground tracking-tighter">Verificar teléfono</span>
+              <span className="font-light text-foreground tracking-tighter">
+                Verificar teléfono
+              </span>
             </h1>
             <p className="text-muted-foreground">
               Ingresa el código de 6 dígitos que enviamos a
@@ -166,7 +163,9 @@ function VerifyPhoneForm() {
               {otp.map((digit, index) => (
                 <input
                   key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
+                  ref={(el) => {
+                    inputRefs.current[index] = el;
+                  }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}

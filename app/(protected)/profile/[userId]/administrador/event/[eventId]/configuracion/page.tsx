@@ -53,7 +53,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     variable_fee: 8,
     fixed_fee: 3000,
     flyer: "/placeholder.svg",
-    flyer_apple: null,
+    flyer_apple: undefined,
     venue_id: "venue-1",
     faqs: [],
     venues: {
