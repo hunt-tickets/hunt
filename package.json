@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@ark-ui/react": "^5.26.2",
+    "@better-auth/passkey": "^1.4.1",
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.2.2",
     "@paper-design/shaders-react": "^0.0.61",

@@ -9,7 +9,7 @@ import { Calendar } from "lucide-react";
 import { AdminEventsList } from "@/components/admin-events-list";
 import { CreateEventDialog } from "@/components/create-event-dialog";
 import { AdminHeader } from "@/components/admin-header";
-import type { EventFull } from "@/lib/supabase/types";
+import type { EventFull } from "@/lib/types";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
