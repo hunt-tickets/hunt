@@ -156,11 +156,8 @@ export const auth = betterAuth({
                   phoneNumber
                 );
               }
-              if (!phoneNumber && request.url) {
-                const url = new URL(request.url, "http://localhost:3000");
-                phoneNumber = url.searchParams.get("phoneNumber");
-                console.log("🔍 Debug - Phone from URL:", phoneNumber);
-              }
+              // Note: URL parsing removed - GenericEndpointContext doesn't expose url property
+              // Phone number should be passed via body or headers instead
             }
           } catch (e) {
             console.log("🔍 Debug - Error extracting phone:", e);

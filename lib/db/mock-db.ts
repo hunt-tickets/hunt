@@ -1,4 +1,4 @@
-import type { EventFull, Ticket, Producer, PaymentData } from "@/lib/types";
+import type { EventFull, Ticket, Producer } from "@/lib/types";
 
 /**
  * Mock Database for Development
@@ -6,6 +6,18 @@ import type { EventFull, Ticket, Producer, PaymentData } from "@/lib/types";
  * This file provides mock data and database functions for development/testing.
  * In production, these would be replaced with actual database queries.
  */
+
+// Local type definition for payment data
+interface PaymentData {
+  id: string;
+  eventId?: string;
+  userId?: string;
+  amount?: number;
+  status?: string;
+  createdAt?: string;
+  order?: string;
+  [key: string]: unknown; // Allow additional properties
+}
 
 // Mock Producers
 const mockProducers: Producer[] = [

@@ -61,6 +61,7 @@ export default async function MarcasPage({ params }: MarcasPageProps) {
       name: "Banda de Rock",
       logo: null,
       description: "Banda local de rock",
+      category: "Rock",
       created_at: "2025-01-01T00:00:00Z",
     },
   ];

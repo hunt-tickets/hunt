@@ -53,17 +53,27 @@ export default async function EquipoPage({ params }: EquipoPageProps) {
   // Mock producers and artists - In production, fetch from database
   const producers = [
     {
-      id: "producer-1",
-      name: "Mi Productora",
-      logo: null,
+      id: "event-producer-1",
+      created_at: new Date().toISOString(),
+      producer: {
+        id: "producer-1",
+        name: "Mi Productora",
+        logo: null,
+      },
     },
   ];
 
   const artists = [
     {
-      id: "artist-1",
-      name: "Banda de Rock",
-      logo: null,
+      id: "event-artist-1",
+      created_at: new Date().toISOString(),
+      artist: {
+        id: "artist-1",
+        name: "Banda de Rock",
+        description: null,
+        category: null,
+        logo: null,
+      },
     },
   ];
 
@@ -84,11 +94,15 @@ export default async function EquipoPage({ params }: EquipoPageProps) {
     {
       id: "artist-1",
       name: "Banda de Rock",
+      description: null,
+      category: null,
       logo: null,
     },
     {
       id: "artist-2",
       name: "DJ Electrónico",
+      description: null,
+      category: null,
       logo: null,
     },
   ];
