@@ -5,11 +5,11 @@ import { createAuthClient } from "better-auth/react";
 import {
   emailOTPClient,
   magicLinkClient,
-  passkeyClient,
   phoneNumberClient,
   adminClient,
   organizationClient,
 } from "better-auth/client/plugins";
+import { passkeyClient } from "@better-auth/passkey/client";
 import { ac, owner, administrator, seller } from "@/lib/auth-permissions";
 
 export const authClient = createAuthClient({
