@@ -15,6 +15,13 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
+// Ticketing process:
+//   1. User completes checkout → Create reservation
+//   2. Payment webhook (Stripe/Mercado Pago) →
+//   3. Backend: Convert reservation to order + tickets (atomic)
+//   4. Backend: Call Edge Function or send emails directly
+//   5. INSERT into email_logs table
+
 export const accountTypeEnum = pgEnum("account_type_enum", [
   "savings",
   "checking",
@@ -118,6 +125,28 @@ export const genderType = pgEnum("gender_type", [
   "femenino",
   "otro",
   "prefiero_no_decir",
+]);
+
+// Core ticketing system enums
+export const reservationStatus = pgEnum("reservation_status", [
+  "active",
+  "expired",
+  "converted",
+  "cancelled",
+]);
+
+export const orderPaymentStatus = pgEnum("order_payment_status", [
+  "pending",
+  "paid",
+  "failed",
+  "refunded",
+]);
+
+export const ticketStatus = pgEnum("ticket_status", [
+  "valid",
+  "used",
+  "cancelled",
+  "transferred",
 ]);
 
 // Countries table
@@ -594,6 +623,221 @@ export const events = pgTable(
   ]
 );
 
+// Ticket Types (palcos, VIP, general, etc.)
+export const ticketTypes = pgTable(
+  "ticket_types",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+    capacity: integer("capacity").notNull(),
+    soldCount: integer("sold_count").notNull().default(0),
+    reservedCount: integer("reserved_count").notNull().default(0),
+    minPerOrder: integer("min_per_order").notNull().default(1),
+    maxPerOrder: integer("max_per_order").notNull().default(10),
+    saleStart: timestamp("sale_start", { withTimezone: true }),
+    saleEnd: timestamp("sale_end", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_ticket_types_event").on(table.eventId),
+    // Note: The CHECK constraint (sold_count + reserved_count <= capacity)
+    // will be added in the migration SQL
+  ]
+);
+
+// The reservations table acts like a shopping cart hold:
+//  The reservations table acts like a shopping cart hold:
+
+//   1. User A clicks "Buy 5" → Immediately reserves 5 tickets (atomic operation with row lock)
+//     - reserved_count increases by 5
+//     - 10-minute timer starts
+//   2. User B clicks "Buy 8" → System checks: capacity - sold_count - reserved_count = 10 - 0 - 5 = 5 available
+//     - Instant error: "Only 5 tickets left"
+//     - User B doesn't waste time entering payment info
+//   3. User A completes payment within 10 min → Reservation converts to real tickets
+//     - reserved_count decreases by 5
+//     - sold_count increases by 5
+//   4. User A abandons cart → After 10 min, background job expires reservation
+//     - reserved_count decreases by 5
+//     - Tickets become available again for others
+
+//   Key Benefits
+
+//   1. Prevents overselling - Atomic locks ensure accuracy
+//   2. Better UX - Immediate feedback on availability
+//   3. Fair - First to reserve gets priority
+//   4. Recovers abandoned carts - Auto-expires and releases tickets
+//   5. High concurrency - Handles hundreds of simultaneous buyers safely
+export const reservations = pgTable(
+  "reservations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    status: reservationStatus("status").notNull().default("active"),
+    // Payment session tracking
+    paymentSessionId: text("payment_session_id").unique(), // Mercado Pago Preference ID or Stripe Checkout Session
+    paymentProcessor: text("payment_processor"), // 'mercadopago' or 'stripe'
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_reservations_user").on(table.userId),
+    index("idx_reservations_event").on(table.eventId),
+    index("idx_reservations_expires").on(table.expiresAt),
+    index("idx_reservations_payment_session").on(table.paymentSessionId),
+  ]
+);
+
+// Reservation items (multiple ticket types per reservation)
+export const reservationItems = pgTable(
+  "reservation_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reservationId: uuid("reservation_id")
+      .notNull()
+      .references(() => reservations.id, { onDelete: "cascade" }),
+    ticketTypeId: uuid("ticket_type_id")
+      .notNull()
+      .references(() => ticketTypes.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_reservation_items_reservation").on(table.reservationId),
+    index("idx_reservation_items_ticket_type").on(table.ticketTypeId),
+  ]
+);
+
+// Orders (purchases)
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+    serviceFee: decimal("service_fee", { precision: 10, scale: 2 })
+      .notNull()
+      .default("0"),
+    paymentStatus: orderPaymentStatus("payment_status")
+      .notNull()
+      .default("pending"),
+    paymentSessionId: text("payment_session_id"), // Stripe/Mercado Pago session ID
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_orders_user").on(table.userId),
+    index("idx_orders_event").on(table.eventId),
+    index("idx_orders_payment_status").on(table.paymentStatus),
+  ]
+);
+
+// Order items (line items for each ticket type in the order)
+export const orderItems = pgTable(
+  "order_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    ticketTypeId: uuid("ticket_type_id")
+      .notNull()
+      .references(() => ticketTypes.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull(),
+    pricePerTicket: decimal("price_per_ticket", {
+      precision: 10,
+      scale: 2,
+    }).notNull(), // Price snapshot
+    subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_order_items_order").on(table.orderId),
+    index("idx_order_items_ticket_type").on(table.ticketTypeId),
+  ]
+);
+
+// Tickets (actual tickets issued)
+export const tickets = pgTable(
+  "tickets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    reservationId: uuid("reservation_id").references(() => reservations.id), // Audit trail
+    ticketTypeId: uuid("ticket_type_id")
+      .notNull()
+      .references(() => ticketTypes.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    qrCode: text("qr_code").notNull().unique(),
+    status: ticketStatus("status").notNull().default("valid"),
+    scannedAt: timestamp("scanned_at", { withTimezone: true }),
+    scannedBy: text("scanned_by").references(() => user.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_tickets_order").on(table.orderId),
+    index("idx_tickets_reservation").on(table.reservationId),
+    index("idx_tickets_ticket_type").on(table.ticketTypeId),
+    index("idx_tickets_user").on(table.userId),
+    index("idx_tickets_qr_code").on(table.qrCode),
+  ]
+);
+
+// Email logs (audit trail for all emails sent)
+export const emailLogs = pgTable(
+  "email_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    emailType: text("email_type").notNull(), // 'purchase_confirmation', 'ticket_delivery', 'refund', etc
+    recipientEmail: text("recipient_email").notNull(),
+    emailServiceId: text("email_service_id"), // Resend ID
+    status: text("status").notNull().default("sent"), // 'sent', 'failed', 'bounced', 'delivered'
+    metadata: jsonb("metadata"), // Additional data (PDF URL, QR URLs, etc)
+    sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_email_logs_order").on(table.orderId),
+    index("idx_email_logs_recipient").on(table.recipientEmail),
+    index("idx_email_logs_service_id").on(table.emailServiceId),
+  ]
+);
+
 // Export schema object for Drizzle
 export const schema = {
   user,
@@ -611,4 +855,11 @@ export const schema = {
   venues,
   legacyEvents,
   events,
+  ticketTypes,
+  reservations,
+  reservationItems,
+  orders,
+  orderItems,
+  tickets,
+  emailLogs,
 };
