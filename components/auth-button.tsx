@@ -64,9 +64,6 @@ export function AuthButton() {
           <Link href={`/profile/`}>Mi Perfil</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}/administrador`}>Administrador</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
           <Link href={`/profile/${user.id}/tickets`}>Mis Tickets</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

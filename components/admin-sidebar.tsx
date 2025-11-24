@@ -2,20 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Settings, ArrowLeft, UserCircle, Tag, Gift } from "lucide-react";
+import { Calendar, Settings, ArrowLeft, UserCircle, Tag, Gift, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
 
 interface AdminSidebarProps {
   userId: string;
+  organizationId?: string;
 }
 
 const primaryMenuItems = [
   {
+    title: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/administrador",
+    description: "Resumen de la organización",
+    exact: true,
+  },
+  {
     title: "Eventos",
     icon: Calendar,
-    href: "/administrador",
+    href: "/administrador/eventos",
     description: "Crea y gestiona eventos",
     exact: false, // Will match /administrador/event/[id] too
   },
@@ -52,7 +60,7 @@ const adminMenuItems = [
   },
 ];
 
-export function AdminSidebar({ userId }: AdminSidebarProps) {
+export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
 
@@ -86,16 +94,18 @@ export function AdminSidebar({ userId }: AdminSidebarProps) {
             {/* Primary Menu Items */}
             {primaryMenuItems.map((item) => {
               const Icon = item.icon;
-              const fullHref = `/profile/${userId}${item.href}`;
+              const fullHref = organizationId
+                ? `/profile/${userId}/organizaciones/${organizationId}${item.href}`
+                : `/profile/${userId}${item.href}`;
 
               // Check if current route matches this menu item
               let isActive = false;
               if (item.exact) {
                 isActive = pathname === fullHref;
               } else {
-                // For non-exact matches (like /administrador which should also match /administrador/event/[id])
-                if (item.href === "/administrador") {
-                  isActive = pathname.includes("/administrador") && !pathname.includes("/configuracion") && !pathname.includes("/usuarios") && !pathname.includes("/marcas") && !pathname.includes("/referidos");
+                // For non-exact matches (like /administrador/eventos which should also match /administrador/event/[id])
+                if (item.href === "/administrador/eventos") {
+                  isActive = (pathname.includes("/eventos") || pathname.includes("/event/")) && !pathname.includes("/configuracion") && !pathname.includes("/usuarios");
                 } else {
                   isActive = pathname.includes(item.href);
                 }
@@ -132,7 +142,9 @@ export function AdminSidebar({ userId }: AdminSidebarProps) {
             {/* Admin Menu Items */}
             {adminMenuItems.map((item) => {
               const Icon = item.icon;
-              const fullHref = `/profile/${userId}${item.href}`;
+              const fullHref = organizationId
+                ? `/profile/${userId}/organizaciones/${organizationId}${item.href}`
+                : `/profile/${userId}${item.href}`;
 
               // Check if current route matches this menu item
               let isActive = false;

@@ -64,7 +64,7 @@ export default async function OrganizacionesPage({
           {organizations.map((org) => (
             <Link
               key={org.id}
-              href={`/profile/${userId}/organizaciones/${org.id}`}
+              href={`/profile/${userId}/organizaciones/${org.id}/administrador`}
               className="block"
             >
               <Card className="bg-background/50 backdrop-blur-sm border-[#303030] hover:border-primary/50 transition-colors cursor-pointer">

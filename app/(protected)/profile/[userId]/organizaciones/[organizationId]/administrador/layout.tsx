@@ -13,17 +13,18 @@ interface AdministradorLayoutProps {
   children: ReactNode;
   params: Promise<{
     userId: string;
+    organizationId: string;
   }>;
 }
 
 const AdministradorLayout = async ({ children, params }: AdministradorLayoutProps) => {
-  const { userId } = await params;
+  const { userId, organizationId } = await params;
 
   return (
     <AdminLayoutWrapper>
       <div className="min-h-screen bg-background">
         {/* Sidebar */}
-        <AdminSidebar userId={userId} />
+        <AdminSidebar userId={userId} organizationId={organizationId} />
 
         {/* Main Content - with left margin to accommodate fixed sidebar */}
         <main className="lg:ml-64 min-h-screen">
