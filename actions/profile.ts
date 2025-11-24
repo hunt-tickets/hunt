@@ -6,6 +6,7 @@ import { db } from "@/lib/drizzle";
 import { schema } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { DUMMY_PROFILES } from "@/lib/dummy-data";
 
 export async function updateProfile(
   _prevState: any,
@@ -96,9 +97,7 @@ export async function checkHasPassword(): Promise<boolean> {
     const credentialAccount = await db
       .select()
       .from(schema.account)
-      .where(
-        eq(schema.account.userId, session.user.id)
-      )
+      .where(eq(schema.account.userId, session.user.id))
       .then((accounts) =>
         accounts.find((acc) => acc.providerId === "credential")
       );
@@ -158,7 +157,6 @@ export async function changePassword(
 }
 
 export async function getAllUsers() {
-  const { DUMMY_PROFILES } = await import("@/lib/dummy-data");
   return DUMMY_PROFILES;
 }
 
