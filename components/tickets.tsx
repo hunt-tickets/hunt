@@ -1,8 +1,8 @@
-import { Ticket } from "@/lib/types";
+import type { TicketType } from "@/lib/schema";
 import { TicketsContainer } from "./tickets-container";
 
 interface TicketsProps {
-  tickets: Ticket[];
+  tickets: TicketType[];
   eventId: string;
   variableFee?: number;
 }

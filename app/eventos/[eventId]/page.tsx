@@ -28,26 +28,26 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${event.name} | Hunt Tickets`,
+    title: `${event.name || "Evento"} | Hunt Tickets`,
     description:
       event.description ||
-      `Compra tickets para ${event.name} en ${event.venue_city}`,
+      `Compra tickets para ${event.name || "este evento"} en ${event.venue_city}`,
     openGraph: {
-      title: event.name,
+      title: event.name || "Evento",
       description: event.description || `Evento en ${event.venue_city}`,
       images: [
         {
           url: event.flyer || "/placeholder.svg",
           width: 1200,
           height: 630,
-          alt: event.name,
+          alt: event.name || "Evento",
         },
       ],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: event.name,
+      title: event.name || "Evento",
       description: event.description || `Evento en ${event.venue_city}`,
       images: [event.flyer || "/placeholder.svg"],
     },
@@ -72,7 +72,7 @@ export default async function EventPage({ params }: EventPageProps) {
       <div className="relative w-full aspect-[3/4] sm:aspect-[16/9] lg:aspect-[21/9] bg-muted">
         <Image
           src={event.flyer || "/placeholder.svg"}
-          alt={event.name}
+          alt={event.name || "Evento"}
           fill
           priority
           sizes="100vw"
@@ -94,7 +94,7 @@ export default async function EventPage({ params }: EventPageProps) {
 
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-balance">
-            {event.name}
+            {event.name || "Evento"}
           </h1>
 
           {/* Key Info Grid */}
@@ -108,11 +108,13 @@ export default async function EventPage({ params }: EventPageProps) {
                   className="font-semibold text-sm sm:text-base"
                   suppressHydrationWarning
                 >
-                  {new Date(event.date).toLocaleDateString("es-ES", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {event.date
+                    ? new Date(event.date).toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Fecha por confirmar"}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {event.hour} - {event.end_hour}
@@ -197,48 +199,13 @@ export default async function EventPage({ params }: EventPageProps) {
               <TicketsContainer
                 tickets={event.tickets}
                 eventId={event.id}
-                variableFee={event.variable_fee}
+                variableFee={event.variableFee ? parseFloat(event.variableFee) : undefined}
               />
             </div>
           </div>
         </section>
       )}
 
-      {/* Producers section */}
-      {event.producers && event.producers.length > 0 && (
-        <section className="mt-6">
-          <div className="container mx-auto max-w-4xl px-4">
-            <div className="bg-background border border-border rounded-2xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold mb-4">
-                Organizadores
-              </h2>
-              <div className="flex flex-wrap gap-4">
-                {event.producers.map((producer, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/50"
-                  >
-                    {producer.logo && (
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                        <Image
-                          src={producer.logo}
-                          alt={producer.name}
-                          width={40}
-                          height={40}
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <p className="font-semibold text-sm sm:text-base">
-                      {producer.name}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Venue location section */}
       {event.venue_latitude && event.venue_longitude && (

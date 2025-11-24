@@ -11,7 +11,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Ticket } from "@/lib/types";
+import type { TicketType } from "@/lib/schema";
 // import { useBoldCheckout } from "@/hooks/useBoldCheckout"; // Temporarily disabled
 
 interface User {
@@ -24,7 +24,7 @@ interface User {
   document_id?: string;
 }
 
-interface TicketWithCount extends Ticket {
+interface TicketWithCount extends TicketType {
   count: number;
 }
 
@@ -154,7 +154,7 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
                       className="text-sm font-semibold"
                       suppressHydrationWarning
                     >
-                      ${(ticket.count * ticket.price).toLocaleString("es-CO")}
+                      ${(ticket.count * parseFloat(ticket.price)).toLocaleString("es-CO")}
                     </span>
                   </div>
                 )

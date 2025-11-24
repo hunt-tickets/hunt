@@ -13,7 +13,7 @@ import {
   pgEnum,
   integer,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { sql, type InferSelectModel, type InferInsertModel } from "drizzle-orm";
 
 // Ticketing process:
 //   1. User completes checkout → Create reservation
@@ -863,3 +863,12 @@ export const schema = {
   tickets,
   emailLogs,
 };
+
+// Inferred types from Drizzle schema
+export type Event = InferSelectModel<typeof events>;
+export type NewEvent = InferInsertModel<typeof events>;
+export type Venue = InferSelectModel<typeof venues>;
+export type TicketType = InferSelectModel<typeof ticketTypes>;
+export type Order = InferSelectModel<typeof orders>;
+export type Ticket = InferSelectModel<typeof tickets>;
+export type Reservation = InferSelectModel<typeof reservations>;

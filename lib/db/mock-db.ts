@@ -1,4 +1,4 @@
-import type { EventFull, Ticket, Producer } from "@/lib/types";
+import type { Event } from "@/lib/schema";
 
 /**
  * Mock Database for Development
@@ -6,6 +6,48 @@ import type { EventFull, Ticket, Producer } from "@/lib/types";
  * This file provides mock data and database functions for development/testing.
  * In production, these would be replaced with actual database queries.
  */
+
+// Mock event type that extends Event with display properties
+// Exported for use in components that display events with venue information
+export type MockEvent = Event & {
+  // Additional flattened venue information for display
+  venue_name: string;
+  venue_logo: string;
+  venue_city: string;
+  venue_address: string;
+  venue_latitude: number;
+  venue_longitude: number;
+  venue_google_maps_link?: string;
+  venue_google_website_url?: string;
+  venue_google_phone_number?: string;
+  venue_google_avg_rating?: string;
+  venue_google_total_reviews?: string;
+  venue_ai_description?: string;
+  // Display helpers for date/time
+  hour: string;
+  end_hour: string;
+  // Mock tickets array
+  tickets: MockTicket[];
+};
+
+// Mock ticket type - aligned with TicketType from schema
+// Exported for use in components that display ticket information
+export interface MockTicket {
+  id: string;
+  eventId: string;
+  name: string;
+  description: string | null;
+  price: string;
+  capacity: number;
+  soldCount: number;
+  reservedCount: number;
+  minPerOrder: number;
+  maxPerOrder: number;
+  saleStart: Date | null;
+  saleEnd: Date | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+}
 
 // Local type definition for payment data
 interface PaymentData {
@@ -19,211 +61,115 @@ interface PaymentData {
   [key: string]: unknown; // Allow additional properties
 }
 
-// Mock Producers
-const mockProducers: Producer[] = [
-  {
-    id: "producer-1",
-    name: "Electro Beats",
-    description: "Premier electronic music events",
-    email: "contact@electrobeats.com",
-    phone: "+57 300 123 4567",
-    logo: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop",
-  },
-  {
-    id: "producer-2",
-    name: "Urban Nights",
-    description: "Hip hop and urban music experiences",
-    email: "info@urbannights.com",
-    phone: "+57 301 234 5678",
-    logo: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
-  },
-  {
-    id: "producer-3",
-    name: "Rock Legends",
-    description: "Rock concerts and festivals",
-    email: "hello@rocklegends.com",
-    phone: "+57 302 345 6789",
-    logo: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&h=400&fit=crop",
-  },
-];
-
 // Mock Tickets
-const createMockTickets = (eventId: string): Ticket[] => [
+const createMockTickets = (eventId: string): MockTicket[] => [
   {
     id: `${eventId}-ticket-1`,
+    eventId,
     name: "General",
-    price: 50000,
+    price: "50000",
     description: "Acceso general al evento",
+    capacity: 500,
+    soldCount: 0,
+    reservedCount: 0,
+    minPerOrder: 1,
+    maxPerOrder: 10,
+    saleStart: null,
+    saleEnd: null,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: null,
   },
   {
     id: `${eventId}-ticket-2`,
+    eventId,
     name: "VIP",
-    price: 120000,
+    price: "120000",
     description: "Acceso VIP con área exclusiva y bebidas incluidas",
+    capacity: 100,
+    soldCount: 0,
+    reservedCount: 0,
+    minPerOrder: 1,
+    maxPerOrder: 10,
+    saleStart: null,
+    saleEnd: null,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: null,
   },
   {
     id: `${eventId}-ticket-3`,
+    eventId,
     name: "Preventa",
-    price: 35000,
+    price: "35000",
     description: "Preventa limitada - Acceso general",
+    capacity: 200,
+    soldCount: 0,
+    reservedCount: 0,
+    minPerOrder: 1,
+    maxPerOrder: 10,
+    saleStart: null,
+    saleEnd: null,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: null,
   },
 ];
 
 // Mock Events
-const mockEvents: EventFull[] = [
+const mockEvents: MockEvent[] = [
   {
+    // Required Event fields
     id: "event-1",
+    organizationId: "mock-org-1",
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
     name: "Neon Nights Festival",
-    flyer: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=1200&fit=crop",
-    date: "2025-12-15",
+    description:
+      "Una experiencia única de música electrónica con los mejores DJs internacionales. Prepárate para una noche inolvidable de luces, sonido y energía.",
+    date: new Date("2025-12-15T22:00:00Z"),
+    endDate: new Date("2025-12-16T06:00:00Z"),
+    status: true,
+    city: "Bogotá",
+    country: "Colombia",
+    flyer:
+      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=1200&fit=crop",
+    venueId: "venue-1",
+    variableFee: "0.08",
+    fixedFee: null,
+    age: "18",
+    cash: false,
+    extraInfo: null,
+    ics: null,
+    flyerApple: null,
+    flyerGoogle: null,
+    flyerOverlay: null,
+    flyerBackground: null,
+    flyerBanner: null,
+    posFee: null,
+    hex: null,
+    priority: false,
+    hexText: null,
+    guestList: false,
+    privateList: false,
+    accessPass: false,
+    guestListMaxHour: null,
+    guestListQuantity: null,
+    guestListInfo: null,
+    hexTextSecondary: "A3A3A3",
+    lateFee: null,
+    guestEmail: null,
+    guestName: null,
+    faqs: null,
+    // Display properties
     hour: "22:00",
-    end_date: "2025-12-16",
     end_hour: "06:00",
-    age: 18,
-    description: "Una experiencia única de música electrónica con los mejores DJs internacionales. Prepárate para una noche inolvidable de luces, sonido y energía.",
-    variable_fee: 0.08,
-    venue_id: "venue-1",
     venue_name: "Club Octagon",
-    venue_logo: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&h=200&fit=crop",
+    venue_logo:
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&h=200&fit=crop",
     venue_city: "Bogotá",
     venue_address: "Calle 85 #12-50, Bogotá",
     venue_latitude: 4.6793,
     venue_longitude: -74.0466,
     venue_google_maps_link: "https://maps.google.com/?q=4.6793,-74.0466",
-    producers: [mockProducers[0]],
     tickets: createMockTickets("event-1"),
-  },
-  {
-    id: "event-2",
-    name: "Urban Flow Concert",
-    flyer: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=1200&fit=crop",
-    date: "2025-12-20",
-    hour: "20:00",
-    end_date: "2025-12-21",
-    end_hour: "02:00",
-    age: 16,
-    description: "El mejor hip hop y reggaeton en vivo. Artistas urbanos que están marcando tendencia en la escena musical.",
-    variable_fee: 0.08,
-    venue_id: "venue-2",
-    venue_name: "Teatro Colón",
-    venue_logo: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=200&h=200&fit=crop",
-    venue_city: "Medellín",
-    venue_address: "Carrera 43 #6-50, Medellín",
-    venue_latitude: 6.2442,
-    venue_longitude: -75.5812,
-    venue_google_maps_link: "https://maps.google.com/?q=6.2442,-75.5812",
-    producers: [mockProducers[1]],
-    tickets: createMockTickets("event-2"),
-  },
-  {
-    id: "event-3",
-    name: "Rock en el Parque",
-    flyer: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&h=1200&fit=crop",
-    date: "2025-12-22",
-    hour: "18:00",
-    end_date: "2025-12-22",
-    end_hour: "23:00",
-    age: null,
-    description: "Festival de rock al aire libre con bandas locales e internacionales. Un tributo al rock en todas sus formas.",
-    variable_fee: 0.08,
-    venue_id: "venue-3",
-    venue_name: "Parque Simón Bolívar",
-    venue_logo: "https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=200&h=200&fit=crop",
-    venue_city: "Bogotá",
-    venue_address: "Calle 63 #60-00, Bogotá",
-    venue_latitude: 4.6558,
-    venue_longitude: -74.0928,
-    venue_google_maps_link: "https://maps.google.com/?q=4.6558,-74.0928",
-    producers: [mockProducers[2]],
-    tickets: createMockTickets("event-3"),
-  },
-  {
-    id: "event-4",
-    name: "Techno Underground",
-    flyer: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=1200&fit=crop",
-    date: "2025-12-28",
-    hour: "23:00",
-    end_date: "2025-12-29",
-    end_hour: "08:00",
-    age: 21,
-    description: "La experiencia techno más auténtica de la ciudad. Para verdaderos amantes del techno underground.",
-    variable_fee: 0.08,
-    venue_id: "venue-4",
-    venue_name: "Industrial Warehouse",
-    venue_logo: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop",
-    venue_city: "Cali",
-    venue_address: "Calle 5 #38-00, Cali",
-    venue_latitude: 3.4372,
-    venue_longitude: -76.5225,
-    venue_google_maps_link: "https://maps.google.com/?q=3.4372,-76.5225",
-    producers: [mockProducers[0]],
-    tickets: createMockTickets("event-4"),
-  },
-  {
-    id: "event-5",
-    name: "Salsa Nights",
-    flyer: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=1200&fit=crop",
-    date: "2025-12-30",
-    hour: "21:00",
-    end_date: "2025-12-31",
-    end_hour: "03:00",
-    age: 18,
-    description: "Celebra con lo mejor de la salsa. Orquestas en vivo y la mejor pista de baile de la ciudad.",
-    variable_fee: 0.08,
-    venue_id: "venue-5",
-    venue_name: "Zaperoco",
-    venue_logo: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop",
-    venue_city: "Cali",
-    venue_address: "Avenida 6 #15-20, Cali",
-    venue_latitude: 3.4516,
-    venue_longitude: -76.5320,
-    venue_google_maps_link: "https://maps.google.com/?q=3.4516,-76.5320",
-    producers: [mockProducers[1]],
-    tickets: createMockTickets("event-5"),
-  },
-  {
-    id: "event-6",
-    name: "Indie Showcase",
-    flyer: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&h=1200&fit=crop",
-    date: "2026-01-05",
-    hour: "19:00",
-    end_date: "2026-01-05",
-    end_hour: "23:30",
-    age: 16,
-    description: "Las mejores bandas indie de la escena local y regional. Apoya el talento emergente.",
-    variable_fee: 0.08,
-    venue_id: "venue-6",
-    venue_name: "El Loft",
-    venue_logo: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
-    venue_city: "Medellín",
-    venue_address: "Carrera 70 #44-55, Medellín",
-    venue_latitude: 6.2486,
-    venue_longitude: -75.5742,
-    venue_google_maps_link: "https://maps.google.com/?q=6.2486,-75.5742",
-    producers: [mockProducers[2], mockProducers[0]],
-    tickets: createMockTickets("event-6"),
-  },
-  {
-    id: "event-7",
-    name: "Reggaeton Fiesta",
-    flyer: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800&h=1200&fit=crop",
-    date: "2026-01-10",
-    hour: "22:00",
-    end_date: "2026-01-11",
-    end_hour: "04:00",
-    age: 18,
-    description: "El perreo no para. Los mejores exponentes del reggaeton en una sola noche.",
-    variable_fee: 0.08,
-    venue_id: "venue-7",
-    venue_name: "La Reina",
-    venue_logo: "https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=200&h=200&fit=crop",
-    venue_city: "Barranquilla",
-    venue_address: "Calle 93 #43-50, Barranquilla",
-    venue_latitude: 10.9878,
-    venue_longitude: -74.7889,
-    venue_google_maps_link: "https://maps.google.com/?q=10.9878,-74.7889",
-    producers: [mockProducers[1]],
-    tickets: createMockTickets("event-7"),
   },
 ];
 
@@ -254,8 +200,7 @@ export async function getAllActiveEvents() {
 
   const now = new Date();
   const activeEvents = mockEvents.filter((event) => {
-    const eventDate = new Date(event.end_date);
-    return eventDate >= now;
+    return event.endDate && event.endDate >= now;
   });
 
   return {
@@ -288,7 +233,7 @@ export async function getTicketById(id: string) {
 
   // Search through all events for the ticket
   for (const event of mockEvents) {
-    const ticket = event.tickets.find((t) => t.id === id);
+    const ticket = event.tickets.find((t: MockTicket) => t.id === id);
     if (ticket) {
       return {
         data: { ...ticket, event_id: event.id },
@@ -313,7 +258,7 @@ export async function createTransaction(transaction: Omit<PaymentData, "id">) {
 
   const newTransaction: PaymentData = {
     ...transaction,
-    id: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `txn-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
   };
 
   mockTransactions.push(newTransaction);
@@ -342,10 +287,7 @@ export async function getTransactionsByOrder(orderId: string) {
 /**
  * Update transaction status (mock implementation)
  */
-export async function updateTransactionStatus(
-  orderId: string,
-  status: string
-) {
+export async function updateTransactionStatus(orderId: string, status: string) {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 50));
 

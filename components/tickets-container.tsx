@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { authClient } from "@/lib/auth-client";
-import { Ticket } from "@/lib/types";
+import type { TicketType } from "@/lib/schema";
 import { TicketQuantitySelector } from "./ticket-quantity-selector";
 import { BuyTicketsButton } from "./buy-tickets-button";
 import {
@@ -19,7 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface TicketsContainerProps {
-  tickets: Ticket[];
+  tickets: TicketType[];
   eventId: string;
   variableFee?: number;
 }
@@ -68,7 +68,8 @@ export function TicketsContainer({
   const totalPrice = Object.entries(ticketSelections).reduce(
     (sum, [ticketId, quantity]) => {
       const ticket = tickets.find((t) => t.id === ticketId);
-      return sum + (ticket?.price || 0) * quantity;
+      const price = ticket?.price ? parseFloat(ticket.price) : 0;
+      return sum + price * quantity;
     },
     0
   );
@@ -172,14 +173,14 @@ export function TicketsContainer({
                     className="text-lg sm:text-xl lg:text-2xl font-bold"
                     suppressHydrationWarning
                   >
-                    ${ticket.price.toLocaleString("es-CO")}
+                    ${parseFloat(ticket.price).toLocaleString("es-CO")}
                   </p>
                 </div>
 
                 {/* Client island: Quantity selector with local state */}
                 <TicketQuantitySelector
                   ticketId={ticket.id}
-                  price={ticket.price}
+                  price={parseFloat(ticket.price)}
                   maxQuantity={10}
                   onQuantityChange={handleQuantityChange}
                 />

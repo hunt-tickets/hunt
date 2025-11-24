@@ -5,11 +5,11 @@ import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
 import { Filter } from "lucide-react";
-import type { EventFull } from "@/lib/types";
+import type { MockEvent } from "@/lib/db/mock-db";
 
 interface EventsWithSearchProps {
   // All events from server
-  events: EventFull[];
+  events: MockEvent[];
   // Number of events to display in grid
   limit?: number;
 }
@@ -186,10 +186,10 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
             <EventCard
               key={`${event.id}-${index}`}
               id={event.id}
-              title={event.name}
-              date={event.date}
+              title={event.name || "Sin título"}
+              date={event.date ? event.date.toISOString() : ""}
               location={`${event.venue_name}, ${event.venue_city}`}
-              image={event.flyer}
+              image={event.flyer || "/placeholder.svg"}
             />
           ))}
         </div>
