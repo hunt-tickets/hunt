@@ -1,15 +1,4 @@
-"use server";
-
-/**
- * Checkout Server Actions
- *
- * Handles the complete checkout flow:
- * 1. User clicks "Checkout" with cart items
- * 2. Create reservation (locks inventory atomically)
- * 3. Create Mercado Pago preference
- * 4. Return checkout URL + reservation details
- */
-
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createReservation, type CartItem } from "@/lib/reservations";
@@ -19,40 +8,14 @@ import { paymentProcessorAccount, events } from "@/lib/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 // ============================================================================
-// Types
-// ============================================================================
-
-interface CheckoutResult {
-  success: boolean;
-  checkoutUrl?: string;
-  reservation?: {
-    id: string;
-    expires_at: string;
-    total_amount: number;
-  };
-  error?: string;
-}
-
-// ============================================================================
 // Helper: Calculate Marketplace Fee
 // ============================================================================
 
-/**
- * Calculate marketplace/platform fee (commission)
- *
- * @param totalAmount - Total order amount
- * @returns Fee amount in cents (for Mercado Pago)
- */
 function calculateMarketplaceFee(totalAmount: number): number {
-  // Platform commission percentage (configurable via env)
   const feePercentage = parseFloat(
     process.env.MARKETPLACE_FEE_PERCENTAGE || "5"
   );
-
-  // Calculate fee and round to 2 decimals
   const fee = (totalAmount * feePercentage) / 100;
-
-  // Return rounded value
   return Math.round(fee * 100) / 100;
 }
 
@@ -61,7 +24,6 @@ function calculateMarketplaceFee(totalAmount: number): number {
 // ============================================================================
 
 async function getOrgMercadoPagoCredentials(organizationId: string) {
-  // Find the Event's Organization payment processor account
   const account = await db.query.paymentProcessorAccount.findFirst({
     where: and(
       eq(paymentProcessorAccount.organizationId, organizationId),
@@ -83,20 +45,10 @@ async function getOrgMercadoPagoCredentials(organizationId: string) {
 }
 
 // ============================================================================
-// Main Checkout Action
+// POST /api/checkout
 // ============================================================================
 
-/**
- * Process checkout: Create reservation + Mercado Pago preference
- *
- * @param eventId - Event UUID
- * @param items - Cart items [{ticket_type_id, quantity}]
- * @returns Checkout URL or error
- */
-export async function checkoutAction(
-  eventId: string,
-  items: CartItem[]
-): Promise<CheckoutResult> {
+export async function POST(request: NextRequest) {
   try {
     // 1. Get authenticated user
     const session = await auth.api.getSession({
@@ -104,63 +56,67 @@ export async function checkoutAction(
     });
 
     if (!session?.user) {
-      return {
-        success: false,
-        error: "Debes iniciar sesión para continuar",
-      };
+      return NextResponse.json(
+        { success: false, error: "Debes iniciar sesión para continuar" },
+        { status: 401 }
+      );
     }
 
     const userId = session.user.id;
 
-    // 2. Validate cart items
+    // 2. Parse request body
+    const body = await request.json();
+    const { eventId, items } = body as { eventId: string; items: CartItem[] };
+
+    // 3. Validate cart items
     if (!items || items.length === 0) {
-      return {
-        success: false,
-        error: "El carrito está vacío",
-      };
+      return NextResponse.json(
+        { success: false, error: "El carrito está vacío" },
+        { status: 400 }
+      );
     }
 
-    // 3. Get event's organization ID (needed for MP credentials)
+    // 4. Get event's organization ID
     const event = await db.query.events.findFirst({
       where: eq(events.id, eventId),
       columns: { organizationId: true },
     });
 
     if (!event) {
-      return {
-        success: false,
-        error: "Evento no encontrado",
-      };
+      return NextResponse.json(
+        { success: false, error: "Evento no encontrado" },
+        { status: 404 }
+      );
     }
 
     const organizationId = event.organizationId;
 
-    // 4. Create reservation (atomic inventory lock)
+    // 5. Create reservation (atomic inventory lock)
     const reservation = await createReservation(userId, eventId, items);
 
-    // 5. Get organization's Mercado Pago credentials
+    // 6. Get organization's Mercado Pago credentials
     const mpCredentials = await getOrgMercadoPagoCredentials(organizationId);
 
-    // 6. Create Mercado Pago client with organization's access token
+    // 7. Create Mercado Pago client with organization's access token
     const mercadopago = new MercadoPagoConfig({
       accessToken: mpCredentials.accessToken,
     });
 
-    // 7. Build preference items from reservation
+    // 8. Build preference items from reservation
     const preferenceItems = items.map((item) => ({
       id: item.ticket_type_id,
-      title: `Entrada - ${item.ticket_type_id.substring(0, 8)}`, // You may want to fetch ticket type name
+      title: `Entrada - ${item.ticket_type_id.substring(0, 8)}`,
       quantity: item.quantity,
       unit_price:
         reservation.total_amount /
-        items.reduce((sum, i) => sum + i.quantity, 0), // Calculate per-ticket price
-      currency_id: "COP", // Adjust based on your region
+        items.reduce((sum, i) => sum + i.quantity, 0),
+      currency_id: "COP",
     }));
 
-    // 8. Calculate marketplace fee (platform commission)
+    // 9. Calculate marketplace fee
     const marketplaceFee = calculateMarketplaceFee(reservation.total_amount);
 
-    // 9. Create Mercado Pago preference
+    // 10. Create Mercado Pago preference
     const appUrl = process.env.APP_URL || "http://localhost:3000";
 
     const preference = await new Preference(mercadopago).create({
@@ -182,34 +138,36 @@ export async function checkoutAction(
         expires: true,
         expiration_date_from: new Date().toISOString(),
         expiration_date_to: reservation.expires_at,
-        // Platform commission (deducted from seller's payout)
         marketplace_fee: marketplaceFee,
       },
     });
 
-    // 10. Update reservation with payment session ID
+    // 11. Update reservation with payment session ID
     await db.execute(
       sql`UPDATE reservations
           SET payment_session_id = ${preference.id}
           WHERE id = ${reservation.reservation_id}`
     );
 
-    // 11. Return checkout URL
-    return {
+    // 12. Return checkout URL
+    return NextResponse.json({
       success: true,
-      checkoutUrl: preference.init_point!,
+      checkoutUrl: preference.init_point,
       reservation: {
         id: reservation.reservation_id,
         expires_at: reservation.expires_at,
         total_amount: reservation.total_amount,
       },
-    };
-  } catch (error: any) {
+    });
+  } catch (error: unknown) {
     console.error("Checkout error:", error);
 
-    return {
-      success: false,
-      error: error.message || "Error al procesar el checkout",
-    };
+    const errorMessage =
+      error instanceof Error ? error.message : "Error al procesar el checkout";
+
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
+    );
   }
 }

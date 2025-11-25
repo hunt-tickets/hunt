@@ -12,7 +12,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import type { TicketType } from "@/lib/schema";
-import { checkoutAction } from "@/actions/checkout";
 
 interface TicketWithCount extends TicketType {
   count: number;
@@ -70,7 +69,13 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
       .map((t) => ({ ticket_type_id: t.id, quantity: t.count }));
 
     try {
-      const response = await checkoutAction(eventId, items);
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, items }),
+      });
+
+      const response = await res.json();
 
       if (!response.success || !response.checkoutUrl) {
         setError(response.error || "Error al procesar el pago");

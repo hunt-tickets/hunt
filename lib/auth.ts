@@ -37,7 +37,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "http://192.168.0.7:3000",
-    "https://f702gzlr-3000.use2.devtunnels.ms/",
+    "https://f702gzlr-3000.use2.devtunnels.ms",
   ],
 
   // Server-side requests made using auth.api aren't affected by rate limiting. Rate limits only apply to client-initiated requests.
