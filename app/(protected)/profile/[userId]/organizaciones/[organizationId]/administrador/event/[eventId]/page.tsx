@@ -6,166 +6,162 @@ import { BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
+import { createClient } from "@/lib/supabase/server";
+import { orderItem } from "@/lib/schema";
 
 interface EventPageProps {
   params: Promise<{
     eventId: string;
     userId: string;
+    organizationId: string;
   }>;
 }
 
-export default async function EventFinancialPage({ params }: EventPageProps) {
+export default async function EventDashboardPage({ params }: EventPageProps) {
   const { userId, eventId } = await params;
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
 
-  // Mock: Get user profile to verify admin/producer access
-  const profile = {
-    id: userId,
-    admin: true,
-    producers_admin: [{ producer_id: "mock-producer-1" }],
-  };
+  const supabase = await createClient();
 
-  const producersAdmin = Array.isArray(profile?.producers_admin)
-    ? profile.producers_admin
-    : profile?.producers_admin
-    ? [profile.producers_admin]
-    : [];
-  const isProducer = producersAdmin.length > 0;
+  // Single fetch: event with ticket_types and orders with order_items
+  const { data: event } = await supabase
+    .from("events")
+    .select(
+      `
+      id,
+      name,
+      status,
+      flyer,
+      ticket_types (*),
+      orders (
+        *,
+        order_items (*)
+      )
+    `
+    )
+    .eq("id", eventId)
+    .single();
 
-  if (!profile?.admin && !isProducer) {
+  if (!event) {
     notFound();
   }
 
-  // Mock event data - In production, fetch from database
-  const event = {
-    id: eventId,
-    name: "Concierto de Rock",
-    status: true,
-    flyer: "/placeholder.svg",
-  };
+  const ticketTypes = event.ticket_types || [];
+  const orders = event.orders || [];
 
-  // Mock financial report - In production, fetch from database
+  // Build tickets with analytics structure
+  const ticketsWithAnalytics = ticketTypes.map((tt) => ({
+    id: tt.id,
+    name: tt.name,
+    price: parseFloat(tt.price),
+    description: tt.description,
+    status: true,
+    quantity: tt.capacity,
+    analytics: {
+      total: {
+        quantity: tt.sold_count,
+        total: tt.sold_count * parseFloat(tt.price),
+      },
+      app: { quantity: 0, total: 0 },
+      web: { quantity: 0, total: 0 },
+      cash: { quantity: 0, total: 0 },
+    },
+  }));
+
+  // Calculate sales by platform first
+  const salesByPlatform = orders.reduce(
+    (acc, order) => {
+      const orderTotal = parseFloat(order.total_amount);
+      const itemCount = (order.order_items || []).reduce(
+        (sum: number, item: orderItem) => sum + item.quantity,
+        0
+      );
+      acc[order.platform as "web" | "app" | "cash"].total += orderTotal;
+      acc[order.platform as "web" | "app" | "cash"].count += itemCount;
+      return acc;
+    },
+    {
+      web: { total: 0, count: 0 },
+      app: { total: 0, count: 0 },
+      cash: { total: 0, count: 0 },
+    }
+  );
+
+  const totalFromOrders =
+    salesByPlatform.web.total +
+    salesByPlatform.app.total +
+    salesByPlatform.cash.total;
+  const totalTicketsFromOrders =
+    salesByPlatform.web.count +
+    salesByPlatform.app.count +
+    salesByPlatform.cash.count;
+
+  // Build financial report from real order data
   const financialReport = {
     timestamp: new Date().toISOString(),
-    channels_total: 7000000,
+    channels_total: totalFromOrders,
     tickets_sold: {
-      total: 100,
-      app: 60,
-      web: 30,
-      cash: 10,
+      total: totalTicketsFromOrders,
+      app: salesByPlatform.app.count,
+      web: salesByPlatform.web.count,
+      cash: salesByPlatform.cash.count,
     },
-    settlement_amount: 6300000,
-    app_total: 4200000,
-    web_total: 2100000,
-    cash_total: 700000,
-    total_tax: 560000,
+    settlement_amount: totalFromOrders * 0.9,
+    app_total: salesByPlatform.app.total,
+    web_total: salesByPlatform.web.total,
+    cash_total: salesByPlatform.cash.total,
+    total_tax: totalFromOrders * 0.08,
     hunt_sales: {
-      price: 6000000,
-      tax: 480000,
-      variable_fee: 520000,
-      total: 6300000,
+      price: salesByPlatform.web.total + salesByPlatform.app.total,
+      tax: (salesByPlatform.web.total + salesByPlatform.app.total) * 0.08,
+      variable_fee:
+        (salesByPlatform.web.total + salesByPlatform.app.total) * 0.1,
+      total: salesByPlatform.web.total + salesByPlatform.app.total,
     },
     producer_sales: {
-      price: 700000,
+      price: salesByPlatform.cash.total,
       tax: 0,
       variable_fee: 0,
-      total: 700000,
+      total: salesByPlatform.cash.total,
     },
     global_calculations: {
-      ganancia_bruta_hunt: 520000,
-      deducciones_bold_total: 50000,
-      impuesto_4x1000: 2800,
-      ganancia_neta_hunt: 467200,
+      ganancia_bruta_hunt: totalFromOrders * 0.1,
+      deducciones_bold_total: totalFromOrders * 0.025,
+      impuesto_4x1000: totalFromOrders * 0.004,
+      ganancia_neta_hunt: totalFromOrders * 0.071,
     },
   };
 
-  // Mock transactions - In production, fetch from database
-  const transactions = [
-    {
-      id: "trans-1",
-      quantity: 1,
-      total: 50000,
-      price: 50000,
-      status: "completed",
-      created_at: new Date().toISOString(),
-      type: "web",
-      ticket_name: "General",
-      event_name: event.name,
-      user_fullname: "María García",
-      user_email: "maria@example.com",
-      promoter_fullname: "",
-      promoter_email: "",
-      cash: false,
-      variable_fee: 8,
-      tax: 0,
-      order_id: "order-1",
-      bold_id: null,
-      bold_fecha: null,
-      bold_estado: null,
-      bold_metodo_pago: null,
-      bold_valor_compra: null,
-      bold_propina: null,
-      bold_iva: null,
-      bold_impoconsumo: null,
-      bold_valor_total: null,
-      bold_rete_fuente: null,
-      bold_rete_iva: null,
-      bold_rete_ica: null,
-      bold_comision_porcentaje: null,
-      bold_comision_fija: null,
-      bold_total_deduccion: null,
-      bold_deposito_cuenta: null,
-      bold_banco: null,
-      bold_franquicia: null,
-      bold_pais_tarjeta: null,
-    },
-  ];
+  // Build sales records from orders and order items
+  const sales = orders.flatMap((order) =>
+    (order.order_items || []).map((item: orderItem) => ({
+      id: item.id,
+      quantity: item.quantity,
+      subtotal: parseFloat(item.subtotal),
+      pricePerTicket: parseFloat(item.pricePerTicket),
+      paymentStatus: order.payment_status,
+      createdAt: order.created_at,
+      platform: order.platform, // 'web' | 'app' | 'cash'
+      ticketTypeName:
+        ticketTypes.find((tt) => tt.id === item.ticketTypeId)?.name || "",
+      userFullname: "",
+      userEmail: "",
+      isCash: order.platform === "cash",
+    }))
+  );
 
-  // Mock tickets with analytics - In production, fetch from database
-  const ticketsWithAnalytics = [
-    {
-      id: "ticket-1",
-      name: "General",
-      price: 50000,
-      description: "Entrada general",
-      status: true,
-      quantity: 100,
-      analytics: {
-        total: { quantity: 60, total: 3000000 },
-        app: { quantity: 40, total: 2000000 },
-        web: { quantity: 20, total: 1000000 },
-        cash: { quantity: 0, total: 0 },
-      },
-    },
-    {
-      id: "ticket-2",
-      name: "VIP",
-      price: 100000,
-      description: "Entrada VIP",
-      status: true,
-      quantity: 50,
-      analytics: {
-        total: { quantity: 40, total: 4000000 },
-        app: { quantity: 25, total: 2500000 },
-        web: { quantity: 15, total: 1500000 },
-        cash: { quantity: 0, total: 0 },
-      },
-    },
-  ];
-
-  // Empty state check
-  if (!financialReport) {
+  // Empty state - no ticket types yet
+  if (ticketTypes.length === 0) {
     return (
       <div className="min-h-screen">
-        <div className="space-y-4">
+        <div className="space-y-4 p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold sm:text-2xl">{event.name}</h1>
@@ -182,10 +178,11 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
             <CardContent className="py-12 text-center">
               <BarChart3 className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-1">
-                Sin datos financieros
+                Sin tipos de entrada
               </h3>
               <p className="text-sm text-muted-foreground">
-                Los datos aparecerán una vez se realicen las primeras ventas.
+                Crea tipos de entrada en la sección &quot;Entradas&quot; para
+                ver las estadísticas.
               </p>
             </CardContent>
           </Card>
@@ -206,7 +203,7 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
       >
         <EventDashboardTabs
           financialReport={financialReport}
-          transactions={transactions || []}
+          sales={sales}
           tickets={ticketsWithAnalytics}
           eventId={eventId}
           eventName={event.name}
@@ -219,7 +216,7 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
       <div className="px-3 py-3 sm:px-6 sm:py-4">
         <EventDashboardTabs
           financialReport={financialReport}
-          transactions={transactions || []}
+          sales={sales}
           tickets={ticketsWithAnalytics}
           eventId={eventId}
           eventName={event.name}

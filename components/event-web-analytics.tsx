@@ -12,19 +12,19 @@ import {
   TrendingDown
 } from "lucide-react";
 
-interface Transaction {
+interface Sale {
   id: string;
   quantity: number;
-  total: number;
-  created_at: string;
-  type: string;
+  subtotal: number;
+  createdAt: string;
+  platform: string; // 'web' | 'app' | 'cash'
 }
 
 interface EventWebAnalyticsProps {
   eventId: string;
   eventName: string;
   eventFlyer: string;
-  transactions: Transaction[];
+  sales: Sale[];
 }
 
 interface AnalyticsSectionProps {
@@ -78,7 +78,7 @@ export function EventWebAnalytics({
   eventId,
   eventName,
   eventFlyer,
-  transactions,
+  sales,
 }: EventWebAnalyticsProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
@@ -89,10 +89,10 @@ export function EventWebAnalytics({
   };
 
   // Calculate web analytics
-  const webTransactions = transactions.filter(t => t.type === 'web');
+  const webSales = sales.filter(s => s.platform === 'web');
 
-  const webRevenue = webTransactions.reduce((sum, t) => sum + t.total, 0);
-  const webTicketsSold = webTransactions.reduce((sum, t) => sum + t.quantity, 0);
+  const webRevenue = webSales.reduce((sum, s) => sum + s.subtotal, 0);
+  const webTicketsSold = webSales.reduce((sum, s) => sum + s.quantity, 0);
 
   // Calculate conversion metrics (simulated for now)
   const totalVisits = 1250; // This would come from actual analytics

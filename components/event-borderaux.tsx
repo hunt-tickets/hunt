@@ -4,20 +4,20 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download } from "lucide-react";
 
-interface Transaction {
+interface Sale {
   id: string;
   quantity: number;
-  total: number;
-  price: number;
-  status: string;
-  created_at: string;
-  type: string;
-  ticket_name: string;
-  user_fullname: string;
-  user_email: string;
-  promoter_fullname: string;
-  promoter_email: string;
-  cash?: boolean;
+  subtotal: number;
+  pricePerTicket: number;
+  paymentStatus: string;
+  createdAt: string;
+  platform: string; // 'web' | 'app' | 'cash'
+  ticketTypeName: string;
+  userFullname: string;
+  userEmail: string;
+  promoterFullname?: string;
+  promoterEmail?: string;
+  isCash?: boolean;
 }
 
 interface Ticket {
@@ -36,7 +36,7 @@ interface Ticket {
 interface EventBordeauxProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   financialReport: any;
-  transactions: Transaction[];
+  sales: Sale[];
   tickets: Ticket[];
 }
 

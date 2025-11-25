@@ -9,18 +9,18 @@ import {
 } from "lucide-react";
 import { SalesDistributionChart, RevenueByChannelChart, SalesFunnelChart, DailySalesChart } from "@/components/event-charts";
 
-interface Transaction {
+interface Sale {
   id: string;
   quantity: number;
-  total: number;
-  price: number;
-  status: string;
-  created_at: string;
-  type: string;
-  ticket_name: string;
-  user_fullname: string;
-  user_email: string;
-  cash?: boolean;
+  subtotal: number;
+  pricePerTicket: number;
+  paymentStatus: string;
+  createdAt: string;
+  platform: string; // 'web' | 'app' | 'cash'
+  ticketTypeName: string;
+  userFullname: string;
+  userEmail: string;
+  isCash?: boolean;
 }
 
 interface Ticket {
@@ -34,13 +34,13 @@ interface Ticket {
 interface EventDashboardProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   financialReport: any;
-  transactions: Transaction[];
+  sales: Sale[];
   tickets: Ticket[];
   chartColor?: string;
   colorPalette?: string[];
 }
 
-export function EventDashboard({ financialReport, transactions, tickets, colorPalette = [] }: EventDashboardProps) {
+export function EventDashboard({ financialReport, sales, tickets, colorPalette = [] }: EventDashboardProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -58,7 +58,7 @@ export function EventDashboard({ financialReport, transactions, tickets, colorPa
 
   // Calculate sales funnel data
   const totalVisits = totalTicketsAvailable;
-  const totalAddedToCart = transactions.length > 0 ? Math.ceil(transactions.length * 0.8) : 0;
+  const totalAddedToCart = sales.length > 0 ? Math.ceil(sales.length * 0.8) : 0;
   const totalCompleted = totalTicketsSold;
 
   return (
@@ -112,7 +112,7 @@ export function EventDashboard({ financialReport, transactions, tickets, colorPa
       </div>
 
       {/* Daily Sales Chart */}
-      <DailySalesChart transactions={transactions} colorPalette={colorPalette} />
+      <DailySalesChart sales={sales} colorPalette={colorPalette} />
 
       {/* Charts Section */}
       <div className="grid gap-4 md:grid-cols-2">

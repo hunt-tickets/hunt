@@ -15,6 +15,7 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
   const { userId, organizationId, eventId } = await params;
   const supabase = await createClient();
 
+  // Fetch event name
   const { data: event } = await supabase
     .from("events")
     .select("name")

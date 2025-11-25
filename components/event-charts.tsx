@@ -669,15 +669,15 @@ export function ChannelSalesChart({ app, web, cash }: ChannelSalesChartProps) {
 }
 
 interface DailySalesChartProps {
-  transactions: Array<{
-    created_at: string;
-    total: number;
+  sales: Array<{
+    createdAt: string;
+    subtotal: number;
     quantity: number;
   }>;
   colorPalette?: string[];
 }
 
-export function DailySalesChart({ transactions, colorPalette = [] }: DailySalesChartProps) {
+export function DailySalesChart({ sales, colorPalette = [] }: DailySalesChartProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -687,30 +687,30 @@ export function DailySalesChart({ transactions, colorPalette = [] }: DailySalesC
     }).format(value);
   };
 
-  // Agrupar transacciones por día
-  const dailySales: Record<string, { revenue: number; quantity: number }> = {};
+  // Agrupar ventas por día
+  const dailySalesData: Record<string, { revenue: number; quantity: number }> = {};
 
-  transactions.forEach(transaction => {
-    const date = new Date(transaction.created_at);
+  sales.forEach(sale => {
+    const date = new Date(sale.createdAt);
     const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
 
-    if (!dailySales[dateKey]) {
-      dailySales[dateKey] = { revenue: 0, quantity: 0 };
+    if (!dailySalesData[dateKey]) {
+      dailySalesData[dateKey] = { revenue: 0, quantity: 0 };
     }
 
-    dailySales[dateKey].revenue += transaction.total;
-    dailySales[dateKey].quantity += transaction.quantity;
+    dailySalesData[dateKey].revenue += sale.subtotal;
+    dailySalesData[dateKey].quantity += sale.quantity;
   });
 
   // Ordenar por fecha y preparar datos para el gráfico
-  const sortedDates = Object.keys(dailySales).sort();
+  const sortedDates = Object.keys(dailySalesData).sort();
   const dates = sortedDates.map(date => {
     const d = new Date(date);
     const day = d.getDate().toString().padStart(2, '0');
     const month = (d.getMonth() + 1).toString().padStart(2, '0');
     return `${day}/${month}`;
   });
-  const revenues = sortedDates.map(date => dailySales[date].revenue);
+  const revenues = sortedDates.map(date => dailySalesData[date].revenue);
 
   const useGrayScale = colorPalette.length === 0;
   const barColor = useGrayScale ? 'rgba(255, 255, 255, 0.35)' : colorPalette[0];
@@ -735,8 +735,8 @@ export function DailySalesChart({ transactions, colorPalette = [] }: DailySalesC
         const dateIndex = params[0].dataIndex;
         const dateKey = sortedDates[dateIndex];
         return `<strong>${params[0].name}</strong><br/>
-                Ingresos: ${formatCurrency(dailySales[dateKey].revenue)}<br/>
-                Tickets: ${dailySales[dateKey].quantity}`;
+                Ingresos: ${formatCurrency(dailySalesData[dateKey].revenue)}<br/>
+                Tickets: ${dailySalesData[dateKey].quantity}`;
       }
     },
     grid: {

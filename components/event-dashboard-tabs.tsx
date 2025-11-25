@@ -6,43 +6,43 @@ import { EventBorderaux } from "@/components/event-borderaux";
 import { EventWebAnalytics } from "@/components/event-web-analytics";
 import { useEventTabs } from "@/contexts/event-tabs-context";
 
-interface Transaction {
+interface Sale {
   id: string;
   quantity: number;
-  total: number;
-  price: number;
-  status: string;
-  created_at: string;
-  type: string;
-  ticket_name: string;
-  event_name: string;
-  user_fullname: string;
-  user_email: string;
-  promoter_fullname: string;
-  promoter_email: string;
-  cash?: boolean;
-  variable_fee: number;
-  tax: number;
-  order_id: string;
-  bold_id: string | null;
-  bold_fecha: string | null;
-  bold_estado: string | null;
-  bold_metodo_pago: string | null;
-  bold_valor_compra?: number | null;
-  bold_propina?: number | null;
-  bold_iva?: number | null;
-  bold_impoconsumo?: number | null;
-  bold_valor_total?: number | null;
-  bold_rete_fuente?: number | null;
-  bold_rete_iva?: number | null;
-  bold_rete_ica?: number | null;
-  bold_comision_porcentaje?: number | null;
-  bold_comision_fija?: number | null;
-  bold_total_deduccion?: number | null;
-  bold_deposito_cuenta?: number | null;
-  bold_banco?: string | null;
-  bold_franquicia?: string | null;
-  bold_pais_tarjeta?: string | null;
+  subtotal: number;
+  pricePerTicket: number;
+  paymentStatus: string;
+  createdAt: string;
+  platform: string; // 'web' | 'app' | 'cash'
+  ticketTypeName: string;
+  eventName?: string;
+  userFullname: string;
+  userEmail: string;
+  promoterFullname?: string;
+  promoterEmail?: string;
+  isCash?: boolean;
+  variableFee?: number;
+  tax?: number;
+  orderId?: string;
+  boldId?: string | null;
+  boldFecha?: string | null;
+  boldEstado?: string | null;
+  boldMetodoPago?: string | null;
+  boldValorCompra?: number | null;
+  boldPropina?: number | null;
+  boldIva?: number | null;
+  boldImpoconsumo?: number | null;
+  boldValorTotal?: number | null;
+  boldReteFuente?: number | null;
+  boldReteIva?: number | null;
+  boldReteIca?: number | null;
+  boldComisionPorcentaje?: number | null;
+  boldComisionFija?: number | null;
+  boldTotalDeduccion?: number | null;
+  boldDepositoCuenta?: number | null;
+  boldBanco?: string | null;
+  boldFranquicia?: string | null;
+  boldPaisTarjeta?: string | null;
 }
 
 interface Ticket {
@@ -56,7 +56,7 @@ interface Ticket {
 interface EventDashboardTabsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   financialReport: any;
-  transactions: Transaction[];
+  sales: Sale[];
   tickets: Ticket[];
   eventId: string;
   eventName: string;
@@ -67,7 +67,7 @@ interface EventDashboardTabsProps {
 
 export function EventDashboardTabs({
   financialReport,
-  transactions,
+  sales,
   tickets,
   eventId,
   eventName,
@@ -163,7 +163,7 @@ export function EventDashboardTabs({
       {activeTab === "dashboard" && (
         <EventDashboard
           financialReport={financialReport}
-          transactions={transactions}
+          sales={sales}
           tickets={tickets}
           chartColor={chartColor}
           colorPalette={colorOptions.find(c => c.value === chartColor)?.colors || colorOptions[0].colors}
@@ -173,7 +173,7 @@ export function EventDashboardTabs({
       {activeTab === "borderaux" && (
         <EventBorderaux
           financialReport={financialReport}
-          transactions={transactions}
+          sales={sales}
           tickets={tickets}
         />
       )}
@@ -183,7 +183,7 @@ export function EventDashboardTabs({
           eventId={eventId}
           eventName={eventName}
           eventFlyer={eventFlyer}
-          transactions={transactions}
+          sales={sales}
         />
       )}
     </>

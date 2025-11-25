@@ -100,6 +100,7 @@ export const paymentStatus = pgEnum("payment_status", [
   "cancelled",
   "refunded",
 ]);
+export const orderFrom = pgEnum("order_from", ["cash", "web", "app"]);
 export const privacyType = pgEnum("privacy_type", ["public", "private"]);
 export const refundStatus = pgEnum("refund_status", [
   "pending",
@@ -744,6 +745,7 @@ export const orders = pgTable(
     paymentStatus: orderPaymentStatus("payment_status")
       .notNull()
       .default("pending"),
+    platform: orderFrom("platform").notNull().default("cash"), // 'web' | 'app' | 'cash'
     paymentSessionId: text("payment_session_id"), // Stripe/Mercado Pago session ID
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -872,3 +874,4 @@ export type TicketType = InferSelectModel<typeof ticketTypes>;
 export type Order = InferSelectModel<typeof orders>;
 export type Ticket = InferSelectModel<typeof tickets>;
 export type Reservation = InferSelectModel<typeof reservations>;
+export type orderItem = InferSelectModel<typeof orderItems>

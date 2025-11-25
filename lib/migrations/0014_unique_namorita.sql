@@ -1,0 +1,1 @@
+ALTER TABLE "orders" RENAME COLUMN "order_from" TO "platform";
