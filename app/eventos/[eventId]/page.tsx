@@ -199,7 +199,6 @@ export default async function EventPage({ params }: EventPageProps) {
               <TicketsContainer
                 tickets={event.tickets}
                 eventId={event.id}
-                variableFee={event.variableFee ? parseFloat(event.variableFee) : undefined}
               />
             </div>
           </div>

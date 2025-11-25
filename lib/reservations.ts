@@ -179,6 +179,7 @@ export async function createReservation(
  *
  * @param reservationId - Reservation UUID
  * @param paymentSessionId - Mercado Pago preference ID (for idempotency)
+ * @param platform - Platform where purchase was made ('web' | 'app' | 'cash')
  * @returns Order details with ticket IDs
  *
  * @throws Error if:
@@ -188,13 +189,15 @@ export async function createReservation(
  */
 export async function convertReservationToOrder(
   reservationId: string,
-  paymentSessionId?: string
+  paymentSessionId?: string,
+  platform: "web" | "app" | "cash" = "web"
 ): Promise<OrderResult> {
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("convert_reservation_to_order", {
     p_reservation_id: reservationId,
     p_payment_session_id: paymentSessionId || null,
+    p_platform: platform,
   });
 
   if (error) {

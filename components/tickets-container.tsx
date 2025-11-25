@@ -21,13 +21,11 @@ import { useRouter } from "next/navigation";
 interface TicketsContainerProps {
   tickets: TicketType[];
   eventId: string;
-  variableFee?: number;
 }
 
 export function TicketsContainer({
   tickets,
   eventId,
-  variableFee,
 }: TicketsContainerProps) {
   const [ticketSelections, setTicketSelections] = useState<
     Record<string, number>
@@ -138,7 +136,6 @@ export function TicketsContainer({
         <TicketSummaryDrawer
           user={userData}
           eventId={eventId}
-          variable_fee={variableFee || 0.05}
           tickets={ticketsWithCount}
           total={totalPrice}
           open={showSummaryDrawer}

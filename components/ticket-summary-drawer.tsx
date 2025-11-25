@@ -30,10 +30,8 @@ interface TicketSummaryDrawerProps {
   eventId: string;
   tickets: TicketWithCount[];
   total: number;
-  variable_fee?: number;
   open: boolean;
   close: () => void;
-  sellerUid?: string;
 }
 
 const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
@@ -41,7 +39,6 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   eventId,
   tickets,
   total,
-  variable_fee,
   close,
   open,
 }) => {
@@ -55,10 +52,6 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // These values will be validated with the server before the User buys
-  const serviceFee = total * (variable_fee ?? 0.05);
-  const iva = serviceFee * 0.19;
-  const finalTotal = Math.ceil(total + serviceFee + iva);
 
   const handlePayment = async () => {
     setIsProcessing(true);
@@ -143,39 +136,14 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
             )}
           </div>
 
-          <div className="border-t pt-4 space-y-2">
+          <div className="border-t pt-4">
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">
-                Carrito de compra
-              </span>
-              <span className="text-sm font-semibold" suppressHydrationWarning>
-                ${total.toLocaleString("es-CO")}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">
-                Tarifa de servicio
-              </span>
-              <span className="text-sm font-semibold" suppressHydrationWarning>
-                ${Math.round(serviceFee).toLocaleString("es-CO")}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">IVA (19%)</span>
-              <span className="text-sm font-semibold" suppressHydrationWarning>
-                ${Math.round(iva).toLocaleString("es-CO")}
-              </span>
-            </div>
-
-            <div className="flex justify-between pt-2 border-t">
               <span className="text-lg font-bold">Total</span>
               <span
                 className="text-lg font-bold text-primary"
                 suppressHydrationWarning
               >
-                ${finalTotal.toLocaleString("es-CO")}
+                ${total.toLocaleString("es-CO")}
               </span>
             </div>
           </div>

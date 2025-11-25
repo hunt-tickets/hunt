@@ -49,10 +49,11 @@ export async function POST(request: Request) {
       return new Response(null, { status: 200 });
     }
 
-    // Extract reservation ID from metadata
+    // Extract reservation ID and platform from metadata
     const reservationId = payment.metadata?.reservation_id as
       | string
       | undefined;
+    const platform = (payment.metadata?.platform as "web" | "app" | "cash") || "web";
 
     if (!reservationId) {
       console.error("[Webhook] No reservation_id in payment metadata");
@@ -66,7 +67,8 @@ export async function POST(request: Request) {
 
     const order = await convertReservationToOrder(
       reservationId,
-      payment.id?.toString() // Use payment ID as idempotency key
+      payment.id?.toString(), // Use payment ID as idempotency key
+      platform
     );
 
     console.log("[Webhook] Order created:", order.order_id);

@@ -4,8 +4,8 @@ import { headers } from "next/headers";
 import { createReservation, type CartItem } from "@/lib/reservations";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { db } from "@/lib/drizzle";
-import { paymentProcessorAccount, events } from "@/lib/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { paymentProcessorAccount, events, ticketTypes } from "@/lib/schema";
+import { eq, and, sql, inArray } from "drizzle-orm";
 
 // ============================================================================
 // Helper: Calculate Marketplace Fee
@@ -102,21 +102,33 @@ export async function POST(request: NextRequest) {
       accessToken: mpCredentials.accessToken,
     });
 
-    // 8. Build preference items from reservation
-    const preferenceItems = items.map((item) => ({
-      id: item.ticket_type_id,
-      title: `Entrada - ${item.ticket_type_id.substring(0, 8)}`,
-      quantity: item.quantity,
-      unit_price:
-        reservation.total_amount /
-        items.reduce((sum, i) => sum + i.quantity, 0),
-      currency_id: "COP",
-    }));
+    // 8. Fetch ticket types to get prices and names
+    const ticketTypeIds = items.map((item) => item.ticket_type_id);
+    const ticketTypesData = await db
+      .select({ id: ticketTypes.id, name: ticketTypes.name, price: ticketTypes.price })
+      .from(ticketTypes)
+      .where(inArray(ticketTypes.id, ticketTypeIds));
 
-    // 9. Calculate marketplace fee
+    const ticketTypeMap = new Map(
+      ticketTypesData.map((tt) => [tt.id, tt])
+    );
+
+    // 9. Build preference items with actual prices
+    const preferenceItems = items.map((item) => {
+      const tt = ticketTypeMap.get(item.ticket_type_id);
+      return {
+        id: item.ticket_type_id,
+        title: tt?.name || `Entrada`,
+        quantity: item.quantity,
+        unit_price: Math.round(Number(tt?.price || 0)),
+        currency_id: "COP",
+      };
+    });
+
+    // 10. Calculate marketplace fee
     const marketplaceFee = calculateMarketplaceFee(reservation.total_amount);
 
-    // 10. Create Mercado Pago preference
+    // 11. Create Mercado Pago preference
     const appUrl = process.env.APP_URL || "http://localhost:3000";
 
     const preference = await new Preference(mercadopago).create({
@@ -134,6 +146,7 @@ export async function POST(request: NextRequest) {
           event_id: eventId,
           user_id: userId,
           organization_id: organizationId,
+          platform: "web",
         },
         expires: true,
         expiration_date_from: new Date().toISOString(),

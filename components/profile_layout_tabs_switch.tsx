@@ -13,7 +13,7 @@ const ProfileTabs = () => {
 
   // Determine current tab from pathname
   const getCurrentTab = () => {
-    if (pathname.includes("/tickets")) return "tickets";
+    if (pathname.includes("/entradas")) return "entradas";
     if (pathname.includes("/organizaciones")) return "organizaciones";
     if (pathname.includes("/soporte")) return "soporte";
     if (pathname.includes("/ajustes")) return "ajustes";
@@ -39,7 +39,7 @@ const ProfileTabs = () => {
 
   const tabs = [
     { value: "general", icon: User, label: "General" },
-    { value: "tickets", icon: Ticket, label: "Entradas" },
+    { value: "entradas", icon: Ticket, label: "Entradas" },
     { value: "organizaciones", icon: Building2, label: "Organizaciones" },
     { value: "soporte", icon: HelpCircle, label: "Soporte" },
     { value: "ajustes", icon: Settings, label: "Ajustes" },
