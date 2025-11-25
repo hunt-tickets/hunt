@@ -78,7 +78,7 @@ export function AdminEventsList({ events, userId, eventVenues = [], organization
               date={event.date ? event.date.toISOString() : ""}
               location={`${event.venue_name || "Sin venue"}, ${event.venue_city || "Sin ciudad"}`}
               image={event.flyer || "/placeholder.svg"}
-              href={`/profile/${userId}/administrador/event/${event.id}`}
+              href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${event.id}`}
               onClick={handleEventClick}
             />
           ))}

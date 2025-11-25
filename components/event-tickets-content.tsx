@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ticket, HelpCircle, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CreateTicketDialog } from "@/components/create-ticket-dialog";
+import { CreateTicketTypeDialog } from "@/components/create-ticket-type-dialog";
 import { EditTicketSheet } from "@/components/edit-ticket-sheet";
 import { ChannelSalesChart, TicketRevenueDistributionChart } from "@/components/event-charts";
 import { SendCourtesyDialog } from "@/components/send-courtesy-dialog";
@@ -97,7 +97,7 @@ export function EventTicketsContent({
         </div>
         <div className="flex items-center gap-2">
           <SendCourtesyDialog eventId={eventId} />
-          <CreateTicketDialog eventId={eventId} ticketTypes={ticketTypes} />
+          <CreateTicketTypeDialog eventId={eventId} />
           <Button
             size="sm"
             variant="outline"

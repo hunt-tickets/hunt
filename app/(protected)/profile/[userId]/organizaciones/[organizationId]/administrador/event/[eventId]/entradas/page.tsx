@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { EventTicketsContent } from "@/components/event-tickets-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
+import { getEventTicketTypes } from "@/lib/supabase/actions/events";
 
 interface EntradasPageProps {
   params: Promise<{
@@ -109,12 +110,12 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     },
   };
 
-  // Mock ticket types - In production, fetch from database
-  const ticketTypes = [
-    { id: "type-1", name: "General" },
-    { id: "type-2", name: "VIP" },
-    { id: "type-3", name: "Palco" },
-  ];
+  // Fetch ticket types from database
+  const dbTicketTypes = await getEventTicketTypes(eventId);
+  const ticketTypes = dbTicketTypes.map((tt) => ({
+    id: tt.id,
+    name: tt.name,
+  }));
 
   return (
     <>

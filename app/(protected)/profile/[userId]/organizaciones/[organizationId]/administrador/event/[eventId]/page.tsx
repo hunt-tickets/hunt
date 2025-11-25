@@ -55,14 +55,36 @@ export default async function EventFinancialPage({ params }: EventPageProps) {
   // Mock financial report - In production, fetch from database
   const financialReport = {
     timestamp: new Date().toISOString(),
-    totalRevenue: 5000000,
-    totalTicketsSold: 100,
-    platformFee: 400000,
-    netRevenue: 4600000,
-    ticketBreakdown: [
-      { ticketName: "General", ticketsSold: 60, revenue: 3000000 },
-      { ticketName: "VIP", ticketsSold: 40, revenue: 2000000 },
-    ],
+    channels_total: 7000000,
+    tickets_sold: {
+      total: 100,
+      app: 60,
+      web: 30,
+      cash: 10,
+    },
+    settlement_amount: 6300000,
+    app_total: 4200000,
+    web_total: 2100000,
+    cash_total: 700000,
+    total_tax: 560000,
+    hunt_sales: {
+      price: 6000000,
+      tax: 480000,
+      variable_fee: 520000,
+      total: 6300000,
+    },
+    producer_sales: {
+      price: 700000,
+      tax: 0,
+      variable_fee: 0,
+      total: 700000,
+    },
+    global_calculations: {
+      ganancia_bruta_hunt: 520000,
+      deducciones_bold_total: 50000,
+      impuesto_4x1000: 2800,
+      ganancia_neta_hunt: 467200,
+    },
   };
 
   // Mock transactions - In production, fetch from database

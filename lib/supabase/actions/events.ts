@@ -783,6 +783,131 @@ export async function addArtistToEvent(eventId: string, artistId: string) {
   return { success: true, message: "Artista agregado exitosamente" };
 }
 
+// Ticket Type Form State
+export type TicketTypeFormState = {
+  errors?: {
+    name?: string[];
+    description?: string[];
+    price?: string[];
+    capacity?: string[];
+    minPerOrder?: string[];
+    maxPerOrder?: string[];
+    saleStart?: string[];
+    saleEnd?: string[];
+  };
+  message?: string;
+  success?: boolean;
+};
+
+/**
+ * Creates a new ticket type for an event
+ * @param eventId - The UUID of the event
+ * @param formData - The ticket type form data
+ * @returns TicketTypeFormState with success/error information
+ */
+export async function createTicketType(
+  eventId: string,
+  formData: {
+    name: string;
+    description?: string;
+    price: number;
+    capacity: number;
+    minPerOrder?: number;
+    maxPerOrder?: number;
+    saleStart?: string;
+    saleEnd?: string;
+  }
+): Promise<TicketTypeFormState> {
+  const supabase = await createClient();
+
+  // Validate required fields
+  if (!formData.name || formData.name.trim() === "") {
+    return {
+      errors: { name: ["El nombre es requerido"] },
+      message: "El nombre es requerido",
+      success: false,
+    };
+  }
+
+  if (formData.price < 0) {
+    return {
+      errors: { price: ["El precio debe ser mayor o igual a 0"] },
+      message: "El precio debe ser mayor o igual a 0",
+      success: false,
+    };
+  }
+
+  if (formData.capacity < 1) {
+    return {
+      errors: { capacity: ["La capacidad debe ser al menos 1"] },
+      message: "La capacidad debe ser al menos 1",
+      success: false,
+    };
+  }
+
+  try {
+    const { error } = await supabase.from("ticket_types").insert({
+      event_id: eventId,
+      name: formData.name.trim(),
+      description: formData.description?.trim() || null,
+      price: formData.price.toFixed(2),
+      capacity: formData.capacity,
+      min_per_order: formData.minPerOrder || 1,
+      max_per_order: formData.maxPerOrder || 10,
+      sale_start: formData.saleStart || null,
+      sale_end: formData.saleEnd || null,
+    });
+
+    if (error) {
+      console.error("Error creating ticket type:", error);
+      return {
+        message: `Error: ${error.message || "Error al crear el tipo de entrada"}`,
+        success: false,
+      };
+    }
+
+    revalidatePath(`/profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId]/entradas`, "page");
+
+    return {
+      message: "Tipo de entrada creado exitosamente",
+      success: true,
+    };
+  } catch (error) {
+    console.error("Unexpected error creating ticket type:", error);
+    return {
+      message: "Error inesperado al crear el tipo de entrada",
+      success: false,
+    };
+  }
+}
+
+/**
+ * Fetches all ticket types for an event
+ * @param eventId - The UUID of the event
+ * @returns Array of ticket types
+ */
+export async function getEventTicketTypes(eventId: string) {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("ticket_types")
+      .select("*")
+      .eq("event_id", eventId)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching ticket types:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Unexpected error fetching ticket types:", error);
+    return [];
+  }
+}
+
 export async function updateEventConfiguration(eventId: string, formData: {
   name?: string;
   description?: string;
