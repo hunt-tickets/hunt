@@ -5,11 +5,11 @@ import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
 import { Filter } from "lucide-react";
-import type { MockEvent } from "@/lib/db/mock-db";
+import type { PopularEventWithVenue } from "@/lib/supabase/actions/events";
 
 interface EventsWithSearchProps {
   // All events from server
-  events: MockEvent[];
+  events: PopularEventWithVenue[];
   // Number of events to display in grid
   limit?: number;
 }

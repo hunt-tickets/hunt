@@ -961,3 +961,90 @@ export async function updateEventConfiguration(eventId: string, formData: {
 
   return { success: true, message: "Configuración actualizada exitosamente" };
 }
+
+/**
+ * Event with venue information for the popular events display
+ */
+export type PopularEventWithVenue = {
+  id: string;
+  name: string | null;
+  description: string | null;
+  date: Date | null;
+  endDate: Date | null;
+  status: boolean | null;
+  flyer: string | null;
+  venue_name: string;
+  venue_city: string;
+};
+
+/**
+ * Fetches popular/active events from the database for the home page
+ * Returns events that are active and haven't ended yet, ordered by priority and date
+ */
+export async function getPopularEvents(limit: number = 12): Promise<PopularEventWithVenue[]> {
+  const supabase = await createClient();
+
+  try {
+    const now = new Date().toISOString();
+
+    const { data: events, error } = await supabase
+      .from("events")
+      .select(`
+        id,
+        name,
+        description,
+        date,
+        end_date,
+        status,
+        flyer,
+        priority,
+        venues (
+          name,
+          city
+        )
+      `)
+      .eq("status", true)
+      .or(`end_date.gte.${now},end_date.is.null`)
+      .order("priority", { ascending: false })
+      .order("date", { ascending: true })
+      .limit(limit);
+
+    console.log("[getPopularEvents] Query executed:", {
+      now,
+      eventCount: events?.length ?? 0,
+      error: error?.message,
+    });
+
+    if (error) {
+      console.error("Error fetching popular events:", error);
+      return [];
+    }
+
+    // Transform the data to flatten venue info and match expected type
+    const eventsWithVenue: PopularEventWithVenue[] = (events || []).map((event) => {
+      // Handle venue data - Supabase returns object for single FK relation, array for many
+      // TypeScript infers array, but runtime is object for one-to-one (event.venueId -> venues.id)
+      const venueData = event.venues as unknown;
+      const venue = Array.isArray(venueData)
+        ? (venueData[0] as { name: string | null; city: string | null } | undefined)
+        : (venueData as { name: string | null; city: string | null } | null);
+
+      return {
+        id: event.id,
+        name: event.name,
+        description: event.description,
+        date: event.date ? new Date(event.date) : null,
+        endDate: event.end_date ? new Date(event.end_date) : null,
+        status: event.status,
+        flyer: event.flyer,
+        venue_name: venue?.name || "Venue",
+        venue_city: venue?.city || "Ciudad",
+      };
+    });
+
+    return eventsWithVenue;
+  } catch (error) {
+    console.error("Unexpected error fetching popular events:", error);
+    return [];
+  }
+}

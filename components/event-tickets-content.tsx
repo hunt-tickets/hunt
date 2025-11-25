@@ -10,19 +10,19 @@ import { EditTicketSheet } from "@/components/edit-ticket-sheet";
 import { ChannelSalesChart, TicketRevenueDistributionChart } from "@/components/event-charts";
 import { SendCourtesyDialog } from "@/components/send-courtesy-dialog";
 
-interface TicketType {
+interface TicketTypeFilter {
   id: string;
   name: string;
 }
 
-interface TicketData {
+interface TicketTypeData {
   id: string;
   created_at: string;
   name: string;
   description: string | null;
   price: number;
-  max_date: string | null;
-  quantity: number;
+  max_date: string | null; // Maps to saleEnd
+  quantity: number; // Maps to capacity
   reference: string | null;
   status: boolean;
   section: string | null;
@@ -38,7 +38,7 @@ interface TicketData {
   } | null;
 }
 
-interface TicketAnalytics {
+interface TicketTypeAnalytics {
   ticketId: string;
   app: { quantity: number; total: number };
   web: { quantity: number; total: number };
@@ -48,9 +48,9 @@ interface TicketAnalytics {
 
 interface EventTicketsContentProps {
   eventId: string;
-  tickets: TicketData[];
-  ticketsAnalytics?: Record<string, TicketAnalytics>;
-  ticketTypes: TicketType[];
+  tickets: TicketTypeData[];
+  ticketsAnalytics?: Record<string, TicketTypeAnalytics>;
+  ticketTypes: TicketTypeFilter[];
   variableFee: number;
 }
 

@@ -802,6 +802,7 @@ export const tickets = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     qrCode: text("qr_code").notNull().unique(),
+    platform: orderFrom("platform").notNull().default("cash"), // 'web' | 'app' | 'cash'
     status: ticketStatus("status").notNull().default("valid"),
     scannedAt: timestamp("scanned_at", { withTimezone: true }),
     scannedBy: text("scanned_by").references(() => user.id),
@@ -874,4 +875,4 @@ export type TicketType = InferSelectModel<typeof ticketTypes>;
 export type Order = InferSelectModel<typeof orders>;
 export type Ticket = InferSelectModel<typeof tickets>;
 export type Reservation = InferSelectModel<typeof reservations>;
-export type orderItem = InferSelectModel<typeof orderItems>
+export type orderItem = InferSelectModel<typeof orderItems>;

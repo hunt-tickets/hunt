@@ -3,12 +3,13 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { EventTicketsContent } from "@/components/event-tickets-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
-import { getEventTicketTypes } from "@/lib/supabase/actions/events";
+import { createClient } from "@/lib/supabase/server";
 
 interface EntradasPageProps {
   params: Promise<{
     eventId: string;
     userId: string;
+    organizationId: string;
   }>;
 }
 
@@ -24,95 +25,147 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     redirect("/sign-in");
   }
 
-  // Mock: Get user profile to verify admin/producer access
-  const profile = {
-    id: userId,
-    admin: true,
-    producers_admin: [{ producer_id: "mock-producer-1" }],
-  };
+  const supabase = await createClient();
 
-  const producersAdmin = Array.isArray(profile?.producers_admin)
-    ? profile.producers_admin
-    : profile?.producers_admin
-    ? [profile.producers_admin]
-    : [];
-  const isProducer = producersAdmin.length > 0;
+  // Fetch event with ticket_types and orders with order_items
+  const { data: event } = await supabase
+    .from("events")
+    .select(
+      `
+      id,
+      name,
+      status,
+      variable_fee,
+      ticket_types (
+        id,
+        name,
+        description,
+        price,
+        capacity,
+        sold_count,
+        reserved_count,
+        min_per_order,
+        max_per_order,
+        sale_start,
+        sale_end,
+        created_at
+      ),
+      orders (
+        id,
+        platform,
+        payment_status,
+        order_items (
+          id,
+          ticket_type_id,
+          quantity,
+          price_per_ticket,
+          subtotal
+        )
+      )
+    `
+    )
+    .eq("id", eventId)
+    .single();
 
-  if (!profile?.admin && !isProducer) {
+  if (!event) {
     notFound();
   }
 
-  // Mock event data - In production, fetch from database
-  const event = {
-    id: eventId,
-    name: "Concierto de Rock",
-    status: true,
-    variable_fee: 8,
-  };
+  const ticketTypes = event.ticket_types || [];
+  const orders = event.orders || [];
 
-  // Mock tickets - In production, fetch from database
-  const tickets = [
+  // Calculate analytics per ticket type and platform
+  // Only count items from paid orders
+  const paidOrders = orders.filter((order) => order.payment_status === "paid");
+
+  // Build analytics map: ticketTypeId -> { app, web, cash, total }
+  const analyticsMap: Record<
+    string,
     {
-      id: "ticket-1",
-      created_at: new Date().toISOString(),
-      name: "General",
-      price: 50000,
-      description: "Entrada general",
-      max_date: null,
-      quantity: 100,
-      reference: null,
-      status: true,
-      section: null,
-      row: null,
-      seat: null,
-      palco: null,
-      capacity: null,
-      hex: null,
-      family: null,
-      ticket_type: { id: "type-1", name: "General" },
-    },
+      ticketTypeId: string;
+      app: { quantity: number; total: number };
+      web: { quantity: number; total: number };
+      cash: { quantity: number; total: number };
+      total: { quantity: number; total: number };
+    }
+  > = {};
+
+  // Initialize analytics for each ticket type
+  ticketTypes.forEach((tt) => {
+    analyticsMap[tt.id] = {
+      ticketTypeId: tt.id,
+      app: { quantity: 0, total: 0 },
+      web: { quantity: 0, total: 0 },
+      cash: { quantity: 0, total: 0 },
+      total: { quantity: 0, total: 0 },
+    };
+  });
+
+  // Aggregate order items by ticket type and platform
+  paidOrders.forEach((order) => {
+    const platform = order.platform as "app" | "web" | "cash";
+    const orderItems = order.order_items || [];
+
+    orderItems.forEach((item) => {
+      const ticketTypeId = item.ticket_type_id;
+      if (!analyticsMap[ticketTypeId]) return;
+
+      const quantity = item.quantity;
+      const subtotal = parseFloat(item.subtotal);
+
+      // Add to platform-specific totals
+      analyticsMap[ticketTypeId][platform].quantity += quantity;
+      analyticsMap[ticketTypeId][platform].total += subtotal;
+
+      // Add to overall totals
+      analyticsMap[ticketTypeId].total.quantity += quantity;
+      analyticsMap[ticketTypeId].total.total += subtotal;
+    });
+  });
+
+  // Transform ticket types to match component interface
+  // The component expects the legacy TicketData interface, so we map to it
+  const ticketTypesForComponent = ticketTypes.map((tt) => ({
+    id: tt.id,
+    created_at: tt.created_at,
+    name: tt.name,
+    description: tt.description,
+    price: parseFloat(tt.price),
+    max_date: tt.sale_end, // Map sale_end to max_date for display
+    quantity: tt.capacity, // Map capacity to quantity (available tickets)
+    reference: null,
+    status: true, // Ticket types don't have status, assume active
+    section: null,
+    row: null,
+    seat: null,
+    palco: null,
+    capacity: tt.capacity,
+    hex: null,
+    family: null,
+    ticket_type: null, // Self-reference not needed for ticket types view
+  }));
+
+  // Transform analytics to match component interface
+  const ticketTypesAnalytics: Record<
+    string,
     {
-      id: "ticket-2",
-      created_at: new Date().toISOString(),
-      name: "VIP",
-      price: 100000,
-      description: "Entrada VIP",
-      max_date: null,
-      quantity: 50,
-      reference: null,
-      status: true,
-      section: null,
-      row: null,
-      seat: null,
-      palco: null,
-      capacity: null,
-      hex: null,
-      family: null,
-      ticket_type: { id: "type-2", name: "VIP" },
-    },
-  ];
+      ticketId: string;
+      app: { quantity: number; total: number };
+      web: { quantity: number; total: number };
+      cash: { quantity: number; total: number };
+      total: { quantity: number; total: number };
+    }
+  > = {};
 
-  // Mock ticket analytics - In production, fetch from database
-  const ticketsAnalytics = {
-    "ticket-1": {
-      ticketId: "ticket-1",
-      total: { quantity: 60, total: 3000000 },
-      app: { quantity: 40, total: 2000000 },
-      web: { quantity: 20, total: 1000000 },
-      cash: { quantity: 0, total: 0 },
-    },
-    "ticket-2": {
-      ticketId: "ticket-2",
-      total: { quantity: 40, total: 4000000 },
-      app: { quantity: 25, total: 2500000 },
-      web: { quantity: 15, total: 1500000 },
-      cash: { quantity: 0, total: 0 },
-    },
-  };
+  Object.entries(analyticsMap).forEach(([ticketTypeId, analytics]) => {
+    ticketTypesAnalytics[ticketTypeId] = {
+      ticketId: ticketTypeId,
+      ...analytics,
+    };
+  });
 
-  // Fetch ticket types from database
-  const dbTicketTypes = await getEventTicketTypes(eventId);
-  const ticketTypes = dbTicketTypes.map((tt) => ({
+  // Build ticket types list for filter tabs
+  const ticketTypesList = ticketTypes.map((tt) => ({
     id: tt.id,
     name: tt.name,
   }));
@@ -121,7 +174,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     <>
       {/* Sticky Header */}
       <EventStickyHeader
-        eventName={event.name}
+        eventName={event.name || "Evento"}
         subtitle="Gestión de Entradas"
       />
 
@@ -129,10 +182,10 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
       <div className="px-3 py-3 sm:px-6 sm:py-4">
         <EventTicketsContent
           eventId={eventId}
-          tickets={tickets || []}
-          ticketsAnalytics={ticketsAnalytics || undefined}
-          ticketTypes={ticketTypes || []}
-          variableFee={event.variable_fee || 0}
+          tickets={ticketTypesForComponent}
+          ticketsAnalytics={ticketTypesAnalytics}
+          ticketTypes={ticketTypesList}
+          variableFee={parseFloat(event.variable_fee || "0")}
         />
       </div>
     </>
