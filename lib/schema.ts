@@ -868,6 +868,7 @@ export const schema = {
 };
 
 // Inferred types from Drizzle schema
+export type User = InferSelectModel<typeof user>;
 export type Event = InferSelectModel<typeof events>;
 export type NewEvent = InferInsertModel<typeof events>;
 export type Venue = InferSelectModel<typeof venues>;

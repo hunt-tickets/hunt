@@ -1009,12 +1009,6 @@ export async function getPopularEvents(limit: number = 12): Promise<PopularEvent
       .order("date", { ascending: true })
       .limit(limit);
 
-    console.log("[getPopularEvents] Query executed:", {
-      now,
-      eventCount: events?.length ?? 0,
-      error: error?.message,
-    });
-
     if (error) {
       console.error("Error fetching popular events:", error);
       return [];
@@ -1046,5 +1040,155 @@ export async function getPopularEvents(limit: number = 12): Promise<PopularEvent
   } catch (error) {
     console.error("Unexpected error fetching popular events:", error);
     return [];
+  }
+}
+
+/**
+ * Full event details type for the event detail page
+ */
+export type EventDetail = {
+  id: string;
+  name: string | null;
+  description: string | null;
+  date: Date | null;
+  endDate: Date | null;
+  status: boolean | null;
+  flyer: string | null;
+  age: string | null;
+  variableFee: string | null;
+  venue_name: string;
+  venue_city: string;
+  venue_address: string | null;
+  venue_latitude: string | null;
+  venue_longitude: string | null;
+  hour: string;
+  end_hour: string;
+  tickets: {
+    id: string;
+    eventId: string;
+    name: string;
+    description: string | null;
+    price: string;
+    capacity: number;
+    soldCount: number;
+    reservedCount: number;
+    minPerOrder: number;
+    maxPerOrder: number;
+    saleStart: Date | null;
+    saleEnd: Date | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+  }[];
+};
+
+/**
+ * Fetches a single event by ID with all details for the event page
+ */
+export async function getEventById(eventId: string): Promise<{ data: EventDetail | null; error: { message: string } | null }> {
+  const supabase = await createClient();
+
+  try {
+    const { data: event, error } = await supabase
+      .from("events")
+      .select(`
+        id,
+        name,
+        description,
+        date,
+        end_date,
+        status,
+        flyer,
+        age,
+        variable_fee,
+        venues (
+          name,
+          city,
+          address,
+          latitude,
+          longitude
+        ),
+        ticket_types (
+          id,
+          name,
+          description,
+          price,
+          capacity,
+          sold_count,
+          reserved_count,
+          min_per_order,
+          max_per_order,
+          sale_start,
+          sale_end,
+          created_at,
+          updated_at
+        )
+      `)
+      .eq("id", eventId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching event by ID:", error);
+      return { data: null, error: { message: error.message } };
+    }
+
+    if (!event) {
+      return { data: null, error: { message: "Event not found" } };
+    }
+
+    // Handle venue data
+    const venueData = event.venues as unknown;
+    const venue = Array.isArray(venueData)
+      ? (venueData[0] as { name: string | null; city: string | null; address: string | null; latitude: string | null; longitude: string | null } | undefined)
+      : (venueData as { name: string | null; city: string | null; address: string | null; latitude: string | null; longitude: string | null } | null);
+
+    // Handle ticket types
+    const ticketTypesData = event.ticket_types as unknown;
+    const ticketTypes = Array.isArray(ticketTypesData) ? ticketTypesData : [];
+
+    // Format hours from date
+    const formatHour = (date: string | null): string => {
+      if (!date) return "--:--";
+      return new Date(date).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    };
+
+    const eventDetail: EventDetail = {
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      date: event.date ? new Date(event.date) : null,
+      endDate: event.end_date ? new Date(event.end_date) : null,
+      status: event.status,
+      flyer: event.flyer,
+      age: event.age,
+      variableFee: event.variable_fee,
+      venue_name: venue?.name || "Venue",
+      venue_city: venue?.city || "Ciudad",
+      venue_address: venue?.address || null,
+      venue_latitude: venue?.latitude || null,
+      venue_longitude: venue?.longitude || null,
+      hour: formatHour(event.date),
+      end_hour: formatHour(event.end_date),
+      tickets: ticketTypes.map((t: Record<string, unknown>) => ({
+        id: t.id as string,
+        eventId: event.id,
+        name: t.name as string,
+        description: t.description as string | null,
+        price: t.price as string,
+        capacity: t.capacity as number,
+        soldCount: t.sold_count as number,
+        reservedCount: t.reserved_count as number,
+        minPerOrder: t.min_per_order as number,
+        maxPerOrder: t.max_per_order as number,
+        saleStart: t.sale_start ? new Date(t.sale_start as string) : null,
+        saleEnd: t.sale_end ? new Date(t.sale_end as string) : null,
+        createdAt: new Date(t.created_at as string),
+        updatedAt: t.updated_at ? new Date(t.updated_at as string) : null,
+      })),
+    };
+
+    return { data: eventDetail, error: null };
+  } catch (error) {
+    console.error("Unexpected error fetching event:", error);
+    return { data: null, error: { message: "Unexpected error" } };
   }
 }

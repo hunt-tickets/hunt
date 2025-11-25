@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getEventById } from "@/lib/db/mock-db";
+import { getEventById } from "@/lib/supabase/actions/events";
 import { ShareButton } from "@/components/share-button";
 import { TicketsContainer } from "@/components/tickets-container";
 

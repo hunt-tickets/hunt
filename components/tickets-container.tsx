@@ -138,7 +138,7 @@ export function TicketsContainer({
         <TicketSummaryDrawer
           user={userData}
           eventId={eventId}
-          variable_fee={variableFee || 0.16}
+          variable_fee={variableFee || 0.05}
           tickets={ticketsWithCount}
           total={totalPrice}
           open={showSummaryDrawer}

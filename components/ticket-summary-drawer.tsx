@@ -12,26 +12,23 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import type { TicketType } from "@/lib/schema";
-// import { useBoldCheckout } from "@/hooks/useBoldCheckout"; // Temporarily disabled
-
-interface User {
-  id: string;
-  email: string;
-  phone?: string;
-  name?: string;
-  lastName?: string;
-  document_type_id?: string;
-  document_id?: string;
-}
 
 interface TicketWithCount extends TicketType {
   count: number;
 }
 
+// Simplified user type for checkout - only fields we actually need
+interface CheckoutUser {
+  id: string;
+  email: string;
+  name?: string;
+  phone?: string;
+}
+
 interface TicketSummaryDrawerProps {
-  user: User;
+  user: CheckoutUser;
   eventId: string;
-  variable_fee: number;
+  variable_fee?: number;
   tickets: TicketWithCount[];
   total: number;
   open: boolean;
@@ -45,31 +42,31 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   total,
   open,
   close,
-  // eventId and sellerUid temporarily unused - needed when payment is re-enabled
-  // eventId,
-  // sellerUid,
+  user,
+  eventId,
 }) => {
+  if (!user) {
+    console.log(
+      "userId not passed as prop; can't trust the User is signed-in."
+    );
+    close();
+  }
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  // These values will be validated with the server before the User buys
   const serviceFee = total * (variable_fee ?? 0.16);
   const iva = serviceFee * 0.19;
   const finalTotal = Math.ceil(total + serviceFee + iva);
-
-  // openCheckout temporarily unused - needed when payment is re-enabled
-  // const { openCheckout } = useBoldCheckout();
 
   const handlePayment = async () => {
     setIsProcessing(true);
     setError(null);
 
     try {
-      // TODO: Payment API routes were deleted during refactoring
-      // Need to recreate /api/transactions/create route for payment processing
-      setError("Payment functionality is temporarily disabled");
-
-      /* COMMENTED OUT - API route /api/transactions/create was deleted
+      console.log(eventId);
+      /* API route /api/validate/create was deleted
       // Create ticket selections object from tickets array
       const ticketSelections: Record<string, number> = {};
       tickets.forEach((ticket) => {
@@ -154,7 +151,10 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
                       className="text-sm font-semibold"
                       suppressHydrationWarning
                     >
-                      ${(ticket.count * parseFloat(ticket.price)).toLocaleString("es-CO")}
+                      $
+                      {(ticket.count * parseFloat(ticket.price)).toLocaleString(
+                        "es-CO"
+                      )}
                     </span>
                   </div>
                 )
