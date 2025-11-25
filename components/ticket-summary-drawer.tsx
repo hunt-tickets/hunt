@@ -12,6 +12,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import type { TicketType } from "@/lib/schema";
+import { checkoutAction } from "@/actions/checkout";
 
 interface TicketWithCount extends TicketType {
   count: number;
@@ -28,22 +29,22 @@ interface CheckoutUser {
 interface TicketSummaryDrawerProps {
   user: CheckoutUser;
   eventId: string;
-  variable_fee?: number;
   tickets: TicketWithCount[];
   total: number;
+  variable_fee?: number;
   open: boolean;
   close: () => void;
   sellerUid?: string;
 }
 
 const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
-  variable_fee,
-  tickets,
-  total,
-  open,
-  close,
   user,
   eventId,
+  tickets,
+  total,
+  variable_fee,
+  close,
+  open,
 }) => {
   if (!user) {
     console.log(
@@ -56,7 +57,7 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   const [isMobile, setIsMobile] = useState(false);
 
   // These values will be validated with the server before the User buys
-  const serviceFee = total * (variable_fee ?? 0.16);
+  const serviceFee = total * (variable_fee ?? 0.05);
   const iva = serviceFee * 0.19;
   const finalTotal = Math.ceil(total + serviceFee + iva);
 
@@ -64,52 +65,28 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
     setIsProcessing(true);
     setError(null);
 
+    const items = tickets
+      .filter((t) => t.count > 0)
+      .map((t) => ({ ticket_type_id: t.id, quantity: t.count }));
+
     try {
-      console.log(eventId);
-      /* API route /api/validate/create was deleted
-      // Create ticket selections object from tickets array
-      const ticketSelections: Record<string, number> = {};
-      tickets.forEach((ticket) => {
-        if (ticket.count > 0) {
-          ticketSelections[ticket.id] = ticket.count;
-        }
-      });
+      const response = await checkoutAction(eventId, items);
 
-      // Call API route to create transaction
-      const response = await fetch("/api/transactions/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          eventId,
-          ticketSelections,
-          variableFee: variable_fee,
-          sellerUid,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success || !result.boldCheckoutData) {
-        throw new Error(result.error || "Error al crear la transacción");
+      if (!response.success || !response.checkoutUrl) {
+        setError(response.error || "Error al procesar el pago");
+        setIsProcessing(false);
+        return;
       }
-      console.log(result);
 
-      // Open Bold checkout with server-generated data
-      await openCheckout(result.boldCheckoutData);
-
-      // Close the drawer after opening checkout
-      close();
-      */
-    } catch (err) {
-      console.error("Error al procesar el pago:", err);
+      // Redirect to MercadoPago checkout
+      window.location.href = response.checkoutUrl;
+    } catch (error) {
+      console.error("Payment error:", error);
       setError(
-        err instanceof Error
-          ? err.message
+        error instanceof Error
+          ? error.message
           : "Error al procesar el pago. Por favor intenta nuevamente."
       );
-    } finally {
       setIsProcessing(false);
     }
   };
