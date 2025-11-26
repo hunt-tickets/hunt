@@ -146,44 +146,92 @@ export function TicketsContainer({
       <div className="space-y-4 sm:space-y-6">
         {/* Tickets list */}
         <div className="space-y-3">
-          {tickets.map((ticket) => (
-            <div
-              key={ticket.id}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-border hover:border-primary/50 transition-colors"
-            >
-              {/* Ticket info - responsive layout */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-base sm:text-lg mb-1">
-                  {ticket.name}
-                </h3>
-                {ticket.description && (
-                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
-                    {ticket.description}
-                  </p>
-                )}
-              </div>
+          {tickets.map((ticket) => {
+            const available = ticket.capacity - ticket.soldCount - ticket.reservedCount;
+            const maxPerOrder = ticket.maxPerOrder ?? 10;
+            const minPerOrder = ticket.minPerOrder ?? 1;
+            const effectiveMax = Math.min(maxPerOrder, available);
+            const isSoldOut = available <= 0;
 
-              {/* Price and quantity selector - responsive layout */}
-              <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                <div className="text-left sm:text-right">
-                  <p
-                    className="text-lg sm:text-xl lg:text-2xl font-bold"
-                    suppressHydrationWarning
-                  >
-                    ${parseFloat(ticket.price).toLocaleString("es-CO")}
-                  </p>
+            return (
+              <div
+                key={ticket.id}
+                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-colors ${
+                  isSoldOut
+                    ? "border-border/50 opacity-60"
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                {/* Ticket info - responsive layout */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-base sm:text-lg">
+                      {ticket.name}
+                    </h3>
+                    {isSoldOut && (
+                      <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
+                        Agotado
+                      </span>
+                    )}
+                  </div>
+                  {ticket.description && (
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
+                      {ticket.description}
+                    </p>
+                  )}
+                  {/* Show constraints */}
+                  {!isSoldOut && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {maxPerOrder < 10 && (
+                        <span className="text-xs text-muted-foreground">
+                          Máx. {maxPerOrder} por orden
+                        </span>
+                      )}
+                      {minPerOrder > 1 && (
+                        <span className="text-xs text-muted-foreground">
+                          {maxPerOrder < 10 ? "• " : ""}Mín. {minPerOrder}
+                        </span>
+                      )}
+                      {available <= 10 && available > 0 && (
+                        <span className="text-xs text-amber-600 dark:text-amber-400">
+                          {maxPerOrder < 10 || minPerOrder > 1 ? "• " : ""}
+                          ¡Solo {available} disponible{available !== 1 ? "s" : ""}!
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Client island: Quantity selector with local state */}
-                <TicketQuantitySelector
-                  ticketId={ticket.id}
-                  price={parseFloat(ticket.price)}
-                  maxQuantity={10}
-                  onQuantityChange={handleQuantityChange}
-                />
+                {/* Price and quantity selector - responsive layout */}
+                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                  <div className="text-left sm:text-right">
+                    <p
+                      className="text-lg sm:text-xl lg:text-2xl font-bold"
+                      suppressHydrationWarning
+                    >
+                      ${parseFloat(ticket.price).toLocaleString("es-CO")}
+                    </p>
+                  </div>
+
+                  {/* Client island: Quantity selector with local state */}
+                  {!isSoldOut ? (
+                    <TicketQuantitySelector
+                      ticketId={ticket.id}
+                      price={parseFloat(ticket.price)}
+                      maxQuantity={effectiveMax}
+                      onQuantityChange={handleQuantityChange}
+                    />
+                  ) : (
+                    <div className="min-w-[100px] text-center">
+                      <span className="text-sm text-muted-foreground">
+                        No disponible
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Terms and conditions checkbox */}
