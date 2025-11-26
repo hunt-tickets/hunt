@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Minus, Plus, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { translateError } from "@/lib/error-messages";
 
 interface TicketType {
   id: string;
@@ -109,12 +110,12 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
         setEmail("");
         setQuantities({});
       } else {
-        setResult({ success: false, message: data.error });
+        setResult({ success: false, message: translateError(data.error) });
       }
     } catch {
       setResult({
         success: false,
-        message: "Error al procesar la venta. Intenta de nuevo.",
+        message: translateError("Error al procesar la venta. Intenta de nuevo."),
       });
     } finally {
       setIsLoading(false);

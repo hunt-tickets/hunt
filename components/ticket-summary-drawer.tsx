@@ -12,6 +12,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import type { TicketType } from "@/lib/schema";
+import { translateError } from "@/lib/error-messages";
 
 interface TicketWithCount extends TicketType {
   count: number;
@@ -71,7 +72,7 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
       const response = await res.json();
 
       if (!response.success || !response.checkoutUrl) {
-        setError(response.error || "Error al procesar el pago");
+        setError(translateError(response.error || "Error al procesar el pago"));
         setIsProcessing(false);
         return;
       }
@@ -81,9 +82,11 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
     } catch (error) {
       console.error("Payment error:", error);
       setError(
-        error instanceof Error
-          ? error.message
-          : "Error al procesar el pago. Por favor intenta nuevamente."
+        translateError(
+          error instanceof Error
+            ? error.message
+            : "Error al procesar el pago. Por favor intenta nuevamente."
+        )
       );
       setIsProcessing(false);
     }

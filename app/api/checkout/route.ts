@@ -175,8 +175,17 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Checkout error:", error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : "Error al procesar el checkout";
+    // Handle PostgreSQL errors (from Supabase RPC)
+    let errorMessage = "Error al procesar el checkout";
+
+    if (error && typeof error === "object") {
+      // PostgreSQL/Supabase error format
+      if ("message" in error && typeof error.message === "string") {
+        errorMessage = error.message;
+      }
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
 
     return NextResponse.json(
       { success: false, error: errorMessage },
