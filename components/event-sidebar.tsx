@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ticket, Settings, Users, ArrowLeft, TrendingUp, ScanLine, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, Ticket, Settings, Users, ArrowLeft, TrendingUp, ScanLine, ShoppingCart, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
@@ -38,6 +38,12 @@ const menuItems = [
     icon: ShoppingCart,
     href: "/ventas",
     description: "Vendedores y transacciones",
+  },
+  {
+    title: "Vender",
+    icon: Banknote,
+    href: "/vender",
+    description: "Venta en efectivo",
   },
   {
     title: "Control de Acceso",
