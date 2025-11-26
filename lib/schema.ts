@@ -740,7 +740,8 @@ export const orders = pgTable(
       .references(() => events.id, { onDelete: "cascade" }),
     totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
     currency: text("currency").notNull().default("COP"),
-    netAmount: decimal("net_amount", { precision: 10, scale: 2 }), // Amount org receives after fees
+    marketplaceFee: decimal("marketplace_fee", { precision: 10, scale: 2 }), // Hunt's fee
+    processorFee: decimal("processor_fee", { precision: 10, scale: 2 }), // Mercado Pago's fee
     paymentStatus: orderPaymentStatus("payment_status")
       .notNull()
       .default("pending"),

@@ -120,6 +120,20 @@
       "when": 1764124954804,
       "tag": "0016_bored_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1764174234220,
+      "tag": "0017_lush_justice",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1764174892631,
+      "tag": "0018_massive_rocket_raccoon",
+      "breakpoints": true
     }
   ]
 }

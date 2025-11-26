@@ -42,6 +42,9 @@ export async function POST(request: Request) {
 
     console.log("[Webhook] Payment status:", payment.status);
     console.log("[Webhook] Payment metadata:", payment.metadata);
+    console.log("[Webhook] Payment fee_details:", JSON.stringify(payment.fee_details, null, 2));
+    console.log("[Webhook] Payment transaction_amount:", payment.transaction_amount);
+    console.log("[Webhook] Payment net_amount:", payment.net_amount);
 
     // Only process approved payments
     if (payment.status !== "approved") {
@@ -55,7 +58,11 @@ export async function POST(request: Request) {
       | undefined;
     const platform = (payment.metadata?.platform as "web" | "app" | "cash") || "web";
     const currency = payment.currency_id || "COP";
-    const netAmount = payment.net_amount || payment.transaction_amount || 0;
+
+    // Extract fees from fee_details
+    const feeDetails = payment.fee_details || [];
+    const processorFee = feeDetails.find((f) => f.type === "mercadopago_fee")?.amount || 0;
+    const marketplaceFee = feeDetails.find((f) => f.type === "application_fee")?.amount || 0;
 
     if (!reservationId) {
       console.error("[Webhook] No reservation_id in payment metadata");
@@ -72,7 +79,8 @@ export async function POST(request: Request) {
       payment.id?.toString(), // Use payment ID as idempotency key
       platform,
       currency,
-      netAmount
+      marketplaceFee,
+      processorFee
     );
 
     console.log("[Webhook] Order created:", order.order_id);

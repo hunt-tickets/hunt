@@ -192,7 +192,8 @@ export async function convertReservationToOrder(
   paymentSessionId?: string,
   platform: "web" | "app" | "cash" = "web",
   currency: string = "COP",
-  netAmount: number = 0
+  marketplaceFee: number = 0,
+  processorFee: number = 0
 ): Promise<OrderResult> {
   const supabase = await createClient();
 
@@ -201,7 +202,8 @@ export async function convertReservationToOrder(
     p_payment_session_id: paymentSessionId || null,
     p_platform: platform,
     p_currency: currency,
-    p_net_amount: netAmount,
+    p_marketplace_fee: marketplaceFee,
+    p_processor_fee: processorFee,
   });
 
   if (error) {
