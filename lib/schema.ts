@@ -367,6 +367,9 @@ export const invitation = pgTable(
     status: text().default("pending").notNull(),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
     inviterId: text().notNull(),
+    createdAt: timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     foreignKey({

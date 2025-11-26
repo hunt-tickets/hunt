@@ -80,10 +80,10 @@ export default async function OrganizationPage({
       <main className="container mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 pt-24 pb-6 sm:pb-8">
         <div className="space-y-6">
           {/* Back button */}
-          <Link href="/profile">
+          <Link href={`/profile/${userId}/organizaciones`}>
             <Button variant="ghost" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Volver a perfil
+              Volver
             </Button>
           </Link>
 

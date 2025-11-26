@@ -1,0 +1,1 @@
+ALTER TABLE "invitation" ADD COLUMN "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL;
