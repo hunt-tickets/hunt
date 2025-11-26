@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ticket, Settings, Users, ArrowLeft, TrendingUp, ScanLine, ShoppingCart, Banknote } from "lucide-react";
+import { LayoutDashboard, Ticket, Settings, Users, ArrowLeft, ScanLine, ShoppingCart, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
@@ -20,12 +20,6 @@ const menuItems = [
     icon: LayoutDashboard,
     href: "",
     description: "Resumen financiero y estadísticas",
-  },
-  {
-    title: "Avances",
-    icon: TrendingUp,
-    href: "/avances",
-    description: "Progreso de ventas",
   },
   {
     title: "Entradas",
