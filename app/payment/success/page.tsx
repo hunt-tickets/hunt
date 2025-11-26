@@ -1,5 +1,7 @@
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 interface SuccessPageProps {
   searchParams: Promise<{
@@ -12,6 +14,12 @@ interface SuccessPageProps {
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const { payment_id, external_reference } = await searchParams;
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const userId = session?.user?.id;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -60,10 +68,10 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
           </div>
 
           <Link
-            href="/"
+            href={userId ? `/profile/${userId}/entradas` : "/"}
             className="block w-full bg-primary text-primary-foreground py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors font-medium"
           >
-            Volver al inicio
+            Ver mis entradas
           </Link>
         </div>
       </div>

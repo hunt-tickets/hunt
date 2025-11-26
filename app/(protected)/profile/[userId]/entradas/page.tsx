@@ -28,6 +28,7 @@ interface TicketData {
   orders: {
     id: string;
     total_amount: string;
+    currency: string;
     paid_at: string;
     events: {
       id: string;
@@ -68,7 +69,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
       created_at,
       order_id,
       ticket_types (id, name, price),
-      orders (id, total_amount, paid_at, events (id, name, date, venues (name, city)))
+      orders (id, total_amount, currency, paid_at, events (id, name, date, venues (name, city)))
     `
     )
     .eq("user_id", userId)
@@ -209,8 +210,8 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
                               $
                               {parseFloat(
                                 ticket.ticket_types?.price || "0"
-                              ).toLocaleString("es-MX")}{" "}
-                              MXN
+                              ).toLocaleString()}{" "}
+                              {ticket.orders?.currency || "COP"}
                             </span>
                           </div>
                           <div className="flex justify-between">

@@ -54,6 +54,8 @@ export async function POST(request: Request) {
       | string
       | undefined;
     const platform = (payment.metadata?.platform as "web" | "app" | "cash") || "web";
+    const currency = payment.currency_id || "COP";
+    const netAmount = payment.net_amount || payment.transaction_amount || 0;
 
     if (!reservationId) {
       console.error("[Webhook] No reservation_id in payment metadata");
@@ -68,7 +70,9 @@ export async function POST(request: Request) {
     const order = await convertReservationToOrder(
       reservationId,
       payment.id?.toString(), // Use payment ID as idempotency key
-      platform
+      platform,
+      currency,
+      netAmount
     );
 
     console.log("[Webhook] Order created:", order.order_id);
