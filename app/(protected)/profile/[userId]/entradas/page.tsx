@@ -18,6 +18,33 @@ interface EntradasPageProps {
   }>;
 }
 
+interface TicketData {
+  id: string;
+  qr_code: string;
+  status: string;
+  created_at: string;
+  order_id: string;
+  ticket_types: { id: string; name: string; price: string } | null;
+  orders: {
+    id: string;
+    total_amount: string;
+    paid_at: string;
+    events: {
+      id: string;
+      name: string;
+      date: string;
+      venues: { name: string; city: string } | null;
+    } | null;
+  } | null;
+}
+
+interface EventData {
+  id: string;
+  name: string;
+  date: string;
+  venues: { name: string; city: string } | null;
+}
+
 const EntradasPage = async ({ params }: EntradasPageProps) => {
   const { userId } = await params;
 
@@ -31,8 +58,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
 
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: tickets, error } = await supabase
+  const { data, error } = await supabase
     .from("tickets")
     .select(
       `
@@ -52,13 +78,13 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
     console.error("Error fetching tickets:", error);
   }
 
-  // Group tickets by event
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ticketsByEvent: Record<string, { event: any; tickets: any[] }> = {};
+  const tickets = (data ?? []) as unknown as TicketData[];
 
-  for (const ticket of tickets || []) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const event = (ticket as any).orders?.events;
+  // Group tickets by event
+  const ticketsByEvent: Record<string, { event: EventData | null; tickets: TicketData[] }> = {};
+
+  for (const ticket of tickets) {
+    const event = ticket.orders?.events ?? null;
     const eventId = event?.id || "unknown";
 
     if (!ticketsByEvent[eventId]) {
@@ -120,15 +146,12 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
                     {event?.date && (
                       <div className="flex items-center gap-1.5">
                         <Calendar className="h-4 w-4" />
-                        {new Date(event.date).toLocaleDateString(
-                          "es-MX",
-                          {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          }
-                        )}
+                        {new Date(event.date).toLocaleDateString("es-MX", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
                       </div>
                     )}
                     {event?.venues && (
@@ -141,8 +164,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {eventTickets.map((ticket: any, index: number) => (
+                  {eventTickets.map((ticket, index) => (
                     <Card key={ticket.id} className="overflow-hidden">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">

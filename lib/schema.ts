@@ -739,9 +739,8 @@ export const orders = pgTable(
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
     totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
-    serviceFee: decimal("service_fee", { precision: 10, scale: 2 })
-      .notNull()
-      .default("0"),
+    currency: text("currency").notNull().default("COP"),
+    netAmount: decimal("net_amount", { precision: 10, scale: 2 }), // Amount org receives after fees
     paymentStatus: orderPaymentStatus("payment_status")
       .notNull()
       .default("pending"),
