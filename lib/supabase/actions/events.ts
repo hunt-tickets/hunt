@@ -1083,56 +1083,53 @@ export type EventDetail = {
 
 /**
  * Fetches a single event by ID with all details for the event page
+ * Uses get_ticket_availability RPC for accurate ticket counts with lazy expiration
  */
 export async function getEventById(eventId: string): Promise<{ data: EventDetail | null; error: { message: string } | null }> {
   const supabase = await createClient();
 
   try {
-    const { data: event, error } = await supabase
-      .from("events")
-      .select(`
-        id,
-        name,
-        description,
-        date,
-        end_date,
-        status,
-        flyer,
-        age,
-        variable_fee,
-        venues (
-          name,
-          city,
-          address,
-          latitude,
-          longitude
-        ),
-        ticket_types (
+    // Fetch event data and ticket availability in parallel
+    const [eventResult, ticketResult] = await Promise.all([
+      supabase
+        .from("events")
+        .select(`
           id,
           name,
           description,
-          price,
-          capacity,
-          sold_count,
-          reserved_count,
-          min_per_order,
-          max_per_order,
-          sale_start,
-          sale_end,
-          created_at,
-          updated_at
-        )
-      `)
-      .eq("id", eventId)
-      .single();
+          date,
+          end_date,
+          status,
+          flyer,
+          age,
+          variable_fee,
+          venues (
+            name,
+            city,
+            address,
+            latitude,
+            longitude
+          )
+        `)
+        .eq("id", eventId)
+        .single(),
+      // Use RPC for accurate availability with lazy expiration
+      supabase.rpc("get_ticket_availability", { p_event_id: eventId }),
+    ]);
 
-    if (error) {
-      console.error("Error fetching event by ID:", error);
-      return { data: null, error: { message: error.message } };
+    if (eventResult.error) {
+      console.error("Error fetching event by ID:", eventResult.error);
+      return { data: null, error: { message: eventResult.error.message } };
     }
 
+    const event = eventResult.data;
     if (!event) {
       return { data: null, error: { message: "Event not found" } };
+    }
+
+    if (ticketResult.error) {
+      console.error("Error fetching ticket availability:", ticketResult.error);
+      // Continue without tickets rather than failing entirely
     }
 
     // Handle venue data
@@ -1141,9 +1138,8 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
       ? (venueData[0] as { name: string | null; city: string | null; address: string | null; latitude: string | null; longitude: string | null } | undefined)
       : (venueData as { name: string | null; city: string | null; address: string | null; latitude: string | null; longitude: string | null } | null);
 
-    // Handle ticket types
-    const ticketTypesData = event.ticket_types as unknown;
-    const ticketTypes = Array.isArray(ticketTypesData) ? ticketTypesData : [];
+    // Handle ticket types from RPC result
+    const ticketTypes = ticketResult.data || [];
 
     // Format hours from date
     const formatHour = (date: string | null): string => {
@@ -1169,9 +1165,9 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
       hour: formatHour(event.date),
       end_hour: formatHour(event.end_date),
       tickets: ticketTypes.map((t: Record<string, unknown>) => ({
-        id: t.id as string,
+        id: t.ticket_type_id as string,
         eventId: event.id,
-        name: t.name as string,
+        name: t.ticket_name as string,
         description: t.description as string | null,
         price: t.price as string,
         capacity: t.capacity as number,
@@ -1181,8 +1177,8 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
         maxPerOrder: t.max_per_order as number,
         saleStart: t.sale_start ? new Date(t.sale_start as string) : null,
         saleEnd: t.sale_end ? new Date(t.sale_end as string) : null,
-        createdAt: new Date(t.created_at as string),
-        updatedAt: t.updated_at ? new Date(t.updated_at as string) : null,
+        createdAt: new Date(),
+        updatedAt: null,
       })),
     };
 
