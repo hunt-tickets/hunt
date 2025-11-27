@@ -5,10 +5,10 @@ import type { NextRequest } from "next/server";
 
 const redis = Redis.fromEnv();
 
-// 5 checkout attempts per 10 minutes per IP
+// 2 checkout attempts per 5 minutes per IP
 const checkoutLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(5, "10 m"),
+  limiter: Ratelimit.slidingWindow(2, "5 m"),
   prefix: "ratelimit:checkout",
 });
 
@@ -17,7 +17,8 @@ export async function middleware(request: NextRequest) {
 
   // Rate limit checkout endpoint
   if (path === "/api/checkout") {
-    const ip = request.ip ?? request.headers.get("x-forwarded-for") ?? "unknown";
+    const forwarded = request.headers.get("x-forwarded-for");
+    const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
 
     const { success, remaining, reset } = await checkoutLimiter.limit(ip);
 
