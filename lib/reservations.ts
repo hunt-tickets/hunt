@@ -112,7 +112,7 @@ export async function createReservation(
   const supabase = await createClient();
 
   try {
-    const { data, error } = await supabase.rpc("create_reservation", {
+    const { data, error } = await supabase.rpc("create_reservation_v2", {
       p_user_id: userId,
       p_event_id: eventId,
       p_items: items,
