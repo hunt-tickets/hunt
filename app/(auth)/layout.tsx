@@ -10,7 +10,7 @@ export default function AuthLayout({
 
       {/* Optional overlay pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.3)_100%)]" />
-      <div className="relative h-screen flex items-center justify-center px-4 py-4">
+      <div className="relative h-screen flex items-center justify-center px-4 pt-20 pb-4">
         <div className="w-full max-w-lg h-full max-h-screen overflow-hidden flex flex-col justify-center">
           {children}
         </div>
