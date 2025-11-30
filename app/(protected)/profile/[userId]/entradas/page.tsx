@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Ticket } from "lucide-react";
+import { QRCode } from "@/components/ui/qr-code";
 
 interface EntradasPageProps {
   params: Promise<{
@@ -183,12 +184,9 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
                       <CardContent className="space-y-4">
                         <div className="flex justify-center">
                           <div className="bg-white p-3 rounded-lg">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ticket.qr_code)}`}
-                              alt={`QR Code entrada ${index + 1}`}
-                              width={180}
-                              height={180}
+                            <QRCode
+                              value={ticket.qr_code}
+                              size={180}
                               className="rounded"
                             />
                           </div>
