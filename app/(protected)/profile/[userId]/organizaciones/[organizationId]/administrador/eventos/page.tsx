@@ -1,6 +1,9 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { db } from "@/lib/drizzle";
+import { member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 import {
   Card,
   CardContent,
@@ -27,44 +30,41 @@ interface AdministradorPageProps {
 
 const AdministradorPage = async ({ params }: AdministradorPageProps) => {
   const { userId, organizationId } = await params;
+  const reqHeaders = await headers();
 
-  // Auth check using Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  // Auth check
+  const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
 
-  const user = session.user;
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
+  });
 
-  // Mock data for profile and producer
-  // In production, this would come from your database
-  const profile = {
-    id: user.id,
-    admin: true, // Mock: user is admin
-    producers_admin: [
-      {
-        producer_id: "mock-producer-1",
-        producers: {
-          id: "mock-producer-1",
-          name: "Mi Productora",
-          logo: null,
-          description: "Productora de eventos",
-        },
-      },
-    ],
-  };
-
-  const isProducer = (profile?.producers_admin?.length ?? 0) > 0;
-
-  // If not admin or producer, redirect
-  if (!profile?.admin && !isProducer) {
+  if (!memberRecord) {
     notFound();
   }
 
-  // Mock venues data
+  // Check if user can view/manage events (sellers cannot)
+  const canManageEvents = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { event: ["create"] },
+      organizationId,
+    },
+  });
+
+  if (!canManageEvents?.success) {
+    // Redirect sellers to their sales page
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
+  }
+
+  // Mock venues data - TODO: fetch from database
   const venues = [
     {
       id: "venue-1",
@@ -104,26 +104,24 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
       />
 
       {/* Organization Events */}
-      {(isProducer || profile?.admin) && (
-        <div className="space-y-4">
-          {organizationEvents.length > 0 ? (
-            <AdminEventsList events={organizationEvents} userId={userId} eventVenues={venues} organizationId={organizationId} />
-          ) : (
-            <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-              <CardContent className="pt-6">
-                <div className="text-center py-8">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Comienza creando tu primer evento para gestionar entradas y
-                    ventas
-                  </p>
-                  <CreateEventDialog eventVenues={venues} organizationId={organizationId} />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+      <div className="space-y-4">
+        {organizationEvents.length > 0 ? (
+          <AdminEventsList events={organizationEvents} userId={userId} eventVenues={venues} organizationId={organizationId} />
+        ) : (
+          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-4">
+                  Comienza creando tu primer evento para gestionar entradas y
+                  ventas
+                </p>
+                <CreateEventDialog eventVenues={venues} organizationId={organizationId} />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

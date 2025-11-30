@@ -3,58 +3,60 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { AdminConfigTabs } from "@/components/admin-config-tabs";
 import { db } from "@/lib/drizzle";
-import { paymentProcessorAccount } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { paymentProcessorAccount, member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 
 interface ConfiguracionPageProps {
   params: Promise<{
     userId: string;
+    organizationId: string;
   }>;
 }
 
 const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
-  const { userId } = await params;
+  const { userId, organizationId } = await params;
+  const reqHeaders = await headers();
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: reqHeaders,
   });
 
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
 
-  // Get user's organizations
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
   });
 
-  // Get the first organization (or selected from context/state)
-  // TODO: Implement organization selection from sidebar context
-  const selectedOrganization = organizations?.[0];
+  if (!memberRecord) {
+    notFound();
+  }
 
-  if (!selectedOrganization) {
-    // No organization available
-    return (
-      <div className="px-3 py-3 sm:px-6 sm:py-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <h3 className="text-lg font-semibold text-white mb-2">
-            No tienes organizaciones
-          </h3>
-          <p className="text-sm text-white/60 max-w-md">
-            Crea una organización desde la página de organizaciones para acceder a la configuración
-          </p>
-        </div>
-      </div>
-    );
+  // Check if user can view dashboard (sellers cannot access configuration)
+  const canViewDashboard = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { dashboard: ["view"] },
+      organizationId,
+    },
+  });
+
+  if (!canViewDashboard?.success) {
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
   }
 
   // Get full organization details with members and invitations
   const fullOrganization = await auth.api.getFullOrganization({
     query: {
-      organizationId: selectedOrganization.id,
+      organizationId,
     },
-    headers: await headers(),
+    headers: reqHeaders,
   });
 
   if (!fullOrganization) {
@@ -65,7 +67,7 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   const paymentAccounts = await db
     .select()
     .from(paymentProcessorAccount)
-    .where(eq(paymentProcessorAccount.organizationId, selectedOrganization.id));
+    .where(eq(paymentProcessorAccount.organizationId, organizationId));
 
   // Get current user's role in the organization
   const currentUserMember = fullOrganization.members?.find(

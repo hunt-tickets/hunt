@@ -193,7 +193,8 @@ export async function convertReservationToOrder(
   platform: "web" | "app" | "cash" = "web",
   currency: string = "COP",
   marketplaceFee: number = 0,
-  processorFee: number = 0
+  processorFee: number = 0,
+  soldBy?: string // For cash sales: the seller who made the sale
 ): Promise<OrderResult> {
   const supabase = await createClient();
 
@@ -204,6 +205,7 @@ export async function convertReservationToOrder(
     p_currency: currency,
     p_marketplace_fee: marketplaceFee,
     p_processor_fee: processorFee,
+    p_sold_by: soldBy || null,
   });
 
   if (error) {
@@ -215,6 +217,7 @@ export async function convertReservationToOrder(
   }
 
   const result = data[0];
+
   return {
     order_id: result.order_id,
     ticket_ids: result.ticket_ids || [],

@@ -12,58 +12,70 @@ interface EventSidebarProps {
   organizationId: string;
   eventId: string;
   eventName: string;
+  role?: "owner" | "administrator" | "seller";
 }
 
+// Menu items with role requirements
 const menuItems = [
   {
     title: "Dashboard",
     icon: LayoutDashboard,
     href: "",
     description: "Resumen financiero y estadísticas",
+    requiredRoles: ["owner", "administrator"],
   },
   {
     title: "Entradas",
     icon: Ticket,
     href: "/entradas",
     description: "Gestiona tipos de entrada",
+    requiredRoles: ["owner", "administrator"],
   },
   {
     title: "Ventas",
     icon: ShoppingCart,
     href: "/ventas",
     description: "Vendedores y transacciones",
+    requiredRoles: ["owner", "administrator"],
   },
   {
     title: "Vender",
     icon: Banknote,
     href: "/vender",
     description: "Venta en efectivo",
+    requiredRoles: ["owner", "administrator", "seller"], // All roles can sell
   },
   {
     title: "Control de Acceso",
     icon: ScanLine,
     href: "/accesos",
     description: "Gestión de códigos QR",
+    requiredRoles: ["owner", "administrator"],
   },
   {
     title: "Configuración",
     icon: Settings,
     href: "/configuracion",
     description: "Ajustes del evento",
+    requiredRoles: ["owner", "administrator"],
   },
   {
     title: "Equipo",
     icon: Users,
     href: "/equipo",
     description: "Productores y artistas",
+    requiredRoles: ["owner", "administrator"],
   },
 ];
 
-export function EventSidebar({ userId, organizationId, eventId, eventName }: EventSidebarProps) {
+export function EventSidebar({ userId, organizationId, eventId, eventName, role = "seller" }: EventSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
 
   const baseEventPath = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}`;
+
+  // Filter menu items based on role
+  const visibleMenuItems = menuItems.filter((item) => item.requiredRoles.includes(role));
 
   return (
     <>
@@ -95,7 +107,7 @@ export function EventSidebar({ userId, organizationId, eventId, eventName }: Eve
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1">
-            {menuItems.map((item) => {
+            {visibleMenuItems.map((item) => {
               const Icon = item.icon;
               const fullHref = `${baseEventPath}${item.href}`;
               const isActive = pathname === fullHref;
@@ -123,11 +135,15 @@ export function EventSidebar({ userId, organizationId, eventId, eventName }: Eve
           <div className="pt-4 border-t border-[#2a2a2a] space-y-1">
             <ThemeToggle />
             <Link
-              href={`/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`}
+              href={
+                role === "seller"
+                  ? `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
+                  : `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`
+              }
               className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Volver a Eventos
+              {role === "seller" ? "Volver a Mis Ventas" : "Volver a Eventos"}
             </Link>
           </div>
         </div>

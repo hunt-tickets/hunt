@@ -11,32 +11,53 @@ import { UserCircle, Users, Shield } from "lucide-react";
 import { UsersTable } from "@/components/users-table";
 import { AnalyticsCharts } from "@/components/analytics-charts";
 import { AdminHeader } from "@/components/admin-header";
+import { db } from "@/lib/drizzle";
+import { member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 
 interface UsuariosPageProps {
   params: Promise<{
     userId: string;
+    organizationId: string;
   }>;
 }
 
 const UsuariosPage = async ({ params }: UsuariosPageProps) => {
-  const { userId } = await params;
+  const { userId, organizationId } = await params;
+  const reqHeaders = await headers();
 
   // Auth check using Better Auth
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: reqHeaders,
   });
 
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
 
-  // Mock: Check if user is admin
-  const profile = {
-    admin: true, // In production, fetch from database
-  };
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
+  });
 
-  if (!profile?.admin) {
+  if (!memberRecord) {
     notFound();
+  }
+
+  // Check if user can view analytics (sellers cannot)
+  const canViewAnalytics = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { analytics: ["view"] },
+      organizationId,
+    },
+  });
+
+  if (!canViewAnalytics?.success) {
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
   }
 
   // Mock users data - In production, fetch from database

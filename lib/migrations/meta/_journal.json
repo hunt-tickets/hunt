@@ -141,6 +141,13 @@
       "when": 1764180417469,
       "tag": "0019_sturdy_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1764467451781,
+      "tag": "0020_tough_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

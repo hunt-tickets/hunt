@@ -10,13 +10,14 @@ interface EventLayoutWrapperProps {
   organizationId: string;
   eventId: string;
   eventName: string;
+  role?: "owner" | "administrator" | "seller";
 }
 
-export function EventLayoutWrapper({ children, userId, organizationId, eventId, eventName }: EventLayoutWrapperProps) {
+export function EventLayoutWrapper({ children, userId, organizationId, eventId, eventName, role = "seller" }: EventLayoutWrapperProps) {
   return (
     <EventTabsProvider>
       <div className="min-h-screen bg-background">
-        <EventSidebar userId={userId} organizationId={organizationId} eventId={eventId} eventName={eventName} />
+        <EventSidebar userId={userId} organizationId={organizationId} eventId={eventId} eventName={eventName} role={role} />
         <main className="min-h-screen">{children}</main>
       </div>
     </EventTabsProvider>

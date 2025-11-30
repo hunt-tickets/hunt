@@ -750,6 +750,7 @@ export const orders = pgTable(
       .default("pending"),
     platform: orderFrom("platform").notNull().default("cash"), // 'web' | 'app' | 'cash'
     paymentSessionId: text("payment_session_id"), // Stripe/Mercado Pago session ID
+    soldBy: text("sold_by").references(() => user.id, { onDelete: "set null" }), // For cash sales: the seller who made the sale
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -759,6 +760,7 @@ export const orders = pgTable(
     index("idx_orders_user").on(table.userId),
     index("idx_orders_event").on(table.eventId),
     index("idx_orders_payment_status").on(table.paymentStatus),
+    index("idx_orders_sold_by").on(table.soldBy),
   ]
 );
 

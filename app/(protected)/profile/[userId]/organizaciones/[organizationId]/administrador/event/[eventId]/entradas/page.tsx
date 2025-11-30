@@ -4,6 +4,9 @@ import { headers } from "next/headers";
 import { EventTicketsContent } from "@/components/event-tickets-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/drizzle";
+import { member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 
 interface EntradasPageProps {
   params: Promise<{
@@ -14,15 +17,38 @@ interface EntradasPageProps {
 }
 
 export default async function EntradasPage({ params }: EntradasPageProps) {
-  const { userId, eventId } = await params;
+  const { userId, eventId, organizationId } = await params;
+  const reqHeaders = await headers();
 
-  // Auth check using Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  // Auth check
+  const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
+  }
+
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
+  });
+
+  if (!memberRecord) {
+    notFound();
+  }
+
+  // Check if user can manage events (sellers cannot)
+  const canManageEvents = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { event: ["update"] },
+      organizationId,
+    },
+  });
+
+  if (!canManageEvents?.success) {
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`);
   }
 
   const supabase = await createClient();

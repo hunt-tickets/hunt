@@ -3,49 +3,72 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { EventAccessControlContent } from "@/components/event-access-control-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
+import { db } from "@/lib/drizzle";
+import { member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
+import { createClient } from "@/lib/supabase/server";
 
 interface AccesosPageProps {
   params: Promise<{
     eventId: string;
     userId: string;
+    organizationId: string;
   }>;
 }
 
 export default async function AccesosPage({ params }: AccesosPageProps) {
-  const { userId, eventId } = await params;
+  const { userId, eventId, organizationId } = await params;
+  const reqHeaders = await headers();
 
-  // Auth check using Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  // Auth check
+  const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
 
-  // Mock: Get user profile to verify admin/producer access
-  const profile = {
-    id: userId,
-    admin: true,
-    producers_admin: [{ producer_id: "mock-producer-1" }],
-  };
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
+  });
 
-  const producersAdmin = Array.isArray(profile?.producers_admin)
-    ? profile.producers_admin
-    : profile?.producers_admin
-    ? [profile.producers_admin]
-    : [];
-  const isProducer = producersAdmin.length > 0;
-
-  if (!profile?.admin && !isProducer) {
+  if (!memberRecord) {
     notFound();
   }
 
-  // Mock event data - In production, fetch from database
+  // Check if user can manage events (sellers cannot)
+  const canManageEvents = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { event: ["update"] },
+      organizationId,
+    },
+  });
+
+  if (!canManageEvents?.success) {
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`);
+  }
+
+  const supabase = await createClient();
+
+  // Fetch event data
+  const { data: eventData } = await supabase
+    .from("events")
+    .select("id, name, status")
+    .eq("id", eventId)
+    .eq("organization_id", organizationId)
+    .single();
+
+  if (!eventData) {
+    notFound();
+  }
+
   const event = {
-    id: eventId,
-    name: "Concierto de Rock",
-    status: true,
+    id: eventData.id,
+    name: eventData.name,
+    status: eventData.status,
   };
 
   // Mock access control data - In production, fetch from database

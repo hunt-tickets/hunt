@@ -107,7 +107,9 @@ export async function POST(request: NextRequest) {
       `cash-${Date.now()}`, // Unique payment session ID for cash
       "cash",
       "COP",
-      reservation.total_amount // net_amount = total_amount for cash (no fees)
+      0, // marketplaceFee
+      0, // processorFee
+      sellerId // Track which seller made this cash sale
     );
 
     return NextResponse.json({

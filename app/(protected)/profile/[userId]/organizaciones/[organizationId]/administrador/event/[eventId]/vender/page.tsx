@@ -18,12 +18,10 @@ interface VenderPageProps {
 
 export default async function VenderPage({ params }: VenderPageProps) {
   const { userId, eventId, organizationId } = await params;
+  const reqHeaders = await headers();
 
   // Auth check
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
@@ -37,6 +35,19 @@ export default async function VenderPage({ params }: VenderPageProps) {
   });
 
   if (!memberRecord) {
+    notFound();
+  }
+
+  // Check if user has permission to sell tickets
+  const canSell = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { event: ["sell"] },
+      organizationId,
+    },
+  });
+
+  if (!canSell?.success) {
     notFound();
   }
 

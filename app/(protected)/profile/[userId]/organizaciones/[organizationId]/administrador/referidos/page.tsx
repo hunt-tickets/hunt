@@ -3,45 +3,50 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { ReferralAdminContent } from "@/components/referral-admin-content";
 import { AdminHeader } from "@/components/admin-header";
+import { db } from "@/lib/drizzle";
+import { member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 
 interface ReferidosPageProps {
   params: Promise<{
     userId: string;
+    organizationId: string;
   }>;
 }
 
 export default async function ReferidosPage({ params }: ReferidosPageProps) {
-  const { userId } = await params;
+  const { userId, organizationId } = await params;
+  const reqHeaders = await headers();
 
-  // Auth check using Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  // Auth check
+  const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
 
-  // Mock: Get user profile to verify admin/producer access
-  const profile = {
-    id: userId,
-    admin: true,
-    producers_admin: [
-      {
-        producer_id: "mock-producer-1",
-      },
-    ],
-  };
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
+  });
 
-  const producersAdmin = Array.isArray(profile?.producers_admin)
-    ? profile.producers_admin
-    : profile?.producers_admin
-    ? [profile.producers_admin]
-    : [];
-  const isProducer = producersAdmin.length > 0;
-
-  if (!profile?.admin && !isProducer) {
+  if (!memberRecord) {
     notFound();
+  }
+
+  // Check if user has admin permissions (sellers cannot view referrals)
+  const canViewReferrals = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { dashboard: ["view"] },
+      organizationId,
+    },
+  });
+
+  if (!canViewReferrals?.success) {
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
   }
 
   return (

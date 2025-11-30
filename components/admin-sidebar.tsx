@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Settings, ArrowLeft, UserCircle, Tag, Gift, LayoutDashboard } from "lucide-react";
+import { Calendar, Settings, ArrowLeft, UserCircle, Gift, LayoutDashboard, Ticket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
@@ -10,8 +10,10 @@ import { useAdminMenu } from "@/contexts/admin-menu-context";
 interface AdminSidebarProps {
   userId: string;
   organizationId?: string;
+  role?: "owner" | "administrator" | "seller";
 }
 
+// Menu items with required permissions
 const primaryMenuItems = [
   {
     title: "Dashboard",
@@ -19,26 +21,33 @@ const primaryMenuItems = [
     href: "/administrador",
     description: "Resumen de la organización",
     exact: true,
+    requiredRoles: ["owner", "administrator"], // Sellers cannot see dashboard
   },
   {
     title: "Eventos",
     icon: Calendar,
     href: "/administrador/eventos",
     description: "Crea y gestiona eventos",
-    exact: false, // Will match /administrador/event/[id] too
-  },
-  {
-    title: "Marcas",
-    icon: Tag,
-    href: "/administrador/marcas",
-    description: "Gestiona productores y marcas",
-    exact: true,
+    exact: false,
+    requiredRoles: ["owner", "administrator"], // Sellers access events via /vender only
   },
   {
     title: "Referidos",
     icon: Gift,
     href: "/administrador/referidos",
     description: "Programa de referidos y comisiones",
+    exact: true,
+    requiredRoles: ["owner", "administrator"],
+  },
+];
+
+// Seller-specific menu items
+const sellerMenuItems = [
+  {
+    title: "Mis Ventas",
+    icon: Ticket,
+    href: "/administrador/mis-ventas",
+    description: "Ver mis ventas en efectivo",
     exact: true,
   },
 ];
@@ -50,6 +59,7 @@ const adminMenuItems = [
     href: "/administrador/usuarios",
     description: "Listado completo de usuarios",
     exact: true,
+    requiredRoles: ["owner", "administrator"],
   },
   {
     title: "Configuración",
@@ -57,12 +67,24 @@ const adminMenuItems = [
     href: "/administrador/configuracion",
     description: "Ajustes del sistema",
     exact: true,
+    requiredRoles: ["owner", "administrator"],
   },
 ];
 
-export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
+export function AdminSidebar({ userId, organizationId, role = "seller" }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
+
+  const isSeller = role === "seller";
+  const isAdminOrOwner = role === "owner" || role === "administrator";
+
+  // Filter menu items based on role
+  const visiblePrimaryItems = primaryMenuItems.filter(
+    (item) => item.requiredRoles.includes(role)
+  );
+  const visibleAdminItems = adminMenuItems.filter(
+    (item) => item.requiredRoles.includes(role)
+  );
 
   return (
     <>
@@ -91,8 +113,37 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1">
-            {/* Primary Menu Items */}
-            {primaryMenuItems.map((item) => {
+            {/* Seller-specific menu items */}
+            {isSeller && sellerMenuItems.map((item) => {
+              const Icon = item.icon;
+              const fullHref = organizationId
+                ? `/profile/${userId}/organizaciones/${organizationId}${item.href}`
+                : `/profile/${userId}${item.href}`;
+
+              const isActive = item.exact
+                ? pathname === fullHref
+                : pathname.includes(item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={fullHref}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
+                    isActive
+                      ? "bg-white/10 text-white border border-white/20"
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <div>{item.title}</div>
+                </Link>
+              );
+            })}
+
+            {/* Primary Menu Items (for admin/owner) */}
+            {visiblePrimaryItems.map((item) => {
               const Icon = item.icon;
               const fullHref = organizationId
                 ? `/profile/${userId}/organizaciones/${organizationId}${item.href}`
@@ -129,48 +180,49 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
               );
             })}
 
-            {/* Separator with "Administrador" label */}
-            <div className="py-4">
-              <div className="px-3 mb-2">
-                <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">
-                  Administrador
-                </span>
-              </div>
-              <div className="border-t border-white/10" />
-            </div>
+            {/* Admin section - only for admin/owner */}
+            {isAdminOrOwner && visibleAdminItems.length > 0 && (
+              <>
+                {/* Separator with "Administrador" label */}
+                <div className="py-4">
+                  <div className="px-3 mb-2">
+                    <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+                      Administrador
+                    </span>
+                  </div>
+                  <div className="border-t border-white/10" />
+                </div>
 
-            {/* Admin Menu Items */}
-            {adminMenuItems.map((item) => {
-              const Icon = item.icon;
-              const fullHref = organizationId
-                ? `/profile/${userId}/organizaciones/${organizationId}${item.href}`
-                : `/profile/${userId}${item.href}`;
+                {/* Admin Menu Items */}
+                {visibleAdminItems.map((item) => {
+                  const Icon = item.icon;
+                  const fullHref = organizationId
+                    ? `/profile/${userId}/organizaciones/${organizationId}${item.href}`
+                    : `/profile/${userId}${item.href}`;
 
-              // Check if current route matches this menu item
-              let isActive = false;
-              if (item.exact) {
-                isActive = pathname === fullHref;
-              } else {
-                isActive = pathname.includes(item.href);
-              }
+                  const isActive = item.exact
+                    ? pathname === fullHref
+                    : pathname.includes(item.href);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={fullHref}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
-                    isActive
-                      ? "bg-white/10 text-white border border-white/20"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
-                  )}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <div>{item.title}</div>
-                </Link>
-              );
-            })}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={fullHref}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
+                        isActive
+                          ? "bg-white/10 text-white border border-white/20"
+                          : "text-white/60 hover:text-white hover:bg-white/5"
+                      )}
+                    >
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <div>{item.title}</div>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
 
           {/* Footer */}

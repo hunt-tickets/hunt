@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import {
@@ -13,8 +13,8 @@ import { Building2, Calendar, Users } from "lucide-react";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import PaymentSettings from "@/components/organization-payment-accounts-settings";
 import { db } from "@/lib/drizzle";
-import { paymentProcessorAccount } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { paymentProcessorAccount, member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 import { AdminHeader } from "@/components/admin-header";
 
 export default async function OrganizationPage({
@@ -23,13 +23,44 @@ export default async function OrganizationPage({
   params: Promise<{ userId: string; organizationId: string }>;
 }) {
   const { userId, organizationId } = await params;
+  const reqHeaders = await headers();
+
+  // Auth check
+  const session = await auth.api.getSession({ headers: reqHeaders });
+  if (!session || session.user.id !== userId) {
+    redirect("/sign-in");
+  }
+
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
+  });
+
+  if (!memberRecord) {
+    notFound();
+  }
+
+  // Check dashboard permission - sellers cannot view dashboard
+  const canViewDashboard = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { dashboard: ["view"] },
+      organizationId,
+    },
+  });
+
+  if (!canViewDashboard?.success) {
+    // Redirect sellers to their sales page
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
+  }
 
   // Fetch full organization details
   const organization = await auth.api.getFullOrganization({
-    query: {
-      organizationId: organizationId,
-    },
-    headers: await headers(),
+    query: { organizationId },
+    headers: reqHeaders,
   });
 
   if (!organization) {
@@ -63,16 +94,20 @@ export default async function OrganizationPage({
     return roleMap[role] || role;
   };
 
-  // Get current user's role
-  const currentUserMember = organization.members?.find(
-    (m) => m.userId === userId
-  );
-  const currentUserRole = currentUserMember?.role || "member";
+  // Check permissions using Better Auth AC
+  const [canInviteResult, canManagePaymentResult] = await Promise.all([
+    auth.api.hasPermission({
+      headers: reqHeaders,
+      body: { permission: { invitation: ["create"] }, organizationId },
+    }),
+    auth.api.hasPermission({
+      headers: reqHeaders,
+      body: { permission: { payment: ["manage"] }, organizationId },
+    }),
+  ]);
 
-  // Check if user can invite members (owner or administrator)
-  const canInvite =
-    currentUserRole === "owner" || currentUserRole === "administrator";
-  const canManagePaymentProcessorAccount = currentUserRole === "owner";
+  const canInvite = canInviteResult?.success ?? false;
+  const canManagePaymentProcessorAccount = canManagePaymentResult?.success ?? false;
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">

@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { createClient } from "@/lib/supabase/server";
-import { orderItem } from "@/lib/schema";
+import { orderItem, member } from "@/lib/schema";
+import { db } from "@/lib/drizzle";
+import { eq, and } from "drizzle-orm";
 
 interface EventPageProps {
   params: Promise<{
@@ -18,14 +20,39 @@ interface EventPageProps {
 }
 
 export default async function EventDashboardPage({ params }: EventPageProps) {
-  const { userId, eventId } = await params;
+  const { userId, eventId, organizationId } = await params;
+  const reqHeaders = await headers();
 
-  // Auth check using Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  // Auth check
+  const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
+  }
+
+  // Verify user is a member of the organization
+  const memberRecord = await db.query.member.findFirst({
+    where: and(
+      eq(member.userId, userId),
+      eq(member.organizationId, organizationId)
+    ),
+  });
+
+  if (!memberRecord) {
+    notFound();
+  }
+
+  // Check if user can view dashboard (sellers cannot)
+  const canViewDashboard = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { dashboard: ["view"] },
+      organizationId,
+    },
+  });
+
+  if (!canViewDashboard?.success) {
+    // Redirect sellers to the vender page for this event
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`);
   }
 
   const supabase = await createClient();
