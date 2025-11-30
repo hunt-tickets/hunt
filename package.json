@@ -39,8 +39,6 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "drizzle-orm": "^0.44.7",
-    "echarts": "^5.6.0",
-    "echarts-for-react": "^3.0.2",
     "framer-motion": "^12.23.24",
     "gsap": "^3.13.0",
     "libphonenumber-js": "^1.12.29",

@@ -35,11 +35,9 @@ interface EventDashboardProps {
   financialReport: any;
   sales: Sale[];
   tickets: Ticket[];
-  chartColor?: string;
-  colorPalette?: string[];
 }
 
-export function EventDashboard({ financialReport, sales, tickets, colorPalette = [] }: EventDashboardProps) {
+export function EventDashboard({ financialReport, sales, tickets }: EventDashboardProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -97,7 +95,7 @@ export function EventDashboard({ financialReport, sales, tickets, colorPalette =
       </div>
 
       {/* Daily Sales Chart */}
-      <DailySalesChart sales={sales} colorPalette={colorPalette} />
+      <DailySalesChart sales={sales} />
 
       {/* Charts Section */}
       <div className="grid gap-4 md:grid-cols-2">
@@ -105,13 +103,11 @@ export function EventDashboard({ financialReport, sales, tickets, colorPalette =
           app={financialReport.tickets_sold.app}
           web={financialReport.tickets_sold.web}
           cash={financialReport.tickets_sold.cash}
-          colorPalette={colorPalette}
         />
         <RevenueByChannelChart
           appTotal={financialReport.app_total}
           webTotal={financialReport.web_total}
           cashTotal={financialReport.cash_total}
-          colorPalette={colorPalette}
         />
       </div>
 
@@ -119,7 +115,6 @@ export function EventDashboard({ financialReport, sales, tickets, colorPalette =
         visits={totalVisits}
         addedToCart={totalAddedToCart}
         completed={totalCompleted}
-        colorPalette={colorPalette}
       />
 
       {/* Sales Breakdown */}

@@ -165,8 +165,6 @@ export function EventDashboardTabs({
           financialReport={financialReport}
           sales={sales}
           tickets={tickets}
-          chartColor={chartColor}
-          colorPalette={colorOptions.find(c => c.value === chartColor)?.colors || colorOptions[0].colors}
         />
       )}
 

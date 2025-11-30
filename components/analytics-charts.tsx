@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AgeGroupData, GenderData } from "@/lib/supabase/actions/profile";
 import { Users, Ticket } from "lucide-react";
@@ -14,229 +12,36 @@ interface AnalyticsChartsProps {
 }
 
 const COLORS = [
-  "#8b5cf6", // purple
-  "#3b82f6", // blue
-  "#06b6d4", // cyan
-  "#10b981", // green
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#6b7280", // gray
+  "bg-violet-500",
+  "bg-blue-500",
+  "bg-cyan-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-red-500",
+  "bg-gray-500",
 ];
 
+const GENDER_COLORS: Record<string, string> = {
+  'Masculino': 'bg-blue-500',
+  'Femenino': 'bg-pink-500',
+  'Otro': 'bg-emerald-500',
+};
+
 export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTicketsSold }: AnalyticsChartsProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Prepare data for pie chart (users by age)
   const usersByAgeData = (ageGroups || [])
     .filter(group => group.ageGroup !== "Sin edad")
     .map((group, index) => ({
       name: group.ageGroup,
       value: group.users,
-      itemStyle: { color: COLORS[index % COLORS.length] }
+      color: COLORS[index % COLORS.length]
     }));
+
+  const totalAgeUsers = usersByAgeData.reduce((acc, item) => acc + item.value, 0);
 
   // Prepare data for bar chart (gender distribution)
   const safeGenderGroups = genderGroups || [];
-  const genderLabels = safeGenderGroups.map(item => item.gender);
-  const genderValues = safeGenderGroups.map(item => item.users);
-
-  // Gender colors
-  const genderColors: Record<string, string> = {
-    'Masculino': '#3b82f6', // blue
-    'Femenino': '#ec4899', // pink
-    'Otro': '#10b981', // green
-  };
-
-  // Pie Chart Option (Age Distribution)
-  const pieChartOption = {
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: '#18181b',
-      borderColor: '#303030',
-      borderWidth: 1,
-      textStyle: {
-        color: '#fff'
-      },
-      formatter: '{b}: {c} usuarios ({d}%)'
-    },
-    series: [
-      {
-        type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['50%', '50%'],
-        avoidLabelOverlap: false,
-        itemStyle: {
-          borderRadius: 10,
-          borderColor: '#0a0a0a',
-          borderWidth: 2
-        },
-        label: {
-          show: true,
-          formatter: '{b}\n{d}%',
-          color: '#888',
-          fontSize: 12
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 14,
-            fontWeight: 'bold',
-            color: '#fff'
-          },
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        },
-        data: usersByAgeData
-      }
-    ]
-  };
-
-  // Bar Chart Option (Gender Distribution)
-  const barChartOption = {
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: '#18181b',
-      borderColor: '#303030',
-      borderWidth: 1,
-      textStyle: {
-        color: '#fff'
-      },
-      axisPointer: {
-        type: 'shadow'
-      },
-      formatter: (params: { dataIndex: number; name: string; value: number }[]) => {
-        const dataIndex = params[0].dataIndex;
-        const item = safeGenderGroups[dataIndex];
-        if (!item) return `${params[0].name}<br/>${params[0].value} usuarios`;
-        return `${params[0].name}<br/>${params[0].value} usuarios<br/>${item.tickets} tickets`;
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '10%',
-      top: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: genderLabels,
-      axisLine: {
-        lineStyle: {
-          color: '#303030'
-        }
-      },
-      axisLabel: {
-        color: '#888',
-        fontSize: 12
-      }
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: {
-        lineStyle: {
-          color: '#303030'
-        }
-      },
-      axisLabel: {
-        color: '#888'
-      },
-      splitLine: {
-        lineStyle: {
-          color: '#303030',
-          type: 'dashed'
-        }
-      }
-    },
-    series: [
-      {
-        type: 'bar',
-        data: genderValues.map((value, index) => ({
-          value,
-          itemStyle: {
-            color: genderColors[genderLabels[index]] || '#6b7280',
-            borderRadius: [8, 8, 0, 0]
-          }
-        })),
-        emphasis: {
-          itemStyle: {
-            opacity: 0.8
-          }
-        }
-      }
-    ]
-  };
-
-  if (!mounted) {
-    return (
-      <div className="space-y-6">
-        {/* Stats Cards - Show immediately */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Usuarios con Compras
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalUsers}</div>
-              <p className="text-xs text-[#404040] mt-1">Usuarios que han comprado al menos 1 ticket</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Ticket className="h-4 w-4" />
-                Total Tickets Vendidos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalTicketsSold}</div>
-              <p className="text-xs text-[#404040] mt-1">Tickets vendidos en total</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Loading skeletons for charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardHeader>
-              <CardTitle className="text-lg">Distribución por Edad</CardTitle>
-              <CardDescription>Usuarios que han comprado, agrupados por edad</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] flex items-center justify-center">
-                <div className="h-8 w-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-            <CardHeader>
-              <CardTitle className="text-lg">Distribución por Género</CardTitle>
-              <CardDescription>Usuarios que han comprado, agrupados por género</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] flex items-center justify-center">
-                <div className="h-8 w-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  const maxGenderValue = Math.max(...safeGenderGroups.map(item => item.users), 1);
 
   return (
     <div className="space-y-6">
@@ -271,7 +76,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Age Distribution - Pie Chart */}
+        {/* Age Distribution - Donut Chart */}
         <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
           <CardHeader>
             <CardTitle className="text-lg">Distribución por Edad</CardTitle>
@@ -279,8 +84,65 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
           </CardHeader>
           <CardContent>
             {usersByAgeData.length > 0 ? (
-              <div className="h-[300px]">
-                <ReactECharts option={pieChartOption} style={{ height: '100%', width: '100%' }} />
+              <div className="flex flex-col items-center gap-6">
+                {/* Donut Chart */}
+                <div className="relative w-48 h-48">
+                  <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                    {(() => {
+                      let cumulativePercent = 0;
+                      return usersByAgeData.map((item, index) => {
+                        const percent = (item.value / totalAgeUsers) * 100;
+                        const strokeDasharray = `${percent} ${100 - percent}`;
+                        const strokeDashoffset = -cumulativePercent;
+                        cumulativePercent += percent;
+
+                        const colorMap: Record<string, string> = {
+                          'bg-violet-500': '#8b5cf6',
+                          'bg-blue-500': '#3b82f6',
+                          'bg-cyan-500': '#06b6d4',
+                          'bg-emerald-500': '#10b981',
+                          'bg-amber-500': '#f59e0b',
+                          'bg-red-500': '#ef4444',
+                          'bg-gray-500': '#6b7280',
+                        };
+
+                        return (
+                          <circle
+                            key={index}
+                            cx="50"
+                            cy="50"
+                            r="40"
+                            fill="none"
+                            stroke={colorMap[item.color] || '#6b7280'}
+                            strokeWidth="20"
+                            strokeDasharray={strokeDasharray}
+                            strokeDashoffset={strokeDashoffset}
+                            pathLength="100"
+                            className="transition-all duration-500"
+                          />
+                        );
+                      });
+                    })()}
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{totalAgeUsers}</div>
+                      <div className="text-xs text-white/50">usuarios</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Legend */}
+                <div className="flex flex-wrap justify-center gap-3">
+                  {usersByAgeData.map((item, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                      <span className="text-sm text-white/70">
+                        {item.name} ({((item.value / totalAgeUsers) * 100).toFixed(0)}%)
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-sm text-[#404040]">
@@ -298,8 +160,32 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
           </CardHeader>
           <CardContent>
             {safeGenderGroups.length > 0 ? (
-              <div className="h-[300px]">
-                <ReactECharts option={barChartOption} style={{ height: '100%', width: '100%' }} />
+              <div className="space-y-4 py-4">
+                {safeGenderGroups.map((item, index) => {
+                  const percentage = (item.users / maxGenderValue) * 100;
+                  const colorClass = GENDER_COLORS[item.gender] || 'bg-gray-500';
+
+                  return (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white/70">{item.gender}</span>
+                        <span className="text-white font-medium">{item.users} usuarios</span>
+                      </div>
+                      <div className="h-8 bg-white/5 rounded-lg overflow-hidden">
+                        <div
+                          className={`h-full ${colorClass} rounded-lg transition-all duration-500 flex items-center justify-end pr-3`}
+                          style={{ width: `${percentage}%` }}
+                        >
+                          {percentage > 20 && (
+                            <span className="text-xs font-medium text-white">
+                              {item.tickets} tickets
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-sm text-[#404040]">
