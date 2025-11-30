@@ -8,12 +8,14 @@ interface EventStickyHeaderProps {
   eventName: string;
   subtitle?: string;
   children?: ReactNode;
+  rightContent?: ReactNode;
 }
 
 export function EventStickyHeader({
   eventName,
   subtitle,
   children,
+  rightContent,
 }: EventStickyHeaderProps) {
   const { toggleMobileMenu } = useAdminMenu();
 
@@ -28,6 +30,13 @@ export function EventStickyHeader({
               <p className="text-sm text-gray-400 mt-1">{subtitle}</p>
             )}
           </div>
+
+          {/* Right content (e.g., status toggle) */}
+          {rightContent && (
+            <div className="flex-shrink-0 hidden sm:block">
+              {rightContent}
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <button

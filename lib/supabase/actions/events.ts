@@ -963,6 +963,32 @@ export async function updateEventConfiguration(eventId: string, formData: {
 }
 
 /**
+ * Toggle event status (active/inactive)
+ * Only owners and administrators should be able to call this
+ */
+export async function toggleEventStatus(eventId: string, status: boolean) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("events")
+    .update({ status })
+    .eq("id", eventId);
+
+  if (error) {
+    console.error("Error toggling event status:", error);
+    return { success: false, message: "Error al cambiar el estado del evento" };
+  }
+
+  revalidatePath(`/profile/[userId]/organizaciones/[organizationId]/administrador/event/${eventId}`);
+
+  return {
+    success: true,
+    message: status ? "Evento activado" : "Evento desactivado",
+    status
+  };
+}
+
+/**
  * Event with venue information for the popular events display
  */
 export type PopularEventWithVenue = {

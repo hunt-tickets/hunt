@@ -3,9 +3,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
+import { EventStatusToggle } from "@/components/event-status-toggle";
 import { createClient } from "@/lib/supabase/server";
 import { orderItem, member } from "@/lib/schema";
 import { db } from "@/lib/drizzle";
@@ -196,9 +196,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
                 Panel de Administración
               </p>
             </div>
-            <Badge variant={event.status ? "default" : "secondary"}>
-              {event.status ? "Activo" : "Finalizado"}
-            </Badge>
+            <EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />
           </div>
 
           <Card>
@@ -227,6 +225,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           dateStyle: "short",
           timeStyle: "short",
         })}
+        rightContent={<EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />}
       >
         <EventDashboardTabs
           financialReport={financialReport}
