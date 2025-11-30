@@ -38,18 +38,8 @@ export default async function VenderPage({ params }: VenderPageProps) {
     notFound();
   }
 
-  // Check if user has permission to sell tickets
-  const canSell = await auth.api.hasPermission({
-    headers: reqHeaders,
-    body: {
-      permission: { event: ["sell"] },
-      organizationId,
-    },
-  });
-
-  if (!canSell?.success) {
-    notFound();
-  }
+  // All roles (owner, administrator, seller) can sell tickets
+  // No additional permission check needed - being a member is enough
 
   const supabase = await createClient();
 
