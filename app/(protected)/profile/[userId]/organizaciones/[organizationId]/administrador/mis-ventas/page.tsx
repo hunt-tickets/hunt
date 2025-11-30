@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Ticket, DollarSign, Calendar, User, Banknote, ChevronRight } from "lucide-react";
 import { AdminHeader } from "@/components/admin-header";
 
