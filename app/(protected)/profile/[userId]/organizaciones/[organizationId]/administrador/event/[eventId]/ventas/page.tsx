@@ -1,8 +1,8 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { EventSalesContent } from "@/components/event-sales-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
+import { EventVentasContent } from "@/components/event-ventas-content";
 import { db } from "@/lib/drizzle";
 import { member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -15,6 +15,48 @@ interface VentasPageProps {
     organizationId: string;
   }>;
 }
+
+export type OrderWithDetails = {
+  id: string;
+  userId: string;
+  totalAmount: string;
+  currency: string;
+  marketplaceFee: string | null;
+  processorFee: string | null;
+  paymentStatus: string;
+  platform: "web" | "app" | "cash";
+  soldBy: string | null;
+  createdAt: string;
+  paidAt: string | null;
+  buyer: {
+    id: string;
+    name: string | null;
+    email: string;
+  } | null;
+  seller: {
+    id: string;
+    name: string | null;
+    email: string;
+  } | null;
+  items: {
+    id: string;
+    ticketTypeId: string;
+    ticketTypeName: string;
+    quantity: number;
+    pricePerTicket: string;
+    subtotal: string;
+  }[];
+};
+
+export type TicketTypeStats = {
+  id: string;
+  name: string;
+  price: string;
+  capacity: number;
+  soldCount: number;
+  reservedCount: number;
+  revenue: number;
+};
 
 export default async function VentasPage({ params }: VentasPageProps) {
   const { userId, eventId, organizationId } = await params;
@@ -65,80 +107,112 @@ export default async function VentasPage({ params }: VentasPageProps) {
     notFound();
   }
 
-  const event = {
-    id: eventData.id,
-    name: eventData.name,
-    status: eventData.status,
-  };
+  // Fetch ticket types for this event
+  const { data: ticketTypesData } = await supabase
+    .from("ticket_types")
+    .select("id, name, price, capacity, sold_count, reserved_count")
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: true });
 
-  // Mock transactions - In production, fetch from database
-  const transactions = [
-    {
-      id: "trans-1",
-      quantity: 1,
-      total: 50000,
-      price: 50000,
-      status: "completed",
-      created_at: new Date().toISOString(),
-      type: "web",
-      ticket_name: "General",
-      event_name: event.name,
-      user_fullname: "María García",
-      user_email: "maria@example.com",
-      promoter_fullname: "",
-      promoter_email: "",
-      cash: false,
-      variable_fee: 8,
-      tax: 0,
-      order_id: "order-1",
-      bold_id: null,
-      bold_fecha: null,
-      bold_estado: null,
-      bold_metodo_pago: null,
-      bold_valor_compra: null,
-      bold_propina: null,
-      bold_iva: null,
-      bold_impoconsumo: null,
-      bold_valor_total: null,
-      bold_rete_fuente: null,
-      bold_rete_iva: null,
-      bold_rete_ica: null,
-      bold_comision_porcentaje: null,
-      bold_comision_fija: null,
-      bold_total_deduccion: null,
-      bold_deposito_cuenta: null,
-      bold_banco: null,
-      bold_franquicia: null,
-      bold_pais_tarjeta: null,
-    },
-  ];
+  const ticketTypes: TicketTypeStats[] = (ticketTypesData || []).map((tt) => ({
+    id: tt.id,
+    name: tt.name,
+    price: tt.price,
+    capacity: tt.capacity,
+    soldCount: tt.sold_count,
+    reservedCount: tt.reserved_count,
+    revenue: tt.sold_count * parseFloat(tt.price),
+  }));
 
-  // User has analytics:view permission, so they're admin/owner
-  const isAdmin = true;
+  // Fetch orders with buyer, seller, and order items
+  const { data: ordersData } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      user_id,
+      total_amount,
+      currency,
+      marketplace_fee,
+      processor_fee,
+      payment_status,
+      platform,
+      sold_by,
+      created_at,
+      paid_at,
+      order_items (
+        id,
+        ticket_type_id,
+        quantity,
+        price_per_ticket,
+        subtotal
+      )
+    `)
+    .eq("event_id", eventId)
+    .eq("payment_status", "paid")
+    .order("created_at", { ascending: false });
+
+  // Get unique user IDs (buyers and sellers)
+  const userIds = new Set<string>();
+  (ordersData || []).forEach((order) => {
+    if (order.user_id) userIds.add(order.user_id);
+    if (order.sold_by) userIds.add(order.sold_by);
+  });
+
+  // Fetch users
+  const { data: usersData } = await supabase
+    .from("users")
+    .select("id, name, email")
+    .in("id", Array.from(userIds));
+
+  const usersMap = new Map(
+    (usersData || []).map((u) => [u.id, { id: u.id, name: u.name, email: u.email }])
+  );
+
+  // Build ticket type name map
+  const ticketTypeMap = new Map(ticketTypes.map((tt) => [tt.id, tt.name]));
+
+  // Transform orders with all details
+  const orders: OrderWithDetails[] = (ordersData || []).map((order) => ({
+    id: order.id,
+    userId: order.user_id,
+    totalAmount: order.total_amount,
+    currency: order.currency || "COP",
+    marketplaceFee: order.marketplace_fee,
+    processorFee: order.processor_fee,
+    paymentStatus: order.payment_status,
+    platform: order.platform as "web" | "app" | "cash",
+    soldBy: order.sold_by,
+    createdAt: order.created_at,
+    paidAt: order.paid_at,
+    buyer: order.user_id ? usersMap.get(order.user_id) || null : null,
+    seller: order.sold_by ? usersMap.get(order.sold_by) || null : null,
+    items: (order.order_items || []).map((item) => ({
+      id: item.id,
+      ticketTypeId: item.ticket_type_id,
+      ticketTypeName: ticketTypeMap.get(item.ticket_type_id) || "Desconocido",
+      quantity: item.quantity,
+      pricePerTicket: item.price_per_ticket,
+      subtotal: item.subtotal,
+    })),
+  }));
 
   return (
     <>
-      {/* Sticky Header with Tabs */}
       <EventStickyHeader
-        eventName={event.name}
-        subtitle="Gestión de ventas"
+        eventName={eventData.name || "Evento"}
+        subtitle="Ventas y órdenes"
       >
-        <EventSalesContent
-          eventId={eventId}
-          transactions={transactions || []}
-          eventName={event.name}
-          isAdmin={isAdmin}
+        <EventVentasContent
+          orders={orders}
+          ticketTypes={ticketTypes}
           showTabsOnly
         />
       </EventStickyHeader>
 
-      {/* Content */}
       <div className="px-3 py-3 sm:px-6 sm:py-4">
-        <EventSalesContent
-          eventId={eventId}
-          transactions={transactions || []}
-          eventName={event.name}
-          isAdmin={isAdmin}
+        <EventVentasContent
+          orders={orders}
+          ticketTypes={ticketTypes}
           showContentOnly
         />
       </div>

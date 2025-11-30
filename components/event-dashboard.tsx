@@ -5,7 +5,6 @@ import {
   CreditCard,
   AlertCircle,
   Ticket,
-  Users,
 } from "lucide-react";
 import { SalesDistributionChart, RevenueByChannelChart, SalesFunnelChart, DailySalesChart } from "@/components/event-charts";
 
@@ -95,20 +94,6 @@ export function EventDashboard({ financialReport, sales, tickets, colorPalette =
           </CardContent>
         </Card>
 
-        <Card className="bg-white/[0.02] border-white/10">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="h-3.5 w-3.5 text-white/40" />
-              <span className="text-xs text-white/40 uppercase tracking-wider">Monto a Liquidar</span>
-            </div>
-            <div className="text-2xl font-bold mb-1">
-              {formatCurrency(financialReport.settlement_amount)}
-            </div>
-            <p className="text-xs text-white/30">
-              Para el productor
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Daily Sales Chart */}
@@ -253,17 +238,6 @@ export function EventDashboard({ financialReport, sales, tickets, colorPalette =
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/10">
-              <h4 className="text-xs text-white/40 uppercase tracking-wider mb-3">
-                Liquidación Productor
-              </h4>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-semibold">Total a liquidar</span>
-                <span className="text-lg font-bold text-cyan-400">
-                  {formatCurrency(financialReport.settlement_amount)}
-                </span>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>

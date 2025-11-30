@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
 type DashboardTab = "dashboard" | "borderaux" | "web";
-type SalesTab = "sellers" | "transactions" | "links";
+type SalesTab = "overview" | "orders" | "sellers";
 type AccessControlTab = "analytics" | "list";
 type ConfigTab = "information" | "images" | "payment" | "wallet" | "faqs";
 type TeamTab = "productores" | "vendedores" | "artistas";
@@ -27,7 +27,7 @@ const EventTabsContext = createContext<EventTabsContextValue | undefined>(undefi
 
 export function EventTabsProvider({ children }: { children: ReactNode }) {
   const [dashboardTab, setDashboardTab] = useState<DashboardTab>("dashboard");
-  const [salesTab, setSalesTab] = useState<SalesTab>("sellers");
+  const [salesTab, setSalesTab] = useState<SalesTab>("overview");
   const [chartColor, setChartColor] = useState<string>("gray");
   const [accessControlTab, setAccessControlTab] = useState<AccessControlTab>("analytics");
   const [configTab, setConfigTab] = useState<ConfigTab>("information");
