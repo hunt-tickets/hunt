@@ -4,7 +4,8 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/drizzle";
 import { orders, member, events, tickets, user } from "@/lib/schema";
-import { eq, and, desc, gte } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import { createClient } from "@/lib/supabase/server";
 import {
   Card,
   CardContent,
@@ -46,20 +47,16 @@ export default async function MisVentasPage({ params }: MisVentasPageProps) {
   }
 
   // Fetch active events for this organization (for sellers to sell)
-  const activeEvents = await db.query.events.findMany({
-    where: and(
-      eq(events.organizationId, organizationId),
-      eq(events.status, true),
-      gte(events.endDate, new Date())
-    ),
-    columns: {
-      id: true,
-      name: true,
-      date: true,
-      flyer: true,
-    },
-    orderBy: [desc(events.date)],
-  });
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data: activeEvents } = await supabase
+    .from("events")
+    .select("id, name, date, flyer")
+    .eq("organization_id", organizationId)
+    .eq("status", true)
+    .or(`end_date.gte.${now},end_date.is.null`)
+    .order("date", { ascending: false });
 
   // Fetch cash sales made by this seller
   const mySales = await db
@@ -190,7 +187,7 @@ export default async function MisVentasPage({ params }: MisVentasPageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {activeEvents.length === 0 ? (
+          {!activeEvents || activeEvents.length === 0 ? (
             <div className="text-center py-8">
               <Calendar className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
               <p className="text-muted-foreground">

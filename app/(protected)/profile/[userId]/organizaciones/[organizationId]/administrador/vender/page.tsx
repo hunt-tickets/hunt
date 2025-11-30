@@ -3,8 +3,9 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/drizzle";
-import { member, events } from "@/lib/schema";
-import { eq, and, desc, gte } from "drizzle-orm";
+import { member } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
+import { createClient } from "@/lib/supabase/server";
 import {
   Card,
   CardContent,
@@ -44,21 +45,17 @@ export default async function VenderPage({ params }: VenderPageProps) {
     notFound();
   }
 
-  // Fetch active events for this organization
-  const activeEvents = await db.query.events.findMany({
-    where: and(
-      eq(events.organizationId, organizationId),
-      eq(events.status, true),
-      gte(events.endDate, new Date())
-    ),
-    columns: {
-      id: true,
-      name: true,
-      date: true,
-      flyer: true,
-    },
-    orderBy: [desc(events.date)],
-  });
+  // Fetch active events for this organization (same logic as eventos page)
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data: activeEvents } = await supabase
+    .from("events")
+    .select("id, name, date, flyer")
+    .eq("organization_id", organizationId)
+    .eq("status", true)
+    .or(`end_date.gte.${now},end_date.is.null`)
+    .order("date", { ascending: false });
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
@@ -78,7 +75,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {activeEvents.length === 0 ? (
+          {!activeEvents || activeEvents.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="text-muted-foreground">
