@@ -18,7 +18,7 @@ export function EventLayoutWrapper({ children, userId, organizationId, eventId, 
     <EventTabsProvider>
       <div className="min-h-screen bg-background">
         <EventSidebar userId={userId} organizationId={organizationId} eventId={eventId} eventName={eventName} role={role} />
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen pt-4 px-4 sm:pt-6 sm:px-6 lg:pt-8 lg:px-8">{children}</main>
       </div>
     </EventTabsProvider>
   );
