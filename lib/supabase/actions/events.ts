@@ -682,7 +682,7 @@ export async function addProducerToEvent(eventId: string, producerId: string) {
     return { success: false, message: "Error al agregar el productor" };
   }
 
-  revalidatePath(`/profile/[userId]/administrador/event/${eventId}`);
+  revalidatePath(`/profile/[userId]/administrador/event/${eventId}`, "page");
 
   return { success: true, message: "Productor agregado exitosamente" };
 }
@@ -778,7 +778,7 @@ export async function addArtistToEvent(eventId: string, artistId: string) {
     return { success: false, message: "Error al agregar el artista" };
   }
 
-  revalidatePath(`/profile/[userId]/administrador/event/${eventId}`);
+  revalidatePath(`/profile/[userId]/administrador/event/${eventId}`, "page");
 
   return { success: true, message: "Artista agregado exitosamente" };
 }
@@ -957,7 +957,7 @@ export async function updateEventConfiguration(eventId: string, formData: {
     return { success: false, message: "Error al actualizar la configuración" };
   }
 
-  revalidatePath(`/profile/[userId]/administrador/event/${eventId}/configuracion`);
+  revalidatePath(`/profile/[userId]/administrador/event/${eventId}/configuracion`, "page");
 
   return { success: true, message: "Configuración actualizada exitosamente" };
 }
@@ -979,7 +979,7 @@ export async function toggleEventStatus(eventId: string, status: boolean) {
     return { success: false, message: "Error al cambiar el estado del evento" };
   }
 
-  revalidatePath(`/profile/[userId]/organizaciones/[organizationId]/administrador/event/${eventId}`);
+  revalidatePath(`/profile/[userId]/organizaciones/[organizationId]/administrador/event/${eventId}`, "page");
 
   return {
     success: true,

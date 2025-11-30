@@ -281,7 +281,7 @@ export async function updateTicket(
     return { success: false, message: "Error al actualizar la entrada" };
   }
 
-  revalidatePath(`/profile/[userId]/administrador/event`);
+  revalidatePath(`/profile/[userId]/administrador/event`, "page");
 
   return { success: true, message: "Entrada actualizada exitosamente" };
 }

@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { CreateTicketTypeDialog } from "@/components/create-ticket-type-dialog";
 import { EditTicketSheet } from "@/components/edit-ticket-sheet";
 import { ChannelSalesChart, TicketRevenueDistributionChart } from "@/components/event-charts";
-import { SendCourtesyDialog } from "@/components/send-courtesy-dialog";
 
 interface TicketTypeFilter {
   id: string;
@@ -96,7 +95,6 @@ export function EventTicketsContent({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <SendCourtesyDialog eventId={eventId} />
           <CreateTicketTypeDialog eventId={eventId} />
           <Button
             size="sm"

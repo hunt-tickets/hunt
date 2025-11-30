@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ticket, Settings, Users, ArrowLeft, ScanLine, ShoppingCart, Banknote } from "lucide-react";
+import { LayoutDashboard, Ticket, Settings, Users, ArrowLeft, ScanLine, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
@@ -29,13 +29,6 @@ const menuItems = [
     icon: Ticket,
     href: "/entradas",
     description: "Gestiona tipos de entrada",
-    requiredRoles: ["owner", "administrator"],
-  },
-  {
-    title: "Ventas",
-    icon: ShoppingCart,
-    href: "/ventas",
-    description: "Vendedores y transacciones",
     requiredRoles: ["owner", "administrator"],
   },
   {
