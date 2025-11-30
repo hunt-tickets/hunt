@@ -1,9 +1,10 @@
 import { redirect, notFound } from "next/navigation";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/drizzle";
 import { orders, member, events, tickets, user } from "@/lib/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte } from "drizzle-orm";
 import {
   Card,
   CardContent,
@@ -12,7 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Ticket, DollarSign, Calendar, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Ticket, DollarSign, Calendar, User, Banknote, ChevronRight } from "lucide-react";
 import { AdminHeader } from "@/components/admin-header";
 
 interface MisVentasPageProps {
@@ -43,6 +45,22 @@ export default async function MisVentasPage({ params }: MisVentasPageProps) {
   if (!memberRecord) {
     notFound();
   }
+
+  // Fetch active events for this organization (for sellers to sell)
+  const activeEvents = await db.query.events.findMany({
+    where: and(
+      eq(events.organizationId, organizationId),
+      eq(events.status, true),
+      gte(events.endDate, new Date())
+    ),
+    columns: {
+      id: true,
+      name: true,
+      date: true,
+      flyer: true,
+    },
+    orderBy: [desc(events.date)],
+  });
 
   // Fetch cash sales made by this seller
   const mySales = await db
@@ -160,6 +178,65 @@ export default async function MisVentasPage({ params }: MisVentasPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Active Events for Selling */}
+      <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Banknote className="h-5 w-5" />
+            Vender Entradas
+          </CardTitle>
+          <CardDescription>
+            Selecciona un evento para realizar una venta en efectivo
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {activeEvents.length === 0 ? (
+            <div className="text-center py-8">
+              <Calendar className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+              <p className="text-muted-foreground">
+                No hay eventos activos para vender
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {activeEvents.map((event) => (
+                <Link
+                  key={event.id}
+                  href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${event.id}/vender`}
+                  className="group"
+                >
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-[#303030] bg-background/30 hover:border-primary/50 hover:bg-background/50 transition-all">
+                    {event.flyer ? (
+                      <img
+                        src={event.flyer}
+                        alt={event.name || "Evento"}
+                        className="h-12 w-12 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Calendar className="h-6 w-6 text-primary" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{event.name || "Sin nombre"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {event.date
+                          ? new Date(event.date).toLocaleDateString("es-ES", {
+                              day: "numeric",
+                              month: "short",
+                            })
+                          : "Sin fecha"}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Sales List */}
       <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
