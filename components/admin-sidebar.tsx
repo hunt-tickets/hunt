@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Settings, ArrowLeft, UserCircle, Gift, LayoutDashboard, Ticket } from "lucide-react";
+import { Calendar, Settings, ArrowLeft, UserCircle, Gift, LayoutDashboard, Ticket, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
@@ -43,6 +43,13 @@ const primaryMenuItems = [
 
 // Seller-specific menu items
 const sellerMenuItems = [
+  {
+    title: "Vender",
+    icon: Banknote,
+    href: "/administrador/vender",
+    description: "Vender entradas en efectivo",
+    exact: true,
+  },
   {
     title: "Mis Ventas",
     icon: Ticket,
