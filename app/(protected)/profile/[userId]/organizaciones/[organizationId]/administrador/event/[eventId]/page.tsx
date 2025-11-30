@@ -102,22 +102,30 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     },
   }));
 
-  // Calculate sales by platform first
+  // Calculate sales by platform and aggregate fees
   const salesByPlatform = orders.reduce(
     (acc, order) => {
+      // Only count paid orders
+      if (order.payment_status !== "paid") return acc;
+
       const orderTotal = parseFloat(order.total_amount);
+      const marketplaceFee = parseFloat(order.marketplace_fee || "0");
+      const processorFee = parseFloat(order.processor_fee || "0");
       const itemCount = (order.order_items || []).reduce(
         (sum: number, item: orderItem) => sum + item.quantity,
         0
       );
+
       acc[order.platform as "web" | "app" | "cash"].total += orderTotal;
       acc[order.platform as "web" | "app" | "cash"].count += itemCount;
+      acc[order.platform as "web" | "app" | "cash"].marketplaceFee += marketplaceFee;
+      acc[order.platform as "web" | "app" | "cash"].processorFee += processorFee;
       return acc;
     },
     {
-      web: { total: 0, count: 0 },
-      app: { total: 0, count: 0 },
-      cash: { total: 0, count: 0 },
+      web: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0 },
+      app: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0 },
+      cash: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0 },
     }
   );
 
@@ -130,6 +138,19 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     salesByPlatform.app.count +
     salesByPlatform.cash.count;
 
+  // Aggregate fees across all platforms
+  const totalMarketplaceFee =
+    salesByPlatform.web.marketplaceFee +
+    salesByPlatform.app.marketplaceFee +
+    salesByPlatform.cash.marketplaceFee;
+  const totalProcessorFee =
+    salesByPlatform.web.processorFee +
+    salesByPlatform.app.processorFee +
+    salesByPlatform.cash.processorFee;
+
+  // Organization receives: total - fees
+  const organizationNetAmount = totalFromOrders - totalMarketplaceFee - totalProcessorFee;
+
   // Build financial report from real order data
   const financialReport = {
     timestamp: new Date().toISOString(),
@@ -140,29 +161,36 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       web: salesByPlatform.web.count,
       cash: salesByPlatform.cash.count,
     },
-    settlement_amount: totalFromOrders * 0.9,
     app_total: salesByPlatform.app.total,
     web_total: salesByPlatform.web.total,
     cash_total: salesByPlatform.cash.total,
-    total_tax: totalFromOrders * 0.08,
-    hunt_sales: {
-      price: salesByPlatform.web.total + salesByPlatform.app.total,
-      tax: (salesByPlatform.web.total + salesByPlatform.app.total) * 0.08,
-      variable_fee:
-        (salesByPlatform.web.total + salesByPlatform.app.total) * 0.1,
-      total: salesByPlatform.web.total + salesByPlatform.app.total,
-    },
-    producer_sales: {
-      price: salesByPlatform.cash.total,
-      tax: 0,
-      variable_fee: 0,
-      total: salesByPlatform.cash.total,
-    },
-    global_calculations: {
-      ganancia_bruta_hunt: totalFromOrders * 0.1,
-      deducciones_bold_total: totalFromOrders * 0.025,
-      impuesto_4x1000: totalFromOrders * 0.004,
-      ganancia_neta_hunt: totalFromOrders * 0.071,
+    // Organization perspective - real fees from orders
+    org_summary: {
+      gross_sales: totalFromOrders,
+      marketplace_fee: totalMarketplaceFee,
+      processor_fee: totalProcessorFee,
+      net_amount: organizationNetAmount,
+      // Breakdown by channel
+      by_channel: {
+        web: {
+          gross: salesByPlatform.web.total,
+          marketplace_fee: salesByPlatform.web.marketplaceFee,
+          processor_fee: salesByPlatform.web.processorFee,
+          net: salesByPlatform.web.total - salesByPlatform.web.marketplaceFee - salesByPlatform.web.processorFee,
+        },
+        app: {
+          gross: salesByPlatform.app.total,
+          marketplace_fee: salesByPlatform.app.marketplaceFee,
+          processor_fee: salesByPlatform.app.processorFee,
+          net: salesByPlatform.app.total - salesByPlatform.app.marketplaceFee - salesByPlatform.app.processorFee,
+        },
+        cash: {
+          gross: salesByPlatform.cash.total,
+          marketplace_fee: salesByPlatform.cash.marketplaceFee,
+          processor_fee: salesByPlatform.cash.processorFee,
+          net: salesByPlatform.cash.total - salesByPlatform.cash.marketplaceFee - salesByPlatform.cash.processorFee,
+        },
+      },
     },
   };
 
