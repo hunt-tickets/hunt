@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/drizzle";
-import { paymentProcessorAccount } from "@/lib/schema";
-import { eq, and, ne } from "drizzle-orm";
+import { paymentProcessorAccount, member } from "@/lib/schema";
+import { eq, and, ne, inArray } from "drizzle-orm";
 
 export async function PATCH(
   request: NextRequest,
@@ -49,8 +49,16 @@ export async function PATCH(
       );
     }
 
-    // Verify the user is the owner of the account
-    if (account.userId !== session.user.id) {
+    // Verify the user is an administrator or owner of the organization
+    const membership = await db.query.member.findFirst({
+      where: and(
+        eq(member.organizationId, account.organizationId),
+        eq(member.userId, session.user.id),
+        inArray(member.role, ["administrator", "owner"])
+      ),
+    });
+
+    if (!membership) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
