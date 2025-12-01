@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AnimatedBackground } from './animated-background';
+import { PhoneInput } from './phone-input';
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -13,6 +14,12 @@ const GoogleIcon = () => (
         <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
         <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
         <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C37.023 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+    </svg>
+);
+
+const AppleIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
     </svg>
 );
 
@@ -35,6 +42,7 @@ interface SignInPageProps {
   onVerifyOtp?: (email: string, otp: string) => void;
   onResendOtp?: (email: string) => void;
   onGoogleSignIn?: () => void;
+  onAppleSignIn?: () => void;
   onCreateAccount?: () => void;
   isOtpSent?: boolean;
   isLoading?: boolean;
@@ -74,6 +82,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   onVerifyOtp,
   onResendOtp,
   onGoogleSignIn,
+  onAppleSignIn,
   onCreateAccount,
   isOtpSent = false,
   isLoading = false,
@@ -84,6 +93,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Countdown timer for resend
@@ -142,7 +152,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       {/* Back button */}
       <Link
         href="/"
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-sm text-gray-400 hover:text-foreground transition-colors group"
       >
         <div className="p-2 rounded-full border dark:border-[#303030] bg-background/80 backdrop-blur-sm group-hover:bg-background transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -155,23 +165,59 @@ export const SignInPage: React.FC<SignInPageProps> = ({
         <div className="w-full max-w-md">
           <div className="flex flex-col gap-6">
             <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight">{title}</h1>
-            <p className="animate-element animate-delay-200 text-muted-foreground">{description}</p>
+            <p className="animate-element animate-delay-200 text-gray-400">{description}</p>
 
             {!isOtpSent ? (
               <form className="space-y-5" onSubmit={handleSendOtp}>
-                <div className="animate-element animate-delay-300">
-                  <label className="text-sm font-medium text-muted-foreground">Correo electrónico</label>
-                  <GlassInputWrapper>
-                    <input
-                      name="email"
-                      type="email"
-                      placeholder="tu@correo.com"
-                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                {/* Tabs */}
+                <div className="animate-element animate-delay-250 flex gap-2 p-1 bg-muted/50 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setLoginMethod("email")}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                      loginMethod === "email"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-gray-400 hover:text-foreground"
+                    }`}
+                  >
+                    Correo electrónico
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLoginMethod("phone")}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                      loginMethod === "phone"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-gray-400 hover:text-foreground"
+                    }`}
+                  >
+                    Celular
+                  </button>
+                </div>
+
+                <div className="animate-element animate-delay-300 space-y-2">
+                  <label className="text-sm font-medium text-gray-400">
+                    {loginMethod === "email" ? "Correo electrónico" : "Número de celular"}
+                  </label>
+                  {loginMethod === "email" ? (
+                    <GlassInputWrapper>
+                      <input
+                        name="email"
+                        type="email"
+                        placeholder="tu@correo.com"
+                        className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                        required
+                      />
+                    </GlassInputWrapper>
+                  ) : (
+                    <PhoneInput
                       value={email}
-                      onChange={(e) => setEmail(e.target.value.toLowerCase())}
-                      required
+                      onChange={(val) => setEmail(val || '')}
+                      placeholder="+57 300 123 4567"
                     />
-                  </GlassInputWrapper>
+                  )}
                 </div>
 
                 {error && <p className="text-sm text-red-500">{error}</p>}
@@ -184,11 +230,20 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 >
                   {isLoading ? "Enviando..." : "Enviar código"}
                 </button>
+
+                <div className="animate-element animate-delay-650 text-center">
+                  <button
+                    type="button"
+                    className="text-sm text-gray-400 hover:text-foreground transition-colors underline"
+                  >
+                    Ingresar con contraseña
+                  </button>
+                </div>
               </form>
             ) : (
               <form className="space-y-5" onSubmit={handleVerifyOtp}>
-                <div className="animate-element animate-delay-300">
-                  <label className="text-sm font-medium text-muted-foreground">Correo electrónico</label>
+                <div className="animate-element animate-delay-300 space-y-2">
+                  <label className="text-sm font-medium text-gray-400">Correo electrónico</label>
                   <GlassInputWrapper>
                     <input
                       name="email"
@@ -200,8 +255,8 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   </GlassInputWrapper>
                 </div>
 
-                <div className="animate-element animate-delay-400">
-                  <label className="text-sm font-medium text-muted-foreground">Código de verificación</label>
+                <div className="animate-element animate-delay-400 space-y-2">
+                  <label className="text-sm font-medium text-gray-400">Código de verificación</label>
                   <div className="flex gap-2 justify-between">
                     {otp.map((digit, index) => (
                       <input
@@ -235,7 +290,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <button
                     type="button"
                     onClick={handleResendOtp}
-                    className="flex-1 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 text-sm text-gray-400 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!canResend || isLoading}
                   >
                     {canResend ? "Reenviar código" : `Reenviar en ${resendCountdown}s`}
@@ -243,7 +298,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <button
                     type="button"
                     onClick={() => window.location.reload()}
-                    className="flex-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex-1 text-sm text-gray-400 hover:text-foreground transition-colors"
                   >
                     Usar otro correo
                   </button>
@@ -253,24 +308,38 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
             {!isOtpSent && (
               <>
-                {onGoogleSignIn && (
+                {(onGoogleSignIn || onAppleSignIn) && (
                   <>
                     <div className="animate-element animate-delay-700 relative flex items-center justify-center">
                       <span className="w-full border-t dark:border-[#303030]"></span>
-                      <span className="px-4 text-sm text-muted-foreground bg-background absolute">O continuar con</span>
+                      <span className="px-4 text-sm text-gray-400 bg-background absolute">O continuar con</span>
                     </div>
 
-                    <button
-                      onClick={onGoogleSignIn}
-                      className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border dark:border-[#303030] rounded-2xl py-4 hover:bg-secondary transition-colors"
-                    >
-                        <GoogleIcon />
-                        Continuar con Google
-                    </button>
+                    <div className="space-y-3">
+                      {onGoogleSignIn && (
+                        <button
+                          onClick={onGoogleSignIn}
+                          className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border dark:border-[#303030] rounded-2xl py-4 hover:bg-secondary transition-colors"
+                        >
+                            <GoogleIcon />
+                            Continuar con Google
+                        </button>
+                      )}
+
+                      {onAppleSignIn && (
+                        <button
+                          onClick={onAppleSignIn}
+                          className="animate-element animate-delay-900 w-full flex items-center justify-center gap-3 border dark:border-[#303030] rounded-2xl py-4 hover:bg-secondary transition-colors"
+                        >
+                            <AppleIcon />
+                            Continuar con Apple
+                        </button>
+                      )}
+                    </div>
                   </>
                 )}
 
-                <p className="animate-element animate-delay-900 text-center text-sm text-muted-foreground">
+                <p className="animate-element animate-delay-1000 text-center text-sm text-gray-400">
                   ¿Nuevo en nuestra plataforma? <a href="#" onClick={(e) => { e.preventDefault(); onCreateAccount?.(); }} className="text-foreground hover:underline transition-colors">Crear cuenta</a>
                 </p>
               </>
@@ -279,7 +348,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
         </div>
       </section>
 
-      {/* Right column: animated background + testimonials */}
+      {/* Right column: animated background */}
       {heroImageSrc && (
         <section className="hidden md:block flex-1 relative p-4 overflow-hidden">
           <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden">
@@ -291,13 +360,6 @@ export const SignInPage: React.FC<SignInPageProps> = ({
               veilOpacity="bg-black/30"
             />
           </div>
-          {testimonials.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center z-10">
-              <TestimonialCard testimonial={testimonials[0]} delay="animate-delay-1000" />
-              {testimonials[1] && <div className="hidden xl:flex"><TestimonialCard testimonial={testimonials[1]} delay="animate-delay-1200" /></div>}
-              {testimonials[2] && <div className="hidden 2xl:flex"><TestimonialCard testimonial={testimonials[2]} delay="animate-delay-1400" /></div>}
-            </div>
-          )}
         </section>
       )}
     </div>

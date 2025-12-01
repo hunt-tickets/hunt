@@ -14,7 +14,7 @@ interface PhoneInputProps {
 }
 
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }) => {
+  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }, ref) => {
     return (
       <div className="w-full">
         <div className="rounded-2xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-primary/50 focus-within:bg-primary/5 p-4">
@@ -25,6 +25,9 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
             onChange={(val) => onChange(val || '')}
             disabled={disabled}
             placeholder={placeholder}
+            inputComponent={forwardRef<HTMLInputElement>((props, innerRef) => (
+              <input {...props} ref={innerRef || ref} />
+            ))}
           />
         </div>
         {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
