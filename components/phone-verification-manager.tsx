@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -13,27 +13,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
 import { Phone, Loader2, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
+import PhoneInputWithCountry from 'react-phone-number-input';
+import type { E164Number } from 'libphonenumber-js/core';
+import 'react-phone-number-input/style.css';
 
 interface PhoneVerificationManagerProps {
   phoneNumber?: string | null;
   phoneNumberVerified?: boolean;
 }
 
-const countryCodes = [
-  { code: "+57", country: "CO", flag: "🇨🇴" },
-  // Add more as needed
-];
+const InputComponent = forwardRef<HTMLInputElement>((props, innerRef) => (
+  <input {...props} ref={innerRef} />
+));
+InputComponent.displayName = 'PhoneInputComponent';
 
 export function PhoneVerificationManager({
   phoneNumber,
@@ -41,17 +37,17 @@ export function PhoneVerificationManager({
 }: PhoneVerificationManagerProps) {
   const [isSendingOTP, setIsSendingOTP] = useState(false);
   const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [countryCode, setCountryCode] = useState("+57");
   const [phoneInput, setPhoneInput] = useState("");
-  const [otpCode, setOtpCode] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(0);
 
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showVerifyDialog, setShowVerifyDialog] = useState(false);
+  const [showOTPInput, setShowOTPInput] = useState(false);
   const [pendingPhoneNumber, setPendingPhoneNumber] = useState("");
 
   const router = useRouter();
+  const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
 
   // Timer for resend functionality
   useEffect(() => {
@@ -80,32 +76,53 @@ export function PhoneVerificationManager({
     return cleaned.length >= 7 && cleaned.length <= 15;
   };
 
-  const handleSendOTP = async () => {
-    const fullPhoneNumber = countryCode + phoneInput.replace(/\D/g, "");
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
 
-    if (!validatePhoneNumber(phoneInput)) {
-      toast.error("Por favor ingresa un número de teléfono válido");
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-verify when all 6 digits are entered
+    if (newOtp.every(digit => digit !== '') && index === 5) {
+      handleVerifyOTP(newOtp.join(''));
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleSendOTP = async () => {
+    if (!phoneInput || phoneInput.length < 10) {
+      toast.error({ title: "Por favor ingresa un número de teléfono válido" });
       return;
     }
 
     setIsSendingOTP(true);
     try {
       await authClient.phoneNumber.sendOtp({
-        phoneNumber: fullPhoneNumber,
+        phoneNumber: phoneInput,
       });
 
-      toast.success("¡Código de verificación enviado!");
-      setPendingPhoneNumber(fullPhoneNumber);
+      toast.success({ title: "¡Código de verificación enviado!" });
+      setPendingPhoneNumber(phoneInput);
       setResendTimer(60);
-      setShowVerifyDialog(true);
-      setShowAddDialog(false);
+      setShowOTPInput(true);
+      setIsEditing(false);
     } catch (error: unknown) {
       console.error("Failed to send OTP:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Error al enviar el código de verificación. Por favor intenta de nuevo.";
-      toast.error(errorMessage);
+      toast.error({ title: errorMessage });
     } finally {
       setIsSendingOTP(false);
     }
@@ -118,46 +135,43 @@ export function PhoneVerificationManager({
         phoneNumber: existingPhoneNumber,
       });
 
-      toast.success("¡Código de verificación enviado!");
+      toast.success({ title: "¡Código de verificación enviado!" });
       setPendingPhoneNumber(existingPhoneNumber);
       setResendTimer(60);
-      setShowVerifyDialog(true);
+      setShowOTPInput(true);
     } catch (error: unknown) {
       console.error("Failed to send OTP:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Error al enviar el código de verificación. Por favor intenta de nuevo.";
-      toast.error(errorMessage);
+      toast.error({ title: errorMessage });
     } finally {
       setIsSendingOTP(false);
     }
   };
 
-  const handleVerifyOTP = async () => {
-    if (otpCode.length !== 6) {
-      toast.error("Por favor ingresa el código de verificación de 6 dígitos");
+  const handleVerifyOTP = async (code: string) => {
+    if (code.length !== 6) {
+      toast.error({ title: "Por favor ingresa el código de verificación de 6 dígitos" });
       return;
     }
 
     setIsVerifyingOTP(true);
     try {
-      // Check if this is verifying an existing phone or adding/updating a new one
       const isExistingPhone = pendingPhoneNumber === phoneNumber;
 
       await authClient.phoneNumber.verify({
         phoneNumber: pendingPhoneNumber,
-        code: otpCode,
+        code: code,
         disableSession: true,
-        // Only set updatePhoneNumber to true if adding/changing phone
-        // For existing unverified phones, just verify without update flag
         updatePhoneNumber: !isExistingPhone,
       });
 
-      toast.success("¡Número de teléfono verificado exitosamente!");
+      toast.success({ title: "¡Número de teléfono verificado exitosamente!" });
 
-      setOtpCode("");
-      setShowVerifyDialog(false);
+      setOtp(["", "", "", "", "", ""]);
+      setShowOTPInput(false);
       setPendingPhoneNumber("");
       setPhoneInput("");
 
@@ -168,7 +182,8 @@ export function PhoneVerificationManager({
         error instanceof Error
           ? error.message
           : "Código de verificación inválido. Por favor intenta de nuevo.";
-      toast.error(errorMessage);
+      toast.error({ title: errorMessage });
+      setOtp(["", "", "", "", "", ""]);
     } finally {
       setIsVerifyingOTP(false);
     }
@@ -183,243 +198,276 @@ export function PhoneVerificationManager({
         phoneNumber: pendingPhoneNumber,
       });
 
-      toast.success("¡Nuevo código de verificación enviado!");
+      toast.success({ title: "¡Nuevo código de verificación enviado!" });
       setResendTimer(60);
     } catch (error: unknown) {
       console.error("Failed to resend OTP:", error);
-      toast.error("Error al reenviar el código. Por favor intenta de nuevo.");
+      toast.error({ title: "Error al reenviar el código. Por favor intenta de nuevo." });
     } finally {
       setIsSendingOTP(false);
     }
   };
 
   const resetDialogs = () => {
-    setShowAddDialog(false);
-    setShowVerifyDialog(false);
+    setShowOTPInput(false);
     setPhoneInput("");
-    setOtpCode("");
+    setOtp(["", "", "", "", "", ""]);
     setPendingPhoneNumber("");
     setResendTimer(0);
+    setIsEditing(false);
   };
 
   return (
     <>
-      {/* Phone Number Display - Matches profile page style */}
-      <div
-        className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
-        onClick={() => {
-          if (!phoneNumber) {
-            setShowAddDialog(true);
-          }
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <Phone className="h-5 w-5 text-gray-400" />
-          <div>
-            {phoneNumber ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">
-                  {formatPhoneNumber(phoneNumber)}
-                </span>
-                {phoneNumberVerified ? (
-                  <Badge
-                    variant="secondary"
-                    className="text-xs px-2 py-0.5 bg-green-600/10 text-green-400 border-green-600/20"
-                  >
-                    Verificado
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="secondary"
-                    className="text-xs px-2 py-0.5 bg-yellow-600/10 text-yellow-400 border-yellow-600/20"
-                  >
-                    Pendiente
-                  </Badge>
-                )}
+      {/* Phone Number Display/Input */}
+      {showOTPInput ? (
+        <div className="p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-all duration-300">
+          {/* Header: Phone number info */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Phone className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium">Código enviado a</p>
+                <p className="text-xs text-gray-500 mt-0.5">{formatPhoneNumber(pendingPhoneNumber)}</p>
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-500">
-                  Agregar número de teléfono
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {phoneNumber && !phoneNumberVerified && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSendOTPExisting(phoneNumber);
-              }}
-              disabled={isSendingOTP}
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium text-gray-400 hover:text-gray-300"
-            >
-              {isSendingOTP ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Verificar"
-              )}
-            </Button>
-          )}
-          {!phoneNumber && (
-            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
-              <span className="text-xl">⋯</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Add Phone Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-[#171717] border border-[#292929]">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Agregar Número de Teléfono
-            </DialogTitle>
-            <DialogDescription className="text-[#7A7A7A]">
-              Ingresa tu número de teléfono para recibir códigos de
-              verificación.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="country-code" className="text-[#A0A0A0]">
-                Código de País
-              </Label>
-              <Select value={countryCode} onValueChange={setCountryCode}>
-                <SelectTrigger className="bg-[#242424] border border-[#424242] text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1d1d1d] border border-[#424242]">
-                  {countryCodes.map((country) => (
-                    <SelectItem
-                      key={country.code}
-                      value={country.code}
-                      className="text-white hover:bg-[#242424]"
-                    >
-                      {country.flag} {country.code} {country.country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
-            <div>
-              <Label htmlFor="phone-number" className="text-[#A0A0A0]">
-                Número de Teléfono
-              </Label>
-              <Input
-                id="phone-number"
-                placeholder="3214567890"
-                value={phoneInput}
-                onChange={(e) => setPhoneInput(e.target.value)}
-                className="bg-[#242424] border border-[#424242] text-white placeholder:text-[#7A7A7A]"
-                disabled={isSendingOTP}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
+            <button
               onClick={resetDialogs}
-              disabled={isSendingOTP}
-              className="bg-[#242424] border border-[#424242] text-[#7A7A7A] hover:bg-[#1d1d1d]"
+              className="text-gray-400 hover:text-gray-300 text-sm font-medium transition-colors"
             >
               Cancelar
-            </Button>
-            <Button
-              onClick={handleSendOTP}
-              disabled={isSendingOTP || !phoneInput.trim()}
-              className="bg-white text-black hover:bg-gray-200"
-            >
-              {isSendingOTP ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                "Enviar Código"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </button>
+          </div>
 
-      {/* OTP Verification Dialog */}
-      <Dialog open={showVerifyDialog} onOpenChange={setShowVerifyDialog}>
-        <DialogContent className="bg-[#171717] border border-[#292929]">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Verificar Número de Teléfono
-            </DialogTitle>
-            <DialogDescription className="text-[#7A7A7A]">
-              Ingresa el código de 6 dígitos enviado a{" "}
-              {formatPhoneNumber(pendingPhoneNumber)}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="otp-code" className="text-[#A0A0A0]">
-                Código de Verificación
-              </Label>
-              <Input
-                id="otp-code"
-                placeholder="123456"
-                value={otpCode}
-                onChange={(e) =>
-                  setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
-                }
-                className="bg-[#242424] border border-[#424242] text-white placeholder:text-[#7A7A7A] text-center text-lg tracking-widest"
-                disabled={isVerifyingOTP}
-                maxLength={6}
-              />
+          {/* Divider */}
+          <div className="border-t border-[#2a2a2a] my-4"></div>
+
+          {/* OTP Input Section */}
+          <div>
+            <p className="text-sm font-medium text-gray-400 mb-3">Código de verificación</p>
+            <div className="flex gap-2 justify-center">
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => { inputRefs.current[index] = el }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-[#2a2a2a] bg-[#0a0a0a] hover:border-[#3a3a3a] focus:border-primary/50 focus:outline-none transition-colors"
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                  disabled={isVerifyingOTP}
+                />
+              ))}
             </div>
-            <div className="text-center">
-              <Button
-                variant="ghost"
-                size="sm"
+
+            {/* Footer: Resend and status */}
+            <div className="mt-4 flex items-center justify-between">
+              <button
                 onClick={handleResendOTP}
                 disabled={resendTimer > 0 || isSendingOTP}
-                className="text-[#7A7A7A] hover:text-white"
+                className="text-sm text-gray-400 hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {resendTimer > 0
-                  ? `Reenviar en ${resendTimer}s`
-                  : "Reenviar Código"}
-              </Button>
+                {resendTimer > 0 ? `Reenviar en ${resendTimer}s` : "Reenviar código"}
+              </button>
+              {isVerifyingOTP && (
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Verificando...
+                </div>
+              )}
             </div>
           </div>
-          <DialogFooter>
+        </div>
+      ) : phoneNumber && phoneNumberVerified && !isEditing ? (
+        <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center gap-3">
+            <Phone className="h-5 w-5 text-gray-400" />
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {formatPhoneNumber(phoneNumber)}
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-xs px-2 py-0.5 bg-green-600/10 text-green-400 border-green-600/20"
+              >
+                Verificado
+              </Badge>
+            </div>
+          </div>
+          <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
+            <span className="text-xl">⋯</span>
+          </button>
+        </div>
+      ) : phoneNumber && !phoneNumberVerified && !isEditing ? (
+        <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center gap-3">
+            <Phone className="h-5 w-5 text-gray-400" />
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {formatPhoneNumber(phoneNumber)}
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-xs px-2 py-0.5 bg-yellow-600/10 text-yellow-400 border-yellow-600/20"
+              >
+                Pendiente
+              </Badge>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleSendOTPExisting(phoneNumber)}
+            disabled={isSendingOTP}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium text-gray-400 hover:text-gray-300"
+          >
+            {isSendingOTP ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Verificar"
+            )}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center gap-3 flex-1">
+            <Phone className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <div className="flex-1">
+              <PhoneInputWithCountry
+                international
+                defaultCountry="CO"
+                value={phoneInput as E164Number | undefined}
+                onChange={(val) => setPhoneInput(val || '')}
+                disabled={isSendingOTP}
+                placeholder="Agregar número de teléfono"
+                inputComponent={InputComponent}
+              />
+            </div>
+          </div>
+          {phoneInput && phoneInput.length >= 10 && (
             <Button
-              variant="outline"
-              onClick={resetDialogs}
-              disabled={isVerifyingOTP}
-              className="bg-[#242424] border border-[#424242] text-[#7A7A7A] hover:bg-[#1d1d1d]"
+              size="sm"
+              onClick={handleSendOTP}
+              disabled={isSendingOTP}
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
             >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleVerifyOTP}
-              disabled={isVerifyingOTP || otpCode.length !== 6}
-              className="bg-white text-black hover:bg-gray-200"
-            >
-              {isVerifyingOTP ? (
+              {isSendingOTP ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Verificando...
                 </>
               ) : (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Verificar
-                </>
+                "Verificar"
               )}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          )}
+        </div>
+      )}
+
+      {/* Phone Input Styles */}
+      <style jsx global suppressHydrationWarning>{`
+        /* Override default PhoneInput styles for profile page */
+        .PhoneInput {
+          display: flex;
+          align-items: center;
+        }
+
+        .PhoneInputCountry {
+          position: relative;
+          align-self: stretch;
+          display: flex;
+          align-items: center;
+          margin-right: 1rem;
+        }
+
+        .PhoneInputCountry:focus,
+        .PhoneInputCountry:focus-visible,
+        .PhoneInputCountry:focus-within {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        .PhoneInputCountryIcon {
+          width: 1.25rem;
+          height: 1.25rem;
+          border: none;
+          outline: none;
+        }
+
+        .PhoneInputCountryIcon--border {
+          box-shadow: none;
+          background-color: transparent;
+          border: none;
+        }
+
+        .PhoneInputCountryIconImg {
+          display: block;
+          width: 100%;
+          height: 100%;
+          border: none;
+          outline: none;
+        }
+
+        .PhoneInputCountrySelect {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 100%;
+          z-index: 1;
+          border: 0;
+          opacity: 0;
+          cursor: pointer;
+          outline: none;
+        }
+
+        .PhoneInputCountrySelect:focus,
+        .PhoneInputCountrySelect:focus-visible,
+        .PhoneInputCountrySelect:active {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+
+        .PhoneInputCountrySelectArrow {
+          display: block;
+          content: '';
+          width: 0.3rem;
+          height: 0.3rem;
+          margin-left: 0.5rem;
+          border-style: solid;
+          border-color: #9ca3af;
+          border-top-width: 0;
+          border-bottom-width: 1px;
+          border-left-width: 0;
+          border-right-width: 1px;
+          transform: rotate(45deg);
+          opacity: 0.5;
+        }
+
+        .PhoneInputInput {
+          flex: 1;
+          min-width: 0;
+          background: transparent;
+          border: none;
+          outline: none;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: inherit;
+        }
+
+        .PhoneInputInput::placeholder {
+          color: #6b7280;
+          opacity: 1;
+        }
+
+        .PhoneInputInput:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      `}</style>
     </>
   );
 }

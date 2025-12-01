@@ -25,6 +25,7 @@ import { LinkAccountButton } from "@/components/link-account-button";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ActiveSessionsCard } from "@/components/active-sessions-card";
 import { PhoneVerificationManager } from "@/components/phone-verification-manager";
+import { BirthDateManager } from "@/components/birth-date-manager";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -130,7 +131,7 @@ export default async function ProfilePage() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10 overflow-x-hidden py-8">
+    <div className="space-y-10 overflow-x-hidden py-8">
       {/* Profile Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-6">
@@ -165,16 +166,6 @@ export default async function ProfilePage() {
             )}
           </div>
         </div>
-
-        {/* Update Profile Button */}
-        <div className="hidden sm:block">
-          <EditProfileDialog user={user} />
-        </div>
-      </div>
-
-      {/* Mobile Update Profile Button */}
-      <div className="sm:hidden">
-        <EditProfileDialog user={user} />
       </div>
 
       {/* User Data Section */}
@@ -239,21 +230,7 @@ export default async function ProfilePage() {
           />
 
           {/* Birth Date */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-gray-400" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-500">
-                    Agregar fecha de nacimiento
-                  </span>
-                </div>
-              </div>
-            </div>
-            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
-              <span className="text-xl">⋯</span>
-            </button>
-          </div>
+          <BirthDateManager birthDate={null} />
         </div>
       </div>
 

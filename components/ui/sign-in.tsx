@@ -319,7 +319,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                       {onGoogleSignIn && (
                         <button
                           onClick={onGoogleSignIn}
-                          className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border dark:border-[#303030] rounded-2xl py-4 hover:bg-secondary transition-colors"
+                          className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border dark:border-[#303030] rounded-2xl py-4 hover:bg-foreground/10 transition-colors"
                         >
                             <GoogleIcon />
                             Continuar con Google
@@ -329,7 +329,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                       {onAppleSignIn && (
                         <button
                           onClick={onAppleSignIn}
-                          className="animate-element animate-delay-900 w-full flex items-center justify-center gap-3 border dark:border-[#303030] rounded-2xl py-4 hover:bg-secondary transition-colors"
+                          className="animate-element animate-delay-900 w-full flex items-center justify-center gap-3 border dark:border-[#303030] rounded-2xl py-4 hover:bg-foreground/10 transition-colors"
                         >
                             <AppleIcon />
                             Continuar con Apple

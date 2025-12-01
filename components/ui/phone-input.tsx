@@ -13,6 +13,11 @@ interface PhoneInputProps {
   placeholder?: string;
 }
 
+const InputComponent = forwardRef<HTMLInputElement>((props, innerRef) => (
+  <input {...props} ref={innerRef} />
+));
+InputComponent.displayName = 'PhoneInputComponent';
+
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
   ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }, ref) => {
     return (
@@ -25,14 +30,12 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
             onChange={(val) => onChange(val || '')}
             disabled={disabled}
             placeholder={placeholder}
-            inputComponent={forwardRef<HTMLInputElement>((props, innerRef) => (
-              <input {...props} ref={innerRef || ref} />
-            ))}
+            inputComponent={InputComponent}
           />
         </div>
         {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
 
-        <style jsx global>{`
+        <style jsx global suppressHydrationWarning>{`
           /* Override default PhoneInput styles */
           .PhoneInput {
             display: flex;

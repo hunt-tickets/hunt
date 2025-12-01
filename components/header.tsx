@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "./ui/theme-toggle";
-import { LanguageToggle } from "./ui/language-toggle";
 import { Menu, X } from "lucide-react";
 import { AuthButton } from "./auth-button";
 
@@ -15,6 +14,8 @@ export function Header() {
 
   // Check if we're in admin route
   const isAdminRoute = pathname?.includes("/administrador");
+  // Check if we're in profile route
+  const isProfileRoute = pathname?.startsWith("/profile");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,68 +56,71 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            <Link
-              href="/eventos"
-              className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
-            >
-              Eventos
-            </Link>
-            <Link
-              href="/productor"
-              className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
-            >
-              Productor
-            </Link>
-            <Link
-              href="/sobre-nosotros"
-              className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
-            >
-              Sobre Nosotros
-            </Link>
-          </nav>
+          {/* Desktop Navigation - Hide in profile route */}
+          {!isProfileRoute && (
+            <nav className="hidden md:flex items-center gap-1">
+              <Link
+                href="/eventos"
+                className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
+              >
+                Eventos
+              </Link>
+              <Link
+                href="/productor"
+                className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
+              >
+                Productor
+              </Link>
+              <Link
+                href="/sobre-nosotros"
+                className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
+              >
+                Sobre Nosotros
+              </Link>
+            </nav>
+          )}
         </div>
 
         {/* Right side - Desktop */}
         <div className="hidden md:flex items-center gap-2">
-          <AuthButton />
-          <LanguageToggle />
           <ThemeToggle />
+          {!isProfileRoute && <AuthButton />}
         </div>
 
         {/* Right side - Mobile */}
         <div className="flex md:hidden items-center gap-2">
           {!isAdminRoute && (
             <>
-              <LanguageToggle />
               <ThemeToggle />
 
-              <button
-                className="flex items-center justify-center h-10 w-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 bg-zinc-100 border border-zinc-300 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-zinc-700 dark:hover:bg-zinc-800"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-5 w-5 text-zinc-900 dark:text-white" />
-                ) : (
-                  <Menu className="h-5 w-5 text-zinc-900 dark:text-white" />
-                )}
-              </button>
+              {!isProfileRoute && (
+                <button
+                  className="flex items-center justify-center h-10 w-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 bg-zinc-100 border border-zinc-300 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="h-5 w-5 text-zinc-900 dark:text-white" />
+                  ) : (
+                    <Menu className="h-5 w-5 text-zinc-900 dark:text-white" />
+                  )}
+                </button>
+              )}
             </>
           )}
         </div>
       </div>
 
-      {/* Mobile Menu - Dropdown from Header */}
-      <div
-        className={`fixed top-16 left-0 right-0 md:hidden transition-all duration-300 ${
-          isMobileMenuOpen
-            ? 'translate-y-0 opacity-100 pointer-events-auto'
-            : '-translate-y-4 opacity-0 pointer-events-none'
-        }`}
-        style={{ zIndex: 45 }}
-      >
+      {/* Mobile Menu - Dropdown from Header - Hide in profile route */}
+      {!isProfileRoute && (
+        <div
+          className={`fixed top-16 left-0 right-0 md:hidden transition-all duration-300 ${
+            isMobileMenuOpen
+              ? 'translate-y-0 opacity-100 pointer-events-auto'
+              : '-translate-y-4 opacity-0 pointer-events-none'
+          }`}
+          style={{ zIndex: 45 }}
+        >
         {/* Glass Background with its own blur */}
         <div className="bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 border-b border-white/10 shadow-2xl">
           {/* Menu Content */}
@@ -149,6 +153,7 @@ export function Header() {
           </nav>
         </div>
       </div>
+      )}
     </header>
   );
 }
