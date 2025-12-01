@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,12 @@ import {
   SelectValue,
   SelectItem,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface BirthDateManagerProps {
   birthDate?: Date | string | null;
@@ -25,10 +31,16 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Date | undefined>(existingDate || undefined);
   const [month, setMonth] = useState<Date>(selected || new Date(2000, 0, 1));
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const formatDisplayDate = (date: Date) => {
     return format(date, "d 'de' MMMM, yyyy", { locale: es });
   };
+
+  const monthNames = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
 
   // Generate years (1900 to current year - 13 for minimum age)
   const currentYear = new Date().getFullYear();
@@ -47,6 +59,24 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
     setMonth(newDate);
   };
 
+  const handleMonthChange = (monthIndex: string) => {
+    const newMonthIndex = parseInt(monthIndex);
+    const newDate = new Date(month);
+    newDate.setMonth(newMonthIndex);
+    setMonth(newDate);
+  };
+
+  const handleEdit = () => {
+    setMenuOpen(false);
+    setOpen(true);
+  };
+
+  const handleDelete = () => {
+    setSelected(undefined);
+    setMenuOpen(false);
+    // Aquí puedes agregar la lógica para eliminar de la BD
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -58,19 +88,44 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
             </span>
           </div>
           {selected && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                // Aquí puedes agregar opciones adicionales
-              }}
-              className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all"
-            >
-              <span className="text-xl">⋯</span>
-            </button>
+            <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="text-gray-400 hover:text-gray-300 hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
+                >
+                  <span className="text-xl">⋯</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-48 rounded-2xl border dark:border-zinc-800 bg-background/95 backdrop-blur-md shadow-lg"
+                sideOffset={8}
+              >
+                <div className="p-1">
+                  <DropdownMenuItem
+                    onClick={handleEdit}
+                    className="rounded-xl cursor-pointer flex items-center px-3 py-2"
+                  >
+                    <Edit2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    <span>Editar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="rounded-xl cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 px-3 py-2"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    <span>Eliminar</span>
+                  </DropdownMenuItem>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent align="start" className="p-3 space-y-3 w-auto bg-[#1a1a1a] border-[#2a2a2a]">
+      <PopoverContent align="start" className="p-4 w-auto bg-[#1a1a1a] border-[#2a2a2a]">
         <Calendar
           mode="single"
           selected={selected}
@@ -78,32 +133,46 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
           month={month}
           onMonthChange={setMonth}
           disabled={(date) => date > new Date() || date < new Date(1900, 0, 1)}
-          className="rounded-lg border border-[#2a2a2a] bg-[#0a0a0a]"
+          className="p-0"
           classNames={{
             day_button: cn(
               "hover:bg-[#2a2a2a] data-[selected]:bg-primary data-[selected]:text-primary-foreground",
-              "data-[disabled]:text-gray-600 data-[disabled]:cursor-not-allowed"
+              "data-[disabled]:text-gray-600 data-[disabled]:cursor-not-allowed",
+              "data-[outside]:text-gray-600"
             ),
             months: "flex flex-col sm:flex-row gap-4",
-            month: "w-full",
-            month_caption: "relative flex h-12 items-center justify-center mb-2",
+            month: "w-full space-y-4",
+            month_caption: "relative flex h-10 items-center justify-center",
             caption_label: "text-sm font-medium capitalize",
-            nav: "flex gap-1 absolute left-0 right-0 top-0 justify-between items-center px-1 py-1.5",
-            button_previous: "size-9 text-gray-400 hover:text-gray-300 hover:bg-[#2a2a2a] rounded-lg transition-colors flex items-center justify-center",
-            button_next: "size-9 text-gray-400 hover:text-gray-300 hover:bg-[#2a2a2a] rounded-lg transition-colors flex items-center justify-center",
+            nav: "hidden",
             weekday: "size-9 p-0 text-xs font-medium text-gray-500",
             day: "group size-9 px-0 text-sm",
             today: "*:after:bg-primary",
+            outside: "text-gray-600 opacity-50",
           }}
           components={{
-            CaptionLabel: ({ children }) => (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium capitalize">{children}</span>
+            CaptionLabel: () => (
+              <div className="flex items-center gap-2 w-full">
+                <Select
+                  value={String(month.getMonth())}
+                  onValueChange={handleMonthChange}
+                >
+                  <SelectTrigger className="h-8 flex-1 text-xs bg-[#1f1f1f] border-[#2a2a2a] hover:border-[#3a3a3a] focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-48 bg-[#1a1a1a] border-[#2a2a2a]">
+                    {monthNames.map((monthName, idx) => (
+                      <SelectItem key={idx} value={String(idx)}>
+                        {monthName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Select
                   value={String(month.getFullYear())}
                   onValueChange={handleYearChange}
                 >
-                  <SelectTrigger className="h-7 w-[80px] text-xs bg-[#0a0a0a] border-[#2a2a2a] hover:border-[#3a3a3a]">
+                  <SelectTrigger className="h-8 flex-1 text-xs bg-[#1f1f1f] border-[#2a2a2a] hover:border-[#3a3a3a] focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="max-h-48 bg-[#1a1a1a] border-[#2a2a2a]">

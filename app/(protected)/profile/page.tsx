@@ -22,7 +22,7 @@ import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
-import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { PasswordManager } from "@/components/password-manager";
 import { ActiveSessionsCard } from "@/components/active-sessions-card";
 import { PhoneVerificationManager } from "@/components/phone-verification-manager";
 import { BirthDateManager } from "@/components/birth-date-manager";
@@ -43,6 +43,9 @@ export default async function ProfilePage() {
   const oauthAccounts = await auth.api.listUserAccounts({
     headers: await headers(),
   });
+
+  // Log to see what data is available
+  console.log('OAuth Accounts:', JSON.stringify(oauthAccounts, null, 2));
 
   // Helper to decode JWT and extract user info
   const decodeIdToken = (idToken: string | null) => {
@@ -183,7 +186,7 @@ export default async function ProfilePage() {
                 <input
                   type="text"
                   defaultValue={user.name?.split(" ")[0] || ""}
-                  placeholder="Nombre"
+                  placeholder="Nombre/s Completo"
                   className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
                 />
               </div>
@@ -196,7 +199,7 @@ export default async function ProfilePage() {
                 <input
                   type="text"
                   defaultValue={user.name?.split(" ").slice(1).join(" ") || ""}
-                  placeholder="Apellido"
+                  placeholder="Apellidos Completos"
                   className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
                 />
               </div>
@@ -249,12 +252,12 @@ export default async function ProfilePage() {
               idToken?: string | null;
             }) => {
               const tokenData = decodeIdToken(account.idToken || null);
-              const accountEmail = tokenData?.email;
+              const accountEmail = tokenData?.email || account.accountId;
 
               return (
                 <div
                   key={account.id}
-                  className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0">
@@ -279,7 +282,7 @@ export default async function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     {account.providerId !== "credential" && (
                       <UnlinkAccountButton
                         accountId={account.id}
@@ -326,20 +329,7 @@ export default async function ProfilePage() {
 
         <div className="space-y-3">
           {/* Password */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <Key className="h-5 w-5 text-gray-400" />
-              <div>
-                <p className="text-sm font-medium">Contraseña</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                  ••••••••••
-                </p>
-              </div>
-            </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <ChangePasswordDialog />
-            </div>
-          </div>
+          <PasswordManager />
 
           {/* Two-step verification */}
           <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">

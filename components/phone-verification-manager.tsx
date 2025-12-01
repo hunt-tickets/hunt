@@ -45,6 +45,7 @@ export function PhoneVerificationManager({
 
   const [showOTPInput, setShowOTPInput] = useState(false);
   const [pendingPhoneNumber, setPendingPhoneNumber] = useState("");
+  const [hasAutoSent, setHasAutoSent] = useState(false);
 
   const router = useRouter();
   const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
@@ -59,6 +60,18 @@ export function PhoneVerificationManager({
     }
     return () => clearInterval(interval);
   }, [resendTimer]);
+
+  // Auto-send OTP when a valid phone number is entered for the first time
+  useEffect(() => {
+    if (phoneInput && phoneInput.length >= 10 && !hasAutoSent && !phoneNumber) {
+      const timer = setTimeout(() => {
+        handleSendOTP(true);
+        setHasAutoSent(true);
+      }, 2000); // 2 second delay to ensure user finished typing
+
+      return () => clearTimeout(timer);
+    }
+  }, [phoneInput, hasAutoSent, phoneNumber]);
 
   const formatPhoneNumber = (phone: string) => {
     if (!phone) return phone;
@@ -99,9 +112,11 @@ export function PhoneVerificationManager({
     }
   };
 
-  const handleSendOTP = async () => {
+  const handleSendOTP = async (autoSend = false) => {
     if (!phoneInput || phoneInput.length < 10) {
-      toast.error({ title: "Por favor ingresa un número de teléfono válido" });
+      if (!autoSend) {
+        toast.error({ title: "Por favor ingresa un número de teléfono válido" });
+      }
       return;
     }
 
@@ -215,6 +230,7 @@ export function PhoneVerificationManager({
     setPendingPhoneNumber("");
     setResendTimer(0);
     setIsEditing(false);
+    setHasAutoSent(false);
   };
 
   return (
@@ -310,9 +326,9 @@ export function PhoneVerificationManager({
               </span>
               <Badge
                 variant="secondary"
-                className="text-xs px-2 py-0.5 bg-yellow-600/10 text-yellow-400 border-yellow-600/20"
+                className="text-xs px-2 py-0.5 bg-orange-600/10 text-orange-400 border-orange-600/20"
               >
-                Pendiente
+                No verificado
               </Badge>
             </div>
           </div>
@@ -321,12 +337,12 @@ export function PhoneVerificationManager({
             size="sm"
             onClick={() => handleSendOTPExisting(phoneNumber)}
             disabled={isSendingOTP}
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium text-gray-400 hover:text-gray-300"
+            className="text-sm font-medium text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
           >
             {isSendingOTP ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              "Verificar"
+              "Verificar ahora"
             )}
           </Button>
         </div>
