@@ -55,11 +55,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster
-            position="bottom-right"
+            position="top-center"
             expand={false}
             richColors
             toastOptions={{
-              className: "sm:bottom-4 sm:right-4 top-4 right-4",
+              className: "!z-[9999]",
             }}
           />
           <ConditionalLayout>{children}</ConditionalLayout>
