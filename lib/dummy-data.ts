@@ -130,7 +130,7 @@ export const DUMMY_VENUES = [
     city: "Cali",
     address: "Avenida 6 #15-20, Cali",
     latitude: 3.4516,
-    longitude: -76.5320,
+    longitude: -76.532,
     logo: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop",
     capacity: 600,
     google_maps_link: "https://maps.google.com/?q=3.4516,-76.5320",
@@ -151,7 +151,8 @@ export const DUMMY_PRODUCERS = [
     email: "contact@electrobeats.com",
     phone: "+57 300 123 4567",
     logo: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop",
-    banner: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&h=400&fit=crop",
+    banner:
+      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&h=400&fit=crop",
   },
   {
     id: "producer-2",
@@ -160,7 +161,8 @@ export const DUMMY_PRODUCERS = [
     email: "info@urbannights.com",
     phone: "+57 301 234 5678",
     logo: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
-    banner: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200&h=400&fit=crop",
+    banner:
+      "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200&h=400&fit=crop",
   },
   {
     id: "producer-3",
@@ -169,7 +171,8 @@ export const DUMMY_PRODUCERS = [
     email: "hello@rocklegends.com",
     phone: "+57 302 345 6789",
     logo: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&h=400&fit=crop",
-    banner: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&h=400&fit=crop",
+    banner:
+      "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&h=400&fit=crop",
   },
   {
     id: "producer-4",
@@ -178,6 +181,7 @@ export const DUMMY_PRODUCERS = [
     email: "contact@salsaviva.com",
     phone: "+57 303 456 7890",
     logo: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop",
-    banner: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200&h=400&fit=crop",
+    banner:
+      "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200&h=400&fit=crop",
   },
 ];

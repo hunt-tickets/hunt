@@ -1,0 +1,1 @@
+ALTER TABLE "tickets" ADD COLUMN "platform" "order_from" DEFAULT 'cash' NOT NULL;

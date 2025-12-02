@@ -70,7 +70,10 @@ export function BuyTicketsButton({
           <span className="text-sm sm:text-base font-medium text-muted-foreground">
             Total
           </span>
-          <span className="text-xl sm:text-2xl lg:text-3xl font-bold" suppressHydrationWarning>
+          <span
+            className="text-xl sm:text-2xl lg:text-3xl font-bold"
+            suppressHydrationWarning
+          >
             ${totalPrice.toLocaleString("es-CO")}
           </span>
         </div>
@@ -88,10 +91,10 @@ export function BuyTicketsButton({
           {isLoading
             ? "Procesando..."
             : totalTickets === 0
-            ? "Selecciona tickets"
-            : !termsAccepted
-            ? "Acepta los términos"
-            : `Comprar (${totalTickets} ${totalTickets === 1 ? "ticket" : "tickets"})`}
+              ? "Selecciona tickets"
+              : !termsAccepted
+                ? "Acepta los términos"
+                : `Comprar (${totalTickets} ${totalTickets === 1 ? "ticket" : "tickets"})`}
         </span>
       </Button>
     </div>

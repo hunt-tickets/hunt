@@ -5,7 +5,7 @@ import { Filter } from "lucide-react";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EventCard } from "@/components/event-card";
 import { CreateEventDialog } from "@/components/create-event-dialog";
-import type { EventFull } from "@/lib/supabase/types";
+import type { EventWithVenue } from "@/lib/supabase/actions/events";
 
 interface VenueOption {
   id: string;
@@ -13,14 +13,15 @@ interface VenueOption {
 }
 
 interface AdminEventsListProps {
-  events: EventFull[];
+  events: EventWithVenue[];
   userId: string;
   eventVenues?: VenueOption[];
+  organizationId: string;
 }
 
 const SCROLL_POSITION_KEY = 'admin-events-list-scroll';
 
-export function AdminEventsList({ events, userId, eventVenues = [] }: AdminEventsListProps) {
+export function AdminEventsList({ events, userId, eventVenues = [], organizationId }: AdminEventsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Restore scroll position when component mounts
@@ -46,7 +47,9 @@ export function AdminEventsList({ events, userId, eventVenues = [] }: AdminEvent
     if (!searchQuery.trim()) return events;
 
     const query = searchQuery.toLowerCase();
-    return events.filter((event) => event.name?.toLowerCase().includes(query));
+    return events.filter((event) =>
+      event.name?.toLowerCase().includes(query) || false
+    );
   }, [events, searchQuery]);
 
   return (
@@ -60,7 +63,7 @@ export function AdminEventsList({ events, userId, eventVenues = [] }: AdminEvent
           />
         </div>
         <div className="flex items-center">
-          <CreateEventDialog eventVenues={eventVenues} className="sm:px-6 px-3 sm:rounded-full rounded-full" />
+          <CreateEventDialog eventVenues={eventVenues} organizationId={organizationId} className="sm:px-6 px-3 sm:rounded-full rounded-full" />
         </div>
       </div>
 
@@ -71,11 +74,11 @@ export function AdminEventsList({ events, userId, eventVenues = [] }: AdminEvent
             <EventCard
               key={event.id}
               id={event.id}
-              title={event.name}
-              date={event.date}
-              location={`${event.venue_name}, ${event.venue_city}`}
-              image={event.flyer}
-              href={`/profile/${userId}/administrador/event/${event.id}`}
+              title={event.name || "Sin nombre"}
+              date={event.date ? event.date.toISOString() : ""}
+              location={`${event.venue_name || "Sin venue"}, ${event.venue_city || "Sin ciudad"}`}
+              image={event.flyer || "/placeholder.svg"}
+              href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${event.id}`}
               onClick={handleEventClick}
             />
           ))}

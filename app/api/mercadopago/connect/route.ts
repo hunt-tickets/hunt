@@ -108,12 +108,12 @@ export async function GET(request: NextRequest) {
 
     // Redirect back to the organization settings with success message
     return NextResponse.redirect(
-      `${process.env.APP_URL}/dashboard/${org.slug}/settings?connected=mercadopago`
+      `${process.env.APP_URL}/profile/${session.user.id}/organizaciones/${organizationId}/administrador/configuracion?connected=mercadopago`
     );
   } catch (error) {
     console.error("MercadoPago connection error:", error);
     return NextResponse.redirect(
-      `${process.env.APP_URL}/dashboard?error=connection_failed`
+      `${process.env.APP_URL}/profile/${session.user.id}/organizaciones/${organizationId}/administrador?error=connection_failed`
     );
   }
 }

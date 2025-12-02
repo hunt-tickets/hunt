@@ -2,8 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Receipt, DollarSign, Ticket, CreditCard } from "lucide-react";
-import { useEffect, useState } from "react";
-import * as echarts from "echarts";
 
 interface AccountingSummary {
   totalIngresos: number;
@@ -33,132 +31,6 @@ interface AccountingDashboardProps {
 }
 
 export function AccountingDashboard({ summary }: AccountingDashboardProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    // Monthly Revenue Chart
-    const monthlyChart = echarts.init(document.getElementById("monthly-revenue-chart"));
-    monthlyChart.setOption({
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        top: '10%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: summary.monthlyData.map(d => {
-          const [year, month] = d.month.split('-');
-          return `${month}/${year.slice(2)}`;
-        }),
-        axisLabel: { color: '#666' },
-        axisLine: { lineStyle: { color: '#333' } }
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: {
-          color: '#666',
-          formatter: (value: number) => `$${(value / 1000).toFixed(0)}k`
-        },
-        splitLine: { lineStyle: { color: '#222' } }
-      },
-      series: [
-        {
-          data: summary.monthlyData.map(d => d.ingresos),
-          type: 'bar',
-          itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: '#10b981' },
-              { offset: 1, color: '#059669' }
-            ])
-          },
-          barWidth: '60%',
-        }
-      ],
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderColor: '#333',
-        textStyle: { color: '#fff' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        formatter: (params: any) => {
-          const param = params[0];
-          return `${param.name}<br/>Ingresos: ${formatCurrency(param.value)}<br/>Transacciones: ${summary.monthlyData[param.dataIndex].transactions}`;
-        }
-      }
-    });
-
-    // Channel Distribution Chart
-    const channelChart = echarts.init(document.getElementById("channel-distribution-chart"));
-    channelChart.setOption({
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderColor: '#333',
-        textStyle: { color: '#fff' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        formatter: (params: any) => {
-          return `${params.name}<br/>Ingresos: ${formatCurrency(params.value)}<br/>Porcentaje: ${params.percent}%`;
-        }
-      },
-      legend: {
-        orient: 'vertical',
-        right: '10%',
-        top: 'center',
-        textStyle: { color: '#999' }
-      },
-      series: [
-        {
-          type: 'pie',
-          radius: ['40%', '70%'],
-          center: ['40%', '50%'],
-          avoidLabelOverlap: false,
-          itemStyle: {
-            borderRadius: 10,
-            borderColor: '#000',
-            borderWidth: 2
-          },
-          label: {
-            show: false
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: 16,
-              fontWeight: 'bold',
-              color: '#fff'
-            }
-          },
-          data: [
-            { value: summary.byChannel.app, name: 'App Móvil', itemStyle: { color: '#8b5cf6' } },
-            { value: summary.byChannel.web, name: 'Web', itemStyle: { color: '#06b6d4' } },
-            { value: summary.byChannel.cash, name: 'Efectivo', itemStyle: { color: '#10b981' } }
-          ]
-        }
-      ]
-    });
-
-    // Resize charts on window resize
-    const handleResize = () => {
-      monthlyChart.resize();
-      channelChart.resize();
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      monthlyChart.dispose();
-      channelChart.dispose();
-    };
-  }, [mounted, summary]);
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -167,14 +39,24 @@ export function AccountingDashboard({ summary }: AccountingDashboardProps) {
     }).format(amount);
   };
 
-  if (!mounted) return null;
-
   // Calculate growth (comparing last month vs previous month)
   const lastMonth = summary.monthlyData[summary.monthlyData.length - 1];
   const previousMonth = summary.monthlyData[summary.monthlyData.length - 2];
   const growth = previousMonth?.ingresos
     ? ((lastMonth.ingresos - previousMonth.ingresos) / previousMonth.ingresos) * 100
     : 0;
+
+  // Calculate max for bar chart
+  const maxMonthlyIngresos = Math.max(...summary.monthlyData.map(d => d.ingresos), 1);
+
+  // Calculate channel total for pie chart percentages
+  const channelTotal = summary.byChannel.app + summary.byChannel.web + summary.byChannel.cash;
+
+  const channelData = [
+    { name: 'App Móvil', value: summary.byChannel.app, color: 'rgba(139, 92, 246, 0.8)' },
+    { name: 'Web', value: summary.byChannel.web, color: 'rgba(6, 182, 212, 0.8)' },
+    { name: 'Efectivo', value: summary.byChannel.cash, color: 'rgba(16, 185, 129, 0.8)' },
+  ].filter(item => item.value > 0);
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto">
@@ -254,21 +136,108 @@ export function AccountingDashboard({ summary }: AccountingDashboardProps) {
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Monthly Revenue Bar Chart */}
         <Card className="bg-white/[0.02] border-white/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Ingresos Mensuales</CardTitle>
           </CardHeader>
           <CardContent>
-            <div id="monthly-revenue-chart" className="h-[300px]" />
+            <div className="h-[300px] flex items-end gap-2 pt-4">
+              {summary.monthlyData.map((data, index) => {
+                const heightPercent = (data.ingresos / maxMonthlyIngresos) * 100;
+                const [year, month] = data.month.split('-');
+                const label = `${month}/${year.slice(2)}`;
+
+                return (
+                  <div
+                    key={index}
+                    className="flex-1 flex flex-col items-center group relative"
+                  >
+                    <div className="w-full flex flex-col justify-end h-[240px]">
+                      <div
+                        className="w-full bg-gradient-to-t from-green-600 to-green-500 rounded-t transition-all duration-300 hover:from-green-500 hover:to-green-400 cursor-pointer min-h-[4px]"
+                        style={{ height: `${Math.max(heightPercent, 2)}%` }}
+                      />
+                    </div>
+
+                    {/* Tooltip */}
+                    <div className="absolute bottom-[250px] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      <div className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-xl">
+                        <div className="font-semibold text-white mb-1">{label}</div>
+                        <div className="text-white/80">{formatCurrency(data.ingresos)}</div>
+                        <div className="text-white/60">{data.transactions} transacciones</div>
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] text-white/40 mt-2">{label}</span>
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
+        {/* Channel Distribution Donut Chart */}
         <Card className="bg-white/[0.02] border-white/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Distribución por Canal</CardTitle>
           </CardHeader>
           <CardContent>
-            <div id="channel-distribution-chart" className="h-[300px]" />
+            <div className="h-[300px] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-6">
+                {/* Donut Chart */}
+                <div className="relative w-44 h-44">
+                  <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                    {(() => {
+                      let cumulativePercent = 0;
+                      return channelData.map((item, index) => {
+                        const percent = (item.value / channelTotal) * 100;
+                        const strokeDasharray = `${percent} ${100 - percent}`;
+                        const strokeDashoffset = -cumulativePercent;
+                        cumulativePercent += percent;
+
+                        return (
+                          <circle
+                            key={index}
+                            cx="50"
+                            cy="50"
+                            r="40"
+                            fill="none"
+                            stroke={item.color}
+                            strokeWidth="16"
+                            strokeDasharray={strokeDasharray}
+                            strokeDashoffset={strokeDashoffset}
+                            pathLength="100"
+                            className="transition-all duration-500"
+                          />
+                        );
+                      });
+                    })()}
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-lg font-bold">{formatCurrency(channelTotal)}</div>
+                      <div className="text-xs text-white/50">Total</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Legend */}
+                <div className="flex flex-wrap justify-center gap-4">
+                  {channelData.map((item, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-xs text-white/60">
+                        {item.name} ({((item.value / channelTotal) * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

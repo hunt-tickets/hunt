@@ -1,4 +1,4 @@
-import { getAllActiveEvents } from "@/lib/db/mock-db";
+import { getPopularEvents } from "@/lib/supabase/actions/events";
 import { EventsWithSearch } from "@/components/events-with-search";
 
 /**
@@ -6,8 +6,8 @@ import { EventsWithSearch } from "@/components/events-with-search";
  * Server Component that fetches all active events from the database
  */
 export default async function EventosPage() {
-  // Fetch all active events (status=true and end_date >= now)
-  const { data: events } = await getAllActiveEvents();
+  // Fetch all active events from Supabase (status=true and end_date >= now)
+  const events = await getPopularEvents(100);
 
   // Show message if no events found
   if (!events || events.length === 0) {

@@ -24,19 +24,18 @@ export default function AddPaymentProcessorDialog({
 
   return (
     <Dialog>
-      
+
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Add Payment Processor
+          Agregar Procesador de Pago
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-center pb-2">
-          <DialogTitle>Connect Payment Processor</DialogTitle>
+          <DialogTitle>Conectar Procesador de Pago</DialogTitle>
           <DialogDescription>
-            Choose a payment processor to start accepting customer payments
-            securely.
+            Elige un procesador de pago para comenzar a recibir pagos de tus clientes de forma segura.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-2">
@@ -58,23 +57,23 @@ export default function AddPaymentProcessorDialog({
                     <div className="space-y-1">
                       <div className="font-semibold">MercadoPago</div>
                       <div className="text-sm text-muted-foreground">
-                        Leading payment solution in Latin America
+                        Solución de pagos líder en Latinoamérica
                       </div>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
                         <div className="flex items-center gap-1">
                           <Shield className="h-3 w-3" />
-                          <span>Bank Security</span>
+                          <span>Seguridad Bancaria</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Zap className="h-3 w-3" />
-                          <span>Local Support</span>
+                          <span>Soporte Local</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   <Link href={mpOauthUrl}>
                     <Button size="sm" className="min-w-[80px]">
-                      Connect
+                      Conectar
                       <ExternalLink className="h-3 w-3 ml-1" />
                     </Button>
                   </Link>

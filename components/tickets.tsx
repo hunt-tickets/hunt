@@ -1,10 +1,9 @@
-import { Ticket } from "@/lib/types";
+import type { TicketType } from "@/lib/schema";
 import { TicketsContainer } from "./tickets-container";
 
 interface TicketsProps {
-  tickets: Ticket[];
+  tickets: TicketType[];
   eventId: string;
-  variableFee?: number;
 }
 
 /**
@@ -31,7 +30,7 @@ interface TicketsProps {
  *    - Client: Interactive content (quantity selection, cart state)
  *    - Result: Balanced payload size vs. UX performance
  */
-const Tickets = ({ tickets, eventId, variableFee }: TicketsProps) => {
+const Tickets = ({ tickets, eventId }: TicketsProps) => {
   // Early return if no tickets - rendered on server
   if (!tickets || tickets.length === 0) {
     return null;
@@ -52,7 +51,6 @@ const Tickets = ({ tickets, eventId, variableFee }: TicketsProps) => {
           <TicketsContainer
             tickets={tickets}
             eventId={eventId}
-            variableFee={variableFee}
           />
         </div>
       </div>

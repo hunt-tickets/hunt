@@ -1,5 +1,5 @@
 import { EventsWithSearch } from "@/components/events-with-search";
-import { getPopularEvents } from "@/lib/db/mock-db";
+import { getPopularEvents, type PopularEventWithVenue } from "@/lib/supabase/actions/events";
 
 interface PopularEventsProps {
   // City ID to fetch popular events for
@@ -10,12 +10,11 @@ interface PopularEventsProps {
 
 /**
  * PopularEvents Server Component
- * Fetches events from the database and passes them to the client component for filtering
+ * Fetches events from Supabase and passes them to the client component for filtering
  */
 export async function PopularEvents({ limit = 6 }: PopularEventsProps) {
-  // Fetch popular events directly in the Server Component
-  // Fetch extra events to ensure we have enough after filtering
-  const { data: events } = await getPopularEvents();
+  // Fetch popular events directly from Supabase
+  const events: PopularEventWithVenue[] = await getPopularEvents(limit * 2);
 
   // Show message if no events found
   if (!events || events.length === 0) {

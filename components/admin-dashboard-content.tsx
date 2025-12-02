@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LayoutDashboard, Download, HelpCircle } from "lucide-react";
-import ReactECharts from 'echarts-for-react';
 
 interface Organization {
   id: string;
@@ -16,10 +15,88 @@ interface AdminDashboardContentProps {
   organization: Organization | null;
 }
 
+// Donut Chart Component
+function DonutChart({
+  data,
+}: {
+  data: Array<{ name: string; value: number; color: string }>;
+}) {
+  const total = data.reduce((acc, item) => acc + item.value, 0);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative w-40 h-40">
+        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+          {(() => {
+            let cumulativePercent = 0;
+            return data.map((item, index) => {
+              const percent = (item.value / total) * 100;
+              const strokeDasharray = `${percent} ${100 - percent}`;
+              const strokeDashoffset = -cumulativePercent;
+              cumulativePercent += percent;
+
+              return (
+                <circle
+                  key={index}
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke={item.color}
+                  strokeWidth="18"
+                  strokeDasharray={strokeDasharray}
+                  strokeDashoffset={strokeDashoffset}
+                  pathLength="100"
+                  className="transition-all duration-500"
+                />
+              );
+            });
+          })()}
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-xl font-bold">{total}%</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+        {data.map((item, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <div
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-xs text-white/60">
+              {item.name} {item.value}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function AdminDashboardContent({ organization }: AdminDashboardContentProps) {
   const [timeRange, setTimeRange] = useState<"3" | "6" | "12">("12");
 
   const displayName = organization?.name || "Mi Organización";
+
+  // Age distribution data
+  const ageData = [
+    { name: '18-24 años', value: 35, color: 'rgba(255, 255, 255, 0.5)' },
+    { name: '25-34 años', value: 42, color: 'rgba(255, 255, 255, 0.35)' },
+    { name: '35-44 años', value: 18, color: 'rgba(255, 255, 255, 0.25)' },
+    { name: '45+ años', value: 5, color: 'rgba(255, 255, 255, 0.15)' }
+  ];
+
+  // Gender distribution data
+  const genderData = [
+    { name: 'Masculino', value: 52, color: 'rgba(255, 255, 255, 0.5)' },
+    { name: 'Femenino', value: 45, color: 'rgba(255, 255, 255, 0.35)' },
+    { name: 'Otro', value: 3, color: 'rgba(255, 255, 255, 0.2)' }
+  ];
 
   return (
     <div className="w-full max-w-full overflow-hidden">
@@ -213,96 +290,8 @@ export function AdminDashboardContent({ organization }: AdminDashboardContentPro
                     <h3 className="text-base sm:text-lg font-semibold text-white mb-1">Distribución por Edad</h3>
                     <p className="text-xs sm:text-sm text-white/50">Rango de edades del público</p>
                   </div>
-                  <div className="h-[300px]">
-                    <ReactECharts
-                      option={{
-                        backgroundColor: 'transparent',
-                        tooltip: {
-                          trigger: 'item',
-                          backgroundColor: '#18181b',
-                          borderColor: '#303030',
-                          borderWidth: 1,
-                          textStyle: { color: '#fff' },
-                          formatter: '{b}: {c}%'
-                        },
-                        series: [{
-                          type: 'pie',
-                          radius: ['40%', '70%'],
-                          center: ['50%', '50%'],
-                          avoidLabelOverlap: false,
-                          padAngle: 3,
-                          itemStyle: {
-                            borderRadius: 10,
-                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                            borderWidth: 2,
-                            color: {
-                              type: 'pattern',
-                              image: (() => {
-                                const canvas = document.createElement('canvas');
-                                canvas.width = 6;
-                                canvas.height = 6;
-                                const ctx = canvas.getContext('2d');
-                                if (ctx) {
-                                  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
-                                  ctx.fillRect(0, 0, 6, 6);
-                                  ctx.fillStyle = 'rgba(255, 255, 255, 0.30)';
-                                  ctx.beginPath();
-                                  ctx.arc(3, 3, 0.3, 0, Math.PI * 2);
-                                  ctx.fill();
-                                }
-                                return canvas;
-                              })(),
-                              repeat: 'repeat'
-                            }
-                          },
-                          label: {
-                            show: true,
-                            formatter: '{b}\n{d}%',
-                            color: '#888',
-                            fontSize: 11
-                          },
-                          emphasis: {
-                            label: {
-                              show: true,
-                              fontSize: 13,
-                              fontWeight: 'bold',
-                              color: '#fff'
-                            },
-                            scale: false,
-                            itemStyle: {
-                              color: {
-                                type: 'pattern',
-                                image: (() => {
-                                  const canvas = document.createElement('canvas');
-                                  canvas.width = 6;
-                                  canvas.height = 6;
-                                  const ctx = canvas.getContext('2d');
-                                  if (ctx) {
-                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
-                                    ctx.fillRect(0, 0, 6, 6);
-                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.40)';
-                                    ctx.beginPath();
-                                    ctx.arc(3, 3, 0.3, 0, Math.PI * 2);
-                                    ctx.fill();
-                                  }
-                                  return canvas;
-                                })(),
-                                repeat: 'repeat'
-                              },
-                              borderColor: 'rgba(255, 255, 255, 0.3)',
-                              shadowBlur: 0
-                            }
-                          },
-                          data: [
-                            { name: '18-24 años', value: 35 },
-                            { name: '25-34 años', value: 42 },
-                            { name: '35-44 años', value: 18 },
-                            { name: '45+ años', value: 5 }
-                          ]
-                        }]
-                      }}
-                      style={{ height: '100%', width: '100%' }}
-                    />
+                  <div className="h-[300px] flex items-center justify-center">
+                    <DonutChart data={ageData} />
                   </div>
                 </CardContent>
               </Card>
@@ -314,95 +303,8 @@ export function AdminDashboardContent({ organization }: AdminDashboardContentPro
                     <h3 className="text-base sm:text-lg font-semibold text-white mb-1">Distribución por Género</h3>
                     <p className="text-xs sm:text-sm text-white/50">Composición del público</p>
                   </div>
-                  <div className="h-[300px]">
-                    <ReactECharts
-                      option={{
-                        backgroundColor: 'transparent',
-                        tooltip: {
-                          trigger: 'item',
-                          backgroundColor: '#18181b',
-                          borderColor: '#303030',
-                          borderWidth: 1,
-                          textStyle: { color: '#fff' },
-                          formatter: '{b}: {c}%'
-                        },
-                        series: [{
-                          type: 'pie',
-                          radius: ['40%', '70%'],
-                          center: ['50%', '50%'],
-                          avoidLabelOverlap: false,
-                          padAngle: 3,
-                          itemStyle: {
-                            borderRadius: 10,
-                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                            borderWidth: 2,
-                            color: {
-                              type: 'pattern',
-                              image: (() => {
-                                const canvas = document.createElement('canvas');
-                                canvas.width = 6;
-                                canvas.height = 6;
-                                const ctx = canvas.getContext('2d');
-                                if (ctx) {
-                                  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
-                                  ctx.fillRect(0, 0, 6, 6);
-                                  ctx.fillStyle = 'rgba(255, 255, 255, 0.30)';
-                                  ctx.beginPath();
-                                  ctx.arc(3, 3, 0.3, 0, Math.PI * 2);
-                                  ctx.fill();
-                                }
-                                return canvas;
-                              })(),
-                              repeat: 'repeat'
-                            }
-                          },
-                          label: {
-                            show: true,
-                            formatter: '{b}\n{d}%',
-                            color: '#888',
-                            fontSize: 11
-                          },
-                          emphasis: {
-                            label: {
-                              show: true,
-                              fontSize: 13,
-                              fontWeight: 'bold',
-                              color: '#fff'
-                            },
-                            scale: false,
-                            itemStyle: {
-                              color: {
-                                type: 'pattern',
-                                image: (() => {
-                                  const canvas = document.createElement('canvas');
-                                  canvas.width = 6;
-                                  canvas.height = 6;
-                                  const ctx = canvas.getContext('2d');
-                                  if (ctx) {
-                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
-                                    ctx.fillRect(0, 0, 6, 6);
-                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.40)';
-                                    ctx.beginPath();
-                                    ctx.arc(3, 3, 0.3, 0, Math.PI * 2);
-                                    ctx.fill();
-                                  }
-                                  return canvas;
-                                })(),
-                                repeat: 'repeat'
-                              },
-                              borderColor: 'rgba(255, 255, 255, 0.3)',
-                              shadowBlur: 0
-                            }
-                          },
-                          data: [
-                            { name: 'Masculino', value: 52 },
-                            { name: 'Femenino', value: 45 },
-                            { name: 'Otro', value: 3 }
-                          ]
-                        }]
-                      }}
-                      style={{ height: '100%', width: '100%' }}
-                    />
+                  <div className="h-[300px] flex items-center justify-center">
+                    <DonutChart data={genderData} />
                   </div>
                 </CardContent>
               </Card>

@@ -36,6 +36,7 @@ interface VenueOption {
 interface CreateEventDialogProps {
   className?: string;
   eventVenues?: VenueOption[];
+  organizationId: string;
 }
 
 const initialState: EventFormState = {
@@ -49,7 +50,6 @@ interface StatusSelectProps {
   name: string;
   value: string;
   onChange: (value: string) => void;
-  required?: boolean;
 }
 
 function StatusSelect({
@@ -57,14 +57,13 @@ function StatusSelect({
   name,
   value,
   onChange,
-  required,
 }: StatusSelectProps) {
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium">
-        {label} {required && <span className="text-destructive">*</span>}
+        {label}
       </Label>
-      <Select value={value} onValueChange={onChange} required={required}>
+      <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
           <SelectValue />
         </SelectTrigger>
@@ -81,6 +80,7 @@ function StatusSelect({
 export function CreateEventDialog({
   className,
   eventVenues = [],
+  organizationId,
 }: CreateEventDialogProps) {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useActionState(createEvent, initialState);
@@ -149,6 +149,9 @@ export function CreateEventDialog({
               className="space-y-8"
               id="create-event-form"
             >
+              {/* Hidden organization ID */}
+              <input type="hidden" name="organization_id" value={organizationId} />
+
               {/* Error message */}
               {state.message && !state.success && (
                 <Alert
@@ -178,14 +181,12 @@ export function CreateEventDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">
-                    Nombre del Evento{" "}
-                    <span className="text-destructive">*</span>
+                    Nombre del Evento
                   </Label>
                   <Input
                     id="name"
                     name="name"
                     placeholder="Ej: Fiesta de Año Nuevo"
-                    required
                     className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
                   />
                   {state.errors?.name && (
@@ -198,14 +199,13 @@ export function CreateEventDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="description" className="text-sm font-medium">
-                    Descripción <span className="text-destructive">*</span>
+                    Descripción
                   </Label>
                   <Textarea
                     id="description"
                     name="description"
                     placeholder="Describe el evento..."
                     className="min-h-[100px] resize-none bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    required
                   />
                   {state.errors?.description && (
                     <p className="text-sm text-destructive flex items-center gap-1">
@@ -225,14 +225,12 @@ export function CreateEventDialog({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="start_date" className="text-sm font-medium">
-                      Fecha de Inicio{" "}
-                      <span className="text-destructive">*</span>
+                      Fecha de Inicio
                     </Label>
                     <Input
                       id="start_date"
                       name="start_date"
                       type="date"
-                      required
                       className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
                     />
                     {state.errors?.start_date && (
@@ -245,13 +243,12 @@ export function CreateEventDialog({
 
                   <div className="space-y-2">
                     <Label htmlFor="start_time" className="text-sm font-medium">
-                      Hora de Inicio <span className="text-destructive">*</span>
+                      Hora de Inicio
                     </Label>
                     <Input
                       id="start_time"
                       name="start_time"
                       type="time"
-                      required
                       className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
                     />
                     {state.errors?.start_time && (
@@ -264,14 +261,12 @@ export function CreateEventDialog({
 
                   <div className="space-y-2">
                     <Label htmlFor="end_date" className="text-sm font-medium">
-                      Fecha de Finalización{" "}
-                      <span className="text-destructive">*</span>
+                      Fecha de Finalización
                     </Label>
                     <Input
                       id="end_date"
                       name="end_date"
                       type="date"
-                      required
                       className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
                     />
                     {state.errors?.end_date && (
@@ -284,14 +279,12 @@ export function CreateEventDialog({
 
                   <div className="space-y-2">
                     <Label htmlFor="end_time" className="text-sm font-medium">
-                      Hora de Finalización{" "}
-                      <span className="text-destructive">*</span>
+                      Hora de Finalización
                     </Label>
                     <Input
                       id="end_time"
                       name="end_time"
                       type="time"
-                      required
                       className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
                     />
                     {state.errors?.end_time && (
@@ -312,9 +305,9 @@ export function CreateEventDialog({
 
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
-                    Venue <span className="text-destructive">*</span>
+                    Venue
                   </Label>
-                  <Select value={venueId} onValueChange={setVenueId} required>
+                  <Select value={venueId} onValueChange={setVenueId}>
                     <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
                       <SelectValue placeholder="Seleccione un venue" />
                     </SelectTrigger>
@@ -342,10 +335,48 @@ export function CreateEventDialog({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">
-                      Edad Mínima <span className="text-destructive">*</span>
+                    <Label htmlFor="city" className="text-sm font-medium">
+                      Ciudad
                     </Label>
-                    <Select value={age} onValueChange={setAge} required>
+                    <Input
+                      id="city"
+                      name="city"
+                      placeholder="Ej: Bogotá"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    {state.errors?.city && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.city[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="country" className="text-sm font-medium">
+                      País
+                    </Label>
+                    <Input
+                      id="country"
+                      name="country"
+                      placeholder="Ej: Colombia"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    {state.errors?.country && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.country[0]}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Edad Mínima
+                    </Label>
+                    <Select value={age} onValueChange={setAge}>
                       <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
                         <SelectValue placeholder="Seleccione edad" />
                       </SelectTrigger>
@@ -376,8 +407,32 @@ export function CreateEventDialog({
                     name="status"
                     value={status}
                     onChange={setStatus}
-                    required
                   />
+                </div>
+              </div>
+
+              {/* Información Adicional */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
+                  Información Adicional
+                </h3>
+
+                <div className="space-y-2">
+                  <Label htmlFor="extra_info" className="text-sm font-medium">
+                    Información Extra
+                  </Label>
+                  <Textarea
+                    id="extra_info"
+                    name="extra_info"
+                    placeholder="Información adicional sobre el evento..."
+                    className="min-h-[80px] resize-none bg-background/50 border-[#303030] focus-visible:ring-primary"
+                  />
+                  {state.errors?.extra_info && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {state.errors.extra_info[0]}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -418,6 +473,238 @@ export function CreateEventDialog({
                     <p className="text-xs text-[#B0B0B0]">
                       Para Apple/Google Wallet (Máx. 5MB)
                     </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="flyer_overlay" className="text-sm font-medium">
+                      Flyer Overlay
+                    </Label>
+                    <Input
+                      id="flyer_overlay"
+                      name="flyer_overlay"
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Imagen de overlay (Máx. 5MB)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="flyer_background" className="text-sm font-medium">
+                      Flyer Background
+                    </Label>
+                    <Input
+                      id="flyer_background"
+                      name="flyer_background"
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Imagen de fondo (Máx. 5MB)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="flyer_banner" className="text-sm font-medium">
+                      Flyer Banner
+                    </Label>
+                    <Input
+                      id="flyer_banner"
+                      name="flyer_banner"
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Banner del evento (Máx. 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tarifas y Comisiones */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
+                  Tarifas y Comisiones
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="variable_fee" className="text-sm font-medium">
+                      Tarifa Variable (%)
+                    </Label>
+                    <Input
+                      id="variable_fee"
+                      name="variable_fee"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Ej: 10.00"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Porcentaje de comisión sobre el precio del ticket
+                    </p>
+                    {state.errors?.variable_fee && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.variable_fee[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fixed_fee" className="text-sm font-medium">
+                      Tarifa Fija
+                    </Label>
+                    <Input
+                      id="fixed_fee"
+                      name="fixed_fee"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Ej: 5000"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Monto fijo de comisión por ticket
+                    </p>
+                    {state.errors?.fixed_fee && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.fixed_fee[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pos_fee" className="text-sm font-medium">
+                      Tarifa POS
+                    </Label>
+                    <Input
+                      id="pos_fee"
+                      name="pos_fee"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Ej: 3000"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Tarifa para ventas en punto de venta
+                    </p>
+                    {state.errors?.pos_fee && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.pos_fee[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="late_fee" className="text-sm font-medium">
+                      Tarifa Tardía
+                    </Label>
+                    <Input
+                      id="late_fee"
+                      name="late_fee"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Ej: 2000"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Tarifa adicional para compras tardías
+                    </p>
+                    {state.errors?.late_fee && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.late_fee[0]}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Personalización */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
+                  Personalización de Tema
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hex" className="text-sm font-medium">
+                      Color Principal (Hex)
+                    </Label>
+                    <Input
+                      id="hex"
+                      name="hex"
+                      type="text"
+                      placeholder="Ej: #FF5733"
+                      maxLength={7}
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Color del tema del evento
+                    </p>
+                    {state.errors?.hex && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.hex[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="hex_text" className="text-sm font-medium">
+                      Color de Texto (Hex)
+                    </Label>
+                    <Input
+                      id="hex_text"
+                      name="hex_text"
+                      type="text"
+                      placeholder="Ej: #FFFFFF"
+                      maxLength={7}
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Color del texto principal
+                    </p>
+                    {state.errors?.hex_text && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.hex_text[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="hex_text_secondary" className="text-sm font-medium">
+                      Color Texto Secundario
+                    </Label>
+                    <Input
+                      id="hex_text_secondary"
+                      name="hex_text_secondary"
+                      type="text"
+                      placeholder="Ej: #A3A3A3"
+                      maxLength={7}
+                      defaultValue="#A3A3A3"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Color del texto secundario
+                    </p>
+                    {state.errors?.hex_text_secondary && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.hex_text_secondary[0]}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -540,6 +827,57 @@ export function CreateEventDialog({
                       <p className="text-sm text-destructive flex items-center gap-1">
                         <AlertCircle className="h-3 w-3" />
                         {state.errors.guest_list_max_time[0]}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="guest_email"
+                      className="text-sm font-medium"
+                    >
+                      Email de Contacto
+                    </Label>
+                    <Input
+                      id="guest_email"
+                      name="guest_email"
+                      type="email"
+                      placeholder="contacto@ejemplo.com"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Email para consultas de guest list
+                    </p>
+                    {state.errors?.guest_email && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.guest_email[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="guest_name"
+                      className="text-sm font-medium"
+                    >
+                      Nombre de Contacto
+                    </Label>
+                    <Input
+                      id="guest_name"
+                      name="guest_name"
+                      placeholder="Ej: Juan Pérez"
+                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                    />
+                    <p className="text-xs text-[#B0B0B0]">
+                      Nombre de la persona a cargo del guest list
+                    </p>
+                    {state.errors?.guest_name && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {state.errors.guest_name[0]}
                       </p>
                     )}
                   </div>

@@ -4,7 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { ConditionalLayout } from "@/components/conditional-layout";
 import { ChatbaseWidget } from "@/components/chatbase-widget";
-import { Analytics } from "@vercel/analytics/react";
+// import { Analytics } from "@vercel/analytics/react";
 import Script from "next/script";
 import "./globals.css";
 
@@ -55,9 +55,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster
-            position="top-right"
+            position="top-center"
             expand={false}
             toastOptions={{
+              className: "!z-[9999]",
               unstyled: true,
               classNames: {
                 toast: 'w-full max-w-md',
@@ -69,7 +70,7 @@ export default function RootLayout({
           <ConditionalLayout>{children}</ConditionalLayout>
           <ChatbaseWidget />
         </ThemeProvider>
-        <Analytics />
+        {/* <Analytics /> */}
 
         {/* Chatbase Widget */}
         <Script

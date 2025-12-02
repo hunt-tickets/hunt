@@ -19,6 +19,7 @@ import { schema } from "./schema";
 import ForgotPasswordEmail from "@/components/email-reset-password";
 import OrganizationInvitationEmail from "@/components/email-organization-invitation";
 import { ac, administrator, seller, owner } from "@/lib/auth-permissions";
+import { and, eq } from "drizzle-orm";
 
 // Initialize Resend lazily
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -36,7 +37,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "http://192.168.0.7:3000",
-    "https://f702gzlr-3000.use2.devtunnels.ms/",
+    "https://f702gzlr-3000.use2.devtunnels.ms",
   ],
 
   // Server-side requests made using auth.api aren't affected by rate limiting. Rate limits only apply to client-initiated requests.
@@ -125,10 +126,11 @@ export const auth = betterAuth({
           // Check if we need to also send SMS with the same code
           let phoneNumber = null;
 
-          console.log(
-            "🔍 Debug - Full request object:",
-            JSON.stringify(request, null, 2)
-          );
+          // Skip serializing full request object to avoid circular reference errors
+          // console.log(
+          //   "🔍 Debug - Full request object:",
+          //   JSON.stringify(request, null, 2)
+          // );
 
           try {
             // Try multiple ways to extract phone number
@@ -172,7 +174,6 @@ export const auth = betterAuth({
           if (phoneNumber) {
             try {
               // Check if phone number is already verified by another user
-              const { and, eq } = await import("drizzle-orm");
               const existingVerifiedUser = await db
                 .select()
                 .from(schema.user)

@@ -2,8 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Target, Clock, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
-import * as echarts from "echarts";
 
 interface Event {
   id: string;
@@ -56,12 +54,6 @@ export function EventProgressContent({
   ticketsAnalytics,
   transactions,
 }: EventProgressContentProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -91,6 +83,8 @@ export function EventProgressContent({
       revenue: dayTransactions.reduce((sum, t) => sum + t.total, 0),
     };
   });
+
+  const maxDailySales = Math.max(...dailySales.map(d => d.quantity), 1);
 
   // Calculate velocity (tickets per day)
   const recentTransactions = transactions.filter(t => {
@@ -123,134 +117,6 @@ export function EventProgressContent({
       };
     })
     .sort((a, b) => b.percentage - a.percentage);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    // Daily Sales Trend Chart
-    const salesTrendChart = echarts.init(document.getElementById("sales-trend-chart"));
-    salesTrendChart.setOption({
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        top: '10%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: dailySales.map(d => {
-          const date = new Date(d.date);
-          return `${date.getDate()}/${date.getMonth() + 1}`;
-        }),
-        axisLabel: { color: '#666' },
-        axisLine: { lineStyle: { color: '#333' } }
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: { color: '#666' },
-        splitLine: { lineStyle: { color: '#222' } }
-      },
-      series: [
-        {
-          data: dailySales.map(d => d.quantity),
-          type: 'line',
-          smooth: true,
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(139, 92, 246, 0.3)' },
-              { offset: 1, color: 'rgba(139, 92, 246, 0.05)' }
-            ])
-          },
-          lineStyle: {
-            color: '#8b5cf6',
-            width: 3
-          },
-          itemStyle: {
-            color: '#8b5cf6'
-          }
-        }
-      ],
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderColor: '#333',
-        textStyle: { color: '#fff' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        formatter: (params: any) => {
-          const param = params[0];
-          const index = param.dataIndex;
-          return `${param.name}<br/>Tickets: ${param.value}<br/>Ingresos: ${formatCurrency(dailySales[index].revenue)}`;
-        }
-      }
-    });
-
-    // Ticket Performance Chart
-    const performanceChart = echarts.init(document.getElementById("ticket-performance-chart"));
-    performanceChart.setOption({
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        top: '10%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'value',
-        max: 100,
-        axisLabel: {
-          color: '#666',
-          formatter: '{value}%'
-        },
-        splitLine: { lineStyle: { color: '#222' } }
-      },
-      yAxis: {
-        type: 'category',
-        data: ticketPerformance.slice(0, 8).map(t => t.name).reverse(),
-        axisLabel: { color: '#666' },
-        axisLine: { lineStyle: { color: '#333' } }
-      },
-      series: [
-        {
-          data: ticketPerformance.slice(0, 8).map(t => ({
-            value: t.percentage,
-            itemStyle: {
-              color: t.hex || '#8b5cf6'
-            }
-          })).reverse(),
-          type: 'bar',
-          barWidth: '60%',
-        }
-      ],
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderColor: '#333',
-        textStyle: { color: '#fff' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        formatter: (params: any) => {
-          const param = params[0];
-          const index = ticketPerformance.length - 1 - param.dataIndex;
-          const ticket = ticketPerformance[index];
-          return `${ticket.name}<br/>Vendidos: ${ticket.sold}/${ticket.quantity}<br/>Progreso: ${ticket.percentage.toFixed(1)}%<br/>Ingresos: ${formatCurrency(ticket.revenue)}`;
-        }
-      }
-    });
-
-    const handleResize = () => {
-      salesTrendChart.resize();
-      performanceChart.resize();
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      salesTrendChart.dispose();
-      performanceChart.dispose();
-    };
-  }, [mounted, dailySales, ticketPerformance]);
-
-  if (!mounted) return null;
 
   return (
     <div className="space-y-4">
@@ -353,21 +219,80 @@ export function EventProgressContent({
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Sales Trend Chart */}
         <Card className="bg-white/[0.02] border-white/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Tendencia de Ventas (Últimos 7 Días)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div id="sales-trend-chart" className="h-[300px]" />
+            <div className="h-[300px] flex items-end gap-2 pt-4">
+              {dailySales.map((day, index) => {
+                const heightPercent = (day.quantity / maxDailySales) * 100;
+                const date = new Date(day.date);
+                const label = `${date.getDate()}/${date.getMonth() + 1}`;
+
+                return (
+                  <div
+                    key={index}
+                    className="flex-1 flex flex-col items-center group relative"
+                  >
+                    <div className="w-full flex flex-col justify-end h-[240px]">
+                      <div
+                        className="w-full bg-gradient-to-t from-purple-600 to-purple-400 rounded-t transition-all duration-300 hover:from-purple-500 hover:to-purple-300 cursor-pointer min-h-[4px]"
+                        style={{ height: `${Math.max(heightPercent, 2)}%` }}
+                      />
+                    </div>
+
+                    {/* Tooltip */}
+                    <div className="absolute bottom-[250px] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      <div className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-xl">
+                        <div className="font-semibold text-white mb-1">{label}</div>
+                        <div className="text-white/80">Tickets: {day.quantity}</div>
+                        <div className="text-white/60">{formatCurrency(day.revenue)}</div>
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] text-white/40 mt-2">{label}</span>
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
+        {/* Ticket Performance Chart */}
         <Card className="bg-white/[0.02] border-white/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Rendimiento por Tipo de Entrada</CardTitle>
           </CardHeader>
           <CardContent>
-            <div id="ticket-performance-chart" className="h-[300px]" />
+            <div className="h-[300px] space-y-3 overflow-y-auto py-2">
+              {ticketPerformance.slice(0, 8).map((ticket, index) => (
+                <div key={index} className="space-y-1.5 group">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70 truncate flex-1 mr-2">{ticket.name}</span>
+                    <span className="text-white font-medium flex-shrink-0">
+                      {ticket.percentage.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="h-6 bg-white/5 rounded overflow-hidden relative">
+                    <div
+                      className="h-full rounded transition-all duration-500 group-hover:opacity-80 flex items-center"
+                      style={{
+                        width: `${ticket.percentage}%`,
+                        backgroundColor: ticket.hex || '#8b5cf6'
+                      }}
+                    >
+                      {ticket.percentage > 20 && (
+                        <span className="text-xs text-white ml-2 truncate">
+                          {ticket.sold}/{ticket.quantity}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

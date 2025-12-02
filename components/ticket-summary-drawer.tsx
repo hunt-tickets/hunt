@@ -11,108 +11,83 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Ticket } from "@/lib/types";
-// import { useBoldCheckout } from "@/hooks/useBoldCheckout"; // Temporarily disabled
+import type { TicketType } from "@/lib/schema";
+import { translateError } from "@/lib/error-messages";
 
-interface User {
-  id: string;
-  email: string;
-  phone?: string;
-  name?: string;
-  lastName?: string;
-  document_type_id?: string;
-  document_id?: string;
-}
-
-interface TicketWithCount extends Ticket {
+interface TicketWithCount extends TicketType {
   count: number;
 }
 
+// Simplified user type for checkout - only fields we actually need
+interface CheckoutUser {
+  id: string;
+  email: string;
+  name?: string;
+  phone?: string;
+}
+
 interface TicketSummaryDrawerProps {
-  user: User;
+  user: CheckoutUser;
   eventId: string;
-  variable_fee: number;
   tickets: TicketWithCount[];
   total: number;
   open: boolean;
   close: () => void;
-  sellerUid?: string;
 }
 
 const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
-  variable_fee,
+  user,
+  eventId,
   tickets,
   total,
-  open,
   close,
-  // eventId and sellerUid temporarily unused - needed when payment is re-enabled
-  // eventId,
-  // sellerUid,
+  open,
 }) => {
+  if (!user) {
+    console.log(
+      "userId not passed as prop; can't trust the User is signed-in."
+    );
+    close();
+  }
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  const serviceFee = total * (variable_fee ?? 0.16);
-  const iva = serviceFee * 0.19;
-  const finalTotal = Math.ceil(total + serviceFee + iva);
-
-  // openCheckout temporarily unused - needed when payment is re-enabled
-  // const { openCheckout } = useBoldCheckout();
 
   const handlePayment = async () => {
     setIsProcessing(true);
     setError(null);
 
+    const items = tickets
+      .filter((t) => t.count > 0)
+      .map((t) => ({ ticket_type_id: t.id, quantity: t.count }));
+
     try {
-      // TODO: Payment API routes were deleted during refactoring
-      // Need to recreate /api/transactions/create route for payment processing
-      setError("Payment functionality is temporarily disabled");
-
-      /* COMMENTED OUT - API route /api/transactions/create was deleted
-      // Create ticket selections object from tickets array
-      const ticketSelections: Record<string, number> = {};
-      tickets.forEach((ticket) => {
-        if (ticket.count > 0) {
-          ticketSelections[ticket.id] = ticket.count;
-        }
-      });
-
-      // Call API route to create transaction
-      const response = await fetch("/api/transactions/create", {
+      const res = await fetch("/api/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          eventId,
-          ticketSelections,
-          variableFee: variable_fee,
-          sellerUid,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, items }),
       });
 
-      const result = await response.json();
+      const response = await res.json();
 
-      if (!response.ok || !result.success || !result.boldCheckoutData) {
-        throw new Error(result.error || "Error al crear la transacción");
+      if (!response.success || !response.checkoutUrl) {
+        setError(translateError(response.error || "Error al procesar el pago"));
+        setIsProcessing(false);
+        return;
       }
-      console.log(result);
 
-      // Open Bold checkout with server-generated data
-      await openCheckout(result.boldCheckoutData);
-
-      // Close the drawer after opening checkout
-      close();
-      */
-    } catch (err) {
-      console.error("Error al procesar el pago:", err);
+      // Redirect to MercadoPago checkout
+      window.location.href = response.checkoutUrl;
+    } catch (error) {
+      console.error("Payment error:", error);
       setError(
-        err instanceof Error
-          ? err.message
-          : "Error al procesar el pago. Por favor intenta nuevamente."
+        translateError(
+          error instanceof Error
+            ? error.message
+            : "Error al procesar el pago. Por favor intenta nuevamente."
+        )
       );
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -154,46 +129,24 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
                       className="text-sm font-semibold"
                       suppressHydrationWarning
                     >
-                      ${(ticket.count * ticket.price).toLocaleString("es-CO")}
+                      $
+                      {(ticket.count * parseFloat(ticket.price)).toLocaleString(
+                        "es-CO"
+                      )}
                     </span>
                   </div>
                 )
             )}
           </div>
 
-          <div className="border-t pt-4 space-y-2">
+          <div className="border-t pt-4">
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">
-                Carrito de compra
-              </span>
-              <span className="text-sm font-semibold" suppressHydrationWarning>
-                ${total.toLocaleString("es-CO")}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">
-                Tarifa de servicio
-              </span>
-              <span className="text-sm font-semibold" suppressHydrationWarning>
-                ${Math.round(serviceFee).toLocaleString("es-CO")}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">IVA (19%)</span>
-              <span className="text-sm font-semibold" suppressHydrationWarning>
-                ${Math.round(iva).toLocaleString("es-CO")}
-              </span>
-            </div>
-
-            <div className="flex justify-between pt-2 border-t">
               <span className="text-lg font-bold">Total</span>
               <span
                 className="text-lg font-bold text-primary"
                 suppressHydrationWarning
               >
-                ${finalTotal.toLocaleString("es-CO")}
+                ${total.toLocaleString("es-CO")}
               </span>
             </div>
           </div>
