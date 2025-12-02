@@ -2,9 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Allow devtunnels for local development with tunnels
-  allowedDevOrigins: [
-    "https://f702gzlr-3000.use2.devtunnels.ms",
-  ],
+  // Uses APP_URL from environment variables
+  allowedDevOrigins: process.env.APP_URL
+    ? [process.env.APP_URL]
+    : [],
   // Configure external image domains for Next.js Image component
   images: {
     remotePatterns: [
