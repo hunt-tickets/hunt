@@ -49,10 +49,10 @@ export function AuthButton() {
       <Link href="/sign-in">
         <div
           className={cn(
-            "h-10 px-3 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95",
+            "h-10 px-3 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 border-2",
             isDark
-              ? "bg-zinc-950 border border-zinc-800 hover:bg-zinc-900"
-              : "bg-zinc-100 border border-zinc-300 hover:bg-zinc-200"
+              ? "bg-zinc-900/50 backdrop-blur-sm border-zinc-700 hover:bg-zinc-900/70"
+              : "bg-zinc-100 border-zinc-300 hover:bg-zinc-200"
           )}
         >
           <span className="text-sm font-medium">Iniciar Sesión</span>
@@ -68,14 +68,14 @@ export function AuthButton() {
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "h-10 w-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95",
+            "h-10 w-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 border-2",
             isDark
-              ? "bg-zinc-950 border border-zinc-800 hover:bg-zinc-900"
-              : "bg-zinc-100 border border-zinc-300 hover:bg-zinc-200"
+              ? "bg-zinc-900/50 backdrop-blur-sm border-zinc-700 hover:bg-zinc-900/70"
+              : "bg-zinc-100 border-zinc-300 hover:bg-zinc-200"
           )}
           aria-label="User menu"
         >
-          <User className="h-5 w-5" strokeWidth={1.5} />
+          <User className={cn("h-5 w-5", isDark ? "text-white" : "text-zinc-900")} strokeWidth={2} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

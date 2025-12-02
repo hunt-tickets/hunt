@@ -130,7 +130,7 @@ export const Component: React.FC = () => {
         </h1>
 
         <div className="mb-6 sm:mb-10 px-4">
-          <p className="text-[clamp(1rem,3vw,1.5rem)] text-[#B0B0B0] leading-relaxed animate-fadeIn animation-delay-200">
+          <p className="text-[clamp(1rem,3vw,1.5rem)] text-gray-600 dark:text-[#B0B0B0] leading-relaxed animate-fadeIn animation-delay-200">
             Descubre, compara y compra los tickets que van con tu estilo.
           </p>
         </div>
@@ -140,22 +140,22 @@ export const Component: React.FC = () => {
         </div>
 
         <div className="flex justify-center space-x-6">
-          <a href="https://www.instagram.com/hunt____tickets/" target="_blank" rel="noopener noreferrer" className="text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a href="https://www.instagram.com/hunt____tickets/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
             <Instagram size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="https://www.linkedin.com/company/hunt-tickets-co/" target="_blank" rel="noopener noreferrer" className="text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a href="https://www.linkedin.com/company/hunt-tickets-co/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
             <FaLinkedin size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="mailto:" className="text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a href="mailto:" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
             <SiGmail size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="https://wa.me/573228597640" target="_blank" rel="noopener noreferrer" className="text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a href="https://wa.me/573228597640" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
             <FaWhatsapp size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="#" className="text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a href="#" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
             <FaApple size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="#" className="text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a href="#" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
             <FaGooglePlay size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
         </div>
