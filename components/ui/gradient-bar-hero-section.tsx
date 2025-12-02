@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { Instagram } from 'lucide-react';
 import { FaWhatsapp, FaGooglePlay, FaApple, FaLinkedin } from 'react-icons/fa';
 import { SiGmail } from 'react-icons/si';
@@ -35,31 +36,29 @@ const WaitlistForm: React.FC = () => {
     <div className="relative z-10 w-full flex justify-center px-4">
       {!isSubmitted ? (
         <div className="flex flex-row gap-2 sm:gap-3 items-center">
-          <HoverButton
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-primary text-primary-foreground flex items-center justify-center"
-            glowColor="#000000"
-            backgroundColor="transparent"
-            textColor="inherit"
-            hoverTextColor="inherit"
-          >
-            {isSubmitting ? (
-              <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-muted-foreground border-t-primary-foreground rounded-full animate-spin"></div>
-            ) : (
-              'Ver Eventos'
-            )}
-          </HoverButton>
+          <Link href="/eventos">
+            <HoverButton
+              className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-primary text-primary-foreground flex items-center justify-center"
+              glowColor="#000000"
+              backgroundColor="transparent"
+              textColor="inherit"
+              hoverTextColor="inherit"
+            >
+              Ver Eventos
+            </HoverButton>
+          </Link>
 
-          <HoverButton
-            className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-background/50 text-foreground border border-[#303030] backdrop-blur-sm flex items-center justify-center"
-            glowColor="#ffffff"
-            backgroundColor="transparent"
-            textColor="inherit"
-            hoverTextColor="inherit"
-          >
-            Soy Productor
-          </HoverButton>
+          <Link href="/productor">
+            <HoverButton
+              className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-background/50 text-foreground border border-[#303030] backdrop-blur-sm flex items-center justify-center"
+              glowColor="#ffffff"
+              backgroundColor="transparent"
+              textColor="inherit"
+              hoverTextColor="inherit"
+            >
+              Soy Productor
+            </HoverButton>
+          </Link>
         </div>
       ) : (
         <div className="bg-green-500/20 border border-green-500/30 text-green-600 dark:text-green-300 rounded-full px-6 sm:px-8 py-3 sm:py-4 text-center animate-fadeIn text-sm sm:text-base">
