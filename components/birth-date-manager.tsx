@@ -125,7 +125,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent align="start" className="p-4 w-auto bg-[#1a1a1a] border-[#2a2a2a]">
+      <PopoverContent align="start" className="p-4 w-auto bg-white border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a] rounded-2xl">
         <Calendar
           mode="single"
           selected={selected}
@@ -160,7 +160,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   <SelectTrigger className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="max-h-48 bg-[#1a1a1a] border-[#2a2a2a]">
+                  <SelectContent className="max-h-48 bg-white border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a]">
                     {monthNames.map((monthName, idx) => (
                       <SelectItem key={idx} value={String(idx)}>
                         {monthName}
@@ -175,7 +175,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   <SelectTrigger className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="max-h-48 bg-[#1a1a1a] border-[#2a2a2a]">
+                  <SelectContent className="max-h-48 bg-white border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a]">
                     {years.reverse().map((year) => (
                       <SelectItem key={year} value={String(year)}>
                         {year}

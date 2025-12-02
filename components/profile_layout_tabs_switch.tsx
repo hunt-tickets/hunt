@@ -54,8 +54,8 @@ const ProfileTabs = () => {
               onClick={() => handleTabChange(tab.value)}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                 isActive
-                  ? "bg-[#2a2a2a] text-white border border-[#3a3a3a]"
-                  : "bg-[#1a1a1a] text-gray-400 hover:text-gray-300 hover:bg-[#2a2a2a] border border-[#2a2a2a]"
+                  ? "bg-gray-200 text-gray-900 border border-gray-300 dark:bg-[#2a2a2a] dark:text-white dark:border-[#3a3a3a]"
+                  : "bg-gray-50 text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 dark:bg-[#1a1a1a] dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-[#2a2a2a] dark:border-[#2a2a2a]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -66,7 +66,7 @@ const ProfileTabs = () => {
       </div>
 
       {/* Mobile: Fixed bottom navigation */}
-      <div data-profile-menu-bar className="md:hidden fixed bottom-0 left-0 right-0 w-full h-16 bg-background/95 backdrop-blur-md border-t border-[#303030] z-50 grid grid-cols-3">
+      <div data-profile-menu-bar className="md:hidden fixed bottom-0 left-0 right-0 w-full h-16 bg-background/95 backdrop-blur-md border-t border-gray-200 dark:border-[#303030] z-50 grid grid-cols-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.value;

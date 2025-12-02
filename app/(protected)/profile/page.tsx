@@ -307,7 +307,7 @@ export default async function ProfilePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{provider.name}</span>
-                  {provider.id === "apple" && (
+                  {(provider.id === "apple" || provider.id === "google") && (
                     <span className="inline-flex h-1.5 w-1.5 rounded-full bg-orange-500"></span>
                   )}
                 </div>
