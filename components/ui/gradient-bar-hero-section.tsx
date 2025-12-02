@@ -16,55 +16,33 @@ const GLSLHills = dynamic(
 );
 
 const WaitlistForm: React.FC = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleSubmit = () => {
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-
-      setTimeout(() => {
-        setIsSubmitted(false);
-      }, 3000);
-    }, 1500);
-  };
-
   return (
     <div className="relative z-10 w-full flex justify-center px-4">
-      {!isSubmitted ? (
-        <div className="flex flex-row gap-2 sm:gap-3 items-center">
-          <Link href="/eventos">
-            <HoverButton
-              className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-primary text-primary-foreground flex items-center justify-center"
-              glowColor="#000000"
-              backgroundColor="transparent"
-              textColor="inherit"
-              hoverTextColor="inherit"
-            >
-              Ver Eventos
-            </HoverButton>
-          </Link>
+      <div className="flex flex-row gap-2 sm:gap-3 items-center">
+        <Link href="/eventos">
+          <HoverButton
+            className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-primary text-primary-foreground flex items-center justify-center"
+            glowColor="#000000"
+            backgroundColor="transparent"
+            textColor="inherit"
+            hoverTextColor="inherit"
+          >
+            Ver Eventos
+          </HoverButton>
+        </Link>
 
-          <Link href="/productor">
-            <HoverButton
-              className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-background/50 text-foreground border border-[#303030] backdrop-blur-sm flex items-center justify-center"
-              glowColor="#ffffff"
-              backgroundColor="transparent"
-              textColor="inherit"
-              hoverTextColor="inherit"
-            >
-              Soy Productor
-            </HoverButton>
-          </Link>
-        </div>
-      ) : (
-        <div className="bg-green-500/20 border border-green-500/30 text-green-600 dark:text-green-300 rounded-full px-6 sm:px-8 py-3 sm:py-4 text-center animate-fadeIn text-sm sm:text-base">
-          Thanks! We&apos;ll notify you when we launch.
-        </div>
-      )}
+        <Link href="/productor">
+          <HoverButton
+            className="w-full sm:w-[200px] h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-background/50 text-foreground border border-[#303030] backdrop-blur-sm flex items-center justify-center"
+            glowColor="#ffffff"
+            backgroundColor="transparent"
+            textColor="inherit"
+            hoverTextColor="inherit"
+          >
+            Soy Productor
+          </HoverButton>
+        </Link>
+      </div>
     </div>
   );
 };
