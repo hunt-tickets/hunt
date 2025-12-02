@@ -237,7 +237,7 @@ export function PhoneVerificationManager({
     <>
       {/* Phone Number Display/Input */}
       {showOTPInput ? (
-        <div className="p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-all duration-300">
+        <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-all duration-300">
           {/* Header: Phone number info */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -256,7 +256,7 @@ export function PhoneVerificationManager({
           </div>
 
           {/* Divider */}
-          <div className="border-t border-[#2a2a2a] my-4"></div>
+          <div className="border-t border-gray-200 dark:border-[#2a2a2a] my-4"></div>
 
           {/* OTP Input Section */}
           <div>
@@ -269,7 +269,7 @@ export function PhoneVerificationManager({
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
-                  className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-[#2a2a2a] bg-[#0a0a0a] hover:border-[#3a3a3a] focus:border-primary/50 focus:outline-none transition-colors"
+                  className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] hover:border-gray-300 dark:hover:border-[#3a3a3a] focus:border-primary/50 focus:outline-none transition-colors"
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
@@ -297,7 +297,7 @@ export function PhoneVerificationManager({
           </div>
         </div>
       ) : phoneNumber && phoneNumberVerified && !isEditing ? (
-        <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
           <div className="flex items-center gap-3">
             <Phone className="h-5 w-5 text-gray-400" />
             <div className="flex items-center gap-2">
@@ -317,7 +317,7 @@ export function PhoneVerificationManager({
           </button>
         </div>
       ) : phoneNumber && !phoneNumberVerified && !isEditing ? (
-        <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
           <div className="flex items-center gap-3">
             <Phone className="h-5 w-5 text-gray-400" />
             <div className="flex items-center gap-2">
@@ -347,7 +347,7 @@ export function PhoneVerificationManager({
           </Button>
         </div>
       ) : (
-        <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
           <div className="flex items-center gap-3 flex-1">
             <Phone className="h-5 w-5 text-gray-400 flex-shrink-0" />
             <div className="flex-1">

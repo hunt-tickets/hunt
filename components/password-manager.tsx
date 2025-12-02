@@ -75,7 +75,7 @@ export function PasswordManager() {
 
   if (hasPassword === null) {
     return (
-      <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px]">
+      <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px]">
         <div className="flex items-center gap-3">
           <Lock className="h-5 w-5 text-gray-400" />
           <span className="text-sm font-medium text-gray-500">Cargando...</span>
@@ -86,7 +86,7 @@ export function PasswordManager() {
 
   if (!hasPassword) {
     return (
-      <div className="p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors">
+      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
         <div className="flex items-center gap-3 mb-3">
           <Lock className="h-5 w-5 text-gray-400" />
           <span className="text-sm font-medium">Contraseña</span>
@@ -105,7 +105,7 @@ export function PasswordManager() {
 
   if (isChanging) {
     return (
-      <div className="p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors">
+      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
         <div className="flex items-center gap-3 mb-4">
           <Lock className="h-5 w-5 text-gray-400" />
           <div>
@@ -115,7 +115,7 @@ export function PasswordManager() {
 
         <div className="grid grid-cols-3 gap-3">
           {/* Current Password */}
-          <div className="relative p-3 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors">
+          <div className="relative p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
             <Input
               type={showCurrentPassword ? "text" : "password"}
               value={currentPassword}
@@ -137,7 +137,7 @@ export function PasswordManager() {
           </div>
 
           {/* New Password */}
-          <div className="relative p-3 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors">
+          <div className="relative p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
             <Input
               type={showNewPassword ? "text" : "password"}
               value={newPassword}
@@ -159,7 +159,7 @@ export function PasswordManager() {
           </div>
 
           {/* Confirm Password */}
-          <div className="relative p-3 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors">
+          <div className="relative p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
             <Input
               type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
@@ -220,7 +220,7 @@ export function PasswordManager() {
   }
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
       <div className="flex items-center gap-3">
         <Lock className="h-5 w-5 text-gray-400" />
         <div>

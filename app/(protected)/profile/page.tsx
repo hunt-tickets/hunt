@@ -180,33 +180,33 @@ export default async function ProfilePage() {
           {/* Name and Last Name - Two columns */}
           <div className="grid grid-cols-2 gap-3">
             {/* First Name */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
               <div className="flex items-center gap-3 flex-1">
                 <User className="h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   defaultValue={user.name?.split(" ")[0] || ""}
                   placeholder="Nombre/s Completo"
-                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
+                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500"
                 />
               </div>
             </div>
 
             {/* Last Name */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
               <div className="flex items-center gap-3 flex-1">
                 <User className="h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   defaultValue={user.name?.split(" ").slice(1).join(" ") || ""}
                   placeholder="Apellidos Completos"
-                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
+                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500"
                 />
               </div>
             </div>
           </div>
           {/* Email */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <Mail className="h-5 w-5 text-gray-400" />
               <div>
@@ -257,7 +257,7 @@ export default async function ProfilePage() {
               return (
                 <div
                   key={account.id}
-                  className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
+                  className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0">
@@ -299,7 +299,7 @@ export default async function ProfilePage() {
           {availableToLink.map((provider) => (
             <div
               key={provider.id}
-              className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0">
@@ -332,7 +332,7 @@ export default async function ProfilePage() {
           <PasswordManager />
 
           {/* Two-step verification */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <Shield className="h-5 w-5 text-gray-400" />
               <div>
@@ -348,7 +348,7 @@ export default async function ProfilePage() {
           </div>
 
           {/* Passkey */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <Fingerprint className="h-5 w-5 text-gray-400" />
               <div>
@@ -381,7 +381,7 @@ export default async function ProfilePage() {
 
         <div className="space-y-3">
           {/* Logout all sessions */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <div>
                 <p className="text-sm font-medium">
@@ -398,7 +398,7 @@ export default async function ProfilePage() {
           </div>
 
           {/* Delete Account */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
               <div>
                 <p className="text-sm font-medium">

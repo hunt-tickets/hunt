@@ -80,7 +80,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="flex items-center justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] min-h-[72px] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
           <div className="flex items-center gap-3 flex-1">
             <CalendarIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
             <span className={cn("text-sm font-medium", !selected && "text-gray-500")}>
@@ -94,7 +94,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  className="text-gray-400 hover:text-gray-300 hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
+                  className="text-gray-400 hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
                 >
                   <span className="text-xl">⋯</span>
                 </button>
@@ -136,7 +136,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
           className="p-0"
           classNames={{
             day_button: cn(
-              "hover:bg-[#2a2a2a] data-[selected]:bg-primary data-[selected]:text-primary-foreground",
+              "hover:bg-gray-100 dark:hover:bg-[#2a2a2a] data-[selected]:bg-primary data-[selected]:text-primary-foreground",
               "data-[disabled]:text-gray-600 data-[disabled]:cursor-not-allowed",
               "data-[outside]:text-gray-600"
             ),
@@ -157,7 +157,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   value={String(month.getMonth())}
                   onValueChange={handleMonthChange}
                 >
-                  <SelectTrigger className="h-8 flex-1 text-xs bg-[#1f1f1f] border-[#2a2a2a] hover:border-[#3a3a3a] focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
+                  <SelectTrigger className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="max-h-48 bg-[#1a1a1a] border-[#2a2a2a]">
@@ -172,7 +172,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   value={String(month.getFullYear())}
                   onValueChange={handleYearChange}
                 >
-                  <SelectTrigger className="h-8 flex-1 text-xs bg-[#1f1f1f] border-[#2a2a2a] hover:border-[#3a3a3a] focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
+                  <SelectTrigger className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="max-h-48 bg-[#1a1a1a] border-[#2a2a2a]">

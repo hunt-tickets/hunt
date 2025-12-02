@@ -252,7 +252,7 @@ export function ActiveSessionsCard() {
         return (
           <div
             key={session.id}
-            className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
+            className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 p-4 rounded-xl border border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
           >
             <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
               <div className="flex-shrink-0 text-muted-foreground mt-1">
