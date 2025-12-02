@@ -11,15 +11,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   User,
-  Mail,
   Shield,
-  Calendar,
-  Key,
   Fingerprint,
   Link2,
 } from "lucide-react";
 import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
-import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
 import { PasswordManager } from "@/components/password-manager";

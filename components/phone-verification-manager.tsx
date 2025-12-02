@@ -3,16 +3,6 @@
 import React, { useState, useEffect, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
-import { Phone, Loader2, Check, Edit2, Trash2 } from "lucide-react";
+import { Phone, Loader2, Edit2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import PhoneInputWithCountry from 'react-phone-number-input';
@@ -89,11 +79,6 @@ export function PhoneVerificationManager({
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
     }
     return phone;
-  };
-
-  const validatePhoneNumber = (phone: string) => {
-    const cleaned = phone.replace(/\D/g, "");
-    return cleaned.length >= 7 && cleaned.length <= 15;
   };
 
   const handleOtpChange = (index: number, value: string) => {

@@ -1,7 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { User, Ticket, HelpCircle, Building2 } from "lucide-react";
+import { User, Ticket, Building2 } from "lucide-react";
 
 const ProfileTabs = () => {
   const pathname = usePathname();
