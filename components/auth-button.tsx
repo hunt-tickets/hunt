@@ -35,9 +35,13 @@ export function AuthButton() {
     });
   };
 
-  // Show loading state - render nothing during SSR/loading to prevent hydration mismatch
+  // Show loading state - render skeleton during SSR/loading to prevent hydration mismatch
   if (isPending || !mounted) {
-    return <div className="h-10 w-10" />;
+    return (
+      <div className="h-10 w-10 rounded-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 animate-pulse">
+        <User className="h-5 w-5 text-zinc-400 dark:text-zinc-600" strokeWidth={2} />
+      </div>
+    );
   }
 
   // Use theme only after mounted
