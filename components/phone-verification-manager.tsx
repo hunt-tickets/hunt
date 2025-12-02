@@ -22,8 +22,8 @@ interface PhoneVerificationManagerProps {
   phoneNumberVerified?: boolean;
 }
 
-const InputComponent = forwardRef<HTMLInputElement>((props, innerRef) => (
-  <input {...props} ref={innerRef} />
+const InputComponent = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>((props, ref) => (
+  <input {...props} ref={ref} />
 ));
 InputComponent.displayName = 'PhoneInputComponent';
 
