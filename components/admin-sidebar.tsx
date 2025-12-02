@@ -18,6 +18,8 @@ interface Organization {
 
 interface AdminSidebarProps {
   userId: string;
+  organizationId: string;
+  role: "owner" | "administrator" | "seller";
   organizations: Organization[];
 }
 
@@ -62,7 +64,7 @@ const adminMenuItems = [
   },
 ];
 
-export function AdminSidebar({ userId, organizations }: AdminSidebarProps) {
+export function AdminSidebar({ userId, organizationId, organizations }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
 
@@ -109,7 +111,7 @@ export function AdminSidebar({ userId, organizations }: AdminSidebarProps) {
             {/* Primary Menu Items */}
             {primaryMenuItems.map((item) => {
               const Icon = item.icon;
-              const fullHref = `/profile/${userId}${item.href}`;
+              const fullHref = `/profile/${userId}/organizaciones/${organizationId}${item.href}`;
 
               // Check if current route matches this menu item
               let isActive = false;
@@ -155,7 +157,7 @@ export function AdminSidebar({ userId, organizations }: AdminSidebarProps) {
             {/* Admin Menu Items */}
             {adminMenuItems.map((item) => {
               const Icon = item.icon;
-              const fullHref = `/profile/${userId}${item.href}`;
+              const fullHref = `/profile/${userId}/organizaciones/${organizationId}${item.href}`;
 
               // Check if current route matches this menu item
               let isActive = false;

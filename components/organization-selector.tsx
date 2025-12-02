@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Building2, Check, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,

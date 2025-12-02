@@ -120,9 +120,6 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     totalTicketsSold: 245,
   };
 
-  const adminCount = users?.filter(u => u.admin).length || 0;
-  const totalUsers = users?.length || 0;
-  const usersWithPhone = users?.filter(u => u.phone).length || 0;
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
@@ -147,7 +144,6 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
             genderGroups={purchaseStats.genderGroups || []}
             totalUsers={purchaseStats.totalUsers}
             totalTicketsSold={purchaseStats.totalTicketsSold}
-            totalRegisteredUsers={totalUsers}
           />
         )}
       </div>
