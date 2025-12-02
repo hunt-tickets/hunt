@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import PhoneInputWithCountry from 'react-phone-number-input';
 import type { E164Number } from 'libphonenumber-js/core';
 import 'react-phone-number-input/style.css';
@@ -13,13 +13,13 @@ interface PhoneInputProps {
   placeholder?: string;
 }
 
-const InputComponent = forwardRef<HTMLInputElement>((props, innerRef) => (
-  <input {...props} ref={innerRef} />
+const InputComponent = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>((props, ref) => (
+  <input {...props} ref={ref} />
 ));
 InputComponent.displayName = 'PhoneInputComponent';
 
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }) => {
+  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }, ref) => {
     return (
       <div className="w-full">
         <div className="rounded-2xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-primary/50 focus-within:bg-primary/5 p-4">
