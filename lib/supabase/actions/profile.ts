@@ -251,12 +251,14 @@ export interface AgeGroupData {
   ageGroup: string;
   users: number;
   tickets: number;
+  averagePrice?: number;
 }
 
 export interface GenderData {
   gender: string;
   users: number;
   tickets: number;
+  averagePrice?: number;
 }
 
 interface TransactionRecord {

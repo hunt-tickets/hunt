@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UserCircle, Users, Shield } from "lucide-react";
+import { Users } from "lucide-react";
 import { UsersTable } from "@/components/users-table";
 import { AnalyticsCharts } from "@/components/analytics-charts";
 import { AdminHeader } from "@/components/admin-header";
@@ -85,15 +85,15 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
   // Mock purchase stats - In production, fetch from database
   const purchaseStats = {
     ageGroups: [
-      { ageGroup: "18-24", users: 45, tickets: 60 },
-      { ageGroup: "25-34", users: 78, tickets: 105 },
-      { ageGroup: "35-44", users: 32, tickets: 50 },
-      { ageGroup: "45+", users: 15, tickets: 30 },
+      { ageGroup: "18-24", users: 45, tickets: 60, averagePrice: 75000 },
+      { ageGroup: "25-34", users: 78, tickets: 105, averagePrice: 95000 },
+      { ageGroup: "35-44", users: 32, tickets: 50, averagePrice: 120000 },
+      { ageGroup: "45+", users: 15, tickets: 30, averagePrice: 150000 },
     ],
     genderGroups: [
-      { gender: "Masculino", users: 90, tickets: 120 },
-      { gender: "Femenino", users: 70, tickets: 100 },
-      { gender: "Otro", users: 10, tickets: 25 },
+      { gender: "Masculino", users: 90, tickets: 120, averagePrice: 85000 },
+      { gender: "Femenino", users: 70, tickets: 100, averagePrice: 105000 },
+      { gender: "Otro", users: 10, tickets: 25, averagePrice: 95000 },
     ],
     totalUsers: 170,
     totalTicketsSold: 245,
@@ -107,64 +107,17 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
       {/* Page Header */}
       <AdminHeader
-        title="USUARIOS"
-        subtitle="Listado completo de usuarios del sistema"
+        title="Analíticas de Público"
+        subtitle="Estadísticas de usuarios que han comprado entradas"
       />
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Total Usuarios
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-[#404040] mt-1">Usuarios registrados</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Administradores
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{adminCount}</div>
-            <p className="text-xs text-[#404040] mt-1">Con permisos admin</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <UserCircle className="h-4 w-4" />
-              Perfiles Completos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{usersWithPhone}</div>
-            <p className="text-xs text-[#404040] mt-1">Con teléfono registrado</p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Analytics Section */}
       <div className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Analíticas de Público</h2>
-          <p className="text-sm text-[#404040] mt-1">Estadísticas de usuarios que han comprado entradas</p>
-        </div>
-
         {!purchaseStats.ageGroups || purchaseStats.ageGroups.length === 0 ? (
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+          <Card className="bg-gray-50 dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
             <CardContent className="py-12 text-center">
-              <p className="text-white/40">No hay usuarios con compras registradas aún</p>
-              <p className="text-xs text-white/30 mt-2">Los gráficos aparecerán cuando haya datos de compras</p>
+              <p className="text-gray-400 dark:text-white/40">No hay usuarios con compras registradas aún</p>
+              <p className="text-xs text-gray-400 dark:text-white/30 mt-2">Los gráficos aparecerán cuando haya datos de compras</p>
             </CardContent>
           </Card>
         ) : (
@@ -173,25 +126,27 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
             genderGroups={purchaseStats.genderGroups || []}
             totalUsers={purchaseStats.totalUsers}
             totalTicketsSold={purchaseStats.totalTicketsSold}
+            totalRegisteredUsers={totalUsers}
           />
         )}
       </div>
 
       {/* Users Table */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Listado de Usuarios</h2>
-        </div>
-
-        {users && users.length > 0 ? (
-          <UsersTable users={users} />
-        ) : (
-          <div className="text-center py-24 rounded-xl bg-white/[0.02] border border-white/5">
-            <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
-            <p className="text-sm text-white/40">No hay usuarios registrados</p>
-          </div>
-        )}
-      </div>
+      <Card className="bg-gray-50 dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+        <CardHeader>
+          <CardTitle className="text-lg">Listado de Usuarios</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {users && users.length > 0 ? (
+            <UsersTable users={users} />
+          ) : (
+            <div className="text-center py-24">
+              <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p className="text-sm text-gray-400 dark:text-white/40">No hay usuarios registrados</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -18,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Shield, Phone, Mail, FileText, Calendar, Cake, Search, X, Filter } from "lucide-react";
+import { ChevronLeft, ChevronRight, Phone, Mail, Calendar, Cake, Search, X, Filter } from "lucide-react";
 import { EditUserSheet } from "@/components/edit-user-sheet";
 import { UserProfileSheet } from "@/components/user-profile-sheet";
 import { Input } from "@/components/ui/input";
@@ -144,18 +143,18 @@ export function UsersTable({ users }: UsersTableProps) {
       <div className="space-y-4">
         {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-white/40" />
           <Input
             type="text"
             placeholder="Buscar por nombre, email, teléfono o documento..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="h-12 pl-12 pr-4 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 focus:bg-white/10 transition-colors text-base"
+            className="h-12 pl-12 pr-4 rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 focus:bg-gray-200 dark:focus:bg-white/10 transition-colors text-base"
           />
           {searchInput && (
             <button
               onClick={() => setSearchInput("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -165,13 +164,13 @@ export function UsersTable({ users }: UsersTableProps) {
         {/* Filters Row */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-white/40" />
-            <span className="text-sm text-white/50">Filtros:</span>
+            <Filter className="h-4 w-4 text-gray-400 dark:text-white/40" />
+            <span className="text-sm text-gray-500 dark:text-white/50">Filtros:</span>
           </div>
 
           {/* Role Filter */}
           <Select value={roleFilter} onValueChange={handleRoleFilterChange}>
-            <SelectTrigger className="h-9 w-[140px] rounded-lg border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+            <SelectTrigger className="h-9 w-[140px] rounded-lg border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -183,7 +182,7 @@ export function UsersTable({ users }: UsersTableProps) {
 
           {/* Profile Filter */}
           <Select value={profileFilter} onValueChange={handleProfileFilterChange}>
-            <SelectTrigger className="h-9 w-[160px] rounded-lg border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+            <SelectTrigger className="h-9 w-[160px] rounded-lg border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -199,7 +198,7 @@ export function UsersTable({ users }: UsersTableProps) {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="h-9 px-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+              className="h-9 px-3 text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
             >
               <X className="h-4 w-4 mr-1" />
               Limpiar filtros
@@ -207,7 +206,7 @@ export function UsersTable({ users }: UsersTableProps) {
           )}
 
           {/* Results Count */}
-          <div className="ml-auto text-sm text-white/50">
+          <div className="ml-auto text-sm text-gray-500 dark:text-white/50">
             {filteredUsers.length === users.length ? (
               <span>{users.length} usuarios</span>
             ) : (
@@ -223,29 +222,27 @@ export function UsersTable({ users }: UsersTableProps) {
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent border-b border-white/5">
-              <TableHead className="font-medium text-white/50 py-3 text-xs uppercase tracking-wider">Usuario</TableHead>
-              <TableHead className="font-medium text-white/50 text-xs uppercase tracking-wider">Contacto</TableHead>
-              <TableHead className="font-medium text-white/50 text-xs uppercase tracking-wider">Edad</TableHead>
-              <TableHead className="font-medium text-white/50 text-xs uppercase tracking-wider">Documento</TableHead>
-              <TableHead className="font-medium text-white/50 text-xs uppercase tracking-wider">Rol</TableHead>
-              <TableHead className="font-medium text-white/50 text-xs uppercase tracking-wider">Registro</TableHead>
-              <TableHead className="font-medium text-white/50 text-xs uppercase tracking-wider text-right">Acciones</TableHead>
+            <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-white/5">
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 py-3 text-xs uppercase tracking-wider">Usuario</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Contacto</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Edad</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Registro</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
             <TableBody>
               {currentUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-24">
+                  <TableCell colSpan={5} className="py-24">
                     <div className="text-center">
                       <Search className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                      <p className="text-sm text-white/40 mb-2">No se encontraron usuarios</p>
+                      <p className="text-sm text-gray-400 dark:text-white/40 mb-2">No se encontraron usuarios</p>
                       {hasActiveFilters && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={clearFilters}
-                          className="text-white/60 hover:text-white hover:bg-white/10"
+                          className="text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10"
                         >
                           Limpiar filtros
                         </Button>
@@ -276,18 +273,18 @@ export function UsersTable({ users }: UsersTableProps) {
                 return (
                   <TableRow
                     key={user.id}
-                    className="border-b border-white/5 hover:bg-white/[0.02] transition-all duration-200 group"
+                    className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-all duration-200 group"
                   >
                     {/* Usuario */}
                     <TableCell className="py-5">
                       <div className="flex items-center gap-3">
-                        <div className="h-11 w-11 rounded-xl bg-white/[0.08] flex items-center justify-center flex-shrink-0 font-semibold text-sm text-white/90 ring-1 ring-white/10">
+                        <div className="h-11 w-11 rounded-xl bg-gray-100 dark:bg-white/[0.08] flex items-center justify-center flex-shrink-0 font-semibold text-sm text-gray-900 dark:text-white/90 ring-1 ring-gray-200 dark:ring-white/10">
                           {initials}
                         </div>
                         <div className="flex flex-col min-w-0 gap-0.5">
-                          <span className="font-medium text-white truncate">{fullName}</span>
+                          <span className="font-medium truncate">{fullName}</span>
                           {user.email && (
-                            <span className="text-xs text-white/40 truncate flex items-center gap-1">
+                            <span className="text-xs text-gray-400 dark:text-white/40 truncate flex items-center gap-1">
                               <Mail className="h-3 w-3" />
                               {user.email}
                             </span>
@@ -300,12 +297,12 @@ export function UsersTable({ users }: UsersTableProps) {
                     <TableCell className="py-5">
                       <div className="flex flex-col gap-1">
                         {phoneNumber ? (
-                          <span className="text-sm text-white/70 flex items-center gap-1.5">
-                            <Phone className="h-3.5 w-3.5 text-white/40" />
+                          <span className="text-sm text-gray-700 dark:text-white/70 flex items-center gap-1.5">
+                            <Phone className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
                             {phoneNumber}
                           </span>
                         ) : (
-                          <span className="text-sm text-white/30">Sin teléfono</span>
+                          <span className="text-sm text-gray-400 dark:text-white/30">Sin teléfono</span>
                         )}
                       </div>
                     </TableCell>
@@ -314,11 +311,11 @@ export function UsersTable({ users }: UsersTableProps) {
                     <TableCell className="py-5">
                       {user.birthdate ? (
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm text-white/70 flex items-center gap-1.5">
-                            <Cake className="h-3.5 w-3.5 text-white/40" />
+                          <span className="text-sm text-gray-700 dark:text-white/70 flex items-center gap-1.5">
+                            <Cake className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
                             {calculateAge(user.birthdate)} años
                           </span>
-                          <span className="text-xs text-white/40">
+                          <span className="text-xs text-gray-400 dark:text-white/40">
                             {new Date(user.birthdate).toLocaleDateString('es-CO', {
                               day: 'numeric',
                               month: 'short',
@@ -327,46 +324,14 @@ export function UsersTable({ users }: UsersTableProps) {
                           </span>
                         </div>
                       ) : (
-                        <span className="text-sm text-white/30">-</span>
-                      )}
-                    </TableCell>
-
-                    {/* Documento */}
-                    <TableCell className="py-5">
-                      {user.document_id ? (
-                        <div className="flex items-center gap-1.5">
-                          <FileText className="h-3.5 w-3.5 text-white/40" />
-                          <span className="text-sm text-white/70 font-mono">{user.document_id}</span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-white/30">-</span>
-                      )}
-                    </TableCell>
-
-                    {/* Rol */}
-                    <TableCell className="py-5">
-                      {user.admin ? (
-                        <Badge
-                          variant="default"
-                          className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-400 border border-amber-500/20 hover:from-amber-500/20 hover:to-orange-500/20 transition-all duration-200 shadow-sm"
-                        >
-                          <Shield className="h-3 w-3 mr-1" />
-                          Admin
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-white/10 text-white/50 bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-200"
-                        >
-                          Usuario
-                        </Badge>
+                        <span className="text-sm text-gray-400 dark:text-white/30">-</span>
                       )}
                     </TableCell>
 
                     {/* Registro */}
                     <TableCell className="py-5">
-                      <div className="flex items-center gap-1.5 text-sm text-white/50">
-                        <Calendar className="h-3.5 w-3.5 text-white/30" />
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-white/50">
+                        <Calendar className="h-3.5 w-3.5 text-gray-400 dark:text-white/30" />
                         {new Date(user.created_at).toLocaleDateString('es-CO', {
                           year: 'numeric',
                           month: 'short',
@@ -391,25 +356,25 @@ export function UsersTable({ users }: UsersTableProps) {
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/5">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200 dark:border-white/5">
         <div className="flex items-center gap-3 text-sm pt-4">
-          <span className="text-white/40">Mostrar</span>
+          <span className="text-gray-500 dark:text-white/40">Mostrar</span>
           <Select
             value={pageSize.toString()}
             onValueChange={handlePageSizeChange}
           >
-            <SelectTrigger className="h-9 w-[70px] rounded-lg border-white/10 bg-transparent hover:bg-white/[0.02] transition-all duration-200">
+            <SelectTrigger className="h-9 w-[70px] rounded-lg border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/[0.02] transition-all duration-200">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-lg border-white/10">
+            <SelectContent className="rounded-lg border-gray-200 dark:border-white/10">
               <SelectItem value="25">25</SelectItem>
               <SelectItem value="50">50</SelectItem>
               <SelectItem value="100">100</SelectItem>
               <SelectItem value="200">200</SelectItem>
             </SelectContent>
           </Select>
-          <span className="text-white/40">
-            de <span className="text-white/70 font-medium">{filteredUsers.length}</span> usuarios
+          <span className="text-gray-500 dark:text-white/40">
+            de <span className="text-gray-700 dark:text-white/70 font-medium">{filteredUsers.length}</span> usuarios
           </span>
         </div>
 
@@ -419,14 +384,14 @@ export function UsersTable({ users }: UsersTableProps) {
             size="sm"
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="h-9 px-3 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+            className="h-9 px-3 hover:bg-gray-100 dark:hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Anterior
           </Button>
 
-          <span className="text-sm text-white/50 px-3">
-            Página <span className="text-white font-medium">{currentPage}</span> de <span className="text-white/70">{totalPages}</span>
+          <span className="text-sm text-gray-500 dark:text-white/50 px-3">
+            Página <span className="text-foreground font-medium">{currentPage}</span> de <span className="text-gray-700 dark:text-white/70">{totalPages}</span>
           </span>
 
           <Button
@@ -434,7 +399,7 @@ export function UsersTable({ users }: UsersTableProps) {
             size="sm"
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="h-9 px-3 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+            className="h-9 px-3 hover:bg-gray-100 dark:hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
           >
             Siguiente
             <ChevronRight className="h-4 w-4 ml-1" />
