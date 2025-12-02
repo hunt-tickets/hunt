@@ -235,7 +235,7 @@ export function PasswordManager() {
           onClick={() => setIsChanging(true)}
           className="text-sm font-medium hover:underline"
         >
-          Update password
+          Actualizar contraseña
         </button>
       </div>
     </div>

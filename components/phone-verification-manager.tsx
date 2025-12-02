@@ -13,8 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
-import { Phone, Loader2, Check } from "lucide-react";
+import { Phone, Loader2, Check, Edit2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import PhoneInputWithCountry from 'react-phone-number-input';
@@ -46,6 +52,7 @@ export function PhoneVerificationManager({
   const [showOTPInput, setShowOTPInput] = useState(false);
   const [pendingPhoneNumber, setPendingPhoneNumber] = useState("");
   const [hasAutoSent, setHasAutoSent] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const router = useRouter();
   const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
@@ -312,9 +319,47 @@ export function PhoneVerificationManager({
               </Badge>
             </div>
           </div>
-          <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
-            <span className="text-xl">⋯</span>
-          </button>
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
+              >
+                <span className="text-xl">⋯</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-48 rounded-2xl border dark:border-zinc-800 bg-background/95 backdrop-blur-md shadow-lg"
+              sideOffset={8}
+            >
+              <div className="p-1">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setIsEditing(true);
+                  }}
+                  className="rounded-xl cursor-pointer flex items-center px-3 py-2"
+                >
+                  <Edit2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                  <span>Editar</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMenuOpen(false);
+                    // Aquí puedes agregar la lógica para eliminar el teléfono
+                    console.log("Delete phone");
+                  }}
+                  className="rounded-xl cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 px-3 py-2"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                  <span>Eliminar</span>
+                </DropdownMenuItem>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       ) : phoneNumber && !phoneNumberVerified && !isEditing ? (
         <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">

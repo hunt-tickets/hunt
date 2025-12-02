@@ -94,7 +94,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  className="text-gray-400 hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
                 >
                   <span className="text-xl">⋯</span>
                 </button>
