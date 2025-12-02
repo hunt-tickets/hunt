@@ -252,36 +252,36 @@ export function ActiveSessionsCard() {
         return (
           <div
             key={session.id}
-            className="flex items-start justify-between p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
+            className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 p-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:border-[#3a3a3a] hover:bg-[#202020] transition-colors cursor-pointer group"
           >
-            <div className="flex items-start gap-4 flex-1">
+            <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
               <div className="flex-shrink-0 text-muted-foreground mt-1">
                 {getDeviceIcon(parsed.deviceType)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <p className="font-medium">{parsed.deviceName}</p>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                  <p className="font-medium text-sm sm:text-base truncate">{parsed.deviceName}</p>
                   {isCurrentSession && (
                     <Badge
                       variant="secondary"
-                      className="text-xs px-2 py-0.5 bg-green-500/10 text-green-400 border-green-500/20"
+                      className="text-xs px-2 py-0.5 bg-green-500/10 text-green-400 border-green-500/20 shrink-0"
                     >
                       Este dispositivo
                     </Badge>
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p>
+                <div className="text-xs sm:text-sm text-gray-500 space-y-1">
+                  <p className="truncate">
                     {parsed.browser} {parsed.browserVersion}
                   </p>
-                  <p>
+                  <p className="truncate">
                     {session.ipAddress && `${session.ipAddress} (Bogotá, CO)`}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-400">
+            <div className="flex items-center sm:items-start justify-between sm:justify-end">
+              <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">
                 {formatSessionTime(new Date(session.createdAt))}
               </span>
             </div>
