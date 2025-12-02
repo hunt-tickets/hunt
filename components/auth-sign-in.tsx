@@ -4,7 +4,6 @@ import { SignInPage, Testimonial } from "@/components/ui/sign-in";
 import { authClient } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { isValidPhoneNumber } from "react-phone-number-input";
 
 const sampleTestimonials: Testimonial[] = [
   {

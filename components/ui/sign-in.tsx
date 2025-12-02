@@ -58,26 +58,12 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const TestimonialCard = ({ testimonial, delay }: { testimonial: Testimonial, delay: string }) => (
-  <div className={`animate-testimonial ${delay} flex items-start gap-3 rounded-3xl bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 p-5 w-64 shadow-lg`}>
-    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-      <img src={testimonial.avatarSrc} className="w-full h-full object-cover" alt="avatar" />
-    </div>
-    <div className="text-sm leading-snug">
-      <p className="flex items-center gap-1 font-medium text-foreground">{testimonial.name}</p>
-      <p className="text-foreground/80">{testimonial.handle}</p>
-      <p className="mt-1 text-foreground/90">{testimonial.text}</p>
-    </div>
-  </div>
-);
-
 // --- MAIN COMPONENT ---
 
 export const SignInPage: React.FC<SignInPageProps> = ({
   title = <span className="font-light text-foreground tracking-tighter">Bienvenido</span>,
   description = "Accede a tu cuenta y continúa tu experiencia con nosotros",
   heroImageSrc,
-  testimonials = [],
   onSendOtp,
   onVerifyOtp,
   onResendOtp,

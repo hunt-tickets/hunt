@@ -395,7 +395,7 @@ export function PhoneVerificationManager({
           {phoneInput && phoneInput.length >= 10 && (
             <Button
               size="sm"
-              onClick={handleSendOTP}
+              onClick={() => handleSendOTP()}
               disabled={isSendingOTP}
               className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
             >

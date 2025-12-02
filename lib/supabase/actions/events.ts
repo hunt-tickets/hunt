@@ -8,7 +8,7 @@ import { toZonedTime } from "date-fns-tz";
 import { formatISO } from "date-fns";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import type { Event as EventSchema } from "@/lib/schema";
+import type { events as EventSchema } from "@/lib/schema";
 
 const eventFormSchema = z.object({
   organization_id: z.string().min(1, "El ID de la organización es requerido"),
@@ -514,7 +514,7 @@ export async function createEvent(
 /**
  * Event with venue information for display
  */
-export type EventWithVenue = EventSchema & {
+export type EventWithVenue = typeof EventSchema.$inferSelect & {
   venue_name: string | null;
   venue_city: string | null;
 };
@@ -548,7 +548,7 @@ export async function getOrganizationEvents(
     }
 
     // Transform the data to flatten venue info
-    const eventsWithVenue: EventWithVenue[] = (events || []).map((event: EventSchema & { venues?: { name: string | null; city: string | null } | null }) => ({
+    const eventsWithVenue: EventWithVenue[] = (events || []).map((event: typeof EventSchema.$inferSelect & { venues?: { name: string | null; city: string | null } | null }) => ({
       ...event,
       venue_name: event.venues?.name || null,
       venue_city: event.venues?.city || null,

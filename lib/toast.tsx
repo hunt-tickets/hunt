@@ -10,7 +10,7 @@ interface ToastOptions {
 }
 
 export const toast = {
-  success: ({ title, description, duration = 4000 }: ToastOptions) => {
+  success: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
         <Alert variant="success" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
@@ -24,7 +24,7 @@ export const toast = {
     );
   },
 
-  error: ({ title, description, duration = 4000 }: ToastOptions) => {
+  error: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
         <Alert variant="destructive" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
@@ -38,7 +38,7 @@ export const toast = {
     );
   },
 
-  warning: ({ title, description, duration = 4000 }: ToastOptions) => {
+  warning: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
         <Alert variant="warning" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
@@ -52,7 +52,7 @@ export const toast = {
     );
   },
 
-  info: ({ title, description, duration = 4000 }: ToastOptions) => {
+  info: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
         <Alert variant="info" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>

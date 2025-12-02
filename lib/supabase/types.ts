@@ -107,8 +107,12 @@ export interface Event {
   name: string;
   flyer: string;
   venue_name: string;
+  venue_city?: string;
   date: string;
 }
+
+// Alias for backward compatibility
+export type EventFull = Event;
 
 
 export interface SocialLink {
