@@ -48,14 +48,9 @@ export function AuthButton() {
     return (
       <Link href="/sign-in">
         <div
-          className={cn(
-            "h-10 px-3 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 border-2",
-            isDark
-              ? "bg-zinc-900/50 backdrop-blur-sm border-zinc-700 hover:bg-zinc-900/70"
-              : "bg-zinc-100 border-zinc-300 hover:bg-zinc-200"
-          )}
+          className="h-10 px-4 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 bg-white dark:bg-white text-black hover:bg-gray-50 dark:hover:bg-gray-100"
         >
-          <span className="text-sm font-medium">Iniciar Sesión</span>
+          <span className="text-sm font-medium">Ingresar</span>
         </div>
       </Link>
     );

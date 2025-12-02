@@ -6,9 +6,19 @@ import { Calendar, Settings, ArrowLeft, UserCircle, Tag, Gift } from "lucide-rea
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
+import { OrganizationSelector } from "@/components/organization-selector";
+
+interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  createdAt: Date;
+}
 
 interface AdminSidebarProps {
   userId: string;
+  organizations: Organization[];
 }
 
 const primaryMenuItems = [
@@ -33,9 +43,6 @@ const primaryMenuItems = [
     description: "Programa de referidos y comisiones",
     exact: true,
   },
-];
-
-const adminMenuItems = [
   {
     title: "Usuarios",
     icon: UserCircle,
@@ -43,6 +50,9 @@ const adminMenuItems = [
     description: "Listado completo de usuarios",
     exact: true,
   },
+];
+
+const adminMenuItems = [
   {
     title: "Configuración",
     icon: Settings,
@@ -52,7 +62,7 @@ const adminMenuItems = [
   },
 ];
 
-export function AdminSidebar({ userId }: AdminSidebarProps) {
+export function AdminSidebar({ userId, organizations }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
 
@@ -69,17 +79,30 @@ export function AdminSidebar({ userId }: AdminSidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-screen w-64 bg-[#202020] border-r border-[#2a2a2a] z-50 transition-transform duration-300 lg:translate-x-0 flex-shrink-0",
+          "fixed top-0 left-0 h-screen w-64 bg-white dark:bg-[#202020] border-r border-gray-200 dark:border-[#2a2a2a] z-50 transition-transform duration-300 lg:translate-x-0 flex-shrink-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full p-6">
-          {/* Logo/Brand */}
-          <div className="mb-8 px-3">
-            <div className="text-xl font-bold text-white" style={{ fontFamily: "LOT, sans-serif" }}>
-              HUNT
-            </div>
+          {/* Logo/Brand with Back Button */}
+          <div className="mb-6 px-3">
+            <Link
+              href="/"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-400 dark:text-gray-400" />
+              <div className="text-xl font-bold text-foreground" style={{ fontFamily: "LOT, sans-serif" }}>
+                HUNT
+              </div>
+            </Link>
           </div>
+
+          {/* Organization Selector */}
+          {organizations.length > 0 && (
+            <div className="mb-6">
+              <OrganizationSelector organizations={organizations} />
+            </div>
+          )}
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1">
@@ -109,8 +132,8 @@ export function AdminSidebar({ userId }: AdminSidebarProps) {
                   className={cn(
                     "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
                     isActive
-                      ? "bg-white/10 text-white border border-white/20"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                      ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
+                      : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
                   )}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
@@ -122,11 +145,11 @@ export function AdminSidebar({ userId }: AdminSidebarProps) {
             {/* Separator with "Administrador" label */}
             <div className="py-4">
               <div className="px-3 mb-2">
-                <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-gray-400 dark:text-white/40 uppercase tracking-wider">
                   Administrador
                 </span>
               </div>
-              <div className="border-t border-white/10" />
+              <div className="border-t border-gray-200 dark:border-white/10" />
             </div>
 
             {/* Admin Menu Items */}
@@ -150,8 +173,8 @@ export function AdminSidebar({ userId }: AdminSidebarProps) {
                   className={cn(
                     "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
                     isActive
-                      ? "bg-white/10 text-white border border-white/20"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                      ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
+                      : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
                   )}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
@@ -162,15 +185,8 @@ export function AdminSidebar({ userId }: AdminSidebarProps) {
           </nav>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-[#2a2a2a] space-y-1">
+          <div className="pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
             <ThemeToggle />
-            <Link
-              href={`/profile/${userId}`}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver
-            </Link>
           </div>
         </div>
       </aside>
