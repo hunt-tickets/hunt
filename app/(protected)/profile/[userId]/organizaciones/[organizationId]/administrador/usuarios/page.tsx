@@ -7,8 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
 import { UsersTable } from "@/components/users-table";
 import { AnalyticsCharts } from "@/components/analytics-charts";
 import { AdminHeader } from "@/components/admin-header";
