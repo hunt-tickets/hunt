@@ -57,7 +57,8 @@ interface AdminConfigTabsProps {
   currentUserRole: string;
 }
 
-type TabType = "equipo" | "invitaciones" | "procesadores" | "configuracion";
+type TabType = "invitaciones" | "configuracion";
+type ConfigSubTab = "general" | "equipo" | "procesadores";
 
 export function AdminConfigTabs({
   organization,
@@ -65,7 +66,8 @@ export function AdminConfigTabs({
   invitations,
   currentUserRole,
 }: AdminConfigTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("equipo");
+  const [activeTab, setActiveTab] = useState<TabType>("configuracion");
+  const [activeConfigSubTab, setActiveConfigSubTab] = useState<ConfigSubTab>("general");
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number; above: boolean } | null>(null);
 
@@ -86,16 +88,20 @@ export function AdminConfigTabs({
   };
 
   const tabs = [
-    { value: "equipo", icon: Users, label: "Equipo" },
-    { value: "invitaciones", icon: MailCheck, label: "Invitaciones" },
-    { value: "procesadores", icon: CreditCard, label: "Procesadores" },
     { value: "configuracion", icon: Settings, label: "Configuración" },
+    { value: "invitaciones", icon: MailCheck, label: "Invitaciones" },
+  ] as const;
+
+  const configSubTabs = [
+    { value: "general", icon: Settings, label: "General" },
+    { value: "equipo", icon: Users, label: "Equipo" },
+    { value: "procesadores", icon: CreditCard, label: "Procesadores" },
   ] as const;
 
   return (
     <div className="w-full max-w-full overflow-hidden">
       <div className="space-y-6">
-        {/* Tabs */}
+        {/* Main Tabs */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {tabs.map((tab) => {
@@ -118,17 +124,45 @@ export function AdminConfigTabs({
             })}
           </div>
 
-          {/* Add Member Button - Only show in Equipo tab */}
-          {activeTab === "equipo" && organization && canInvite && (
+          {/* Add Member Button - Only show in Equipo sub-tab within Configuracion */}
+          {activeTab === "configuracion" && activeConfigSubTab === "equipo" && organization && canInvite && (
             <div className="w-full sm:w-auto">
               <InviteMemberDialog organizationId={organization.id} />
             </div>
           )}
         </div>
 
+        {/* Sub-tabs for Configuración */}
+        {activeTab === "configuracion" && (
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {configSubTabs.map((subTab) => {
+              const Icon = subTab.icon;
+              const isActive = activeConfigSubTab === subTab.value;
+              return (
+                <button
+                  key={subTab.value}
+                  onClick={() => setActiveConfigSubTab(subTab.value)}
+                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
+                    isActive
+                      ? "bg-white/[0.08] text-white border border-white/20"
+                      : "bg-white/[0.03] text-white/50 hover:text-white/80 hover:bg-white/[0.05] border border-white/5"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{subTab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Tab Content */}
         <div className="mt-6">
-          {activeTab === "equipo" && (
+          {activeTab === "invitaciones" && (
+            <PendingInvitationsList invitations={invitations} currentUserRole={currentUserRole} />
+          )}
+
+          {activeTab === "configuracion" && activeConfigSubTab === "equipo" && (
             <div className="space-y-4">
               {/* Team Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -426,16 +460,12 @@ export function AdminConfigTabs({
             </div>
           )}
 
-          {activeTab === "invitaciones" && (
-            <PendingInvitationsList invitations={invitations} currentUserRole={currentUserRole} />
-          )}
-
-          {activeTab === "procesadores" && organization && (
-            <AdminPaymentSettings organization={organization} currentUserRole={currentUserRole} />
-          )}
-
-          {activeTab === "configuracion" && organization && (
+          {activeTab === "configuracion" && activeConfigSubTab === "general" && organization && (
             <EditOrganizationForm organization={organization} currentUserRole={currentUserRole} />
+          )}
+
+          {activeTab === "configuracion" && activeConfigSubTab === "procesadores" && organization && (
+            <AdminPaymentSettings organization={organization} currentUserRole={currentUserRole} />
           )}
         </div>
       </div>
