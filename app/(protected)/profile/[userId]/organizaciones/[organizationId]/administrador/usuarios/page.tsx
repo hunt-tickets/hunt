@@ -133,12 +133,12 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
       />
 
       {/* Analytics Section */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {!purchaseStats.ageGroups || purchaseStats.ageGroups.length === 0 ? (
-          <Card className="bg-gray-50 dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+          <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
             <CardContent className="py-12 text-center">
-              <p className="text-gray-400 dark:text-white/40">No hay usuarios con compras registradas aún</p>
-              <p className="text-xs text-gray-400 dark:text-white/30 mt-2">Los gráficos aparecerán cuando haya datos de compras</p>
+              <p className="text-gray-500">No hay usuarios con compras registradas aún</p>
+              <p className="text-xs text-gray-500 mt-2">Los gráficos aparecerán cuando haya datos de compras</p>
             </CardContent>
           </Card>
         ) : (
@@ -153,7 +153,7 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
       </div>
 
       {/* Users Table */}
-      <Card className="bg-gray-50 dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+      <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
         <CardHeader>
           <CardTitle className="text-lg">Listado de Usuarios</CardTitle>
         </CardHeader>

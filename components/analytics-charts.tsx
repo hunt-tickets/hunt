@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AgeGroupData, GenderData } from "@/lib/supabase/actions/profile";
 import { Users, Ticket, UserPlus } from "lucide-react";
+import { useTheme } from "next-themes";
 
 interface AnalyticsChartsProps {
   ageGroups: AgeGroupData[];
@@ -12,154 +15,311 @@ interface AnalyticsChartsProps {
   totalRegisteredUsers?: number;
 }
 
-const COLORS = [
-  "bg-violet-500",
-  "bg-blue-500",
-  "bg-cyan-500",
-  "bg-emerald-500",
-  "bg-amber-500",
-  "bg-red-500",
-  "bg-gray-500",
-];
-
-const GENDER_COLORS: Record<string, string> = {
-  'Masculino': 'bg-blue-500',
-  'Femenino': 'bg-pink-500',
-  'Otro': 'bg-emerald-500',
-};
-
 export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTicketsSold, totalRegisteredUsers = 0 }: AnalyticsChartsProps) {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = resolvedTheme === 'dark';
+
+  // Color palette that adapts to theme
+  const COLORS = isDark ? [
+    "#e5e5e5", // lightest
+    "#cccccc", // light
+    "#b3b3b3", // medium-light
+    "#999999", // medium
+    "#808080", // medium-dark
+    "#666666", // dark
+    "#4d4d4d", // darkest
+  ] : [
+    "#1a1a1a", // darkest
+    "#2a2a2a", // dark
+    "#3a3a3a", // medium-dark
+    "#4a4a4a", // medium
+    "#5a5a5a", // medium-light
+    "#6a6a6a", // light
+    "#7a7a7a", // lightest
+  ];
+
   // Prepare data for pie chart (users by age)
   const usersByAgeData = (ageGroups || [])
     .filter(group => group.ageGroup !== "Sin edad")
     .map((group, index) => ({
       name: group.ageGroup,
       value: group.users,
-      color: COLORS[index % COLORS.length]
+      itemStyle: { color: COLORS[index % COLORS.length] }
     }));
-
-  const totalAgeUsers = usersByAgeData.reduce((acc, item) => acc + item.value, 0);
 
   // Prepare data for bar chart (gender distribution)
   const safeGenderGroups = genderGroups || [];
-  const maxGenderValue = Math.max(...safeGenderGroups.map(item => item.users), 1);
+  const genderLabels = safeGenderGroups.map(item => item.gender);
+  const genderValues = safeGenderGroups.map(item => item.users);
+
+  // Gender colors - monochromatic, adapts to theme
+  const genderColors: Record<string, string> = isDark ? {
+    'Masculino': '#e5e5e5', // lightest
+    'Femenino': '#999999', // medium
+    'Otro': '#666666', // dark
+  } : {
+    'Masculino': '#1a1a1a', // darkest
+    'Femenino': '#4a4a4a', // medium
+    'Otro': '#6a6a6a', // light
+  };
+
+  // Pie Chart Option (Age Distribution)
+  const pieChartOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: isDark ? '#18181b' : '#ffffff',
+      borderColor: isDark ? '#303030' : '#e5e7eb',
+      borderWidth: 1,
+      textStyle: {
+        color: isDark ? '#fff' : '#000'
+      },
+      formatter: '{b}: {c} usuarios ({d}%)'
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: isDark ? '#1a1a1a' : '#f9fafb',
+          borderWidth: 2
+        },
+        label: {
+          show: true,
+          formatter: '{b}\n{d}%',
+          color: isDark ? '#888' : '#666',
+          fontSize: 12
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 14,
+            fontWeight: 'bold',
+            color: isDark ? '#fff' : '#000'
+          }
+        },
+        data: usersByAgeData
+      }
+    ]
+  };
+
+  // Bar Chart Option (Gender Distribution)
+  const barChartOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: isDark ? '#18181b' : '#ffffff',
+      borderColor: isDark ? '#303030' : '#e5e7eb',
+      borderWidth: 1,
+      textStyle: {
+        color: isDark ? '#fff' : '#000'
+      },
+      formatter: (params: { dataIndex: number; name: string; value: number }[]) => {
+        const dataIndex = params[0].dataIndex;
+        const item = safeGenderGroups[dataIndex];
+        if (!item) return `${params[0].name}<br/>${params[0].value} usuarios`;
+        return `${params[0].name}<br/>${params[0].value} usuarios<br/>${item.tickets} tickets`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '10%',
+      top: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: genderLabels,
+      axisLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#d1d5db'
+        }
+      },
+      axisLabel: {
+        color: isDark ? '#888' : '#6b7280',
+        fontSize: 12
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#d1d5db'
+        }
+      },
+      axisLabel: {
+        color: isDark ? '#888' : '#6b7280'
+      },
+      splitLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#e5e7eb',
+          type: 'dashed'
+        }
+      }
+    },
+    series: [
+      {
+        type: 'bar',
+        data: genderValues.map((value, index) => ({
+          value,
+          itemStyle: {
+            color: genderColors[genderLabels[index]] || '#6b7280',
+            borderRadius: [8, 8, 0, 0]
+          }
+        })),
+        emphasis: {
+          itemStyle: {
+            opacity: 0.8
+          }
+        }
+      }
+    ]
+  };
+
+  if (!mounted) {
+    return (
+      <div className="space-y-6">
+        {/* Stats Cards - Show immediately */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-gray-400" />
+                Usuarios Registrados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalRegisteredUsers}</div>
+              <p className="text-xs text-gray-500 mt-1">Total de usuarios en la plataforma</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4 text-gray-400" />
+                Usuarios con Compras
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalUsers}</div>
+              <p className="text-xs text-gray-500 mt-1">Usuarios que han comprado al menos 1 ticket</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Ticket className="h-4 w-4 text-gray-400" />
+                Total Tickets Vendidos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalTicketsSold}</div>
+              <p className="text-xs text-gray-500 mt-1">Tickets vendidos en total</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Loading skeletons for charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+            <CardHeader>
+              <CardTitle className="text-lg">Distribución por Edad</CardTitle>
+              <CardDescription className="text-gray-500">Usuarios que han comprado, agrupados por edad</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] flex items-center justify-center">
+                <div className="h-8 w-8 border-2 border-gray-200 dark:border-white/30 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+            <CardHeader>
+              <CardTitle className="text-lg">Distribución por Género</CardTitle>
+              <CardDescription className="text-gray-500">Usuarios que han comprado, agrupados por género</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] flex items-center justify-center">
+                <div className="h-8 w-8 border-2 border-gray-200 dark:border-white/30 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900 dark:text-white">
-              <UserPlus className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <UserPlus className="h-4 w-4 text-gray-400" />
               Usuarios Registrados
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalRegisteredUsers}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total de usuarios en la plataforma</p>
+            <div className="text-2xl font-bold">{totalRegisteredUsers}</div>
+            <p className="text-xs text-gray-500 mt-1">Total de usuarios en la plataforma</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+        <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900 dark:text-white">
-              <Users className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Users className="h-4 w-4 text-gray-400" />
               Usuarios con Compras
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalUsers}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Usuarios que han comprado al menos 1 ticket</p>
+            <div className="text-2xl font-bold">{totalUsers}</div>
+            <p className="text-xs text-gray-500 mt-1">Usuarios que han comprado al menos 1 ticket</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+        <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900 dark:text-white">
-              <Ticket className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Ticket className="h-4 w-4 text-gray-400" />
               Total Tickets Vendidos
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalTicketsSold}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Tickets vendidos en total</p>
+            <div className="text-2xl font-bold">{totalTicketsSold}</div>
+            <p className="text-xs text-gray-500 mt-1">Tickets vendidos en total</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Age Distribution - Donut Chart */}
-        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Age Distribution - Pie Chart */}
+        <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
           <CardHeader>
-            <CardTitle className="text-lg text-gray-900 dark:text-white">Distribución por Edad</CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">Usuarios que han comprado, agrupados por edad</CardDescription>
+            <CardTitle className="text-lg">Distribución por Edad</CardTitle>
+            <CardDescription className="text-gray-500">Usuarios que han comprado, agrupados por edad</CardDescription>
           </CardHeader>
           <CardContent>
             {usersByAgeData.length > 0 ? (
-              <div className="flex flex-col items-center gap-6">
-                {/* Donut Chart */}
-                <div className="relative w-48 h-48">
-                  <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                    {(() => {
-                      let cumulativePercent = 0;
-                      return usersByAgeData.map((item, index) => {
-                        const percent = (item.value / totalAgeUsers) * 100;
-                        const strokeDasharray = `${percent} ${100 - percent}`;
-                        const strokeDashoffset = -cumulativePercent;
-                        cumulativePercent += percent;
-
-                        const colorMap: Record<string, string> = {
-                          'bg-violet-500': '#8b5cf6',
-                          'bg-blue-500': '#3b82f6',
-                          'bg-cyan-500': '#06b6d4',
-                          'bg-emerald-500': '#10b981',
-                          'bg-amber-500': '#f59e0b',
-                          'bg-red-500': '#ef4444',
-                          'bg-gray-500': '#6b7280',
-                        };
-
-                        return (
-                          <circle
-                            key={index}
-                            cx="50"
-                            cy="50"
-                            r="40"
-                            fill="none"
-                            stroke={colorMap[item.color] || '#6b7280'}
-                            strokeWidth="20"
-                            strokeDasharray={strokeDasharray}
-                            strokeDashoffset={strokeDashoffset}
-                            pathLength="100"
-                            className="transition-all duration-500"
-                          />
-                        );
-                      });
-                    })()}
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalAgeUsers}</div>
-                      <div className="text-xs text-gray-500 dark:text-white/50">usuarios</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="flex flex-wrap justify-center gap-3">
-                  {usersByAgeData.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                      <span className="text-sm text-gray-600 dark:text-white/70">
-                        {item.name} ({((item.value / totalAgeUsers) * 100).toFixed(0)}%)
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              <div className="h-[300px]">
+                <ReactECharts option={pieChartOption} style={{ height: '100%', width: '100%' }} />
               </div>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-sm text-gray-400 dark:text-[#404040]">
+              <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">
                 No hay datos de edad disponibles
               </div>
             )}
@@ -167,42 +327,18 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         </Card>
 
         {/* Gender Distribution - Bar Chart */}
-        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+        <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
           <CardHeader>
-            <CardTitle className="text-lg text-gray-900 dark:text-white">Distribución por Género</CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">Usuarios que han comprado, agrupados por género</CardDescription>
+            <CardTitle className="text-lg">Distribución por Género</CardTitle>
+            <CardDescription className="text-gray-500">Usuarios que han comprado, agrupados por género</CardDescription>
           </CardHeader>
           <CardContent>
             {safeGenderGroups.length > 0 ? (
-              <div className="space-y-4 py-4">
-                {safeGenderGroups.map((item, index) => {
-                  const percentage = (item.users / maxGenderValue) * 100;
-                  const colorClass = GENDER_COLORS[item.gender] || 'bg-gray-500';
-
-                  return (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-white/70">{item.gender}</span>
-                        <span className="text-gray-900 dark:text-white font-medium">{item.users} usuarios</span>
-                      </div>
-                      <div className="h-8 bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden">
-                        <div
-                          className={`h-full ${colorClass} rounded-lg transition-all duration-500 flex items-center justify-end pr-3`}
-                          style={{ width: `${percentage}%` }}
-                        >
-                          {percentage > 20 && (
-                            <span className="text-xs font-medium text-white">
-                              {item.tickets} tickets
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="h-[300px]">
+                <ReactECharts option={barChartOption} style={{ height: '100%', width: '100%' }} />
               </div>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-sm text-gray-400 dark:text-[#404040]">
+              <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">
                 No hay datos de género disponibles
               </div>
             )}
@@ -211,41 +347,52 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
       </div>
 
       {/* Detailed Table */}
-      <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+      <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
         <CardHeader>
-          <CardTitle className="text-lg text-gray-900 dark:text-white">Resumen Detallado</CardTitle>
-          <CardDescription className="text-gray-500 dark:text-gray-400">Estadísticas completas por grupo de edad</CardDescription>
+          <CardTitle className="text-lg">Resumen Detallado</CardTitle>
+          <CardDescription className="text-gray-500">Estadísticas completas por grupo de edad</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-white/5">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Grupo de Edad</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Usuarios</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Tickets</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Promedio por Usuario</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Grupo de Edad</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Usuarios</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Tickets</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Tickets Promedio</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Precio Promedio</th>
                 </tr>
               </thead>
               <tbody>
                 {(ageGroups || []).map((group) => (
-                  <tr key={group.ageGroup} className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                    <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">{group.ageGroup}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-white/70 text-right">{group.users}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-white/70 text-right">{group.tickets}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-white/70 text-right">
+                  <tr key={group.ageGroup} className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-[#202020]">
+                    <td className="py-3 px-4 text-sm">{group.ageGroup}</td>
+                    <td className="py-3 px-4 text-sm text-gray-500 text-right">{group.users}</td>
+                    <td className="py-3 px-4 text-sm text-gray-500 text-right">{group.tickets}</td>
+                    <td className="py-3 px-4 text-sm text-gray-500 text-right">
                       {(group.tickets / group.users).toFixed(1)}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-500 text-right">
+                      {group.averagePrice ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(group.averagePrice) : '-'}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="border-t border-gray-300 dark:border-white/10 font-medium">
-                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">Total</td>
-                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white text-right">{totalUsers}</td>
-                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white text-right">{totalTicketsSold}</td>
-                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white text-right">
+                  <td className="py-3 px-4 text-sm">Total</td>
+                  <td className="py-3 px-4 text-sm text-right">{totalUsers}</td>
+                  <td className="py-3 px-4 text-sm text-right">{totalTicketsSold}</td>
+                  <td className="py-3 px-4 text-sm text-right">
                     {totalUsers > 0 ? (totalTicketsSold / totalUsers).toFixed(1) : '0.0'}
+                  </td>
+                  <td className="py-3 px-4 text-sm text-right">
+                    {(() => {
+                      const totalPrice = (ageGroups || []).reduce((sum, group) => sum + (group.averagePrice || 0) * group.users, 0);
+                      const avgPrice = totalUsers > 0 ? totalPrice / totalUsers : 0;
+                      return avgPrice > 0 ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(avgPrice) : '-';
+                    })()}
                   </td>
                 </tr>
               </tfoot>
