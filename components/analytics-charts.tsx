@@ -2,13 +2,14 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AgeGroupData, GenderData } from "@/lib/supabase/actions/profile";
-import { Users, Ticket } from "lucide-react";
+import { Users, Ticket, UserPlus } from "lucide-react";
 
 interface AnalyticsChartsProps {
   ageGroups: AgeGroupData[];
   genderGroups: GenderData[];
   totalUsers: number;
   totalTicketsSold: number;
+  totalRegisteredUsers?: number;
 }
 
 const COLORS = [
@@ -27,7 +28,7 @@ const GENDER_COLORS: Record<string, string> = {
   'Otro': 'bg-emerald-500',
 };
 
-export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTicketsSold }: AnalyticsChartsProps) {
+export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTicketsSold, totalRegisteredUsers = 0 }: AnalyticsChartsProps) {
   // Prepare data for pie chart (users by age)
   const usersByAgeData = (ageGroups || [])
     .filter(group => group.ageGroup !== "Sin edad")
@@ -46,30 +47,43 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900 dark:text-white">
+              <UserPlus className="h-4 w-4" />
+              Usuarios Registrados
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalRegisteredUsers}</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total de usuarios en la plataforma</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900 dark:text-white">
               <Users className="h-4 w-4" />
               Usuarios con Compras
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-[#404040] mt-1">Usuarios que han comprado al menos 1 ticket</p>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalUsers}</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Usuarios que han comprado al menos 1 ticket</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900 dark:text-white">
               <Ticket className="h-4 w-4" />
               Total Tickets Vendidos
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTicketsSold}</div>
-            <p className="text-xs text-[#404040] mt-1">Tickets vendidos en total</p>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalTicketsSold}</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Tickets vendidos en total</p>
           </CardContent>
         </Card>
       </div>
@@ -77,10 +91,10 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Age Distribution - Donut Chart */}
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
           <CardHeader>
-            <CardTitle className="text-lg">Distribución por Edad</CardTitle>
-            <CardDescription>Usuarios que han comprado, agrupados por edad</CardDescription>
+            <CardTitle className="text-lg text-gray-900 dark:text-white">Distribución por Edad</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Usuarios que han comprado, agrupados por edad</CardDescription>
           </CardHeader>
           <CardContent>
             {usersByAgeData.length > 0 ? (
@@ -126,8 +140,8 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{totalAgeUsers}</div>
-                      <div className="text-xs text-white/50">usuarios</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalAgeUsers}</div>
+                      <div className="text-xs text-gray-500 dark:text-white/50">usuarios</div>
                     </div>
                   </div>
                 </div>
@@ -137,7 +151,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
                   {usersByAgeData.map((item, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                      <span className="text-sm text-white/70">
+                      <span className="text-sm text-gray-600 dark:text-white/70">
                         {item.name} ({((item.value / totalAgeUsers) * 100).toFixed(0)}%)
                       </span>
                     </div>
@@ -145,7 +159,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
                 </div>
               </div>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-sm text-[#404040]">
+              <div className="h-[300px] flex items-center justify-center text-sm text-gray-400 dark:text-[#404040]">
                 No hay datos de edad disponibles
               </div>
             )}
@@ -153,10 +167,10 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         </Card>
 
         {/* Gender Distribution - Bar Chart */}
-        <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+        <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
           <CardHeader>
-            <CardTitle className="text-lg">Distribución por Género</CardTitle>
-            <CardDescription>Usuarios que han comprado, agrupados por género</CardDescription>
+            <CardTitle className="text-lg text-gray-900 dark:text-white">Distribución por Género</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Usuarios que han comprado, agrupados por género</CardDescription>
           </CardHeader>
           <CardContent>
             {safeGenderGroups.length > 0 ? (
@@ -168,10 +182,10 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
                   return (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-white/70">{item.gender}</span>
-                        <span className="text-white font-medium">{item.users} usuarios</span>
+                        <span className="text-gray-600 dark:text-white/70">{item.gender}</span>
+                        <span className="text-gray-900 dark:text-white font-medium">{item.users} usuarios</span>
                       </div>
-                      <div className="h-8 bg-white/5 rounded-lg overflow-hidden">
+                      <div className="h-8 bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden">
                         <div
                           className={`h-full ${colorClass} rounded-lg transition-all duration-500 flex items-center justify-end pr-3`}
                           style={{ width: `${percentage}%` }}
@@ -188,7 +202,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
                 })}
               </div>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-sm text-[#404040]">
+              <div className="h-[300px] flex items-center justify-center text-sm text-gray-400 dark:text-[#404040]">
                 No hay datos de género disponibles
               </div>
             )}
@@ -197,40 +211,40 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
       </div>
 
       {/* Detailed Table */}
-      <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+      <Card className="bg-white dark:bg-background/50 backdrop-blur-sm border-gray-200 dark:border-[#303030]">
         <CardHeader>
-          <CardTitle className="text-lg">Resumen Detallado</CardTitle>
-          <CardDescription>Estadísticas completas por grupo de edad</CardDescription>
+          <CardTitle className="text-lg text-gray-900 dark:text-white">Resumen Detallado</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">Estadísticas completas por grupo de edad</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-white/70">Grupo de Edad</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/70">Usuarios</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/70">Tickets</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-white/70">Promedio por Usuario</th>
+                <tr className="border-b border-gray-200 dark:border-white/5">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Grupo de Edad</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Usuarios</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Tickets</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600 dark:text-white/70">Promedio por Usuario</th>
                 </tr>
               </thead>
               <tbody>
                 {(ageGroups || []).map((group) => (
-                  <tr key={group.ageGroup} className="border-b border-white/5 hover:bg-white/[0.02]">
-                    <td className="py-3 px-4 text-sm text-white">{group.ageGroup}</td>
-                    <td className="py-3 px-4 text-sm text-white/70 text-right">{group.users}</td>
-                    <td className="py-3 px-4 text-sm text-white/70 text-right">{group.tickets}</td>
-                    <td className="py-3 px-4 text-sm text-white/70 text-right">
+                  <tr key={group.ageGroup} className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                    <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">{group.ageGroup}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-white/70 text-right">{group.users}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-white/70 text-right">{group.tickets}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-white/70 text-right">
                       {(group.tickets / group.users).toFixed(1)}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-white/10 font-medium">
-                  <td className="py-3 px-4 text-sm text-white">Total</td>
-                  <td className="py-3 px-4 text-sm text-white text-right">{totalUsers}</td>
-                  <td className="py-3 px-4 text-sm text-white text-right">{totalTicketsSold}</td>
-                  <td className="py-3 px-4 text-sm text-white text-right">
+                <tr className="border-t border-gray-300 dark:border-white/10 font-medium">
+                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">Total</td>
+                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white text-right">{totalUsers}</td>
+                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white text-right">{totalTicketsSold}</td>
+                  <td className="py-3 px-4 text-sm text-gray-900 dark:text-white text-right">
                     {totalUsers > 0 ? (totalTicketsSold / totalUsers).toFixed(1) : '0.0'}
                   </td>
                 </tr>

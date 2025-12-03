@@ -103,6 +103,9 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     },
   ];
 
+  // Total registered users (including those who haven't made purchases)
+  const totalRegisteredUsers = 245;
+
   // Mock purchase stats - In production, fetch from database
   const purchaseStats = {
     ageGroups: [
@@ -144,6 +147,7 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
             genderGroups={purchaseStats.genderGroups || []}
             totalUsers={purchaseStats.totalUsers}
             totalTicketsSold={purchaseStats.totalTicketsSold}
+            totalRegisteredUsers={totalRegisteredUsers}
           />
         )}
       </div>
