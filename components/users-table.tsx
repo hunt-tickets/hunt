@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Phone, Mail, Calendar, Cake, Search, X, Filter } from "lucide-react";
+import { ChevronLeft, ChevronRight, Phone, Mail, Cake, Search, X } from "lucide-react";
 import { EditUserSheet } from "@/components/edit-user-sheet";
 import { UserProfileSheet } from "@/components/user-profile-sheet";
 import { Input } from "@/components/ui/input";
@@ -59,8 +59,6 @@ export function UsersTable({ users }: UsersTableProps) {
   const [pageSize, setPageSize] = useState(50);
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [profileFilter, setProfileFilter] = useState("all");
 
   // Debounce search input
   useEffect(() => {
@@ -72,7 +70,7 @@ export function UsersTable({ users }: UsersTableProps) {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Filter users based on search and filters
+  // Filter users based on search only
   const filteredUsers = users.filter((user) => {
     const fullName = [user.name, user.lastName].filter(Boolean).join(' ').toLowerCase();
     const email = (user.email || "").toLowerCase();
@@ -81,23 +79,11 @@ export function UsersTable({ users }: UsersTableProps) {
     const search = searchTerm.toLowerCase();
 
     // Search filter
-    const matchesSearch = searchTerm === "" ||
+    return searchTerm === "" ||
       fullName.includes(search) ||
       email.includes(search) ||
       phone.includes(search) ||
       document.includes(search);
-
-    // Role filter
-    const matchesRole = roleFilter === "all" ||
-      (roleFilter === "admin" && user.admin) ||
-      (roleFilter === "user" && !user.admin);
-
-    // Profile filter
-    const matchesProfile = profileFilter === "all" ||
-      (profileFilter === "complete" && user.phone) ||
-      (profileFilter === "incomplete" && !user.phone);
-
-    return matchesSearch && matchesRole && matchesProfile;
   });
 
   // Calculate pagination based on filtered users
@@ -116,40 +102,20 @@ export function UsersTable({ users }: UsersTableProps) {
     setCurrentPage(1); // Reset to first page when changing page size
   };
 
-  // Reset to first page when filters change
-  const handleRoleFilterChange = (value: string) => {
-    setRoleFilter(value);
-    setCurrentPage(1);
-  };
-
-  const handleProfileFilterChange = (value: string) => {
-    setProfileFilter(value);
-    setCurrentPage(1);
-  };
-
-  const clearFilters = () => {
-    setSearchInput("");
-    setSearchTerm("");
-    setRoleFilter("all");
-    setProfileFilter("all");
-    setCurrentPage(1);
-  };
-
-  const hasActiveFilters = searchTerm !== "" || roleFilter !== "all" || profileFilter !== "all";
+  const hasActiveFilters = searchTerm !== "";
 
   return (
     <div className="space-y-6">
-      {/* Search and Filters */}
-      <div className="space-y-4">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-white/40" />
+      {/* Search Bar */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-white/50" />
           <Input
             type="text"
             placeholder="Buscar por nombre, email, teléfono o documento..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="h-12 pl-12 pr-4 rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 focus:bg-gray-200 dark:focus:bg-white/10 transition-colors text-base"
+            className="h-12 pl-12 pr-4 rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 focus:bg-gray-200 dark:focus:bg-white/10 transition-colors text-base placeholder:text-gray-500 dark:placeholder:text-white/50"
           />
           {searchInput && (
             <button
@@ -161,60 +127,15 @@ export function UsersTable({ users }: UsersTableProps) {
           )}
         </div>
 
-        {/* Filters Row */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-400 dark:text-white/40" />
-            <span className="text-sm text-gray-500 dark:text-white/50">Filtros:</span>
-          </div>
-
-          {/* Role Filter */}
-          <Select value={roleFilter} onValueChange={handleRoleFilterChange}>
-            <SelectTrigger className="h-9 w-[140px] rounded-lg border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los roles</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="user">Usuario</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Profile Filter */}
-          <Select value={profileFilter} onValueChange={handleProfileFilterChange}>
-            <SelectTrigger className="h-9 w-[160px] rounded-lg border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los perfiles</SelectItem>
-              <SelectItem value="complete">Perfil completo</SelectItem>
-              <SelectItem value="incomplete">Perfil incompleto</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearFilters}
-              className="h-9 px-3 text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Limpiar filtros
-            </Button>
+        {/* Results Count */}
+        <div className="text-sm text-gray-500 dark:text-white/50 whitespace-nowrap">
+          {filteredUsers.length === users.length ? (
+            <span>{users.length} usuarios</span>
+          ) : (
+            <span>
+              {filteredUsers.length} de {users.length}
+            </span>
           )}
-
-          {/* Results Count */}
-          <div className="ml-auto text-sm text-gray-500 dark:text-white/50">
-            {filteredUsers.length === users.length ? (
-              <span>{users.length} usuarios</span>
-            ) : (
-              <span>
-                {filteredUsers.length} de {users.length} usuarios
-              </span>
-            )}
-          </div>
         </div>
       </div>
 
@@ -224,9 +145,9 @@ export function UsersTable({ users }: UsersTableProps) {
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-white/5">
               <TableHead className="font-medium text-gray-500 dark:text-white/50 py-3 text-xs uppercase tracking-wider">Usuario</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Contacto</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Correo</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Teléfono</TableHead>
               <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Edad</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Registro</TableHead>
               <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -241,10 +162,10 @@ export function UsersTable({ users }: UsersTableProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={clearFilters}
+                          onClick={() => setSearchInput("")}
                           className="text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10"
                         >
-                          Limpiar filtros
+                          Limpiar búsqueda
                         </Button>
                       )}
                     </div>
@@ -281,68 +202,49 @@ export function UsersTable({ users }: UsersTableProps) {
                         <div className="h-11 w-11 rounded-xl bg-gray-100 dark:bg-white/[0.08] flex items-center justify-center flex-shrink-0 font-semibold text-sm text-gray-900 dark:text-white/90 ring-1 ring-gray-200 dark:ring-white/10">
                           {initials}
                         </div>
-                        <div className="flex flex-col min-w-0 gap-0.5">
-                          <span className="font-medium truncate">{fullName}</span>
-                          {user.email && (
-                            <span className="text-xs text-gray-400 dark:text-white/40 truncate flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              {user.email}
-                            </span>
-                          )}
-                        </div>
+                        <span className="font-medium truncate">{fullName}</span>
                       </div>
                     </TableCell>
 
-                    {/* Contacto */}
+                    {/* Correo */}
                     <TableCell className="py-5">
-                      <div className="flex flex-col gap-1">
-                        {phoneNumber ? (
-                          <span className="text-sm text-gray-700 dark:text-white/70 flex items-center gap-1.5">
-                            <Phone className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
-                            {phoneNumber}
-                          </span>
-                        ) : (
-                          <span className="text-sm text-gray-400 dark:text-white/30">Sin teléfono</span>
-                        )}
-                      </div>
+                      {user.email ? (
+                        <span className="text-sm text-gray-700 dark:text-white/80 flex items-center gap-1.5">
+                          <Mail className="h-3.5 w-3.5 text-gray-400 dark:text-white/50" />
+                          {user.email}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400 dark:text-white/40">-</span>
+                      )}
+                    </TableCell>
+
+                    {/* Teléfono */}
+                    <TableCell className="py-5">
+                      {phoneNumber ? (
+                        <span className="text-sm text-gray-700 dark:text-white/80 flex items-center gap-1.5">
+                          <Phone className="h-3.5 w-3.5 text-gray-400 dark:text-white/50" />
+                          {phoneNumber}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400 dark:text-white/40">-</span>
+                      )}
                     </TableCell>
 
                     {/* Edad */}
                     <TableCell className="py-5">
                       {user.birthdate ? (
-                        <div className="flex flex-col gap-1">
-                          <span className="text-sm text-gray-700 dark:text-white/70 flex items-center gap-1.5">
-                            <Cake className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
-                            {calculateAge(user.birthdate)} años
-                          </span>
-                          <span className="text-xs text-gray-400 dark:text-white/40">
-                            {new Date(user.birthdate).toLocaleDateString('es-CO', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </span>
-                        </div>
+                        <span className="text-sm text-gray-700 dark:text-white/80 flex items-center gap-1.5">
+                          <Cake className="h-3.5 w-3.5 text-gray-400 dark:text-white/50" />
+                          {calculateAge(user.birthdate)} años
+                        </span>
                       ) : (
-                        <span className="text-sm text-gray-400 dark:text-white/30">-</span>
+                        <span className="text-sm text-gray-400 dark:text-white/40">-</span>
                       )}
-                    </TableCell>
-
-                    {/* Registro */}
-                    <TableCell className="py-5">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-white/50">
-                        <Calendar className="h-3.5 w-3.5 text-gray-400 dark:text-white/30" />
-                        {new Date(user.created_at).toLocaleDateString('es-CO', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </div>
                     </TableCell>
 
                     {/* Acciones */}
                     <TableCell className="text-right py-5">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2">
                         <UserProfileSheet user={user} />
                         <EditUserSheet user={user} />
                       </div>

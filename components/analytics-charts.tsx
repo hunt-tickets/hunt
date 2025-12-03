@@ -200,7 +200,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalRegisteredUsers}</div>
-              <p className="text-xs text-gray-500 mt-1">Total de usuarios en la plataforma</p>
+              <p className="text-xs text-gray-500 dark:text-white/60 mt-1">Total de usuarios en la plataforma</p>
             </CardContent>
           </Card>
 
@@ -213,7 +213,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalUsers}</div>
-              <p className="text-xs text-gray-500 mt-1">Usuarios que han comprado al menos 1 ticket</p>
+              <p className="text-xs text-gray-500 dark:text-white/60 mt-1">Usuarios que han comprado al menos 1 ticket</p>
             </CardContent>
           </Card>
 
@@ -226,7 +226,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalTicketsSold}</div>
-              <p className="text-xs text-gray-500 mt-1">Tickets vendidos en total</p>
+              <p className="text-xs text-gray-500 dark:text-white/60 mt-1">Tickets vendidos en total</p>
             </CardContent>
           </Card>
         </div>
@@ -311,7 +311,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
           <CardHeader>
             <CardTitle className="text-lg">Distribución por Edad</CardTitle>
-            <CardDescription className="text-gray-500">Usuarios que han comprado, agrupados por edad</CardDescription>
+            <CardDescription className="text-gray-500 dark:text-white/60">Usuarios que han comprado, agrupados por edad</CardDescription>
           </CardHeader>
           <CardContent>
             {usersByAgeData.length > 0 ? (
@@ -330,7 +330,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
           <CardHeader>
             <CardTitle className="text-lg">Distribución por Género</CardTitle>
-            <CardDescription className="text-gray-500">Usuarios que han comprado, agrupados por género</CardDescription>
+            <CardDescription className="text-gray-500 dark:text-white/60">Usuarios que han comprado, agrupados por género</CardDescription>
           </CardHeader>
           <CardContent>
             {safeGenderGroups.length > 0 ? (
@@ -350,30 +350,30 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
       <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
         <CardHeader>
           <CardTitle className="text-lg">Resumen Detallado</CardTitle>
-          <CardDescription className="text-gray-500">Estadísticas completas por grupo de edad</CardDescription>
+          <CardDescription className="text-gray-500 dark:text-white/60">Estadísticas completas por grupo de edad</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-white/5">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Grupo de Edad</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Usuarios</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Tickets</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Tickets Promedio</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Precio Promedio</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Grupo de Edad</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Usuarios</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Tickets</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Tickets Promedio</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Precio Promedio</th>
                 </tr>
               </thead>
               <tbody>
                 {(ageGroups || []).map((group) => (
                   <tr key={group.ageGroup} className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-[#202020]">
                     <td className="py-3 px-4 text-sm">{group.ageGroup}</td>
-                    <td className="py-3 px-4 text-sm text-gray-500 text-right">{group.users}</td>
-                    <td className="py-3 px-4 text-sm text-gray-500 text-right">{group.tickets}</td>
-                    <td className="py-3 px-4 text-sm text-gray-500 text-right">
+                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">{group.users}</td>
+                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">{group.tickets}</td>
+                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">
                       {(group.tickets / group.users).toFixed(1)}
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-500 text-right">
+                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">
                       {group.averagePrice ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(group.averagePrice) : '-'}
                     </td>
                   </tr>
