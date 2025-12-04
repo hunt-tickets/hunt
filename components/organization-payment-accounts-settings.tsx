@@ -9,7 +9,6 @@ import { CreditCard, CheckCircle, Clock, Wallet } from "lucide-react";
 import AddPaymentProcessorDialog from "./add-payment-processor-dialog";
 import { PaymentAccountActions } from "./payment-status-actions";
 import { PaymentStatusSwitch } from "./payment-status-switch";
-import { getMercadopagoAuthorizationUrl } from "@/lib/mercadopago";
 import Image from "next/image";
 import {
   PaymentProcessorType,
@@ -25,9 +24,10 @@ interface OrganizationWithPayments {
 
 interface PaymentSettingsProps {
   org: OrganizationWithPayments | null;
+  mpOauthUrl?: string;
 }
 
-const PaymentSettings = async ({ org }: PaymentSettingsProps) => {
+const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
   // Get payment accounts from the organization
   const paymentAccounts = org?.paymentAccounts || [];
 
@@ -85,9 +85,6 @@ const PaymentSettings = async ({ org }: PaymentSettingsProps) => {
         );
     }
   };
-
-  // Retrieve Oauth Urls
-  const mpOauthUrl = await getMercadopagoAuthorizationUrl(org?.id);
 
   return (
     <Card className="w-full">

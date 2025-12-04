@@ -1,10 +1,29 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { AnimatedBackground } from './animated-background';
+import { Eye, EyeOff } from 'lucide-react';
 import { PhoneInput } from './phone-input';
+
+// Sanitization helpers
+const sanitizeEmail = (email: string): string => {
+  // Remove any HTML tags and potentially malicious characters
+  return email
+    .replace(/[<>]/g, '') // Remove < and >
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .trim()
+    .slice(0, 100); // Limit length
+};
+
+const sanitizePassword = (password: string): string => {
+  // Remove potentially malicious characters while allowing special chars for passwords
+  return password
+    .replace(/[<>]/g, '') // Remove < and >
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .trim()
+    .slice(0, 100); // Limit length
+};
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -36,8 +55,6 @@ export interface Testimonial {
 interface SignInPageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  heroImageSrc?: string;
-  testimonials?: Testimonial[];
   onSendOtp?: (email: string) => void;
   onVerifyOtp?: (email: string, otp: string) => void;
   onResendOtp?: (email: string) => void;
@@ -63,7 +80,6 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
 export const SignInPage: React.FC<SignInPageProps> = ({
   title = <span className="font-light text-foreground tracking-tighter">Bienvenido</span>,
   description = "Accede a tu cuenta y continúa tu experiencia con nosotros",
-  heroImageSrc,
   onSendOtp,
   onVerifyOtp,
   onResendOtp,
@@ -76,10 +92,13 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   message = null,
 }) => {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
+  const [usePassword, setUsePassword] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Countdown timer for resend
@@ -134,23 +153,9 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw] relative">
-      {/* Back button */}
-      <Link
-        href="/"
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-sm text-gray-400 hover:text-foreground transition-colors group"
-      >
-        <div className="p-2 rounded-full border dark:border-[#303030] bg-background/80 backdrop-blur-sm group-hover:bg-background transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </div>
-        <span className="hidden sm:inline">Volver</span>
-      </Link>
-
-      {/* Left column: sign-in form */}
-      <section className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="flex flex-col gap-6">
-            <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight">{title}</h1>
+            <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight text-foreground">{title}</h1>
             <p className="animate-element animate-delay-200 text-gray-400">{description}</p>
 
             {!isOtpSent ? (
@@ -193,7 +198,10 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                         placeholder="tu@correo.com"
                         className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                        onChange={(e) => setEmail(sanitizeEmail(e.target.value.toLowerCase()))}
+                        maxLength={100}
+                        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                        autoComplete="email"
                         required
                       />
                     </GlassInputWrapper>
@@ -206,6 +214,34 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   )}
                 </div>
 
+                {usePassword && (
+                  <div className="animate-element animate-delay-300 space-y-2">
+                    <label className="text-sm font-medium text-gray-400">Contraseña</label>
+                    <div className="rounded-2xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-primary/50 focus-within:bg-primary/5">
+                      <div className="flex items-center gap-2 px-4">
+                        <input
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Ingresa tu contraseña"
+                          className="flex-1 bg-transparent text-sm py-4 focus:outline-none"
+                          value={password}
+                          onChange={(e) => setPassword(sanitizePassword(e.target.value))}
+                          maxLength={100}
+                          autoComplete="current-password"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 {message && <p className="text-sm text-green-600">{message}</p>}
 
@@ -214,15 +250,16 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Enviando..." : "Enviar código"}
+                  {isLoading ? (usePassword ? "Iniciando sesión..." : "Enviando...") : (usePassword ? "Iniciar sesión" : "Enviar código")}
                 </button>
 
                 <div className="animate-element animate-delay-650 text-center">
                   <button
                     type="button"
+                    onClick={() => setUsePassword(!usePassword)}
                     className="text-sm text-gray-400 hover:text-foreground transition-colors underline"
                   >
-                    Ingresar con contraseña
+                    {usePassword ? "Ingresar con código" : "Ingresar con contraseña"}
                   </button>
                 </div>
               </form>
@@ -236,6 +273,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                       type="email"
                       className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none bg-muted/50"
                       value={email}
+                      maxLength={100}
                       disabled
                     />
                   </GlassInputWrapper>
@@ -255,6 +293,8 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        pattern="[0-9]"
+                        autoComplete="off"
                         required
                       />
                     ))}
@@ -276,7 +316,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <button
                     type="button"
                     onClick={handleResendOtp}
-                    className="flex-1 text-sm text-gray-400 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!canResend || isLoading}
                   >
                     {canResend ? "Reenviar código" : `Reenviar en ${resendCountdown}s`}
@@ -284,7 +324,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <button
                     type="button"
                     onClick={() => window.location.reload()}
-                    className="flex-1 text-sm text-gray-400 hover:text-foreground transition-colors"
+                    className="flex-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Usar otro correo
                   </button>
@@ -332,22 +372,5 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             )}
           </div>
         </div>
-      </section>
-
-      {/* Right column: animated background */}
-      {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-4 overflow-hidden">
-          <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden">
-            <AnimatedBackground
-              colors={["#7700ff", "#ff006e", "#00e5ff", "#ff00aa", "#00ffaa", "#aa00ff"]}
-              distortion={1.2}
-              speed={0.42}
-              swirl={0.6}
-              veilOpacity="bg-black/30"
-            />
-          </div>
-        </section>
-      )}
-    </div>
   );
 };

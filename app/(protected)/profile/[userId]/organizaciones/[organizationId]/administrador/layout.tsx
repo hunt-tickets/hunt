@@ -25,6 +25,11 @@ interface AdministradorLayoutProps {
 const AdministradorLayout = async ({ children, params }: AdministradorLayoutProps) => {
   const { userId, organizationId } = await params;
 
+  // Get user session
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   // Fetch user's role in the organization for sidebar display
   const memberRecord = await db.query.member.findFirst({
     where: and(
@@ -49,6 +54,7 @@ const AdministradorLayout = async ({ children, params }: AdministradorLayoutProp
           organizationId={organizationId}
           role={role}
           organizations={organizations || []}
+          user={session?.user || null}
         />
 
         {/* Main Content - with left margin to accommodate fixed sidebar */}

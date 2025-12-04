@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Settings, ArrowLeft, UserCircle, Tag, Gift } from "lucide-react";
+import { Calendar, Settings, ArrowLeft, UserCircle, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
 import { OrganizationSelector } from "@/components/organization-selector";
+import { SidebarUserMenu } from "@/components/sidebar-user-menu";
 
 interface Organization {
   id: string;
@@ -16,33 +17,34 @@ interface Organization {
   createdAt: Date;
 }
 
+interface UserData {
+  id: string;
+  name: string | null;
+  email: string;
+  image?: string | null;
+}
+
 interface AdminSidebarProps {
   userId: string;
   organizationId: string;
   role: "owner" | "administrator" | "seller";
   organizations: Organization[];
+  user: UserData | null;
 }
 
 const primaryMenuItems = [
   {
     title: "Eventos",
     icon: Calendar,
-    href: "/administrador",
+    href: "/administrador/eventos",
     description: "Crea y gestiona eventos",
     exact: false, // Will match /administrador/event/[id] too
   },
   {
-    title: "Marcas",
-    icon: Tag,
-    href: "/administrador/marcas",
-    description: "Gestiona productores y marcas",
-    exact: true,
-  },
-  {
-    title: "Referidos",
+    title: "Recompensas",
     icon: Gift,
     href: "/administrador/referidos",
-    description: "Programa de referidos y comisiones",
+    description: "Programa de referidos y rebate",
     exact: true,
   },
   {
@@ -52,9 +54,6 @@ const primaryMenuItems = [
     description: "Listado completo de usuarios",
     exact: true,
   },
-];
-
-const adminMenuItems = [
   {
     title: "Configuración",
     icon: Settings,
@@ -64,7 +63,7 @@ const adminMenuItems = [
   },
 ];
 
-export function AdminSidebar({ userId, organizationId, organizations }: AdminSidebarProps) {
+export function AdminSidebar({ userId, organizationId, organizations, user }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
 
@@ -118,9 +117,9 @@ export function AdminSidebar({ userId, organizationId, organizations }: AdminSid
               if (item.exact) {
                 isActive = pathname === fullHref;
               } else {
-                // For non-exact matches (like /administrador which should also match /administrador/event/[id])
-                if (item.href === "/administrador") {
-                  isActive = pathname.includes("/administrador") && !pathname.includes("/configuracion") && !pathname.includes("/usuarios") && !pathname.includes("/marcas") && !pathname.includes("/referidos");
+                // For non-exact matches (like /administrador/eventos which should also match /administrador/event/[id])
+                if (item.href === "/administrador/eventos") {
+                  isActive = pathname.includes("/administrador/eventos") || (pathname.includes("/administrador/event/") && !pathname.includes("/configuracion"));
                 } else {
                   isActive = pathname.includes(item.href);
                 }
@@ -143,52 +142,18 @@ export function AdminSidebar({ userId, organizationId, organizations }: AdminSid
                 </Link>
               );
             })}
-
-            {/* Separator with "Administrador" label */}
-            <div className="py-4">
-              <div className="px-3 mb-2">
-                <span className="text-xs font-semibold text-gray-400 dark:text-white/40 uppercase tracking-wider">
-                  Administrador
-                </span>
-              </div>
-              <div className="border-t border-gray-200 dark:border-white/10" />
-            </div>
-
-            {/* Admin Menu Items */}
-            {adminMenuItems.map((item) => {
-              const Icon = item.icon;
-              const fullHref = `/profile/${userId}/organizaciones/${organizationId}${item.href}`;
-
-              // Check if current route matches this menu item
-              let isActive = false;
-              if (item.exact) {
-                isActive = pathname === fullHref;
-              } else {
-                isActive = pathname.includes(item.href);
-              }
-
-              return (
-                <Link
-                  key={item.href}
-                  href={fullHref}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
-                    isActive
-                      ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
-                      : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
-                  )}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <div>{item.title}</div>
-                </Link>
-              );
-            })}
           </nav>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
+          <div className="pt-4 border-t border-gray-200 dark:border-[#2a2a2a] space-y-3">
             <ThemeToggle />
+
+            {/* User Menu */}
+            <SidebarUserMenu
+              user={user}
+              userId={userId}
+              onMenuClose={() => setIsMobileMenuOpen(false)}
+            />
           </div>
         </div>
       </aside>

@@ -2,9 +2,11 @@ import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { AdminConfigTabs } from "@/components/admin-config-tabs";
+import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
 import { paymentProcessorAccount, member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
+import { getMercadopagoAuthorizationUrl } from "@/lib/mercadopago";
 
 interface ConfiguracionPageProps {
   params: Promise<{
@@ -81,16 +83,46 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
     paymentAccounts: paymentAccounts,
   };
 
-  const teamMembers = fullOrganization.members || [];
+  // Map team members to include phoneNumber (default to null if not present)
+  const teamMembers = (fullOrganization.members || []).map((member: {
+    id: string;
+    userId: string;
+    role: string;
+    organizationId: string;
+    createdAt: Date;
+    user?: {
+      id: string;
+      name: string;
+      email: string;
+      image?: string;
+      phoneNumber?: string;
+    };
+  }) => ({
+    ...member,
+    user: member.user ? {
+      ...member.user,
+      phoneNumber: member.user.phoneNumber || null,
+    } : undefined,
+  }));
   const invitations = fullOrganization.invitations || [];
 
+  // Get MercadoPago OAuth URL
+  const mpOauthUrl = await getMercadopagoAuthorizationUrl(organizationId);
+
   return (
-    <div className="px-3 py-3 sm:px-6 sm:py-6">
+    <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
+      {/* Page Header */}
+      <AdminHeader
+        title="Configuración"
+        subtitle="Gestiona tu organización, equipo y procesadores de pago"
+      />
+
       <AdminConfigTabs
         organization={organizationData}
         team={teamMembers}
         invitations={invitations}
         currentUserRole={currentUserRole}
+        mpOauthUrl={mpOauthUrl}
       />
     </div>
   );

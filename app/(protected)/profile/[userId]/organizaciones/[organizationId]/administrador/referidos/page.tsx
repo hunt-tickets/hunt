@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { ReferralAdminContent } from "@/components/referral-admin-content";
+import { ReferralTabs } from "@/components/referral-tabs";
 import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
 import { member } from "@/lib/schema";
@@ -50,15 +50,15 @@ export default async function ReferidosPage({ params }: ReferidosPageProps) {
   }
 
   return (
-    <div className="px-4 py-4 sm:px-6 sm:py-6 space-y-8">
+    <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
       {/* Header */}
       <AdminHeader
-        title="Programa de Referidos"
-        subtitle="Invita productores y gana comisiones por sus ventas"
+        title="Recompensas"
+        subtitle="Gana comisiones por referir productores y obtén rebates por tus ventas"
       />
 
-      {/* Content */}
-      <ReferralAdminContent userId={userId} />
+      {/* Tabs */}
+      <ReferralTabs userId={userId} />
     </div>
   );
 }

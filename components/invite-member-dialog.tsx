@@ -32,19 +32,18 @@ export function InviteMemberDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={size}>
+        <Button size={size} className="rounded-full">
           <Mail className="h-4 w-4 mr-2" />
           Invitar
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md max-h-[75vh] sm:max-h-[85vh] overflow-y-auto overflow-x-hidden p-5 sm:p-6">
-        <DialogHeader className="space-y-1.5 pb-3">
-          <DialogTitle className="text-lg sm:text-xl font-semibold">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-xl max-h-[85vh] overflow-y-auto bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="text-xl font-semibold">
             Invitar Miembro
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-            Envía una invitación por correo electrónico para unirse a la
-            organización
+          <DialogDescription className="text-sm text-gray-600 dark:text-white/60">
+            Envía una invitación por correo electrónico para unirse a la organización
           </DialogDescription>
         </DialogHeader>
         <InviteMemberForm

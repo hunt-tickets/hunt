@@ -23,6 +23,7 @@ import { ActiveSessionsCard } from "@/components/active-sessions-card";
 import { PhoneVerificationManager } from "@/components/phone-verification-manager";
 import { BirthDateManager } from "@/components/birth-date-manager";
 import { EmailManager } from "@/components/email-manager";
+import { DocumentManager } from "@/components/document-manager";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -213,6 +214,9 @@ export default async function ProfilePage() {
 
           {/* Birth Date */}
           <BirthDateManager birthDate={null} />
+
+          {/* Document Type and Number */}
+          <DocumentManager documentType={null} documentNumber={null} />
         </div>
       </div>
 

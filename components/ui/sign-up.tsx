@@ -1,10 +1,37 @@
 "use client";
 
-import React, { useState } from 'react';
-import { ArrowLeft, Check } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { SimpleDatePicker } from './simple-date-picker';
-import { NeuralNetworkBackground } from './neural-network-background';
+import { PhoneInput } from './phone-input';
+
+// Sanitization helpers
+const sanitizeText = (text: string): string => {
+  // Remove any HTML tags and potentially malicious characters
+  return text
+    .replace(/[<>]/g, '') // Remove < and >
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .trim()
+    .slice(0, 100); // Limit length
+};
+
+const sanitizeName = (name: string): string => {
+  // Allow only letters, spaces, hyphens, and accented characters
+  return name
+    .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]/g, '')
+    .trim()
+    .slice(0, 50);
+};
+
+const sanitizeDocumentNumber = (doc: string): string => {
+  // Allow only alphanumeric characters
+  return doc
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+    .slice(0, 20);
+};
 
 // --- TYPE DEFINITIONS ---
 
@@ -19,8 +46,7 @@ export interface SignUpFormData {
   email: string;
   nombre: string;
   apellido: string;
-  prefijo: string;
-  telefono: string;
+  phoneNumber: string;
   birthday: string;
   tipoDocumento: string;
   numeroDocumento: string;
@@ -29,12 +55,14 @@ export interface SignUpFormData {
 interface SignUpPageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  heroImageSrc?: string;
-  testimonials?: Testimonial[];
-  onSignUp?: (data: SignUpFormData) => void;
+  onSendOtp?: (data: SignUpFormData) => void;
+  onVerifyOtp?: (otp: string) => void;
+  onResendOtp?: () => void;
   onLogin?: () => void;
+  isOtpSent?: boolean;
   isLoading?: boolean;
   error?: string | null;
+  message?: string | null;
 }
 
 // --- SUB-COMPONENTS ---
@@ -45,82 +73,110 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const TestimonialCard = ({ testimonial, delay }: { testimonial: Testimonial, delay: string }) => (
-  <div className={`animate-testimonial ${delay} flex items-start gap-3 rounded-3xl bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 p-5 w-64 shadow-lg`}>
-    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-      <img src={testimonial.avatarSrc} className="w-full h-full object-cover" alt="avatar" />
-    </div>
-    <div className="text-sm leading-snug">
-      <p className="flex items-center gap-1 font-medium text-foreground">{testimonial.name}</p>
-      <p className="text-foreground/80">{testimonial.handle}</p>
-      <p className="mt-1 text-foreground/90">{testimonial.text}</p>
-    </div>
-  </div>
-);
-
 // --- MAIN COMPONENT ---
 
 export const SignUpPage: React.FC<SignUpPageProps> = ({
   title = <span className="font-light text-foreground tracking-tighter">Crear cuenta</span>,
   description = "Únete a nosotros y comienza tu experiencia",
-  heroImageSrc,
-  testimonials = [],
-  onSignUp,
+  onSendOtp,
+  onVerifyOtp,
+  onResendOtp,
   onLogin,
+  isOtpSent = false,
   isLoading = false,
   error = null,
+  message = null,
 }) => {
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
-  const [prefijo, setPrefijo] = useState("+57");
-  const [telefono, setTelefono] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [birthday, setBirthday] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("CC");
   const [numeroDocumento, setNumeroDocumento] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [resendCountdown, setResendCountdown] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Countdown timer for resend
+  useEffect(() => {
+    if (isOtpSent && resendCountdown > 0) {
+      const timer = setInterval(() => {
+        setResendCountdown((prev) => {
+          if (prev <= 1) {
+            setCanResend(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isOtpSent, resendCountdown]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptedTerms) {
       return;
     }
-    onSignUp?.({
+    onSendOtp?.({
       email,
       nombre,
       apellido,
-      prefijo,
-      telefono,
+      phoneNumber,
       birthday,
       tipoDocumento,
       numeroDocumento,
     });
   };
 
-  return (
-    <div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw] relative">
-      {/* Back button */}
-      <Link
-        href="/"
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-      >
-        <div className="p-2 rounded-full border dark:border-[#303030] bg-background/80 backdrop-blur-sm group-hover:bg-background transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </div>
-        <span className="hidden sm:inline">Volver</span>
-      </Link>
+  const handleResendOtp = () => {
+    setResendCountdown(60);
+    setCanResend(false);
+    onResendOtp?.();
+  };
 
-      {/* Left column: sign-up form */}
-      <section className="flex-1 flex items-center justify-center p-8">
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return; // Only allow digits
+
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1); // Only take last character
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    onVerifyOtp?.(otp.join(""));
+  };
+
+  return (
         <div className="w-full max-w-md">
           <div className="flex flex-col gap-6">
-            <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight">{title}</h1>
-            <p className="animate-element animate-delay-200 text-muted-foreground">{description}</p>
+            <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight text-foreground">{title}</h1>
+            <p className="animate-element animate-delay-200 text-gray-400">
+              {isOtpSent
+                ? "Hemos enviado un código de 6 dígitos a tu correo electrónico"
+                : description}
+            </p>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            {!isOtpSent ? (
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-3">
-                <div className="animate-element animate-delay-300">
-                  <label className="text-sm font-medium text-muted-foreground">Nombre</label>
+                <div className="animate-element animate-delay-300 space-y-2">
+                  <label className="text-sm font-medium text-gray-400">Nombre</label>
                   <GlassInputWrapper>
                     <input
                       name="nombre"
@@ -128,14 +184,16 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       placeholder="Tu nombre"
                       className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
                       value={nombre}
-                      onChange={(e) => setNombre(e.target.value)}
+                      onChange={(e) => setNombre(sanitizeName(e.target.value))}
+                      maxLength={50}
+                      pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]+"
                       required
                     />
                   </GlassInputWrapper>
                 </div>
 
-                <div className="animate-element animate-delay-350">
-                  <label className="text-sm font-medium text-muted-foreground">Apellido</label>
+                <div className="animate-element animate-delay-300 space-y-2">
+                  <label className="text-sm font-medium text-gray-400">Apellido</label>
                   <GlassInputWrapper>
                     <input
                       name="apellido"
@@ -143,15 +201,17 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       placeholder="Tu apellido"
                       className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
                       value={apellido}
-                      onChange={(e) => setApellido(e.target.value)}
+                      onChange={(e) => setApellido(sanitizeName(e.target.value))}
+                      maxLength={50}
+                      pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]+"
                       required
                     />
                   </GlassInputWrapper>
                 </div>
               </div>
 
-              <div className="animate-element animate-delay-400">
-                <label className="text-sm font-medium text-muted-foreground">Correo electrónico</label>
+              <div className="animate-element animate-delay-300 space-y-2">
+                <label className="text-sm font-medium text-gray-400">Correo electrónico</label>
                 <GlassInputWrapper>
                   <input
                     name="email"
@@ -159,59 +219,25 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                     placeholder="tu@correo.com"
                     className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                    onChange={(e) => setEmail(sanitizeText(e.target.value.toLowerCase()))}
+                    maxLength={100}
+                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
                     required
                   />
                 </GlassInputWrapper>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div className="animate-element animate-delay-450">
-                  <label className="text-sm font-medium text-muted-foreground">Prefijo</label>
-                  <GlassInputWrapper>
-                    <select
-                      name="prefijo"
-                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
-                      value={prefijo}
-                      onChange={(e) => setPrefijo(e.target.value)}
-                      required
-                    >
-                      <option value="+57">+57</option>
-                      <option value="+1">+1</option>
-                      <option value="+52">+52</option>
-                      <option value="+54">+54</option>
-                      <option value="+56">+56</option>
-                      <option value="+51">+51</option>
-                      <option value="+58">+58</option>
-                      <option value="+593">+593</option>
-                      <option value="+507">+507</option>
-                      <option value="+506">+506</option>
-                    </select>
-                  </GlassInputWrapper>
-                </div>
-
-                <div className="col-span-2 animate-element animate-delay-500">
-                  <label className="text-sm font-medium text-muted-foreground">Teléfono</label>
-                  <GlassInputWrapper>
-                    <input
-                      name="telefono"
-                      type="tel"
-                      inputMode="numeric"
-                      placeholder="3001234567"
-                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
-                      value={telefono}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '');
-                        setTelefono(value);
-                      }}
-                      required
-                    />
-                  </GlassInputWrapper>
-                </div>
+              <div className="animate-element animate-delay-300 space-y-2">
+                <label className="text-sm font-medium text-gray-400">Número de celular</label>
+                <PhoneInput
+                  value={phoneNumber}
+                  onChange={(val) => setPhoneNumber(val || '')}
+                  placeholder="+57 300 123 4567"
+                />
               </div>
 
-              <div className="animate-element animate-delay-550">
-                <label className="text-sm font-medium text-muted-foreground">Fecha de nacimiento</label>
+              <div className="animate-element animate-delay-300 space-y-2">
+                <label className="text-sm font-medium text-gray-400">Fecha de nacimiento</label>
                 <SimpleDatePicker
                   name="birthday"
                   value={birthday}
@@ -221,12 +247,13 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="animate-element animate-delay-600">
-                  <label className="text-sm font-medium text-muted-foreground">Tipo de documento</label>
+                <div className="animate-element animate-delay-300 space-y-2">
+                  <label className="text-sm font-medium text-gray-400">Tipo de documento</label>
                   <GlassInputWrapper>
                     <select
                       name="tipoDocumento"
-                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                      className="w-full bg-transparent text-sm p-4 pr-10 rounded-2xl focus:outline-none appearance-none"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
                       value={tipoDocumento}
                       onChange={(e) => setTipoDocumento(e.target.value)}
                       required
@@ -240,8 +267,8 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                   </GlassInputWrapper>
                 </div>
 
-                <div className="animate-element animate-delay-650">
-                  <label className="text-sm font-medium text-muted-foreground">Número de documento</label>
+                <div className="animate-element animate-delay-300 space-y-2">
+                  <label className="text-sm font-medium text-gray-400">Número de documento</label>
                   <GlassInputWrapper>
                     <input
                       name="numeroDocumento"
@@ -251,16 +278,18 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
                       value={numeroDocumento}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '');
+                        const value = sanitizeDocumentNumber(e.target.value);
                         setNumeroDocumento(value);
                       }}
+                      maxLength={20}
+                      pattern="[A-Z0-9]+"
                       required
                     />
                   </GlassInputWrapper>
                 </div>
               </div>
 
-              <div className="animate-element animate-delay-700">
+              <div className="animate-element animate-delay-300">
                 <label className="flex items-start gap-3 cursor-pointer group">
                   <div className="relative flex-shrink-0 mt-0.5">
                     <input
@@ -278,7 +307,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       />
                     </div>
                   </div>
-                  <span className="text-sm text-muted-foreground leading-relaxed">
+                  <span className="text-sm text-gray-400 leading-relaxed">
                     Acepto los{" "}
                     <Link
                       href="/terms-and-conditions"
@@ -300,38 +329,91 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               </div>
 
               {error && <p className="text-sm text-red-500">{error}</p>}
+              {message && <p className="text-sm text-green-600">{message}</p>}
 
               <button
                 type="submit"
-                className="animate-element animate-delay-750 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-                disabled={isLoading || !acceptedTerms}
+                className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:bg-muted disabled:text-gray-400 disabled:cursor-not-allowed"
+                disabled={!acceptedTerms || isLoading}
               >
-                {isLoading ? "Creando cuenta..." : "Crear cuenta"}
+                {isLoading ? "Enviando código..." : "Crear cuenta"}
               </button>
             </form>
+            ) : (
+            <form className="space-y-5" onSubmit={handleVerifyOtp}>
+              <div className="animate-element animate-delay-300 space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Correo electrónico</label>
+                <GlassInputWrapper>
+                  <input
+                    name="email"
+                    type="email"
+                    className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none bg-muted/50"
+                    value={email}
+                    maxLength={100}
+                    disabled
+                  />
+                </GlassInputWrapper>
+              </div>
 
-            <p className="animate-element animate-delay-800 text-center text-sm text-muted-foreground">
+              <div className="animate-element animate-delay-400 space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Código de verificación</label>
+                <div className="flex gap-2 justify-between">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => { inputRefs.current[index] = el }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      className="w-full h-14 text-center text-lg font-semibold rounded-2xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm transition-colors focus:outline-none focus:border-primary/50 focus:bg-primary/5"
+                      value={digit}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      pattern="[0-9]"
+                      autoComplete="off"
+                      required
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              {message && <p className="text-sm text-green-600">{message}</p>}
+
+              <button
+                type="submit"
+                className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+                disabled={isLoading}
+              >
+                {isLoading ? "Verificando..." : "Verificar código"}
+              </button>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="flex-1 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!canResend || isLoading}
+                >
+                  {canResend ? "Reenviar código" : `Reenviar en ${resendCountdown}s`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="flex-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Usar otro correo
+                </button>
+              </div>
+            </form>
+            )}
+
+            {!isOtpSent && (
+            <p className="animate-element animate-delay-650 text-center text-sm text-gray-400">
               ¿Ya tienes una cuenta? <a href="#" onClick={(e) => { e.preventDefault(); onLogin?.(); }} className="text-foreground hover:underline transition-colors">Iniciar sesión</a>
             </p>
+            )}
           </div>
         </div>
-      </section>
-
-      {/* Right column: animated background + testimonials */}
-      {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-4 overflow-hidden">
-          <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-black">
-            <NeuralNetworkBackground />
-          </div>
-          {testimonials.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center z-10">
-              <TestimonialCard testimonial={testimonials[0]} delay="animate-delay-1000" />
-              {testimonials[1] && <div className="hidden xl:flex"><TestimonialCard testimonial={testimonials[1]} delay="animate-delay-1200" /></div>}
-              {testimonials[2] && <div className="hidden 2xl:flex"><TestimonialCard testimonial={testimonials[2]} delay="animate-delay-1400" /></div>}
-            </div>
-          )}
-        </section>
-      )}
-    </div>
   );
 };

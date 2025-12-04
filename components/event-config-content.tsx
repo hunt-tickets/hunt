@@ -725,30 +725,28 @@ export function EventConfigContent({
 
       {/* Wallet Section */}
       {activeTab === "wallet" && (
-        <Card className="bg-white/[0.02] border-white/10">
-          <CardHeader>
-            <CardTitle>Diseño de Apple Wallet</CardTitle>
-            <CardDescription>
-              Personaliza cómo se verán tus tickets en Apple Wallet
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Inputs */}
-              <div className="space-y-6">
-                {/* Color Configuration */}
-                <div className="space-y-3">
-                  <Label className="text-base font-semibold">Colores</Label>
-
-                  {/* All 3 colors in one row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+            {/* Left Column - Configuration (3 columns) */}
+            <div className="xl:col-span-3 space-y-6">
+              {/* Colors Section */}
+              <Card className="bg-white/[0.02] border-white/10">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500" />
+                    <CardTitle className="text-base">Paleta de Colores</CardTitle>
+                  </div>
+                  <CardDescription className="text-xs">
+                    Personaliza los colores del ticket según tu marca
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4">
                     {/* Background Color */}
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="backgroundColor"
-                        className="text-xs text-white/60"
-                      >
-                        Fondo
+                      <Label htmlFor="backgroundColor" className="text-sm font-medium flex items-center justify-between">
+                        <span>Color de Fondo</span>
+                        <span className="text-xs font-mono text-white/40">{walletConfig.backgroundColor}</span>
                       </Label>
                       <div className="relative">
                         <Input
@@ -757,170 +755,129 @@ export function EventConfigContent({
                           type="color"
                           value={walletConfig.backgroundColor}
                           onChange={handleWalletColorChange}
-                          className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                          className="absolute inset-0 h-full w-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
-                          <div
-                            className="w-5 h-5 rounded border border-white/20"
-                            style={{
-                              backgroundColor: walletConfig.backgroundColor,
-                            }}
-                          />
-                          <span className="text-xs font-mono text-white/80 uppercase">
-                            {walletConfig.backgroundColor}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Foreground Color */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="foregroundColor"
-                        className="text-xs text-white/60"
-                      >
-                        Texto
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="foregroundColor"
-                          name="foregroundColor"
-                          type="color"
-                          value={walletConfig.foregroundColor}
-                          onChange={handleWalletColorChange}
-                          className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
-                        />
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
-                          <div
-                            className="w-5 h-5 rounded border border-white/20"
-                            style={{
-                              backgroundColor: walletConfig.foregroundColor,
-                            }}
-                          />
-                          <span className="text-xs font-mono text-white/80 uppercase">
-                            {walletConfig.foregroundColor}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Label Color */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="labelColor"
-                        className="text-xs text-white/60"
-                      >
-                        Etiquetas
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="labelColor"
-                          name="labelColor"
-                          type="color"
-                          value={walletConfig.labelColor}
-                          onChange={handleWalletColorChange}
-                          className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
-                        />
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
-                          <div
-                            className="w-5 h-5 rounded border border-white/20"
-                            style={{ backgroundColor: walletConfig.labelColor }}
-                          />
-                          <span className="text-xs font-mono text-white/80 uppercase">
-                            {walletConfig.labelColor}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Images */}
-                <div className="space-y-4">
-                  <Label className="text-base font-semibold">Imágenes</Label>
-
-                  {/* Strip Image */}
-                  <div className="space-y-3">
-                    <Label>Imagen Strip</Label>
-                    <p className="text-xs text-white/50">
-                      Recomendado: 375x123px (franja superior)
-                    </p>
-
-                    {walletConfig.strip ? (
-                      <div className="relative w-full h-32 rounded-lg overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center">
-                        <img
-                          src={walletConfig.strip as string}
-                          alt="Strip Image"
-                          className="w-full h-full object-cover"
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() =>
-                            setWalletConfig((prev) => ({
-                              ...prev,
-                              strip: null,
-                            }))
-                          }
-                          className="absolute top-2 right-2 rounded-lg h-8 w-8 p-0"
+                        <div
+                          className="h-12 rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer shadow-inner"
+                          style={{ backgroundColor: walletConfig.backgroundColor }}
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:bg-white/5 transition-colors">
-                        <div className="flex flex-col items-center justify-center">
-                          <Upload className="h-6 w-6 text-white/40 mb-1" />
-                          <p className="text-xs text-white/60">Subir Strip</p>
+                          <div className="h-full flex items-center justify-between px-4">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-6 h-6 rounded-lg border-2 border-white/40 shadow-sm"
+                                style={{ backgroundColor: walletConfig.backgroundColor }}
+                              />
+                              <span className="text-sm font-medium text-white/90">
+                                Color principal del pass
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleWalletImageUpload(e, "strip")}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
+                      </div>
+                    </div>
 
-                  {/* Logo and Icon in same row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Logo */}
+                    {/* Foreground & Label Colors */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Foreground Color */}
+                      <div className="space-y-2">
+                        <Label htmlFor="foregroundColor" className="text-sm font-medium flex items-center justify-between">
+                          <span>Color de Texto</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="foregroundColor"
+                            name="foregroundColor"
+                            type="color"
+                            value={walletConfig.foregroundColor}
+                            onChange={handleWalletColorChange}
+                            className="absolute inset-0 h-full w-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div
+                            className="h-12 rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer"
+                            style={{ backgroundColor: walletConfig.foregroundColor }}
+                          >
+                            <div className="h-full flex items-center justify-center">
+                              <span className="text-xs font-mono text-white/80 bg-black/30 px-2 py-1 rounded">
+                                {walletConfig.foregroundColor}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Label Color */}
+                      <div className="space-y-2">
+                        <Label htmlFor="labelColor" className="text-sm font-medium flex items-center justify-between">
+                          <span>Color de Etiquetas</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="labelColor"
+                            name="labelColor"
+                            type="color"
+                            value={walletConfig.labelColor}
+                            onChange={handleWalletColorChange}
+                            className="absolute inset-0 h-full w-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div
+                            className="h-12 rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer"
+                            style={{ backgroundColor: walletConfig.labelColor }}
+                          >
+                            <div className="h-full flex items-center justify-center">
+                              <span className="text-xs font-mono text-white/80 bg-black/30 px-2 py-1 rounded">
+                                {walletConfig.labelColor}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Images Section */}
+              <Card className="bg-white/[0.02] border-white/10">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4 text-white/60" />
+                    <CardTitle className="text-base">Imágenes del Pass</CardTitle>
+                  </div>
+                  <CardDescription className="text-xs">
+                    Sube las imágenes que aparecerán en el ticket digital
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-[25%_75%] gap-4">
+                    {/* Logo - 30% */}
                     <div className="space-y-3">
                       <div>
-                        <Label>Logo</Label>
-                        <p className="text-xs text-white/50">
-                          Recomendado: 160x50px
-                        </p>
+                        <Label className="text-sm font-medium">Logo</Label>
+                        <p className="text-xs text-white/40 mt-0.5">160x50px</p>
                       </div>
 
                       {walletConfig.logo ? (
-                        <div className="relative w-full h-40 rounded-lg overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center">
+                        <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center p-3">
                           <img
                             src={walletConfig.logo as string}
-                            alt="Wallet Logo"
-                            className="max-w-full max-h-full object-contain"
+                            alt="Logo"
+                            className="max-h-full max-w-full object-contain"
                           />
                           <Button
-                            variant="destructive"
+                            variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              setWalletConfig((prev) => ({
-                                ...prev,
-                                logo: null,
-                              }))
-                            }
-                            className="absolute top-2 right-2 rounded-lg h-8 w-8 p-0"
+                            onClick={() => setWalletConfig((prev) => ({ ...prev, logo: null }))}
+                            className="absolute top-2 right-2 h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
                       ) : (
-                        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:bg-white/5 transition-colors">
-                          <div className="flex flex-col items-center justify-center">
-                            <Upload className="h-6 w-6 text-white/40 mb-1" />
-                            <p className="text-xs text-white/60">Subir Logo</p>
-                          </div>
+                        <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:bg-white/5 hover:border-white/20 transition-all group">
+                          <Upload className="h-5 w-5 text-white/30 group-hover:text-white/50 transition-colors mb-1" />
+                          <p className="text-xs text-white/50 group-hover:text-white/70 transition-colors text-center px-2">
+                            Subir logo
+                          </p>
                           <input
                             type="file"
                             accept="image/*"
@@ -931,225 +888,222 @@ export function EventConfigContent({
                       )}
                     </div>
 
-                    {/* Icon */}
+                    {/* Strip Image - 70% */}
                     <div className="space-y-3">
                       <div>
-                        <Label>Ícono</Label>
-                        <p className="text-xs text-white/50">
-                          Recomendado: 58x58px
-                        </p>
+                        <Label className="text-sm font-medium">Imagen Strip</Label>
+                        <p className="text-xs text-white/40 mt-0.5">375x123px • Aparece debajo del logo</p>
                       </div>
 
-                      {walletConfig.icon ? (
-                        <div className="relative w-full h-40 rounded-lg overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center">
+                      {walletConfig.strip ? (
+                        <div className="relative aspect-[375/123] rounded-xl overflow-hidden border border-white/10 bg-white/5">
                           <img
-                            src={walletConfig.icon as string}
-                            alt="Wallet Icon"
-                            className="max-w-full max-h-full object-contain"
+                            src={walletConfig.strip as string}
+                            alt="Strip"
+                            className="w-full h-full object-cover"
                           />
                           <Button
-                            variant="destructive"
+                            variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              setWalletConfig((prev) => ({
-                                ...prev,
-                                icon: null,
-                              }))
-                            }
-                            className="absolute top-2 right-2 rounded-lg h-6 w-6 p-0"
+                            onClick={() => setWalletConfig((prev) => ({ ...prev, strip: null }))}
+                            className="absolute top-2 right-2 h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
                       ) : (
-                        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:bg-white/5 transition-colors">
-                          <div className="flex flex-col items-center justify-center">
-                            <Upload className="h-5 w-5 text-white/40 mb-1" />
-                            <p className="text-xs text-white/60 text-center px-2">
-                              Subir Ícono
-                            </p>
-                          </div>
+                        <label className="flex flex-col items-center justify-center aspect-[375/123] border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:bg-white/5 hover:border-white/20 transition-all group">
+                          <Upload className="h-5 w-5 text-white/30 group-hover:text-white/50 transition-colors mb-1" />
+                          <p className="text-xs text-white/50 group-hover:text-white/70 transition-colors">
+                            Subir strip image
+                          </p>
                           <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => handleWalletImageUpload(e, "icon")}
+                            onChange={(e) => handleWalletImageUpload(e, "strip")}
                             className="hidden"
                           />
                         </label>
                       )}
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Save Button */}
-                <div className="pt-4 border-t border-white/10">
-                  <Button
-                    onClick={() => handleSaveConfig("wallet")}
-                    className="w-full rounded-lg"
-                  >
-                    Guardar Diseño de Wallet
-                  </Button>
-                </div>
-              </div>
+              {/* Save Button */}
+              <Button
+                onClick={() => handleSaveConfig("wallet")}
+                className="w-full h-12 rounded-xl bg-white text-black hover:bg-white/90 font-medium"
+                size="lg"
+              >
+                Guardar Configuración de Wallet
+              </Button>
+            </div>
 
-              {/* Right Column - Preview */}
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">Vista Previa</Label>
-                <div className="sticky top-6">
-                  {/* Apple Wallet Pass Preview - Simple */}
-                  <div className="max-w-[375px] mx-auto">
-                    <div
-                      className="relative rounded-xl overflow-hidden shadow-xl border border-white/10"
-                      style={{ backgroundColor: walletConfig.backgroundColor }}
-                    >
-                      {/* Strip Image Area */}
-                      {walletConfig.strip ? (
-                        <div className="w-full h-32 overflow-hidden relative">
-                          <img
-                            src={walletConfig.strip as string}
-                            alt="Strip"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-full h-32 bg-gradient-to-br from-white/5 to-white/10" />
-                      )}
+            {/* Right Column - Preview (2 columns) */}
+            <div className="xl:col-span-2">
+              <div className="sticky top-6">
+                <Card className="bg-white/[0.02] border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-base">Vista Previa</CardTitle>
+                    <CardDescription className="text-xs">
+                      Así se verá el ticket en Apple Wallet
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Apple Wallet Pass Preview */}
+                    <div className="w-full max-w-[340px] mx-auto">
+                      <div
+                        className="relative rounded-[20px] overflow-hidden shadow-2xl border border-black/20"
+                        style={{ backgroundColor: walletConfig.backgroundColor }}
+                      >
+                        {/* Header - Logo + Date/Time */}
+                        <div className="px-5 pt-4 pb-3 flex items-start justify-between">
+                          <div className="flex-1">
+                            {walletConfig.logo ? (
+                              <img
+                                src={walletConfig.logo as string}
+                                alt="Logo"
+                                className="max-h-[45px] max-w-[160px] object-contain"
+                              />
+                            ) : (
+                              <div
+                                className="text-2xl font-bold"
+                                style={{ color: walletConfig.foregroundColor }}
+                              >
+                                LOGO
+                              </div>
+                            )}
+                          </div>
 
-                      {/* Content */}
-                      <div className="p-6">
-                        {/* Logo */}
-                        <div className="mb-6">
-                          {walletConfig.logo ? (
-                            <img
-                              src={walletConfig.logo as string}
-                              alt="Logo"
-                              className="max-h-12 max-w-[200px] object-contain"
-                            />
-                          ) : (
+                          {/* Date/Time in corner */}
+                          <div className="text-right">
                             <div
-                              className="text-sm font-semibold"
+                              className="text-[11px] font-semibold tracking-wide"
                               style={{ color: walletConfig.foregroundColor }}
                             >
-                              Logo del Evento
+                              VIE, DIC 15
                             </div>
-                          )}
-                        </div>
-
-                        {/* Event Name */}
-                        <div className="mb-6">
-                          <div
-                            className="text-xs uppercase tracking-wider mb-1 opacity-60"
-                            style={{ color: walletConfig.labelColor }}
-                          >
-                            EVENTO
-                          </div>
-                          <div
-                            className="text-2xl font-bold"
-                            style={{ color: walletConfig.foregroundColor }}
-                          >
-                            Nombre del Evento
+                            <div
+                              className="text-2xl font-bold leading-none"
+                              style={{ color: walletConfig.foregroundColor }}
+                            >
+                              8:00PM
+                            </div>
                           </div>
                         </div>
 
-                        {/* QR Code */}
-                        <div className="flex justify-center pt-4 pb-2">
-                          <div className="bg-white rounded-lg p-4">
-                            <svg width="120" height="120" viewBox="0 0 120 120">
-                              <rect width="120" height="120" fill="white" />
-                              <rect
-                                x="10"
-                                y="10"
-                                width="30"
-                                height="30"
-                                fill="black"
-                              />
-                              <rect
-                                x="15"
-                                y="15"
-                                width="20"
-                                height="20"
-                                fill="white"
-                              />
-                              <rect
-                                x="20"
-                                y="20"
-                                width="10"
-                                height="10"
-                                fill="black"
-                              />
-                              <rect
-                                x="80"
-                                y="10"
-                                width="30"
-                                height="30"
-                                fill="black"
-                              />
-                              <rect
-                                x="85"
-                                y="15"
-                                width="20"
-                                height="20"
-                                fill="white"
-                              />
-                              <rect
-                                x="90"
-                                y="20"
-                                width="10"
-                                height="10"
-                                fill="black"
-                              />
-                              <rect
-                                x="10"
-                                y="80"
-                                width="30"
-                                height="30"
-                                fill="black"
-                              />
-                              <rect
-                                x="15"
-                                y="85"
-                                width="20"
-                                height="20"
-                                fill="white"
-                              />
-                              <rect
-                                x="20"
-                                y="90"
-                                width="10"
-                                height="10"
-                                fill="black"
-                              />
-                              {Array.from({ length: 80 }).map((_, i) => {
-                                const x = 10 + (i % 10) * 10;
-                                const y = 50 + Math.floor(i / 10) * 10;
-                                return Math.random() > 0.5 ? (
-                                  <rect
-                                    key={i}
-                                    x={x}
-                                    y={y}
-                                    width="8"
-                                    height="8"
-                                    fill="black"
-                                  />
-                                ) : null;
-                              })}
-                            </svg>
+                        {/* Strip Image */}
+                        {walletConfig.strip ? (
+                          <div className="w-full h-[100px] overflow-hidden">
+                            <img
+                              src={walletConfig.strip as string}
+                              alt="Strip"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-full h-[100px] bg-gradient-to-br from-white/10 to-white/5" />
+                        )}
+
+                        {/* Main Content */}
+                        <div className="px-5 pt-4 pb-5">
+                          {/* Event Title Section */}
+                          <div className="mb-4">
+                            <div
+                              className="text-[11px] uppercase tracking-wide font-semibold mb-0.5"
+                              style={{ color: walletConfig.labelColor }}
+                            >
+                              EVENTO
+                            </div>
+                            <div
+                              className="text-xl font-bold leading-tight"
+                              style={{ color: walletConfig.foregroundColor }}
+                            >
+                              Festival de Música
+                            </div>
+                          </div>
+
+                          {/* Details Grid - 3 columns like AMC */}
+                          <div className="grid grid-cols-3 gap-3 mb-5">
+                            <div>
+                              <div
+                                className="text-[10px] uppercase tracking-wide font-semibold mb-1"
+                                style={{ color: walletConfig.labelColor }}
+                              >
+                                SECCIÓN
+                              </div>
+                              <div
+                                className="text-base font-bold"
+                                style={{ color: walletConfig.foregroundColor }}
+                              >
+                                VIP
+                              </div>
+                            </div>
+                            <div>
+                              <div
+                                className="text-[10px] uppercase tracking-wide font-semibold mb-1"
+                                style={{ color: walletConfig.labelColor }}
+                              >
+                                ASIENTOS
+                              </div>
+                              <div
+                                className="text-base font-bold"
+                                style={{ color: walletConfig.foregroundColor }}
+                              >
+                                A12, A13
+                              </div>
+                            </div>
+                            <div>
+                              <div
+                                className="text-[10px] uppercase tracking-wide font-semibold mb-1"
+                                style={{ color: walletConfig.labelColor }}
+                              >
+                                ENTRADAS
+                              </div>
+                              <div
+                                className="text-base font-bold"
+                                style={{ color: walletConfig.foregroundColor }}
+                              >
+                                2 ADULT
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* QR Code */}
+                          <div className="flex justify-center mt-6">
+                            <div className="bg-white rounded-lg p-2.5 shadow-md">
+                              <svg width="110" height="110" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="29" height="29" fill="white"/>
+                                <path d="M0 0h7v7h-7zM8 0h1v1h-1zM10 0h2v1h1v1h-1v1h-1v-2h-1zM13 0h1v2h1v-1h2v1h-1v1h-1v1h1v1h-2v-1h-1v1h-1v-3h1v1h1zM17 0h2v1h-2zM21 0h1v1h-1zM22 0h7v7h-7zM1 1v5h5v-5zM9 1h1v1h-1zM19 1h2v1h-2zM23 1v5h5v-5zM2 2h3v3h-3zM16 2h1v2h1v-1h1v2h-1v1h-1v-1h-1zM24 2h3v3h-3zM10 3h1v2h-1zM12 3h1v1h-1zM20 3h1v3h-1zM9 4h1v2h-1zM16 4h1v1h-1zM11 5h2v1h-2zM17 5h2v1h1v1h-1v-1h-2zM8 6h1v2h1v-1h1v2h-2v1h-1v1h-1v-4h1zM13 6h3v1h-1v1h-1v-1h-1zM21 6h1v2h-1zM0 8h1v2h-1zM2 8h3v1h-1v1h-1v1h2v-1h1v1h-1v2h-1v-3h-1v1h-1zM6 8h1v1h-1zM11 8h1v1h1v1h-2zM14 8h1v1h-1zM17 8h1v2h1v-1h2v1h-1v1h-2v1h-1v-1h-1v1h-2v-1h2v-2h1zM20 8h1v1h-1zM25 8h4v1h-4zM13 9h1v3h-1zM23 9h2v2h1v-1h1v3h-2v-1h-1v2h-1v-2h-1v1h-1v-1h1v-2h1zM7 10h1v1h-1zM9 10h3v1h-1v1h-1v-1h-1zM27 10h2v1h-2zM0 11h1v1h-1zM20 11h1v1h-1zM6 12h1v1h-1zM10 12h1v2h-1zM14 12h2v1h-2zM28 12h1v2h-1zM8 13h2v2h-1v1h-2v-2h1zM16 13h1v1h-1zM19 13h1v2h-1zM21 13h1v1h-1zM11 14h2v1h-2zM25 14h2v1h-2zM0 15h1v1h1v1h-2zM3 15h4v1h-1v1h-1v-1h-2zM14 15h3v1h1v1h-1v1h-1v-2h-2zM20 15h3v1h-3zM27 15h2v1h-2zM2 16h1v1h-1zM9 16h1v1h-1zM24 16h1v3h-1zM26 16h1v1h-1zM4 17h3v1h1v-1h1v1h-1v1h1v1h-2v1h-1v-3h-2zM10 17h2v1h1v2h-1v-1h-1v1h-1zM18 17h1v2h2v1h-3zM21 17h2v1h-2zM25 17h1v1h-1zM0 18h2v1h-2zM8 18h1v1h-1zM13 18h1v3h-1zM22 18h1v1h-1zM26 18h2v1h-1v1h1v2h-1v1h-1v-1h-1v-1h2v-2h-1zM2 19h1v1h-1zM14 19h1v1h-1zM21 19h1v2h-1zM23 19h1v2h-1zM8 20h1v1h-1zM10 20h2v1h-2zM16 20h2v1h-2zM25 20h1v1h-1zM0 21h7v7h-7zM9 21h1v1h-1zM14 21h4v1h1v1h-4v1h3v1h-1v1h-1v1h-2v-1h1v-1h-2v-2h1v-1h1zM22 21h1v1h-1zM1 22v5h5v-5zM19 22h2v2h-2zM8 23h1v3h1v-1h2v2h-3v1h-1v-2h1v-2h-1zM11 23h1v1h-1zM24 23h1v1h-1zM2 24h3v3h-3zM21 24h1v1h-1zM25 24h1v1h1v1h-2zM12 25h1v1h-1zM23 25h1v2h-1zM27 25h2v1h-2zM19 26h2v1h-2zM25 26h1v1h-1zM11 27h1v2h-1zM20 27h1v1h-1zM22 27h1v1h-1zM26 27h3v1h-3zM8 28h2v1h-2zM13 28h2v1h-2zM17 28h2v1h-2zM24 28h1v1h-1z" fill="black"/>
+                              </svg>
+                            </div>
+                          </div>
+
+                          {/* Barcode/Ticket Number at bottom */}
+                          <div className="mt-5 text-center">
+                            <div
+                              className="text-[11px] font-mono tracking-widest font-semibold"
+                              style={{ color: walletConfig.labelColor }}
+                            >
+                              PASS-2025-HNT123456
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Helper text */}
-                    <p className="text-xs text-white/40 text-center mt-4">
-                      Vista previa simplificada • Los detalles se generarán
-                      automáticamente
-                    </p>
-                  </div>
-                </div>
+                      {/* Helper text */}
+                      <p className="text-[10px] text-white/30 text-center mt-4 leading-relaxed">
+                        Vista previa de referencia<br />
+                        El diseño final se ajusta automáticamente en Apple Wallet
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* FAQs Section */}

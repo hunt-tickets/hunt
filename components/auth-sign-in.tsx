@@ -1,30 +1,9 @@
 "use client";
 
-import { SignInPage, Testimonial } from "@/components/ui/sign-in";
+import { SignInPage } from "@/components/ui/sign-in";
 import { authClient } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const sampleTestimonials: Testimonial[] = [
-  {
-    avatarSrc: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-    name: "Felipe Troncoso",
-    handle: "@felipetroncoso",
-    text: "Hunt ha sido un canal de ventas increible para todas las personas que quieren disfrutar de los eventos."
-  },
-  {
-    avatarSrc: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-    name: "María González",
-    handle: "@mariag",
-    text: "La mejor plataforma para comprar tickets. Rápida, segura y confiable."
-  },
-  {
-    avatarSrc: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80",
-    name: "Ana Martínez",
-    handle: "@anamtz",
-    text: "Excelente experiencia. El proceso de compra es súper intuitivo y seguro."
-  },
-];
 
 const translateError = (errorMessage: string): string => {
   // Rate limiting error
@@ -293,8 +272,6 @@ export const AuthSignIn = () => {
           ? "Hemos enviado un código de 6 dígitos a tu correo electrónico"
           : "Accede a tu cuenta y descubre los mejores eventos"
       }
-      heroImageSrc="animated" // Flag to show right section with animated background
-      testimonials={sampleTestimonials}
       onSendOtp={handleSendOtp}
       onVerifyOtp={handleVerifyOtp}
       onResendOtp={handleResendOtp}

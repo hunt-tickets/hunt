@@ -3,17 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Shield, Users, CheckCircle2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 interface InviteMemberFormProps {
@@ -65,60 +57,133 @@ export function InviteMemberForm({
     }
   };
 
+  const roles: Array<{
+    key: string;
+    value: "seller" | "administrator" | "owner";
+    title: string;
+    icon: typeof Users;
+    description: string;
+    permissions: string[];
+  }> = [
+    {
+      key: "seller",
+      value: "seller",
+      title: "Vendedor",
+      icon: Users,
+      description: "Acceso básico para vender boletos",
+      permissions: [
+        "Ver eventos de la organización",
+        "Vender boletos y gestionar órdenes",
+        "Ver reportes de sus propias ventas"
+      ]
+    },
+    {
+      key: "administrator",
+      value: "administrator",
+      title: "Administrador",
+      icon: Shield,
+      description: "Gestión completa de eventos y equipo",
+      permissions: [
+        "Crear y editar eventos",
+        "Invitar miembros al equipo",
+        "Gestionar configuraciones generales",
+        "Acceder a todos los reportes"
+      ]
+    }
+  ];
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Email Input */}
       <div className="space-y-2">
-        <Label htmlFor="email">
-          Correo electrónico <span className="text-destructive">*</span>
+        <Label htmlFor="email" className="text-sm font-medium">
+          Correo electrónico <span className="text-red-400">*</span>
         </Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="usuario@ejemplo.com"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-          disabled={isLoading}
-          className="w-full"
-        />
-        <p className="text-xs text-muted-foreground">
+        <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
+          <div className="flex items-center gap-3 flex-1">
+            <Mail className="h-5 w-5 text-gray-400" />
+            <input
+              id="email"
+              type="email"
+              placeholder="usuario@ejemplo.com"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              disabled={isLoading}
+              className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
+            />
+          </div>
+        </div>
+        <p className="text-xs text-gray-600 dark:text-white/40">
           El usuario recibirá un correo con la invitación
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="role">
-          Rol <span className="text-destructive">*</span>
+      {/* Role Selection */}
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">
+          Selecciona un rol <span className="text-red-400">*</span>
         </Label>
-        <Select
-          value={formData.role}
-          onValueChange={(value: "seller" | "administrator" | "owner") =>
-            setFormData({ ...formData, role: value })
-          }
-          disabled={isLoading}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecciona un rol" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="seller">Vendedor</SelectItem>
-            <SelectItem value="administrator">Administrador</SelectItem>
-            <SelectItem value="owner">Propietario</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground">
-          {formData.role === "seller" && "Acceso básico a la organización"}
-          {formData.role === "administrator" &&
-            "Puede invitar a otros miembros"}
-          {formData.role === "owner" && "Control total sobre la organización"}
-        </p>
+        <div className="space-y-3">
+          {roles.map((role) => {
+            const Icon = role.icon;
+            const isSelected = formData.role === role.value;
+
+            return (
+              <button
+                key={role.key}
+                type="button"
+                onClick={() => setFormData({ ...formData, role: role.value })}
+                disabled={isLoading}
+                className={`w-full text-left p-4 rounded-xl border transition-all ${
+                  isSelected
+                    ? "border-gray-300 dark:border-[#3a3a3a] bg-gray-100 dark:bg-[#252525]"
+                    : "border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525]"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`mt-0.5 h-9 w-9 rounded-lg flex items-center justify-center ${
+                    isSelected
+                      ? "bg-gray-200 dark:bg-white/[0.08]"
+                      : "bg-gray-100 dark:bg-white/[0.05]"
+                  }`}>
+                    <Icon className="h-4 w-4 text-gray-700 dark:text-white/70" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="text-sm font-semibold">
+                        {role.title}
+                      </h4>
+                      {isSelected && (
+                        <CheckCircle2 className="h-4 w-4 text-gray-700 dark:text-white/70" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-white/50 mb-2">
+                      {role.description}
+                    </p>
+                    <ul className="space-y-1">
+                      {role.permissions.map((permission, index) => (
+                        <li key={index} className="text-xs text-gray-500 dark:text-white/40 flex items-start gap-1.5">
+                          <span className="text-gray-400 dark:text-white/30 mt-0.5">•</span>
+                          <span>{permission}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 pt-4">
+      {/* Submit Button */}
+      <div className="flex flex-col sm:flex-row gap-2 pt-2">
         <Button
           type="submit"
           disabled={isLoading || !formData.email}
-          className="w-full sm:w-auto"
+          className="w-full bg-white/90 hover:bg-white text-black dark:bg-white/90 dark:hover:bg-white dark:text-black"
         >
           {isLoading ? (
             <>

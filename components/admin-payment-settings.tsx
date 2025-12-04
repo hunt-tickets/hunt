@@ -1,6 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { CreditCard, Settings } from "lucide-react";
-import PaymentSettings from "./organization-payment-accounts-settings";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
+import PaymentSettings from "@/components/organization-payment-accounts-settings";
 
 interface Organization {
   id: string;
@@ -14,11 +17,13 @@ interface Organization {
 interface AdminPaymentSettingsProps {
   organization: Organization;
   currentUserRole: string;
+  mpOauthUrl?: string;
 }
 
-export async function AdminPaymentSettings({
+export function AdminPaymentSettings({
   organization,
   currentUserRole,
+  mpOauthUrl,
 }: AdminPaymentSettingsProps) {
   // Only owners can manage payment processors
   const canManagePayments = currentUserRole === "owner";
@@ -42,23 +47,70 @@ export async function AdminPaymentSettings({
     );
   }
 
-  // If no payment accounts, show empty state
+  // If no payment accounts, show available payment processors
   if (!organization.paymentAccounts || organization.paymentAccounts.length === 0) {
     return (
-      <Card className="bg-white/[0.02] border-white/10">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <CreditCard className="h-12 w-12 text-white/40 mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">
-              Conecta un procesador de pago
-            </h3>
-            <p className="text-sm text-white/60 max-w-md mb-6">
-              Conecta MercadoPago, Stripe o Toast POS para comenzar a recibir pagos
-            </p>
-            <PaymentSettings org={organization} />
+      <div className="space-y-6">
+        {/* Available Processors Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Mercado Pago Card */}
+              <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-8 hover:border-gray-300 dark:hover:border-[#3a3a3a] transition-colors">
+                <div className="flex flex-col h-full items-center text-center">
+                  {/* Logo */}
+                  <div className="mb-6">
+                    <div className="h-16 w-16 bg-white rounded-xl flex items-center justify-center p-3">
+                      <Image
+                        src="/mercadopago-logo.webp"
+                        alt="MercadoPago"
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 mb-6">
+                    <h4 className="text-lg font-semibold">Mercado Pago</h4>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="w-full">
+                    {mpOauthUrl ? (
+                      <Link href={mpOauthUrl} className="block">
+                        <Button className="w-full bg-white/90 hover:bg-white text-black dark:bg-white/90 dark:hover:bg-white dark:text-black">
+                          Conectar
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button disabled className="w-full">
+                        No disponible
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Placeholder card for future processors */}
+              <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-8 opacity-60">
+                <div className="flex flex-col h-full items-center text-center">
+                  <div className="mb-6">
+                    <div className="h-16 w-16 bg-gray-200 dark:bg-[#2a2a2a] rounded-xl flex items-center justify-center">
+                      <CreditCard className="h-8 w-8 text-gray-400 dark:text-white/30" />
+                    </div>
+                  </div>
+                  <div className="flex-1 mb-6">
+                    <h4 className="text-lg font-semibold text-gray-400 dark:text-white/40">Próximamente</h4>
+                  </div>
+                  <div className="w-full">
+                    <Button disabled className="w-full">
+                      Próximamente
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
     );
   }
 
@@ -119,7 +171,7 @@ export async function AdminPaymentSettings({
 
       {/* Payment Settings Component (wrapped in admin styling) */}
       <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-hidden">
-        <PaymentSettings org={organization} />
+        <PaymentSettings org={organization} mpOauthUrl={mpOauthUrl} />
       </div>
     </div>
   );

@@ -1,30 +1,115 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTheme } from "next-themes";
 
 interface SalesDistributionChartProps {
   app: number;
   web: number;
   cash: number;
+  colorPalette?: string[];
 }
 
 export function SalesDistributionChart({ app, web, cash }: SalesDistributionChartProps) {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = resolvedTheme === 'dark';
+
+  // Grayscale palette that adapts to theme (same as analytics-charts.tsx)
+  const COLORS = isDark ? [
+    "#e5e5e5", // lightest
+    "#cccccc", // light
+    "#b3b3b3", // medium-light
+  ] : [
+    "#1a1a1a", // darkest
+    "#2a2a2a", // dark
+    "#3a3a3a", // medium-dark
+  ];
+
   const data = [
-    { name: 'App', value: app, color: 'rgba(255, 255, 255, 0.5)' },
-    { name: 'Web', value: web, color: 'rgba(255, 255, 255, 0.35)' },
-    { name: 'Efectivo', value: cash, color: 'rgba(255, 255, 255, 0.2)' },
+    { name: 'App', value: app },
+    { name: 'Web', value: web },
+    { name: 'Efectivo', value: cash },
   ].filter(item => item.value > 0);
 
-  const total = data.reduce((acc, item) => acc + item.value, 0);
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: isDark ? '#18181b' : '#ffffff',
+      borderColor: isDark ? '#303030' : '#e5e7eb',
+      borderWidth: 1,
+      textStyle: {
+        color: isDark ? '#fff' : '#000'
+      },
+      formatter: '{b}: {c} ({d}%)'
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: false,
+        padAngle: 3,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: isDark ? '#1a1a1a' : '#f9fafb',
+          borderWidth: 2
+        },
+        label: {
+          show: true,
+          formatter: '{b}\n{d}%',
+          color: isDark ? '#888' : '#666',
+          fontSize: 12
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 14,
+            fontWeight: 'bold',
+            color: isDark ? '#fff' : '#000'
+          }
+        },
+        data: data.map((item, index) => ({
+          ...item,
+          itemStyle: {
+            color: COLORS[index % COLORS.length]
+          }
+        }))
+      }
+    ]
+  };
+
+  if (!mounted) {
+    return (
+      <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+        <CardHeader>
+          <CardTitle className="text-base">Distribución por Canal</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="h-8 w-8 border-2 border-gray-200 dark:border-white/30 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-white/[0.02] border-white/10">
+    <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
       <CardHeader>
         <CardTitle className="text-base">Distribución por Canal</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] flex items-center justify-center">
-          <DonutChart data={data} total={total} />
+        <div className="h-[300px]">
+          <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />
         </div>
       </CardContent>
     </Card>
@@ -35,9 +120,30 @@ interface RevenueByChannelChartProps {
   appTotal: number;
   webTotal: number;
   cashTotal: number;
+  colorPalette?: string[];
 }
 
 export function RevenueByChannelChart({ appTotal, webTotal, cashTotal }: RevenueByChannelChartProps) {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = resolvedTheme === 'dark';
+
+  // Grayscale palette that adapts to theme
+  const COLORS = isDark ? [
+    "#e5e5e5", // lightest
+    "#cccccc", // light
+    "#b3b3b3", // medium-light
+  ] : [
+    "#1a1a1a", // darkest
+    "#2a2a2a", // dark
+    "#3a3a3a", // medium-dark
+  ];
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -53,32 +159,108 @@ export function RevenueByChannelChart({ appTotal, webTotal, cashTotal }: Revenue
     { name: 'Efectivo', value: cashTotal },
   ].filter(item => item.value > 0);
 
-  const maxValue = Math.max(...data.map(d => d.value), 1);
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: isDark ? '#18181b' : '#ffffff',
+      borderColor: isDark ? '#303030' : '#e5e7eb',
+      borderWidth: 1,
+      textStyle: {
+        color: isDark ? '#fff' : '#000'
+      },
+      axisPointer: {
+        type: 'shadow'
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      formatter: (params: any) => {
+        return `${params[0].name}: ${formatCurrency(params[0].value)}`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      top: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: data.map(d => d.name),
+      axisLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#d1d5db'
+        }
+      },
+      axisLabel: {
+        color: isDark ? '#888' : '#6b7280',
+        fontSize: 12
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#d1d5db'
+        }
+      },
+      axisLabel: {
+        color: isDark ? '#888' : '#6b7280',
+        formatter: (value: number) => {
+          if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+          if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+          return `$${value}`;
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#e5e7eb',
+          type: 'dashed'
+        }
+      }
+    },
+    series: [
+      {
+        type: 'bar',
+        data: data.map((d, index) => ({
+          value: d.value,
+          itemStyle: {
+            color: COLORS[index % COLORS.length],
+            borderRadius: [8, 8, 0, 0]
+          }
+        })),
+        emphasis: {
+          itemStyle: {
+            opacity: 0.8
+          }
+        }
+      }
+    ]
+  };
+
+  if (!mounted) {
+    return (
+      <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+        <CardHeader>
+          <CardTitle className="text-base">Ingresos por Canal</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="h-8 w-8 border-2 border-gray-200 dark:border-white/30 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-white/[0.02] border-white/10">
+    <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
       <CardHeader>
         <CardTitle className="text-base">Ingresos por Canal</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] flex flex-col justify-center space-y-4">
-          {data.map((item, index) => {
-            const percentage = (item.value / maxValue) * 100;
-            return (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/70">{item.name}</span>
-                  <span className="text-white font-medium">{formatCurrency(item.value)}</span>
-                </div>
-                <div className="h-8 bg-white/5 rounded-lg overflow-hidden">
-                  <div
-                    className="h-full bg-white/30 rounded-lg transition-all duration-500 hover:bg-white/40"
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+        <div className="h-[300px]">
+          <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />
         </div>
       </CardContent>
     </Card>
@@ -89,53 +271,182 @@ interface SalesFunnelChartProps {
   visits: number;
   addedToCart: number;
   completed: number;
+  colorPalette?: string[];
 }
 
 export function SalesFunnelChart({ visits, addedToCart, completed }: SalesFunnelChartProps) {
+  const [mounted, setMounted] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = resolvedTheme === 'dark';
+
+  // Grayscale palette
+  const COLORS = isDark ? [
+    "#e5e5e5", // lightest
+    "#cccccc", // light
+    "#b3b3b3", // medium-light
+  ] : [
+    "#1a1a1a", // darkest
+    "#2a2a2a", // dark
+    "#3a3a3a", // medium-dark
+  ];
+
   const stages = [
     { name: 'Visitas', value: visits },
     { name: 'Carrito', value: addedToCart },
     { name: 'Completado', value: completed }
   ];
 
+  // Calculate percentages based on max value for sizing
+  const maxValue = Math.max(...stages.map(s => s.value));
+
+  // Calculate conversion rates from first stage
   const conversionRates = [
     100,
     visits > 0 ? (addedToCart / visits) * 100 : 0,
-    addedToCart > 0 ? (completed / addedToCart) * 100 : 0
+    visits > 0 ? (completed / visits) * 100 : 0
   ];
 
-  const maxValue = Math.max(...stages.map(s => s.value), 1);
+  if (!mounted) {
+    return (
+      <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+        <CardHeader>
+          <CardTitle className="text-base">Embudo de Conversión</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[250px] flex items-center justify-center">
+            <div className="h-8 w-8 border-2 border-gray-200 dark:border-white/30 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-white/[0.02] border-white/10">
+    <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
       <CardHeader>
-        <CardTitle className="text-base">Embudo de Ventas</CardTitle>
+        <CardTitle className="text-base">Embudo de Conversión</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {stages.map((stage, index) => {
-            const widthPercent = (stage.value / maxValue) * 100;
-            return (
-              <div key={index} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/70">{stage.name}</span>
-                  <span className="text-white font-medium">
-                    {stage.value} ({conversionRates[index].toFixed(0)}%)
-                  </span>
-                </div>
-                <div className="h-10 bg-white/5 rounded-lg overflow-hidden flex items-center justify-center">
-                  <div
-                    className="h-full bg-white/25 rounded-lg transition-all duration-500 hover:bg-white/35 flex items-center justify-center"
-                    style={{ width: `${widthPercent}%` }}
-                  >
-                    {widthPercent > 30 && (
-                      <span className="text-xs font-medium text-white/80">{stage.value}</span>
-                    )}
-                  </div>
-                </div>
+        <div className="py-6 relative">
+          {/* SVG for funnel shapes only */}
+          <svg
+            width="100%"
+            height="200"
+            viewBox="0 0 840 200"
+            preserveAspectRatio="none"
+            className="w-full"
+          >
+            {stages.map((stage, index) => {
+              // Calculate heights based on values
+              const heightPercentage = maxValue > 0 ? (stage.value / maxValue) : 0;
+              const stageHeight = 140 * heightPercentage;
+
+              // Next stage for smooth curves
+              const nextHeightPercentage = index < stages.length - 1
+                ? (maxValue > 0 ? (stages[index + 1].value / maxValue) : 0)
+                : heightPercentage * 0.5;
+              const nextStageHeight = 140 * nextHeightPercentage;
+
+              // Horizontal position - sections connect directly and fill width
+              const sectionWidth = 280;
+              const xStart = index * sectionWidth;
+              const xEnd = xStart + sectionWidth;
+
+              // Vertical centering
+              const yTop = (200 - stageHeight) / 2;
+              const yBottom = yTop + stageHeight;
+              const nextYTop = (200 - nextStageHeight) / 2;
+              const nextYBottom = nextYTop + nextStageHeight;
+
+              // Control points for smooth Bezier curves
+              const controlOffset = sectionWidth * 0.7;
+
+              const isHovered = hoveredIndex === index;
+
+              return (
+                <g
+                  key={index}
+                  onMouseEnter={(e) => {
+                    setHoveredIndex(index);
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setTooltipPosition({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top
+                    });
+                  }}
+                  onMouseMove={(e) => {
+                    setTooltipPosition({
+                      x: e.clientX,
+                      y: e.clientY
+                    });
+                  }}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {/* Smooth connected funnel section */}
+                  <path
+                    d={`
+                      M ${xStart} ${yTop}
+                      C ${xStart + controlOffset} ${yTop}, ${xEnd - controlOffset} ${nextYTop}, ${xEnd} ${nextYTop}
+                      L ${xEnd} ${nextYBottom}
+                      C ${xEnd - controlOffset} ${nextYBottom}, ${xStart + controlOffset} ${yBottom}, ${xStart} ${yBottom}
+                      Z
+                    `}
+                    fill={COLORS[index]}
+                    opacity={isHovered ? "1" : "0.85"}
+                    style={{
+                      transition: 'all 0.3s ease',
+                      filter: isHovered ? 'brightness(1.1)' : 'none'
+                    }}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Tooltip */}
+          {hoveredIndex !== null && (
+            <div
+              className="fixed z-50 px-3 py-2 text-sm rounded-lg shadow-lg pointer-events-none bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a]"
+              style={{
+                left: `${tooltipPosition.x}px`,
+                top: `${tooltipPosition.y - 80}px`,
+                transform: 'translateX(-50%)'
+              }}
+            >
+              <div className="font-semibold text-gray-900 dark:text-white mb-1">
+                {stages[hoveredIndex].name}
               </div>
-            );
-          })}
+              <div className="text-gray-600 dark:text-gray-400">
+                Valor: {stages[hoveredIndex].value.toLocaleString()}
+              </div>
+              <div className="text-gray-600 dark:text-gray-400">
+                Conversión: {conversionRates[hoveredIndex].toFixed(1)}%
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div className="flex justify-center gap-6 pt-4 border-t border-gray-200 dark:border-white/10">
+          {stages.map((stage, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: COLORS[index] }}
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {stage.name}
+              </span>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -152,6 +463,12 @@ interface TicketRevenueDistributionChartProps {
   }>;
 }
 
+interface ChannelSalesChartProps {
+  app: number;
+  web: number;
+  cash: number;
+}
+
 export function TicketRevenueDistributionChart({ tickets }: TicketRevenueDistributionChartProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -162,140 +479,269 @@ export function TicketRevenueDistributionChart({ tickets }: TicketRevenueDistrib
     }).format(value);
   };
 
-  const maxRevenue = Math.max(...tickets.map(t => t.revenue), 1);
+  const formatCurrencyShort = (value: number) => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value}`;
+  };
+
+  const maxRevenue = Math.max(...tickets.map(t => t.revenue));
+  const minRevenue = Math.min(...tickets.map(t => t.revenue));
   const totalRevenue = tickets.reduce((sum, t) => sum + t.revenue, 0);
 
+  // Estructura de datos para treemap (empaquetado rectangular)
+  const data = {
+    name: 'root',
+    children: tickets.map((ticket) => {
+      const normalized = ((ticket.revenue - minRevenue) / (maxRevenue - minRevenue)) || 0;
+      const lightness = 25 + normalized * 40; // 25-65% escala de grises
+
+      return {
+        name: ticket.name,
+        value: ticket.revenue,
+        itemStyle: {
+          color: `hsl(0, 0%, ${lightness}%)`,
+          borderColor: '#18181b',
+          borderWidth: 2
+        }
+      };
+    })
+  };
+
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: '#18181b',
+      borderColor: '#303030',
+      borderWidth: 1,
+      textStyle: {
+        color: '#fff'
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      formatter: (params: any) => {
+        const ticket = tickets.find(t => t.name === params.name);
+        if (!ticket) return '';
+        return `<strong>${params.name}</strong><br/>
+                Ingresos: ${formatCurrency(ticket.revenue)}<br/>
+                Vendidos: ${ticket.quantity}<br/>
+                Participación: ${ticket.percentage.toFixed(1)}%`;
+      }
+    },
+    series: [
+      {
+        type: 'treemap',
+        data: data.children,
+        roam: false,
+        nodeClick: false,
+        width: '100%',
+        height: '100%',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        breadcrumb: {
+          show: false
+        },
+        levels: [
+          {
+            itemStyle: {
+              borderWidth: 0
+            }
+          },
+          {
+            itemStyle: {
+              borderWidth: 2,
+              borderColor: '#0a0a0a',
+              gapWidth: 2
+            }
+          }
+        ],
+        label: {
+          show: true,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter: (params: any) => {
+            const ticket = tickets.find(t => t.name === params.name);
+            if (!ticket) return '';
+            const percentage = ((params.value / totalRevenue) * 100).toFixed(1);
+            // Solo mostrar etiqueta si el área es suficientemente grande
+            if (params.value / totalRevenue < 0.03) return '';
+            return `{name|${params.name}}\n{value|${formatCurrencyShort(params.value)}}\n{percent|${percentage}%}`;
+          },
+          rich: {
+            name: {
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 'bold',
+              lineHeight: 16
+            },
+            value: {
+              color: '#fff',
+              fontSize: 10,
+              lineHeight: 14
+            },
+            percent: {
+              color: '#fff',
+              fontSize: 9,
+              opacity: 0.8,
+              lineHeight: 12
+            }
+          },
+          position: 'inside'
+        },
+        emphasis: {
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 3,
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          },
+          label: {
+            fontSize: 12
+          }
+        }
+      }
+    ]
+  };
+
   return (
-    <div className="h-full space-y-3 overflow-y-auto">
-      {tickets.map((ticket, index) => {
-        const widthPercent = (ticket.revenue / maxRevenue) * 100;
-        const revenuePercent = totalRevenue > 0 ? ((ticket.revenue / totalRevenue) * 100).toFixed(1) : '0';
-
-        return (
-          <div key={index} className="space-y-1.5 group">
-            <div className="flex justify-between text-sm">
-              <div className="flex items-center gap-2 min-w-0">
-                {ticket.color && (
-                  <div
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: ticket.color }}
-                  />
-                )}
-                <span className="text-white/80 truncate">{ticket.name}</span>
-              </div>
-              <span className="text-white font-medium flex-shrink-0 ml-2">
-                {formatCurrency(ticket.revenue)}
-              </span>
-            </div>
-            <div className="h-7 bg-white/5 rounded-lg overflow-hidden relative">
-              <div
-                className="h-full bg-white/25 rounded-lg transition-all duration-500 group-hover:bg-white/35 flex items-center"
-                style={{ width: `${widthPercent}%` }}
-              >
-                {widthPercent > 25 && (
-                  <span className="text-xs text-white/70 ml-2">
-                    {ticket.quantity} vendidos · {revenuePercent}%
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-interface ChannelSalesChartProps {
-  app: number;
-  web: number;
-  cash: number;
-}
-
-// Reusable Donut Chart component
-function DonutChart({
-  data,
-  total
-}: {
-  data: Array<{ name: string; value: number; color: string }>;
-  total: number;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative w-44 h-44">
-        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-          {(() => {
-            let cumulativePercent = 0;
-            return data.map((item, index) => {
-              const percent = (item.value / total) * 100;
-              const strokeDasharray = `${percent} ${100 - percent}`;
-              const strokeDashoffset = -cumulativePercent;
-              cumulativePercent += percent;
-
-              return (
-                <circle
-                  key={index}
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke={item.color}
-                  strokeWidth="16"
-                  strokeDasharray={strokeDasharray}
-                  strokeDashoffset={strokeDashoffset}
-                  pathLength="100"
-                  className="transition-all duration-500"
-                />
-              );
-            });
-          })()}
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-2xl font-bold">{total}</div>
-            <div className="text-xs text-white/50">tickets</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
-        {data.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: item.color }}
-            />
-            <span className="text-xs text-white/60">
-              {item.name} {((item.value / total) * 100).toFixed(0)}%
-            </span>
-          </div>
-        ))}
-      </div>
+    <div className="h-full">
+      <ReactECharts
+        option={option}
+        style={{ height: '100%', width: '100%' }}
+        opts={{ renderer: 'canvas' }}
+      />
     </div>
   );
 }
 
 export function ChannelSalesChart({ app, web, cash }: ChannelSalesChartProps) {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = resolvedTheme === 'dark';
+
+  // Grayscale palette
+  const COLORS = isDark ? [
+    "#e5e5e5", // lightest
+    "#cccccc", // light
+    "#b3b3b3", // medium-light
+  ] : [
+    "#1a1a1a", // darkest
+    "#2a2a2a", // dark
+    "#3a3a3a", // medium-dark
+  ];
+
+  const total = app + web + cash;
+
   const data = [
-    { name: 'App Móvil', value: app, color: 'rgba(255, 255, 255, 0.5)' },
-    { name: 'Web', value: web, color: 'rgba(255, 255, 255, 0.35)' },
-    { name: 'Efectivo', value: cash, color: 'rgba(255, 255, 255, 0.2)' },
+    { name: 'App Móvil', value: app },
+    { name: 'Web', value: web },
+    { name: 'Efectivo', value: cash }
   ].filter(item => item.value > 0);
 
-  const total = data.reduce((acc, item) => acc + item.value, 0);
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: isDark ? '#18181b' : '#ffffff',
+      borderColor: isDark ? '#303030' : '#e5e7eb',
+      borderWidth: 1,
+      textStyle: {
+        color: isDark ? '#fff' : '#000'
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      formatter: (params: any) => {
+        const percentage = ((params.value / total) * 100).toFixed(1);
+        return `<strong>${params.name}</strong><br/>
+                ${params.value} tickets<br/>
+                ${percentage}%`;
+      }
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: false,
+        padAngle: 3,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: isDark ? '#1a1a1a' : '#f9fafb',
+          borderWidth: 2
+        },
+        label: {
+          show: true,
+          position: 'outside',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter: (params: any) => {
+            const percentage = ((params.value / total) * 100).toFixed(0);
+            return `{name|${params.name}}\n{value|${params.value}} {percent|(${percentage}%)}`;
+          },
+          rich: {
+            name: {
+              color: isDark ? '#fff' : '#000',
+              fontSize: 11,
+              fontWeight: 'bold',
+              lineHeight: 16
+            },
+            value: {
+              color: isDark ? '#fff' : '#000',
+              fontSize: 10,
+              lineHeight: 14
+            },
+            percent: {
+              color: isDark ? '#ccc' : '#666',
+              fontSize: 9,
+              lineHeight: 12
+            }
+          }
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 14,
+            fontWeight: 'bold'
+          }
+        },
+        labelLine: {
+          show: true,
+          length: 10,
+          length2: 10,
+          lineStyle: {
+            color: isDark ? '#707070' : '#d1d5db'
+          }
+        },
+        data: data.map((item, index) => ({
+          name: item.name,
+          value: item.value,
+          itemStyle: {
+            color: COLORS[index % COLORS.length]
+          }
+        }))
+      }
+    ]
+  };
 
-  if (total === 0) {
+  if (!mounted) {
     return (
-      <div className="h-full flex items-center justify-center text-sm text-white/40">
-        Sin datos de ventas
+      <div className="h-full flex items-center justify-center">
+        <div className="h-8 w-8 border-2 border-gray-200 dark:border-white/30 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex items-center justify-center">
-      <DonutChart data={data} total={total} />
+    <div className="h-full">
+      <ReactECharts
+        option={option}
+        style={{ height: '100%', width: '100%' }}
+        opts={{ renderer: 'canvas' }}
+      />
     </div>
   );
 }
@@ -306,9 +752,30 @@ interface DailySalesChartProps {
     subtotal: number;
     quantity: number;
   }>;
+  colorPalette?: string[];
 }
 
 export function DailySalesChart({ sales }: DailySalesChartProps) {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = resolvedTheme === 'dark';
+
+  // Grayscale palette
+  const COLORS = isDark ? [
+    "#e5e5e5", // lightest
+    "#cccccc", // light
+    "#b3b3b3", // medium-light
+  ] : [
+    "#1a1a1a", // darkest
+    "#2a2a2a", // dark
+    "#3a3a3a", // medium-dark
+  ];
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -318,92 +785,185 @@ export function DailySalesChart({ sales }: DailySalesChartProps) {
     }).format(value);
   };
 
-  // Group sales by day
-  const dailySalesData: Record<string, { revenue: number; quantity: number }> = {};
+  // Agrupar ventas por día
+  const dailySales: Record<string, { revenue: number; quantity: number }> = {};
 
   sales.forEach(sale => {
     const date = new Date(sale.createdAt);
-    const dateKey = date.toISOString().split('T')[0];
+    const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
 
-    if (!dailySalesData[dateKey]) {
-      dailySalesData[dateKey] = { revenue: 0, quantity: 0 };
+    if (!dailySales[dateKey]) {
+      dailySales[dateKey] = { revenue: 0, quantity: 0 };
     }
 
-    dailySalesData[dateKey].revenue += sale.subtotal;
-    dailySalesData[dateKey].quantity += sale.quantity;
+    dailySales[dateKey].revenue += sale.subtotal;
+    dailySales[dateKey].quantity += sale.quantity;
   });
 
-  const sortedDates = Object.keys(dailySalesData).sort();
+  // Obtener rango de fechas
+  let sortedDates = Object.keys(dailySales).sort();
+
+  // Si hay datos, completar el rango entre la primera y última fecha
+  if (sortedDates.length > 0) {
+    const firstDate = new Date(sortedDates[0]);
+    const lastDate = new Date(sortedDates[sortedDates.length - 1]);
+
+    // Calcular la diferencia en días
+    const daysDiff = Math.floor((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Solo completar si hay menos de 60 días de diferencia (para evitar rangos muy grandes)
+    if (daysDiff < 60) {
+      const allDates: string[] = [];
+      const currentDate = new Date(firstDate);
+
+      while (currentDate <= lastDate) {
+        const dateKey = currentDate.toISOString().split('T')[0];
+        allDates.push(dateKey);
+
+        // Si la fecha no existe en dailySales, agregarla con 0
+        if (!dailySales[dateKey]) {
+          dailySales[dateKey] = { revenue: 0, quantity: 0 };
+        }
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      sortedDates = allDates;
+    }
+  }
   const dates = sortedDates.map(date => {
     const d = new Date(date);
     const day = d.getDate().toString().padStart(2, '0');
     const month = (d.getMonth() + 1).toString().padStart(2, '0');
     return `${day}/${month}`;
   });
-  const revenues = sortedDates.map(date => dailySalesData[date].revenue);
-  const maxRevenue = Math.max(...revenues, 1);
+  const revenues = sortedDates.map(date => dailySales[date].revenue);
+
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: isDark ? '#18181b' : '#ffffff',
+      borderColor: isDark ? '#303030' : '#e5e7eb',
+      borderWidth: 1,
+      textStyle: {
+        color: isDark ? '#fff' : '#000'
+      },
+      axisPointer: {
+        type: 'shadow'
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      formatter: (params: any) => {
+        const dateIndex = params[0].dataIndex;
+        const dateKey = sortedDates[dateIndex];
+        return `<strong>${params[0].name}</strong><br/>
+                Ingresos: ${formatCurrency(dailySales[dateKey].revenue)}<br/>
+                Tickets: ${dailySales[dateKey].quantity}`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '10%',
+      top: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#d1d5db'
+        }
+      },
+      axisLabel: {
+        color: isDark ? '#888' : '#6b7280',
+        fontSize: 11,
+        rotate: dates.length > 15 ? 45 : 0
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#d1d5db'
+        }
+      },
+      axisLabel: {
+        color: isDark ? '#888' : '#6b7280',
+        formatter: (value: number) => {
+          if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+          if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+          return `$${value}`;
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: isDark ? '#303030' : '#e5e7eb',
+          type: 'dashed'
+        }
+      }
+    },
+    series: [
+      {
+        name: 'Ingresos',
+        type: 'bar',
+        data: revenues,
+        barMaxWidth: sortedDates.length <= 3 ? 60 : sortedDates.length <= 7 ? 80 : undefined,
+        itemStyle: {
+          color: COLORS[0],
+          borderRadius: [8, 8, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            opacity: 0.8
+          }
+        }
+      }
+    ]
+  };
+
+  if (!mounted) {
+    return (
+      <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
+        <CardHeader>
+          <CardTitle className="text-base">Ventas Diarias</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="h-8 w-8 border-2 border-gray-200 dark:border-white/30 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-white/[0.02] border-white/10">
+    <Card className="bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
       <CardHeader>
         <CardTitle className="text-base">Ventas Diarias</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="text-center">
-            <div className="text-xs text-white/40 mb-1">Total Días</div>
+            <div className="text-xs text-gray-500 dark:text-white/60 mb-1">Total Días</div>
             <div className="text-lg font-bold">{dates.length}</div>
           </div>
           <div className="text-center">
-            <div className="text-xs text-white/40 mb-1">Promedio Diario</div>
+            <div className="text-xs text-gray-500 dark:text-white/60 mb-1">Promedio Diario</div>
             <div className="text-lg font-bold">
-              {formatCurrency(dates.length > 0 ? revenues.reduce((sum, val) => sum + val, 0) / dates.length : 0)}
+              {formatCurrency(revenues.reduce((sum, val) => sum + val, 0) / dates.length)}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-xs text-white/40 mb-1">Mejor Día</div>
+            <div className="text-xs text-gray-500 dark:text-white/60 mb-1">Mejor Día</div>
             <div className="text-lg font-bold">
-              {formatCurrency(Math.max(...revenues, 0))}
+              {formatCurrency(Math.max(...revenues))}
             </div>
           </div>
         </div>
-
-        {/* Bar Chart */}
-        <div className="h-[250px] flex items-end gap-1 pt-4">
-          {sortedDates.map((dateKey, index) => {
-            const data = dailySalesData[dateKey];
-            const heightPercent = (data.revenue / maxRevenue) * 100;
-
-            return (
-              <div
-                key={dateKey}
-                className="flex-1 flex flex-col items-center group relative"
-              >
-                <div className="w-full flex flex-col justify-end h-[200px]">
-                  <div
-                    className="w-full bg-white/25 rounded-t transition-all duration-300 hover:bg-white/40 cursor-pointer min-h-[4px]"
-                    style={{ height: `${Math.max(heightPercent, 2)}%` }}
-                  />
-                </div>
-
-                {/* Tooltip */}
-                <div className="absolute bottom-[210px] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  <div className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-xl">
-                    <div className="font-semibold text-white mb-1">{dates[index]}</div>
-                    <div className="text-white/80">{formatCurrency(data.revenue)}</div>
-                    <div className="text-white/60">{data.quantity} tickets</div>
-                  </div>
-                </div>
-
-                {/* Date label - only show some labels if too many */}
-                {(dates.length <= 10 || index % Math.ceil(dates.length / 10) === 0) && (
-                  <span className="text-[10px] text-white/40 mt-1 truncate w-full text-center">
-                    {dates[index]}
-                  </span>
-                )}
-              </div>
-            );
-          })}
+        <div className="h-[300px]">
+          <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />
         </div>
       </CardContent>
     </Card>

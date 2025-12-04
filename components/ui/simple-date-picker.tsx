@@ -53,13 +53,39 @@ export const SimpleDatePicker = ({ value, onChange, placeholder = "Selecciona un
     };
 
     if (isOpen) {
-      // Calculate position
+      // Calculate position with boundary checks
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        setPosition({
-          top: rect.bottom + window.scrollY + 8,
-          left: rect.left + window.scrollX
-        });
+        const calendarWidth = 384; // max-w-sm = 24rem = 384px
+        const calendarHeight = 400; // approximate height
+        const padding = 16; // 1rem padding from edges
+
+        let top = rect.bottom + window.scrollY + 8;
+        let left = rect.left + window.scrollX;
+
+        // Check if calendar would go off right edge
+        if (left + calendarWidth > window.innerWidth - padding) {
+          left = window.innerWidth - calendarWidth - padding;
+        }
+
+        // Check if calendar would go off left edge
+        if (left < padding) {
+          left = padding;
+        }
+
+        // Check if calendar would go off bottom edge
+        if (rect.bottom + calendarHeight > window.innerHeight - padding) {
+          // Position above the input instead
+          top = rect.top + window.scrollY - calendarHeight - 8;
+        }
+
+        // Check if calendar would go off top edge when positioned above
+        if (top < padding + window.scrollY) {
+          // If it doesn't fit above either, position it at the top with scroll
+          top = padding + window.scrollY;
+        }
+
+        setPosition({ top, left });
       }
 
       document.addEventListener('mousedown', handleClickOutside);
@@ -150,7 +176,7 @@ export const SimpleDatePicker = ({ value, onChange, placeholder = "Selecciona un
             {selectedDate ? (
               <span className="text-foreground">{displayDate(selectedDate)}</span>
             ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
+              <span className="text-gray-400">{placeholder}</span>
             )}
           </span>
           <Calendar size={18} className="text-muted-foreground" />
@@ -177,24 +203,26 @@ export const SimpleDatePicker = ({ value, onChange, placeholder = "Selecciona un
           }}
         >
 
-          {/* Year + Month Select */}
+          {/* Month + Year Select */}
           <div className="flex gap-2 mb-4">
-            <select
-              value={viewDate.getFullYear()}
-              onChange={(e) => changeYear(parseInt(e.target.value))}
-              className="flex-1 rounded-xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm px-3 py-2 text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
-            >
-              {Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i).map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
             <select
               value={viewDate.getMonth()}
               onChange={(e) => changeMonthDirect(parseInt(e.target.value))}
-              className="flex-1 rounded-xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm px-3 py-2 text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+              className="flex-1 rounded-xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm px-3 py-2 pr-8 text-sm text-foreground outline-none focus:border-primary/50 transition-colors appearance-none"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25em 1.25em' }}
             >
               {months.map((month, index) => (
                 <option key={index} value={index}>{month}</option>
+              ))}
+            </select>
+            <select
+              value={viewDate.getFullYear()}
+              onChange={(e) => changeYear(parseInt(e.target.value))}
+              className="flex-1 rounded-xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm px-3 py-2 pr-8 text-sm text-foreground outline-none focus:border-primary/50 transition-colors appearance-none"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25em 1.25em' }}
+            >
+              {Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i).map(year => (
+                <option key={year} value={year}>{year}</option>
               ))}
             </select>
           </div>
@@ -227,7 +255,7 @@ export const SimpleDatePicker = ({ value, onChange, placeholder = "Selecciona un
             {/* Week days header */}
             <div className="grid grid-cols-7 mb-2">
               {weekDays.map(day => (
-                <div key={day} className="py-2 text-xs font-medium text-muted-foreground">
+                <div key={day} className="py-2 text-xs font-medium text-gray-400">
                   {day}
                 </div>
               ))}
