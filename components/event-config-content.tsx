@@ -355,7 +355,7 @@ export function EventConfigContent({
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               activeTab === tab.id
                 ? "bg-white/10 text-white border border-white/20"
-                : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
+                : "bg-white/5 text-gray-600 dark:text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
             }`}
           >
             <Icon className="h-4 w-4" />
@@ -375,10 +375,10 @@ export function EventConfigContent({
       {activeTab === "information" && (
         <div className="space-y-6">
           {/* Basic Information */}
-          <Card className="bg-white/[0.02] border-white/10">
+          <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-white/60" />
+                <FileText className="h-5 w-5 text-gray-600 dark:text-gray-600 dark:text-white/60" />
                 <div>
                   <CardTitle>Información Básica</CardTitle>
                   <CardDescription>
@@ -390,7 +390,7 @@ export function EventConfigContent({
             <CardContent className="space-y-5">
               {/* Event Name */}
               <div className="space-y-2">
-                <Label htmlFor="eventName" className="text-sm font-medium">
+                <Label htmlFor="eventName" className="text-sm font-medium text-gray-600 dark:text-gray-600 dark:text-white/60">
                   Nombre del Evento
                 </Label>
                 <Input
@@ -399,13 +399,13 @@ export function EventConfigContent({
                   value={formData.eventName}
                   onChange={handleInputChange}
                   placeholder="ej. Festival de Música 2024"
-                  className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium">
+                <Label htmlFor="description" className="text-sm font-medium text-gray-600 dark:text-gray-600 dark:text-white/60">
                   Descripción
                 </Label>
                 <Textarea
@@ -414,16 +414,16 @@ export function EventConfigContent({
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Describe tu evento, artistas, atracciones y todo lo que los asistentes deben saber..."
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors min-h-[140px] resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 min-h-[140px] resize-none"
                 />
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-gray-500 dark:text-gray-500 dark:text-white/40">
                   Esta descripción será visible para todos los usuarios
                 </p>
               </div>
 
               {/* Age Restriction */}
               <div className="space-y-2">
-                <Label htmlFor="age" className="text-sm font-medium">
+                <Label htmlFor="age" className="text-sm font-medium text-gray-600 dark:text-gray-600 dark:text-white/60">
                   Edad Mínima
                 </Label>
                 <select
@@ -436,7 +436,7 @@ export function EventConfigContent({
                       age: parseInt(e.target.value),
                     }))
                   }
-                  className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20"
                 >
                   <option value="0">Para todo público</option>
                   <option value="12">12+</option>
@@ -444,7 +444,7 @@ export function EventConfigContent({
                   <option value="21">21+</option>
                   <option value="25">25+</option>
                 </select>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-gray-500 dark:text-gray-500 dark:text-white/40">
                   Edad mínima requerida para asistir al evento
                 </p>
               </div>
@@ -452,10 +452,10 @@ export function EventConfigContent({
           </Card>
 
           {/* Location Information */}
-          <Card className="bg-white/[0.02] border-white/10">
+          <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <MapPinned className="h-5 w-5 text-white/60" />
+                <MapPinned className="h-5 w-5 text-gray-600 dark:text-white/60" />
                 <div>
                   <CardTitle>Ubicación</CardTitle>
                   <CardDescription>
@@ -471,7 +471,7 @@ export function EventConfigContent({
                   htmlFor="location"
                   className="text-sm font-medium flex items-center gap-2"
                 >
-                  <MapPin className="h-4 w-4 text-white/40" />
+                  <MapPin className="h-4 w-4 text-gray-500 dark:text-white/40" />
                   Dirección
                 </Label>
                 <Input
@@ -480,7 +480,7 @@ export function EventConfigContent({
                   value={formData.location}
                   onChange={handleInputChange}
                   placeholder="ej. Av. Principal 123, Auditorio Nacional"
-                  className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -496,7 +496,7 @@ export function EventConfigContent({
                     value={formData.city}
                     onChange={handleInputChange}
                     placeholder="ej. Bogotá"
-                    className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -509,7 +509,7 @@ export function EventConfigContent({
                     value={formData.country}
                     onChange={handleInputChange}
                     placeholder="ej. Colombia"
-                    className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -517,10 +517,10 @@ export function EventConfigContent({
           </Card>
 
           {/* Date & Time Configuration */}
-          <Card className="bg-white/[0.02] border-white/10">
+          <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-white/60" />
+                <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
                 <div>
                   <CardTitle>Fecha y Hora</CardTitle>
                   <CardDescription>
@@ -542,7 +542,7 @@ export function EventConfigContent({
                     type="datetime-local"
                     value={formData.startDate}
                     onChange={handleInputChange}
-                    className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -555,7 +555,7 @@ export function EventConfigContent({
                     type="datetime-local"
                     value={formData.endDate}
                     onChange={handleInputChange}
-                    className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -566,7 +566,7 @@ export function EventConfigContent({
                   htmlFor="timezone"
                   className="text-sm font-medium flex items-center gap-2"
                 >
-                  <Globe className="h-4 w-4 text-white/40" />
+                  <Globe className="h-4 w-4 text-gray-500 dark:text-white/40" />
                   Zona Horaria
                 </Label>
                 <select
@@ -579,7 +579,7 @@ export function EventConfigContent({
                       timezone: e.target.value,
                     }))
                   }
-                  className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                 >
                   <option value="America/Bogota">Colombia (GMT-5)</option>
                   <option value="America/Mexico_City">México (GMT-6)</option>
@@ -597,7 +597,7 @@ export function EventConfigContent({
                   <option value="Europe/London">London (GMT+0)</option>
                   <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
                 </select>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-gray-500 dark:text-white/40">
                   Las fechas y horas se mostrarán según esta zona horaria
                 </p>
               </div>
@@ -605,10 +605,10 @@ export function EventConfigContent({
           </Card>
 
           {/* Regional Settings */}
-          <Card className="bg-white/[0.02] border-white/10">
+          <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Coins className="h-5 w-5 text-white/60" />
+                <Coins className="h-5 w-5 text-gray-600 dark:text-white/60" />
                 <div>
                   <CardTitle>Configuración Regional</CardTitle>
                   <CardDescription>Moneda y formato de precios</CardDescription>
@@ -621,7 +621,7 @@ export function EventConfigContent({
                   htmlFor="currency"
                   className="text-sm font-medium flex items-center gap-2"
                 >
-                  <DollarSign className="h-4 w-4 text-white/40" />
+                  <DollarSign className="h-4 w-4 text-gray-500 dark:text-white/40" />
                   Moneda
                 </Label>
                 <select
@@ -634,7 +634,7 @@ export function EventConfigContent({
                       currency: e.target.value,
                     }))
                   }
-                  className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                 >
                   <option value="COP">COP - Peso Colombiano</option>
                   <option value="USD">USD - Dólar Estadounidense</option>
@@ -646,7 +646,7 @@ export function EventConfigContent({
                   <option value="BRL">BRL - Real Brasileño</option>
                   <option value="GBP">GBP - Libra Esterlina</option>
                 </select>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-gray-500 dark:text-white/40">
                   Todos los precios se mostrarán en esta moneda
                 </p>
               </div>
@@ -654,10 +654,10 @@ export function EventConfigContent({
           </Card>
 
           {/* Banner Image */}
-          <Card className="bg-white/[0.02] border-white/10">
+          <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-white/60" />
+                <ImageIcon className="h-5 w-5 text-gray-600 dark:text-white/60" />
                 <div>
                   <CardTitle>Flyer del Evento</CardTitle>
                   <CardDescription>
@@ -693,11 +693,11 @@ export function EventConfigContent({
               ) : (
                 <label className="flex flex-col items-center justify-center aspect-[3/4] max-w-xs border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:bg-white/5 transition-colors">
                   <div className="flex flex-col items-center justify-center">
-                    <Upload className="h-8 w-8 text-white/40 mb-2" />
-                    <p className="text-sm text-white/60 text-center px-4">
+                    <Upload className="h-8 w-8 text-gray-500 dark:text-white/40 mb-2" />
+                    <p className="text-sm text-gray-600 dark:text-white/60 text-center px-4">
                       Haz clic o arrastra una imagen
                     </p>
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-white/40 mt-1">
                       Formato vertical 3:4
                     </p>
                   </div>
@@ -733,7 +733,7 @@ export function EventConfigContent({
             {/* Left Column - Configuration (3 columns) */}
             <div className="xl:col-span-3 space-y-6">
               {/* Colors Section */}
-              <Card className="bg-white/[0.02] border-white/10">
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500" />
@@ -749,7 +749,7 @@ export function EventConfigContent({
                     <div className="space-y-2">
                       <Label htmlFor="backgroundColor" className="text-sm font-medium flex items-center justify-between">
                         <span>Color de Fondo</span>
-                        <span className="text-xs font-mono text-white/40">{walletConfig.backgroundColor}</span>
+                        <span className="text-xs font-mono text-gray-500 dark:text-white/40">{walletConfig.backgroundColor}</span>
                       </Label>
                       <div className="relative">
                         <Input
@@ -840,10 +840,10 @@ export function EventConfigContent({
               </Card>
 
               {/* Images Section */}
-              <Card className="bg-white/[0.02] border-white/10">
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4 text-white/60" />
+                    <ImageIcon className="h-4 w-4 text-gray-600 dark:text-white/60" />
                     <CardTitle className="text-base">Imágenes del Pass</CardTitle>
                   </div>
                   <CardDescription className="text-xs">
@@ -856,7 +856,7 @@ export function EventConfigContent({
                     <div className="space-y-3">
                       <div>
                         <Label className="text-sm font-medium">Logo</Label>
-                        <p className="text-xs text-white/40 mt-0.5">160x50px</p>
+                        <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">160x50px</p>
                       </div>
 
                       {walletConfig.logo ? (
@@ -895,7 +895,7 @@ export function EventConfigContent({
                     <div className="space-y-3">
                       <div>
                         <Label className="text-sm font-medium">Imagen Strip</Label>
-                        <p className="text-xs text-white/40 mt-0.5">375x123px • Aparece debajo del logo</p>
+                        <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">375x123px • Aparece debajo del logo</p>
                       </div>
 
                       {walletConfig.strip ? (
@@ -946,7 +946,7 @@ export function EventConfigContent({
             {/* Right Column - Preview (2 columns) */}
             <div className="xl:col-span-2">
               <div className="sticky top-6">
-                <Card className="bg-white/[0.02] border-white/10">
+                <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
                   <CardHeader>
                     <CardTitle className="text-base">Vista Previa</CardTitle>
                     <CardDescription className="text-xs">
@@ -1112,7 +1112,7 @@ export function EventConfigContent({
       {/* FAQs Section */}
       {activeTab === "faqs" && (
         <div className="space-y-4">
-          <Card className="bg-white/[0.02] border-white/10">
+          <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -1171,7 +1171,7 @@ export function EventConfigContent({
                           }
                         }}
                         placeholder="Ej: ¿Cómo puedo obtener mi ticket?"
-                        className="w-full h-11 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                       />
                     </div>
                     <div className="space-y-2">
@@ -1195,7 +1195,7 @@ export function EventConfigContent({
                           }
                         }}
                         placeholder="Escribe una respuesta clara y concisa..."
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-base focus:border-white/20 focus:outline-none transition-colors min-h-[120px] resize-none"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors min-h-[120px] resize-none"
                       />
                     </div>
                   </div>
@@ -1258,12 +1258,12 @@ export function EventConfigContent({
               {faqs.length === 0 && !isAddingFaq && !editingFaq ? (
                 <div className="text-center py-16">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
-                    <HelpCircle className="h-8 w-8 text-white/40" />
+                    <HelpCircle className="h-8 w-8 text-gray-500 dark:text-white/40" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2 text-white">
                     No hay preguntas frecuentes
                   </h3>
-                  <p className="text-sm text-white/40 max-w-md mx-auto">
+                  <p className="text-sm text-gray-500 dark:text-white/40 max-w-md mx-auto">
                     Crea preguntas frecuentes para ayudar a tus asistentes a
                     resolver sus dudas rápidamente
                   </p>
@@ -1292,7 +1292,7 @@ export function EventConfigContent({
                       >
                         <div className="flex items-start gap-3">
                           {/* Drag Handle - only visible on hover */}
-                          <div className="flex-shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-white/40 hover:text-white/70">
+                          <div className="flex-shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-500 dark:text-white/40 hover:text-white/70">
                             <GripVertical className="h-5 w-5" />
                           </div>
 
@@ -1303,10 +1303,10 @@ export function EventConfigContent({
 
                           {/* Content */}
                           <div className="flex-1 min-w-0 space-y-2.5">
-                            <h4 className="font-semibold text-white text-base leading-snug pr-20">
+                            <h4 className="font-semibold text-white text-sm leading-snug pr-20">
                               {faq.question}
                             </h4>
-                            <p className="text-sm text-white/60 leading-relaxed">
+                            <p className="text-sm text-gray-600 dark:text-white/60 leading-relaxed">
                               {faq.answer}
                             </p>
                           </div>
@@ -1367,10 +1367,10 @@ export function EventConfigContent({
           {/* Instructions Card for Information Tab */}
           {activeTab === "information" && (
             <>
-              <Card className="bg-white/[0.02] border-white/10">
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <Info className="h-5 w-5 text-white/60" />
+                    <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
                     <div>
                       <CardTitle className="text-base">Guía de Configuración</CardTitle>
                       <CardDescription className="text-xs">
@@ -1456,10 +1456,10 @@ export function EventConfigContent({
 
           {/* Instructions for Wallet Tab */}
           {activeTab === "wallet" && (
-            <Card className="bg-white/[0.02] border-white/10">
+            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Info className="h-5 w-5 text-white/60" />
+                  <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle className="text-base">Apple Wallet</CardTitle>
                     <CardDescription className="text-xs">
@@ -1502,10 +1502,10 @@ export function EventConfigContent({
 
           {/* Instructions for FAQs Tab */}
           {activeTab === "faqs" && (
-            <Card className="bg-white/[0.02] border-white/10">
+            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Info className="h-5 w-5 text-white/60" />
+                  <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle className="text-base">Preguntas Frecuentes</CardTitle>
                     <CardDescription className="text-xs">
