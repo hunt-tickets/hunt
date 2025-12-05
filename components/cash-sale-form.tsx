@@ -2,17 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Minus, Plus, Loader2, CheckCircle, AlertCircle, Mail, Ticket, Info, CreditCard, UserCheck } from "lucide-react";
 import { translateError } from "@/lib/error-messages";
 
 interface TicketType {
@@ -123,163 +115,263 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      {/* Result Message */}
-      {result && (
-        <div
-          className={`p-4 rounded-lg flex items-start gap-3 ${
-            result.success
-              ? "bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
-              : "bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800"
-          }`}
-        >
-          {result.success ? (
-            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Column - Form */}
+      <div className="lg:col-span-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Result Message */}
+          {result && (
+            <div
+              className={`p-4 rounded-xl flex items-start gap-3 border ${
+                result.success
+                  ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
+                  : "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800"
+              }`}
+            >
+              {result.success ? (
+                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              )}
+              <div>
+                <p className={result.success ? "text-green-800 dark:text-green-200 font-medium" : "text-red-800 dark:text-red-200 font-medium"}>
+                  {result.message}
+                </p>
+                {result.orderId && (
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    ID de orden: {result.orderId.slice(0, 8).toUpperCase()}
+                  </p>
+                )}
+              </div>
+            </div>
           )}
-          <div>
-            <p className={result.success ? "text-green-800 dark:text-green-200" : "text-red-800 dark:text-red-200"}>
-              {result.message}
-            </p>
-            {result.orderId && (
-              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                Orden: {result.orderId.slice(0, 8).toUpperCase()}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Email Input */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Datos del comprador</CardTitle>
-          <CardDescription>
-            El usuario debe tener una cuenta registrada
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email del comprador</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="correo@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Ticket Types */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Seleccionar tickets</CardTitle>
-          <CardDescription>
-            Elige la cantidad de cada tipo de entrada
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {ticketTypes.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">
-              No hay tipos de tickets disponibles
-            </p>
-          ) : (
-            ticketTypes.map((ticketType) => {
-              const quantity = quantities[ticketType.id] || 0;
-              const isAvailable = ticketType.available > 0;
-
-              return (
-                <div
-                  key={ticketType.id}
-                  className={`flex items-center justify-between p-4 rounded-lg border ${
-                    !isAvailable ? "opacity-50" : ""
-                  }`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">{ticketType.name}</span>
-                      {!isAvailable && (
-                        <Badge variant="secondary" className="text-xs">
-                          Agotado
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                      <span>${ticketType.price.toLocaleString()} COP</span>
-                      <span>•</span>
-                      <span>{ticketType.available} disponibles</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(ticketType.id, -1)}
-                      disabled={!isAvailable || quantity === 0 || isLoading}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-8 text-center font-medium">{quantity}</span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(ticketType.id, 1)}
-                      disabled={
-                        !isAvailable ||
-                        quantity >= ticketType.available ||
-                        quantity >= ticketType.maxPerOrder ||
-                        isLoading
-                      }
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Summary & Submit */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-2xl font-bold">
-                ${totalAmount.toLocaleString()} COP
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {totalTickets} ticket{totalTickets !== 1 ? "s" : ""}
+          {/* Email Input */}
+          <div className="space-y-3 p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+            <div className="flex items-center gap-2 mb-4">
+              <Mail className="h-5 w-5 text-gray-600 dark:text-white/60" />
+              <h3 className="text-base font-semibold">Datos del comprador</h3>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-gray-600 dark:text-white/60">
+                Correo electrónico <span className="text-red-400">*</span>
+              </Label>
+              <input
+                id="email"
+                type="email"
+                placeholder="correo@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                required
+              />
+              <p className="text-xs text-gray-500 dark:text-white/40">
+                El usuario debe tener una cuenta registrada
               </p>
             </div>
+          </div>
+
+          {/* Ticket Selection */}
+          <div className="space-y-3 p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+            <div className="flex items-center gap-2 mb-4">
+              <Ticket className="h-5 w-5 text-gray-600 dark:text-white/60" />
+              <h3 className="text-base font-semibold">Seleccionar entradas</h3>
+            </div>
+
+            <div className="space-y-3">
+              {ticketTypes.length === 0 ? (
+                <div className="text-center py-12 rounded-lg border border-dashed border-gray-300 dark:border-[#2a2a2a]">
+                  <Ticket className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-500 dark:text-white/50">
+                    No hay tipos de tickets disponibles
+                  </p>
+                </div>
+              ) : (
+                ticketTypes.map((ticketType) => {
+                  const quantity = quantities[ticketType.id] || 0;
+                  const isAvailable = ticketType.available > 0;
+
+                  return (
+                    <div
+                      key={ticketType.id}
+                      className={`flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] ${
+                        !isAvailable ? "opacity-50" : ""
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-sm">{ticketType.name}</span>
+                          {!isAvailable && (
+                            <Badge variant="secondary" className="text-xs">
+                              Agotado
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-white/50">
+                          <span className="font-medium">${ticketType.price.toLocaleString()}</span>
+                          <span>•</span>
+                          <span>{ticketType.available} disponibles</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 rounded-md"
+                          onClick={() => updateQuantity(ticketType.id, -1)}
+                          disabled={!isAvailable || quantity === 0 || isLoading}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-8 text-center font-bold text-base">{quantity}</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 rounded-md"
+                          onClick={() => updateQuantity(ticketType.id, 1)}
+                          disabled={
+                            !isAvailable ||
+                            quantity >= ticketType.available ||
+                            quantity >= ticketType.maxPerOrder ||
+                            isLoading
+                          }
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Summary & Submit */}
+          <div className="p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-white/60 mb-1">Total a cobrar</p>
+                <p className="text-3xl font-bold">
+                  ${totalAmount.toLocaleString()}{" "}
+                  <span className="text-base font-normal text-gray-500 dark:text-white/50">COP</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-white/60 mt-1">
+                  {totalTickets} entrada{totalTickets !== 1 ? "s" : ""} seleccionada{totalTickets !== 1 ? "s" : ""}
+                </p>
+              </div>
+            </div>
+
             <Button
               type="submit"
               size="lg"
               disabled={isLoading || totalTickets === 0 || !email.trim()}
+              className="w-full bg-gray-900 hover:bg-black text-white dark:bg-white/90 dark:hover:bg-white dark:text-black"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Procesando...
+                  Procesando venta...
                 </>
               ) : (
-                "Vender"
+                <>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Completar Venta en Efectivo
+                </>
               )}
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </form>
+        </form>
+      </div>
+
+      {/* Right Column - Instructions */}
+      <div className="lg:col-span-1">
+        <div className="sticky top-6 space-y-4">
+          {/* Instructions Card */}
+          <div className="p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+            <div className="flex items-center gap-2 mb-4">
+              <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
+              <h3 className="text-base font-semibold">Instrucciones</h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-900 dark:bg-white/90 text-white dark:text-black flex items-center justify-center text-xs font-bold">
+                    1
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Verifica el email</p>
+                    <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                      Asegúrate que el comprador tenga una cuenta registrada en la plataforma
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-900 dark:bg-white/90 text-white dark:text-black flex items-center justify-center text-xs font-bold">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Selecciona las entradas</p>
+                    <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                      Elige el tipo y cantidad de entradas que el cliente desea comprar
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-900 dark:bg-white/90 text-white dark:text-black flex items-center justify-center text-xs font-bold">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Cobra el efectivo</p>
+                    <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                      Verifica el monto total y recibe el pago en efectivo antes de completar la venta
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-900 dark:bg-white/90 text-white dark:text-black flex items-center justify-center text-xs font-bold">
+                    4
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Completa la venta</p>
+                    <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                      Las entradas se asignarán automáticamente al email del comprador
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Important Note */}
+          <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30">
+            <div className="flex items-start gap-3">
+              <UserCheck className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  Importante
+                </p>
+                <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">
+                  El comprador recibirá las entradas en su cuenta y podrá verlas en su perfil inmediatamente.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
