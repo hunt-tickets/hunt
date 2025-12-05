@@ -118,36 +118,37 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left Column - Form */}
       <div className="lg:col-span-2">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Result Message */}
-          {result && (
-            <div
-              className={`p-4 rounded-xl flex items-start gap-3 border ${
-                result.success
-                  ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
-                  : "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800"
-              }`}
-            >
-              {result.success ? (
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-              ) : (
-                <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-              )}
-              <div>
-                <p className={result.success ? "text-green-800 dark:text-green-200 font-medium" : "text-red-800 dark:text-red-200 font-medium"}>
-                  {result.message}
+        {/* Result Message */}
+        {result && (
+          <div
+            className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${
+              result.success
+                ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
+                : "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800"
+            }`}
+          >
+            {result.success ? (
+              <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            )}
+            <div>
+              <p className={result.success ? "text-green-800 dark:text-green-200 font-medium" : "text-red-800 dark:text-red-200 font-medium"}>
+                {result.message}
+              </p>
+              {result.orderId && (
+                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                  ID de orden: {result.orderId.slice(0, 8).toUpperCase()}
                 </p>
-                {result.orderId && (
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                    ID de orden: {result.orderId.slice(0, 8).toUpperCase()}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
+        {/* Single Form Box */}
+        <form onSubmit={handleSubmit} className="p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
           {/* Email Input */}
-          <div className="space-y-3 p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+          <div className="space-y-3 pb-6 border-b border-gray-200 dark:border-[#2a2a2a]">
             <div className="flex items-center gap-2 mb-4">
               <Mail className="h-5 w-5 text-gray-600 dark:text-white/60" />
               <h3 className="text-base font-semibold">Datos del comprador</h3>
@@ -173,7 +174,7 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
           </div>
 
           {/* Ticket Selection */}
-          <div className="space-y-3 p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+          <div className="space-y-3 py-6 border-b border-gray-200 dark:border-[#2a2a2a]">
             <div className="flex items-center gap-2 mb-4">
               <Ticket className="h-5 w-5 text-gray-600 dark:text-white/60" />
               <h3 className="text-base font-semibold">Seleccionar entradas</h3>
@@ -251,7 +252,7 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
           </div>
 
           {/* Summary & Submit */}
-          <div className="p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+          <div className="pt-6">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-sm text-gray-600 dark:text-white/60 mb-1">Total a cobrar</p>

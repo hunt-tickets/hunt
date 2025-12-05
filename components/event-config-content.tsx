@@ -30,6 +30,7 @@ import {
   Coins,
   FileText,
   MapPinned,
+  Info,
 } from "lucide-react";
 
 interface EventData {
@@ -367,7 +368,9 @@ export function EventConfigContent({
 
   // Content section
   const contentSection = (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Column - Main Content */}
+      <div className="lg:col-span-2 space-y-4">
       {/* Information Section */}
       {activeTab === "information" && (
         <div className="space-y-6">
@@ -1356,6 +1359,194 @@ export function EventConfigContent({
           </Card>
         </div>
       )}
+      </div>
+
+      {/* Right Column - Instructions */}
+      <div className="lg:col-span-1">
+        <div className="sticky top-6 space-y-4">
+          {/* Instructions Card for Information Tab */}
+          {activeTab === "information" && (
+            <>
+              <Card className="bg-white/[0.02] border-white/10">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-white/60" />
+                    <div>
+                      <CardTitle className="text-base">Guía de Configuración</CardTitle>
+                      <CardDescription className="text-xs">
+                        Tips para completar la información
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                        1
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Información básica</p>
+                        <p className="text-xs text-white/50 mt-1">
+                          Asegúrate de incluir un nombre atractivo y una descripción detallada del evento
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                        2
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Banner del evento</p>
+                        <p className="text-xs text-white/50 mt-1">
+                          Usa una imagen de alta calidad (mínimo 1920x1080px) para el banner principal
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                        3
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Ubicación precisa</p>
+                        <p className="text-xs text-white/50 mt-1">
+                          Ingresa la dirección completa para que los asistentes puedan encontrar el lugar fácilmente
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                        4
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Fechas y horarios</p>
+                        <p className="text-xs text-white/50 mt-1">
+                          Verifica que las fechas de inicio y fin sean correctas
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-950/30">
+                <div className="flex items-start gap-3">
+                  <HelpCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-200">
+                      Recuerda guardar
+                    </p>
+                    <p className="text-xs text-amber-300/80 mt-1">
+                      Los cambios se guardarán automáticamente al hacer clic en el botón "Guardar Cambios"
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Instructions for Wallet Tab */}
+          {activeTab === "wallet" && (
+            <Card className="bg-white/[0.02] border-white/10">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-white/60" />
+                  <div>
+                    <CardTitle className="text-base">Apple Wallet</CardTitle>
+                    <CardDescription className="text-xs">
+                      Personaliza las entradas digitales
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      1
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Colores y branding</p>
+                      <p className="text-xs text-white/50 mt-1">
+                        Personaliza los colores para que coincidan con la identidad de tu evento
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      2
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Logo e imágenes</p>
+                      <p className="text-xs text-white/50 mt-1">
+                        Sube tu logo y las imágenes que aparecerán en el pase de Apple Wallet
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Instructions for FAQs Tab */}
+          {activeTab === "faqs" && (
+            <Card className="bg-white/[0.02] border-white/10">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-white/60" />
+                  <div>
+                    <CardTitle className="text-base">Preguntas Frecuentes</CardTitle>
+                    <CardDescription className="text-xs">
+                      Ayuda a tus asistentes
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      1
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Preguntas comunes</p>
+                      <p className="text-xs text-white/50 mt-1">
+                        Incluye información sobre estacionamiento, edad mínima, política de reembolsos, etc.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      2
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Orden y claridad</p>
+                      <p className="text-xs text-white/50 mt-1">
+                        Organiza las preguntas de más a menos importante y sé claro en las respuestas
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 
