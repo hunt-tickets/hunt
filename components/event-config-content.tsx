@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useEventTabs } from "@/contexts/event-tabs-context";
+import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import {
   Card,
   CardContent,
@@ -465,24 +466,18 @@ export function EventConfigContent({
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
-              {/* Full Address */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="location"
-                  className="text-sm font-medium flex items-center gap-2"
-                >
-                  <MapPin className="h-4 w-4 text-gray-500 dark:text-white/40" />
-                  Dirección
-                </Label>
-                <Input
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  placeholder="ej. Av. Principal 123, Auditorio Nacional"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                />
-              </div>
+              {/* Full Address with Google Places Autocomplete */}
+              <GooglePlacesAutocomplete
+                defaultValue={formData.location}
+                onPlaceSelect={(place) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    location: place.address,
+                    city: place.city || prev.city,
+                    country: place.country || prev.country,
+                  }));
+                }}
+              />
 
               {/* City and Country */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
