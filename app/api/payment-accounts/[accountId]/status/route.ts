@@ -49,6 +49,13 @@ export async function PATCH(
       );
     }
 
+    if (!account.organizationId) {
+      return NextResponse.json(
+        { error: "Payment account has no organization" },
+        { status: 400 }
+      );
+    }
+
     // Verify the user is an administrator or owner of the organization
     const membership = await db.query.member.findFirst({
       where: and(

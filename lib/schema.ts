@@ -211,6 +211,12 @@ export const user = pgTable(
     documentTypeId: uuid("document_type_id").references(() => documentType.id),
     gender: genderType("gender"),
     birthdate: timestamp("birthdate", { withTimezone: true }),
+    // New fields from database
+    tipoPersona: text("tipo_persona"),
+    nombres: text("nombres"),
+    apellidos: text("apellidos"),
+    razonSocial: text("razon_social"),
+    nit: text("nit"),
   },
   (table) => [
     unique("user_email_key").on(table.email),
@@ -328,6 +334,17 @@ export const organization = pgTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     metadata: text(),
+    // New fields from database
+    tipoOrganizacion: text("tipo_organizacion"),
+    nombres: text("nombres"),
+    apellidos: text("apellidos"),
+    tipoDocumento: text("tipo_documento"),
+    numeroDocumento: text("numero_documento"),
+    nit: text("nit"),
+    direccion: text("direccion"),
+    correoElectronico: text("correo_electronico"),
+    rutUrl: text("rut_url"),
+    cerlUrl: text("cerl_url"),
   },
   (table) => [unique("organization_slug_key").on(table.slug)]
 );
@@ -386,25 +403,28 @@ export const invitation = pgTable(
 );
 
 // Payment processor account linking (OAuth-based)
-export const paymentProcessorAccount = pgTable("payment_processor_account", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  processorType: paymentProcessorType("processor_type").notNull(),
-  processorAccountId: text("processor_account_id").notNull(), // e.g., Stripe Connect account ID
-  accessToken: text("access_token").notNull(), // Encrypted OAuth access token
-  refreshToken: text("refresh_token"), // Encrypted OAuth refresh token
-  tokenExpiresAt: timestamp("token_expires_at"),
-  scope: text("scope"), // OAuth scopes granted
-  status: paymentProcessorStatus("status").notNull().default("inactive"),
-  metadata: jsonb("metadata"), // Processor-specific metadata (account details, capabilities, etc.)
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const paymentProcessorAccount = pgTable(
+  "payment_processor_account",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id").references(() => organization.id, {
+      onDelete: "cascade",
+    }),
+    processorType: paymentProcessorType("processor_type").notNull(),
+    processorAccountId: text("processor_account_id").notNull(),
+    accessToken: text("access_token").notNull(),
+    refreshToken: text("refresh_token"),
+    tokenExpiresAt: timestamp("token_expires_at"),
+    scope: text("scope"),
+    status: paymentProcessorStatus("status").notNull().default("inactive"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  }
+);
 
 // Hunt-Tickets specific tables
 
@@ -649,6 +669,7 @@ export const ticketTypes = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+    active: boolean("active"),
   },
   (table) => [
     index("idx_ticket_types_event").on(table.eventId),
@@ -874,11 +895,31 @@ export const schema = {
 
 // Inferred types from Drizzle schema
 export type User = InferSelectModel<typeof user>;
+export type NewUser = InferInsertModel<typeof user>;
 export type Event = InferSelectModel<typeof events>;
 export type NewEvent = InferInsertModel<typeof events>;
 export type Venue = InferSelectModel<typeof venues>;
+export type NewVenue = InferInsertModel<typeof venues>;
 export type TicketType = InferSelectModel<typeof ticketTypes>;
+export type NewTicketType = InferInsertModel<typeof ticketTypes>;
 export type Order = InferSelectModel<typeof orders>;
+export type NewOrder = InferInsertModel<typeof orders>;
 export type Ticket = InferSelectModel<typeof tickets>;
+export type NewTicket = InferInsertModel<typeof tickets>;
 export type Reservation = InferSelectModel<typeof reservations>;
-export type orderItem = InferSelectModel<typeof orderItems>;
+export type NewReservation = InferInsertModel<typeof reservations>;
+export type OrderItem = InferSelectModel<typeof orderItems>;
+export type NewOrderItem = InferInsertModel<typeof orderItems>;
+export type ReservationItem = InferSelectModel<typeof reservationItems>;
+export type NewReservationItem = InferInsertModel<typeof reservationItems>;
+export type Organization = InferSelectModel<typeof organization>;
+export type NewOrganization = InferInsertModel<typeof organization>;
+export type Member = InferSelectModel<typeof member>;
+export type NewMember = InferInsertModel<typeof member>;
+export type EmailLog = InferSelectModel<typeof emailLogs>;
+export type NewEmailLog = InferInsertModel<typeof emailLogs>;
+export type PaymentProcessorAccount = InferSelectModel<typeof paymentProcessorAccount>;
+export type NewPaymentProcessorAccount = InferInsertModel<typeof paymentProcessorAccount>;
+
+// Keep backward compatibility
+export type orderItem = OrderItem;

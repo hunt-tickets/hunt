@@ -86,7 +86,7 @@ export function UsersGrowthChart() {
     return {
       backgroundColor: 'transparent',
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         backgroundColor: isDark ? '#18181b' : '#ffffff',
         borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
         borderWidth: 1,
@@ -94,13 +94,14 @@ export function UsersGrowthChart() {
           color: isDark ? '#fff' : '#000'
         },
         axisPointer: {
-          type: 'line',
+          type: 'line' as const,
           lineStyle: {
             color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
             width: 1,
-            type: 'dashed'
+            type: 'dashed' as const
           }
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           const date = params[0].axisValue;
           const returningUsers = params[0].value;
@@ -134,7 +135,7 @@ export function UsersGrowthChart() {
         containLabel: true
       },
       xAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: dates,
         axisLine: {
           lineStyle: {
@@ -154,7 +155,7 @@ export function UsersGrowthChart() {
         }
       },
       yAxis: {
-        type: 'value',
+        type: 'value' as const,
         axisLine: {
           show: false
         },
@@ -165,14 +166,14 @@ export function UsersGrowthChart() {
         splitLine: {
           lineStyle: {
             color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-            type: 'dashed'
+            type: 'dashed' as const
           }
         }
       },
       series: [
         {
           name: 'Usuarios Recurrentes',
-          type: 'bar',
+          type: 'bar' as const,
           stack: 'total',
           data: returningUsersData,
           itemStyle: {
@@ -193,7 +194,7 @@ export function UsersGrowthChart() {
         },
         {
           name: 'Usuarios Nuevos',
-          type: 'bar',
+          type: 'bar' as const,
           stack: 'total',
           data: newUsersData,
           itemStyle: {

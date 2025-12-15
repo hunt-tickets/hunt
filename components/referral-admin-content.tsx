@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useTheme } from "next-themes";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,8 +50,6 @@ export function ReferralAdminContent({ userId }: ReferralAdminContentProps) {
   const [copied, setCopied] = useState(false);
   const [selectedProducer, setSelectedProducer] = useState<ReferredProducer | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
 
   const referralLink = `${MOCK_REFERRAL_DATA.baseUrl}?ref=${MOCK_REFERRAL_DATA.referralCode}`;
   const { stats, referredProducers } = MOCK_REFERRAL_DATA;

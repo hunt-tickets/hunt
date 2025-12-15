@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type DashboardTab = "dashboard" | "borderaux" | "web";
+type DashboardTab = "dashboard" | "borderaux" | "web" | "vendedores";
 type SalesTab = "overview" | "orders" | "sellers";
 type AccessControlTab = "analytics" | "list";
 type ConfigTab = "information" | "images" | "payment" | "wallet" | "faqs";

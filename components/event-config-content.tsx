@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useEventTabs } from "@/contexts/event-tabs-context";
-import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
+// TODO: Fix Google Maps types
+// import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
 import { FormInput } from "@/components/ui/form-input";
 import { FormTextarea } from "@/components/ui/form-textarea";
@@ -20,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import {
   Settings,
   Image as ImageIcon,
-  MapPin,
   Calendar,
   Upload,
   Trash2,
@@ -36,6 +36,7 @@ import {
   MapPinned,
   Info,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface EventData {
   id: string;
@@ -467,8 +468,8 @@ export function EventConfigContent({
                 icon={<MapPinned className="h-4 w-4" />}
               />
 
-              {/* Full Address with Google Places Autocomplete */}
-              <GooglePlacesAutocomplete
+              {/* Full Address with Google Places Autocomplete - TODO: Fix Google Maps types */}
+              {/* <GooglePlacesAutocomplete
                 label="Dirección"
                 defaultValue={formData.location}
                 onPlaceSelect={(place) => {
@@ -480,6 +481,15 @@ export function EventConfigContent({
                   }));
                 }}
                 required
+              /> */}
+              <FormInput
+                id="location"
+                name="location"
+                label="Dirección"
+                value={formData.location}
+                onChange={handleInputChange}
+                placeholder="ej. Calle 123 #45-67"
+                icon={<MapPinned className="h-4 w-4" />}
               />
 
               {/* City and Country */}
@@ -1405,7 +1415,7 @@ export function EventConfigContent({
                       Recuerda guardar
                     </p>
                     <p className="text-xs text-amber-300/80 mt-1">
-                      Los cambios se guardarán automáticamente al hacer clic en el botón "Guardar Cambios"
+                      Los cambios se guardarán automáticamente al hacer clic en el botón &quot;Guardar Cambios&quot;
                     </p>
                   </div>
                 </div>

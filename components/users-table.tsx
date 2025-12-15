@@ -11,13 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ChevronLeft, ChevronRight, Phone, Mail, Cake, Search, X, FileSpreadsheet } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PAGINATION, DEBOUNCE_DELAYS } from "@/lib/constants";
@@ -92,8 +85,9 @@ export function UsersTable({ users }: UsersTableProps) {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   }, [totalPages]);
 
-  const handlePageSizeChange = useCallback((newSize: string) => {
-    setPageSize(Number(newSize));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handlePageSizeChange = useCallback((newSize: string) => {
+    setPageSize(Number(newSize) as typeof pageSize);
     setCurrentPage(1); // Reset to first page when changing page size
   }, []);
 

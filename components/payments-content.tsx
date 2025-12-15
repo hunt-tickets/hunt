@@ -27,7 +27,6 @@ import { formatCurrency } from "@/lib/referrals/currency";
 import { generatePaymentData } from "@/lib/referrals/mock-data";
 import type { PaymentsContentProps } from "@/lib/referrals/types";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function PaymentsContent({ userId }: PaymentsContentProps) {
   const [mounted, setMounted] = useState(false);
   const [timeRange, setTimeRange] = useState<"3" | "6" | "12">("12");
@@ -120,7 +119,7 @@ export function PaymentsContent({ userId }: PaymentsContentProps) {
     return {
       backgroundColor: 'transparent',
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         backgroundColor: isDark ? '#18181b' : '#ffffff',
         borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
         borderWidth: 1,
@@ -128,11 +127,12 @@ export function PaymentsContent({ userId }: PaymentsContentProps) {
           color: isDark ? '#fff' : '#000'
         },
         axisPointer: {
-          type: 'shadow',
+          type: 'shadow' as const,
           shadowStyle: {
             color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
           }
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           const index = params[0].dataIndex;
           const month = params[0].axisValue;
@@ -158,7 +158,7 @@ export function PaymentsContent({ userId }: PaymentsContentProps) {
         containLabel: true
       },
       xAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: months,
         axisLine: {
           lineStyle: {
@@ -180,7 +180,7 @@ export function PaymentsContent({ userId }: PaymentsContentProps) {
         }
       },
       yAxis: {
-        type: 'value',
+        type: 'value' as const,
         axisLine: {
           show: false
         },
@@ -197,26 +197,26 @@ export function PaymentsContent({ userId }: PaymentsContentProps) {
         splitLine: {
           lineStyle: {
             color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-            type: 'dashed'
+            type: 'dashed' as const
           }
         }
       },
       series: [
         {
           name: 'Pagos',
-          type: 'bar',
+          type: 'bar' as const,
           data: amounts.map((amount, index) => ({
             value: amount,
             itemStyle: chartData[index].isEstimated ? {
               color: estimatedPatternCanvas ? {
-                type: 'pattern',
+                type: 'pattern' as const,
                 image: estimatedPatternCanvas,
-                repeat: 'repeat'
+                repeat: 'repeat' as const
               } : PAYMENT_COLOR,
               borderRadius: [8, 8, 0, 0],
               borderColor: PAYMENT_COLOR,
               borderWidth: 2,
-              borderType: 'solid',
+              borderType: 'solid' as const,
             } : {
               color: PAYMENT_COLOR,
               borderRadius: [8, 8, 0, 0],

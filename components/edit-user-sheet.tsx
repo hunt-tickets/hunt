@@ -87,7 +87,7 @@ export function EditUserSheet({ user }: EditUserSheetProps) {
         gender: formData.gender === "no_decir" ? undefined : formData.gender || undefined,
         prefix: formData.prefix === "none" ? undefined : formData.prefix || undefined,
         document_id: formData.document_id || undefined,
-        admin: formData.admin,
+        admin: formData.admin ?? false,
       });
 
       if (result.success) {

@@ -11,10 +11,9 @@ import {
 
 interface EventOptionsMenuProps {
   eventId: string;
-  eventName: string;
 }
 
-export function EventOptionsMenu({ eventId, eventName }: EventOptionsMenuProps) {
+export function EventOptionsMenu({ eventId }: EventOptionsMenuProps) {
   const handleEdit = () => {
     // TODO: Navigate to edit event page or open edit modal
     console.log("Edit event", eventId);

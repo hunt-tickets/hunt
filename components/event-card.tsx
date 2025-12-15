@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
@@ -25,8 +26,15 @@ export function EventCard({
   href,
   onClick,
 }: EventCardProps) {
+  const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
-  const isThemeDark = resolvedTheme === "dark";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use false (light mode) as default on server to avoid hydration mismatch
+  const isThemeDark = mounted ? resolvedTheme === "dark" : false;
 
   // Analyze image brightness to determine text color (only in light mode)
   const { isDark: isImageLight } = useImageBrightness(

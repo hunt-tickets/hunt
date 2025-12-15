@@ -98,7 +98,7 @@ export function useImageBrightness(
     };
 
     img.onerror = () => {
-      console.error('Error loading image for brightness analysis');
+      // Silently fail - this is expected for placeholder images or CORS-restricted URLs
       setIsDark(false); // Default to light text on error
       setIsLoading(false);
     };

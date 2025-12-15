@@ -6,7 +6,7 @@
  * Reduces bundle size from ~400KB to ~150-200KB
  */
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef } from "react";
 import * as echarts from 'echarts/core';
 import {
   PieChart,

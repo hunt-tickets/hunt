@@ -257,7 +257,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         rightContent={
           <div className="flex items-center gap-3">
             <EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />
-            <EventOptionsMenu eventId={eventId} eventName={event.name} />
+            <EventOptionsMenu eventId={eventId} />
           </div>
         }
       >

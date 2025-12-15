@@ -33,7 +33,7 @@ interface CustomHolidaysConfig {
 
 // Cache for custom holidays
 let customHolidaysCache: CustomHolidaysConfig | null = null;
-let apiHolidaysCache: Map<number, Date[]> = new Map();
+const apiHolidaysCache: Map<number, Date[]> = new Map();
 
 /**
  * Calculate Easter Sunday for a given year using Computus algorithm
@@ -223,8 +223,9 @@ async function loadCustomHolidays(): Promise<CustomHolidaysConfig> {
     if (typeof window !== 'undefined') {
       const response = await fetch('/config/custom-holidays.json');
       if (response.ok) {
-        customHolidaysCache = await response.json();
-        return customHolidaysCache;
+        const config: CustomHolidaysConfig = await response.json();
+        customHolidaysCache = config;
+        return config;
       }
     } else {
       // In Node.js/server-side
@@ -234,8 +235,9 @@ async function loadCustomHolidays(): Promise<CustomHolidaysConfig> {
 
       try {
         const fileContent = await fs.readFile(configPath, 'utf-8');
-        customHolidaysCache = JSON.parse(fileContent);
-        return customHolidaysCache;
+        const config: CustomHolidaysConfig = JSON.parse(fileContent);
+        customHolidaysCache = config;
+        return config;
       } catch {
         // File doesn't exist, return empty config
       }
@@ -326,15 +328,12 @@ export async function getColombianHolidaysEnhanced(
   const { useCustomConfig = true, useAPI = false } = options;
 
   // Start with base hardcoded holidays
-  let holidays = getColombianHolidays(year);
-  const holidayNames = new Set<string>();
+  const holidays = getColombianHolidays(year);
 
   // Load custom config if enabled
-  let disabledNames: string[] = [];
   if (useCustomConfig) {
     try {
       const config = await loadCustomHolidays();
-      disabledNames = config.disabledHolidays.holidays;
 
       // Add custom holidays
       const customHolidays = getCustomHolidaysForYear(year, config);

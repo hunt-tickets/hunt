@@ -79,7 +79,7 @@ export function RebateContent({ userId }: RebateContentProps) {
     return {
       backgroundColor: 'transparent',
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         backgroundColor: isDark ? '#18181b' : '#ffffff',
         borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
         borderWidth: 1,
@@ -87,11 +87,12 @@ export function RebateContent({ userId }: RebateContentProps) {
           color: isDark ? '#fff' : '#000'
         },
         axisPointer: {
-          type: 'shadow',
+          type: 'shadow' as const,
           shadowStyle: {
             color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
           }
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           const month = params[0].axisValue;
           const amount = params[0].value;
@@ -114,7 +115,7 @@ export function RebateContent({ userId }: RebateContentProps) {
         containLabel: true
       },
       xAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: months,
         axisLine: {
           lineStyle: {
@@ -127,7 +128,7 @@ export function RebateContent({ userId }: RebateContentProps) {
         }
       },
       yAxis: {
-        type: 'value',
+        type: 'value' as const,
         axisLine: {
           show: false
         },
@@ -152,7 +153,7 @@ export function RebateContent({ userId }: RebateContentProps) {
       series: [
         {
           data: amounts,
-          type: 'bar',
+          type: 'bar' as const,
           itemStyle: {
             color: REBATE_COLOR,
             borderRadius: [4, 4, 0, 0]

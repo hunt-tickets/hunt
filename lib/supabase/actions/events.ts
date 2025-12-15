@@ -1104,6 +1104,7 @@ export type EventDetail = {
     saleEnd: Date | null;
     createdAt: Date;
     updatedAt: Date | null;
+    active: boolean | null;
   }[];
 };
 
@@ -1205,6 +1206,7 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
         saleEnd: t.sale_end ? new Date(t.sale_end as string) : null,
         createdAt: new Date(),
         updatedAt: null,
+        active: (t.active as boolean | null) ?? true,
       })),
     };
 

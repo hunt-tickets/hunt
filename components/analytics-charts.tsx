@@ -80,7 +80,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
   const pieChartOption = useMemo(() => ({
     backgroundColor: 'transparent',
     tooltip: {
-      trigger: 'item',
+      trigger: 'item' as const,
       backgroundColor: isDark ? '#18181b' : '#ffffff',
       borderColor: isDark ? '#303030' : '#e5e7eb',
       borderWidth: 1,
@@ -91,7 +91,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
     },
     series: [
       {
-        type: 'pie',
+        type: 'pie' as const,
         radius: ['40%', '70%'],
         center: ['50%', '50%'],
         avoidLabelOverlap: false,
@@ -110,7 +110,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
           label: {
             show: true,
             fontSize: 14,
-            fontWeight: 'bold',
+            fontWeight: 'bold' as const,
             color: isDark ? '#fff' : '#000'
           }
         },
@@ -126,14 +126,15 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
     return {
       backgroundColor: 'transparent',
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         backgroundColor: isDark ? '#18181b' : '#ffffff',
         borderColor: isDark ? '#303030' : '#e5e7eb',
         borderWidth: 1,
         textStyle: {
           color: isDark ? '#fff' : '#000'
         },
-        formatter: (params: { dataIndex: number; name: string; value: number }[]) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        formatter: (params: any) => {
           const dataIndex = params[0].dataIndex;
           const item = safeGenderGroups[dataIndex];
           if (!item) return `${params[0].name}<br/>${params[0].value} usuarios`;
@@ -148,7 +149,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         containLabel: true
       },
       xAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: genderLabels,
         axisLine: {
           lineStyle: {
@@ -161,7 +162,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         }
       },
       yAxis: {
-        type: 'value',
+        type: 'value' as const,
         axisLine: {
           lineStyle: {
             color: isDark ? '#303030' : '#d1d5db'
@@ -173,13 +174,13 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         splitLine: {
           lineStyle: {
             color: isDark ? '#303030' : '#e5e7eb',
-            type: 'dashed'
+            type: 'dashed' as const
           }
         }
       },
       series: [
         {
-          type: 'bar',
+          type: 'bar' as const,
           data: genderValues.map((value, index) => ({
             value,
             itemStyle: {

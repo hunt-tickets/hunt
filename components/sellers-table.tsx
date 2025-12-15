@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, DollarSign, Search, X, ShoppingCart, CreditCard, Banknote } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X, ShoppingCart, CreditCard, Banknote } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SellerDetailSheet } from "@/components/seller-detail-sheet";
 

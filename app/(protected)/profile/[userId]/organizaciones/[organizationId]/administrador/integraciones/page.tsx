@@ -308,8 +308,6 @@ export default function IntegrationsPage() {
 
             if (categoryIntegrations.length === 0) return null;
 
-            const Icon = category.icon;
-
             return (
               <div key={categoryKey} className="space-y-4">
                 {/* Category Header */}

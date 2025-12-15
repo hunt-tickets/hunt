@@ -112,7 +112,8 @@ export function AdminEventsList({ events, userId, eventVenues = [], organization
 
   // Efficient client-side filtering using useMemo
   const filteredEvents = useMemo(() => {
-    const allEvents = [...testEvents as any[], ...events]; // Add test events at the beginning
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allEvents = [...(testEvents as any[]), ...events]; // Add test events at the beginning
 
     if (!searchQuery.trim()) return allEvents;
 
