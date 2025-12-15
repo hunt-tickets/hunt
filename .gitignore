@@ -44,4 +44,5 @@ yarn-error.log*
 next-env.d.ts
 
 
-notas.txt.env.local.backup
+notas.txt
+.env.local.backup
