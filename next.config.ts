@@ -23,6 +23,27 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        // Allow images from Wikimedia Commons (integration logos)
+        protocol: "https",
+        hostname: "upload.wikimedia.org",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        // Allow images from Google (Google Analytics logo)
+        protocol: "https",
+        hostname: "www.gstatic.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        // Allow images from CDN World Vector Logo (Zapier logo)
+        protocol: "https",
+        hostname: "cdn.worldvectorlogo.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
     // Add these optimization settings
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days

@@ -1,9 +1,5 @@
-import { redirect, notFound } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { db } from "@/lib/drizzle";
-import { member } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { verifyMembershipAndPermission } from "@/lib/auth/utils";
 import {
   Card,
   CardContent,
@@ -32,37 +28,14 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
   const { userId, organizationId } = await params;
   const reqHeaders = await headers();
 
-  // Auth check
-  const session = await auth.api.getSession({ headers: reqHeaders });
-  if (!session || session.user.id !== userId) {
-    redirect("/sign-in");
-  }
-
-  // Verify user is a member of the organization
-  const memberRecord = await db.query.member.findFirst({
-    where: and(
-      eq(member.userId, userId),
-      eq(member.organizationId, organizationId)
-    ),
-  });
-
-  if (!memberRecord) {
-    notFound();
-  }
-
-  // Check if user can view/manage events (sellers cannot)
-  const canManageEvents = await auth.api.hasPermission({
-    headers: reqHeaders,
-    body: {
-      permission: { event: ["create"] },
-      organizationId,
-    },
-  });
-
-  if (!canManageEvents?.success) {
-    // Redirect sellers to their sales page
-    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
-  }
+  // Verify membership and permission in one call
+  await verifyMembershipAndPermission(
+    userId,
+    organizationId,
+    reqHeaders,
+    "event",
+    "create"
+  );
 
   // Mock venues data - TODO: fetch from database
   const venues = [

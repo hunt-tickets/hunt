@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ticket, Settings, Users, ArrowLeft, ScanLine, Banknote, ShoppingBag } from "lucide-react";
+import { LayoutDashboard, Ticket, Settings, ArrowLeft, ScanLine, Banknote, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
+import { SidebarUserMenu } from "@/components/sidebar-user-menu";
+
+interface UserData {
+  id: string;
+  name: string | null;
+  email: string;
+  image?: string | null;
+}
 
 interface EventSidebarProps {
   userId: string;
@@ -13,6 +21,7 @@ interface EventSidebarProps {
   eventId: string;
   eventName: string;
   role?: "owner" | "administrator" | "seller";
+  user: UserData | null;
 }
 
 // Menu items with role requirements
@@ -59,20 +68,16 @@ const menuItems = [
     description: "Ajustes del evento",
     requiredRoles: ["owner", "administrator"],
   },
-  {
-    title: "Equipo",
-    icon: Users,
-    href: "/equipo",
-    description: "Productores y artistas",
-    requiredRoles: ["owner", "administrator"],
-  },
 ];
 
-export function EventSidebar({ userId, organizationId, eventId, eventName, role = "seller" }: EventSidebarProps) {
+export function EventSidebar({ userId, organizationId, eventId, eventName, role = "seller", user }: EventSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
 
   const baseEventPath = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}`;
+  const backHref = role === "seller"
+    ? `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
+    : `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`;
 
   // Filter menu items based on role
   const visibleMenuItems = menuItems.filter((item) => item.requiredRoles.includes(role));
@@ -90,17 +95,23 @@ export function EventSidebar({ userId, organizationId, eventId, eventName, role 
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-screen w-64 bg-[#202020] border-r border-[#2a2a2a] z-50 transition-transform duration-300 lg:translate-x-0 flex-shrink-0",
+          "fixed top-0 left-0 h-screen w-64 bg-white dark:bg-[#202020] border-r border-gray-200 dark:border-[#2a2a2a] z-50 transition-transform duration-300 lg:translate-x-0 flex-shrink-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full p-6">
-          {/* Logo/Brand */}
-          <div className="mb-8 px-3">
-            <div className="text-xl font-bold text-white mb-1" style={{ fontFamily: "LOT, sans-serif" }}>
-              HUNT
-            </div>
-            <div className="text-xs text-white/40 truncate" title={eventName}>
+          {/* Logo/Brand with Back Button */}
+          <div className="mb-6 px-3">
+            <Link
+              href={backHref}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-400 dark:text-gray-400" />
+              <div className="text-xl font-bold text-foreground" style={{ fontFamily: "LOT, sans-serif" }}>
+                HUNT
+              </div>
+            </Link>
+            <div className="text-xs text-gray-500 dark:text-white/40 truncate mt-2 ml-8" title={eventName}>
               {eventName}
             </div>
           </div>
@@ -120,8 +131,8 @@ export function EventSidebar({ userId, organizationId, eventId, eventName, role 
                   className={cn(
                     "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
                     isActive
-                      ? "bg-white/10 text-white border border-white/20"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                      ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
+                      : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
                   )}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
@@ -132,19 +143,15 @@ export function EventSidebar({ userId, organizationId, eventId, eventName, role 
           </nav>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-[#2a2a2a] space-y-1">
+          <div className="pt-4 border-t border-gray-200 dark:border-[#2a2a2a] space-y-3">
             <ThemeToggle />
-            <Link
-              href={
-                role === "seller"
-                  ? `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
-                  : `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`
-              }
-              className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              {role === "seller" ? "Volver a Mis Ventas" : "Volver a Eventos"}
-            </Link>
+
+            {/* User Menu */}
+            <SidebarUserMenu
+              user={user}
+              userId={userId}
+              onMenuClose={() => setIsMobileMenuOpen(false)}
+            />
           </div>
         </div>
       </aside>

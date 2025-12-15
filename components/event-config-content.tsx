@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { useEventTabs } from "@/contexts/event-tabs-context";
 import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
+import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
+import { FormInput } from "@/components/ui/form-input";
+import { FormTextarea } from "@/components/ui/form-textarea";
+import { FormSelect } from "@/components/ui/form-select";
 import {
   Card,
   CardContent,
@@ -10,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -72,6 +75,7 @@ export function EventConfigContent({
   const [formData, setFormData] = useState({
     eventName: "",
     description: "",
+    venueName: "",
     location: "",
     city: "",
     country: "",
@@ -102,6 +106,7 @@ export function EventConfigContent({
       setFormData({
         eventName: eventData.name || "",
         description: eventData.description || "",
+        venueName: eventData.venues?.name || "",
         location: eventData.venues?.address || "",
         city: eventData.venues?.city || "",
         country: "",
@@ -390,65 +395,50 @@ export function EventConfigContent({
             </CardHeader>
             <CardContent className="space-y-5">
               {/* Event Name */}
-              <div className="space-y-2">
-                <Label htmlFor="eventName" className="text-sm font-medium text-gray-600 dark:text-gray-600 dark:text-white/60">
-                  Nombre del Evento
-                </Label>
-                <Input
-                  id="eventName"
-                  name="eventName"
-                  value={formData.eventName}
-                  onChange={handleInputChange}
-                  placeholder="ej. Festival de Música 2024"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20"
-                />
-              </div>
+              <FormInput
+                id="eventName"
+                name="eventName"
+                label="Nombre del Evento"
+                value={formData.eventName}
+                onChange={handleInputChange}
+                placeholder="ej. Festival de Música 2024"
+                required
+              />
 
               {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium text-gray-600 dark:text-gray-600 dark:text-white/60">
-                  Descripción
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe tu evento, artistas, atracciones y todo lo que los asistentes deben saber..."
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 min-h-[140px] resize-none"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-500 dark:text-white/40">
-                  Esta descripción será visible para todos los usuarios
-                </p>
-              </div>
+              <FormTextarea
+                id="description"
+                name="description"
+                label="Descripción"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Describe tu evento, artistas, atracciones y todo lo que los asistentes deben saber..."
+                hint="Esta descripción será visible para todos los usuarios"
+                rows={5}
+                maxLength={1000}
+                showCharCount
+              />
 
               {/* Age Restriction */}
-              <div className="space-y-2">
-                <Label htmlFor="age" className="text-sm font-medium text-gray-600 dark:text-gray-600 dark:text-white/60">
-                  Edad Mínima
-                </Label>
-                <select
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      age: parseInt(e.target.value),
-                    }))
-                  }
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20"
-                >
-                  <option value="0">Para todo público</option>
-                  <option value="12">12+</option>
-                  <option value="18">18+</option>
-                  <option value="21">21+</option>
-                  <option value="25">25+</option>
-                </select>
-                <p className="text-xs text-gray-500 dark:text-gray-500 dark:text-white/40">
-                  Edad mínima requerida para asistir al evento
-                </p>
-              </div>
+              <FormSelect
+                id="age"
+                name="age"
+                label="Edad Mínima"
+                value={formData.age}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    age: parseInt(e.target.value),
+                  }))
+                }
+                hint="Edad mínima requerida para asistir al evento"
+              >
+                <option value="0">Para todo público</option>
+                <option value="12">12+</option>
+                <option value="18">18+</option>
+                <option value="21">21+</option>
+                <option value="25">25+</option>
+              </FormSelect>
             </CardContent>
           </Card>
 
@@ -466,8 +456,20 @@ export function EventConfigContent({
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
+              {/* Venue Name */}
+              <FormInput
+                id="venueName"
+                name="venueName"
+                label="Nombre del Lugar"
+                value={formData.venueName}
+                onChange={handleInputChange}
+                placeholder="ej. Movistar Arena, Club Colombia, Armando Records"
+                icon={<MapPinned className="h-4 w-4" />}
+              />
+
               {/* Full Address with Google Places Autocomplete */}
               <GooglePlacesAutocomplete
+                label="Dirección"
                 defaultValue={formData.location}
                 onPlaceSelect={(place) => {
                   setFormData((prev) => ({
@@ -477,36 +479,27 @@ export function EventConfigContent({
                     country: place.country || prev.country,
                   }));
                 }}
+                required
               />
 
               {/* City and Country */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city" className="text-sm font-medium">
-                    Ciudad
-                  </Label>
-                  <Input
-                    id="city"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    placeholder="ej. Bogotá"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="country" className="text-sm font-medium">
-                    País
-                  </Label>
-                  <Input
-                    id="country"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    placeholder="ej. Colombia"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                  />
-                </div>
+                <FormInput
+                  id="city"
+                  name="city"
+                  label="Ciudad"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  placeholder="ej. Bogotá"
+                />
+                <FormInput
+                  id="country"
+                  name="country"
+                  label="País"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  placeholder="ej. Colombia"
+                />
               </div>
             </CardContent>
           </Card>
@@ -527,75 +520,56 @@ export function EventConfigContent({
             <CardContent className="space-y-5">
               {/* Dates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate" className="text-sm font-medium">
-                    Fecha y Hora de Inicio
-                  </Label>
-                  <Input
-                    id="startDate"
-                    name="startDate"
-                    type="datetime-local"
-                    value={formData.startDate}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endDate" className="text-sm font-medium">
-                    Fecha y Hora de Fin
-                  </Label>
-                  <Input
-                    id="endDate"
-                    name="endDate"
-                    type="datetime-local"
-                    value={formData.endDate}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                  />
-                </div>
+                <SimpleDateTimePicker
+                  name="startDate"
+                  label="Fecha y Hora de Inicio"
+                  value={formData.startDate}
+                  onChange={(value) => setFormData(prev => ({ ...prev, startDate: value }))}
+                  placeholder="Selecciona fecha y hora de inicio"
+                  required
+                />
+                <SimpleDateTimePicker
+                  name="endDate"
+                  label="Fecha y Hora de Fin"
+                  value={formData.endDate}
+                  onChange={(value) => setFormData(prev => ({ ...prev, endDate: value }))}
+                  placeholder="Selecciona fecha y hora de fin"
+                  minDate={formData.startDate ? new Date(formData.startDate) : undefined}
+                  required
+                />
               </div>
 
               {/* Timezone */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="timezone"
-                  className="text-sm font-medium flex items-center gap-2"
-                >
-                  <Globe className="h-4 w-4 text-gray-500 dark:text-white/40" />
-                  Zona Horaria
-                </Label>
-                <select
-                  id="timezone"
-                  name="timezone"
-                  value={formData.timezone}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      timezone: e.target.value,
-                    }))
-                  }
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                >
-                  <option value="America/Bogota">Colombia (GMT-5)</option>
-                  <option value="America/Mexico_City">México (GMT-6)</option>
-                  <option value="America/New_York">New York (GMT-5)</option>
-                  <option value="America/Los_Angeles">
-                    Los Angeles (GMT-8)
-                  </option>
-                  <option value="America/Chicago">Chicago (GMT-6)</option>
-                  <option value="America/Argentina/Buenos_Aires">
-                    Buenos Aires (GMT-3)
-                  </option>
-                  <option value="America/Santiago">Santiago (GMT-4)</option>
-                  <option value="America/Lima">Lima (GMT-5)</option>
-                  <option value="Europe/Madrid">Madrid (GMT+1)</option>
-                  <option value="Europe/London">London (GMT+0)</option>
-                  <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
-                </select>
-                <p className="text-xs text-gray-500 dark:text-white/40">
-                  Las fechas y horas se mostrarán según esta zona horaria
-                </p>
-              </div>
+              <FormSelect
+                id="timezone"
+                name="timezone"
+                label="Zona Horaria"
+                icon={<Globe className="h-4 w-4" />}
+                value={formData.timezone}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    timezone: e.target.value,
+                  }))
+                }
+                hint="Las fechas y horas se mostrarán según esta zona horaria"
+              >
+                <option value="America/Bogota">Colombia (GMT-5)</option>
+                <option value="America/Mexico_City">México (GMT-6)</option>
+                <option value="America/New_York">New York (GMT-5)</option>
+                <option value="America/Los_Angeles">
+                  Los Angeles (GMT-8)
+                </option>
+                <option value="America/Chicago">Chicago (GMT-6)</option>
+                <option value="America/Argentina/Buenos_Aires">
+                  Buenos Aires (GMT-3)
+                </option>
+                <option value="America/Santiago">Santiago (GMT-4)</option>
+                <option value="America/Lima">Lima (GMT-5)</option>
+                <option value="Europe/Madrid">Madrid (GMT+1)</option>
+                <option value="Europe/London">London (GMT+0)</option>
+                <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+              </FormSelect>
             </CardContent>
           </Card>
 
@@ -611,40 +585,30 @@ export function EventConfigContent({
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="currency"
-                  className="text-sm font-medium flex items-center gap-2"
-                >
-                  <DollarSign className="h-4 w-4 text-gray-500 dark:text-white/40" />
-                  Moneda
-                </Label>
-                <select
-                  id="currency"
-                  name="currency"
-                  value={formData.currency}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      currency: e.target.value,
-                    }))
-                  }
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                >
-                  <option value="COP">COP - Peso Colombiano</option>
-                  <option value="USD">USD - Dólar Estadounidense</option>
-                  <option value="EUR">EUR - Euro</option>
-                  <option value="MXN">MXN - Peso Mexicano</option>
-                  <option value="ARS">ARS - Peso Argentino</option>
-                  <option value="CLP">CLP - Peso Chileno</option>
-                  <option value="PEN">PEN - Sol Peruano</option>
-                  <option value="BRL">BRL - Real Brasileño</option>
-                  <option value="GBP">GBP - Libra Esterlina</option>
-                </select>
-                <p className="text-xs text-gray-500 dark:text-white/40">
-                  Todos los precios se mostrarán en esta moneda
-                </p>
-              </div>
+              <FormSelect
+                id="currency"
+                name="currency"
+                label="Moneda"
+                icon={<DollarSign className="h-4 w-4" />}
+                value={formData.currency}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    currency: e.target.value,
+                  }))
+                }
+                hint="Todos los precios se mostrarán en esta moneda"
+              >
+                <option value="COP">COP - Peso Colombiano</option>
+                <option value="USD">USD - Dólar Estadounidense</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="MXN">MXN - Peso Mexicano</option>
+                <option value="ARS">ARS - Peso Argentino</option>
+                <option value="CLP">CLP - Peso Chileno</option>
+                <option value="PEN">PEN - Sol Peruano</option>
+                <option value="BRL">BRL - Real Brasileño</option>
+                <option value="GBP">GBP - Libra Esterlina</option>
+              </FormSelect>
             </CardContent>
           </Card>
 

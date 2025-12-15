@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import ReactECharts from 'echarts-for-react';
+import { useState, useEffect, useMemo } from "react";
+import { OptimizedEChart } from '@/components/optimized-echart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AgeGroupData, GenderData } from "@/lib/supabase/actions/profile";
 import { Users, Ticket, UserPlus } from "lucide-react";
 import { useTheme } from "next-themes";
+import { UsersGrowthChart } from "@/components/users-growth-chart";
 
 interface AnalyticsChartsProps {
   ageGroups: AgeGroupData[];
@@ -25,8 +26,8 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
 
   const isDark = resolvedTheme === 'dark';
 
-  // Color palette that adapts to theme
-  const COLORS = isDark ? [
+  // Memoized color palette that adapts to theme
+  const COLORS = useMemo(() => isDark ? [
     "#e5e5e5", // lightest
     "#cccccc", // light
     "#b3b3b3", // medium-light
@@ -42,35 +43,41 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
     "#5a5a5a", // medium-light
     "#6a6a6a", // light
     "#7a7a7a", // lightest
-  ];
+  ], [isDark]);
 
-  // Prepare data for pie chart (users by age)
-  const usersByAgeData = (ageGroups || [])
-    .filter(group => group.ageGroup !== "Sin edad")
-    .map((group, index) => ({
-      name: group.ageGroup,
-      value: group.users,
-      itemStyle: { color: COLORS[index % COLORS.length] }
-    }));
+  // Memoized data transformation for pie chart (users by age)
+  const usersByAgeData = useMemo(() =>
+    (ageGroups || [])
+      .filter(group => group.ageGroup !== "Sin edad")
+      .map((group, index) => ({
+        name: group.ageGroup,
+        value: group.users,
+        itemStyle: { color: COLORS[index % COLORS.length] }
+      }))
+  , [ageGroups, COLORS]);
 
-  // Prepare data for bar chart (gender distribution)
-  const safeGenderGroups = genderGroups || [];
-  const genderLabels = safeGenderGroups.map(item => item.gender);
-  const genderValues = safeGenderGroups.map(item => item.users);
+  // Memoized data transformation for bar chart (gender distribution)
+  const { genderLabels, genderValues, genderColors } = useMemo(() => {
+    const safeGenderGroups = genderGroups || [];
+    const genderLabels = safeGenderGroups.map(item => item.gender);
+    const genderValues = safeGenderGroups.map(item => item.users);
 
-  // Gender colors - monochromatic, adapts to theme
-  const genderColors: Record<string, string> = isDark ? {
-    'Masculino': '#e5e5e5', // lightest
-    'Femenino': '#999999', // medium
-    'Otro': '#666666', // dark
-  } : {
-    'Masculino': '#1a1a1a', // darkest
-    'Femenino': '#4a4a4a', // medium
-    'Otro': '#6a6a6a', // light
-  };
+    // Gender colors - monochromatic, adapts to theme
+    const genderColors: Record<string, string> = isDark ? {
+      'Masculino': '#e5e5e5', // lightest
+      'Femenino': '#999999', // medium
+      'Otro': '#666666', // dark
+    } : {
+      'Masculino': '#1a1a1a', // darkest
+      'Femenino': '#4a4a4a', // medium
+      'Otro': '#6a6a6a', // light
+    };
 
-  // Pie Chart Option (Age Distribution)
-  const pieChartOption = {
+    return { genderLabels, genderValues, genderColors };
+  }, [genderGroups, isDark]);
+
+  // Memoized Pie Chart Option (Age Distribution)
+  const pieChartOption = useMemo(() => ({
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
@@ -110,81 +117,85 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         data: usersByAgeData
       }
     ]
-  };
+  }), [isDark, usersByAgeData]);
 
-  // Bar Chart Option (Gender Distribution)
-  const barChartOption = {
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: isDark ? '#18181b' : '#ffffff',
-      borderColor: isDark ? '#303030' : '#e5e7eb',
-      borderWidth: 1,
-      textStyle: {
-        color: isDark ? '#fff' : '#000'
-      },
-      formatter: (params: { dataIndex: number; name: string; value: number }[]) => {
-        const dataIndex = params[0].dataIndex;
-        const item = safeGenderGroups[dataIndex];
-        if (!item) return `${params[0].name}<br/>${params[0].value} usuarios`;
-        return `${params[0].name}<br/>${params[0].value} usuarios<br/>${item.tickets} tickets`;
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '10%',
-      top: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: genderLabels,
-      axisLine: {
-        lineStyle: {
-          color: isDark ? '#303030' : '#d1d5db'
+  // Memoized Bar Chart Option (Gender Distribution)
+  const barChartOption = useMemo(() => {
+    const safeGenderGroups = genderGroups || [];
+
+    return {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: isDark ? '#18181b' : '#ffffff',
+        borderColor: isDark ? '#303030' : '#e5e7eb',
+        borderWidth: 1,
+        textStyle: {
+          color: isDark ? '#fff' : '#000'
+        },
+        formatter: (params: { dataIndex: number; name: string; value: number }[]) => {
+          const dataIndex = params[0].dataIndex;
+          const item = safeGenderGroups[dataIndex];
+          if (!item) return `${params[0].name}<br/>${params[0].value} usuarios`;
+          return `${params[0].name}<br/>${params[0].value} usuarios<br/>${item.tickets} tickets`;
         }
       },
-      axisLabel: {
-        color: isDark ? '#888' : '#6b7280',
-        fontSize: 12
-      }
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: {
-        lineStyle: {
-          color: isDark ? '#303030' : '#d1d5db'
-        }
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '10%',
+        top: '3%',
+        containLabel: true
       },
-      axisLabel: {
-        color: isDark ? '#888' : '#6b7280'
-      },
-      splitLine: {
-        lineStyle: {
-          color: isDark ? '#303030' : '#e5e7eb',
-          type: 'dashed'
-        }
-      }
-    },
-    series: [
-      {
-        type: 'bar',
-        data: genderValues.map((value, index) => ({
-          value,
-          itemStyle: {
-            color: genderColors[genderLabels[index]] || '#6b7280',
-            borderRadius: [8, 8, 0, 0]
+      xAxis: {
+        type: 'category',
+        data: genderLabels,
+        axisLine: {
+          lineStyle: {
+            color: isDark ? '#303030' : '#d1d5db'
           }
-        })),
-        emphasis: {
-          itemStyle: {
-            opacity: 0.8
+        },
+        axisLabel: {
+          color: isDark ? '#888' : '#6b7280',
+          fontSize: 12
+        }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: {
+          lineStyle: {
+            color: isDark ? '#303030' : '#d1d5db'
+          }
+        },
+        axisLabel: {
+          color: isDark ? '#888' : '#6b7280'
+        },
+        splitLine: {
+          lineStyle: {
+            color: isDark ? '#303030' : '#e5e7eb',
+            type: 'dashed'
           }
         }
-      }
-    ]
-  };
+      },
+      series: [
+        {
+          type: 'bar',
+          data: genderValues.map((value, index) => ({
+            value,
+            itemStyle: {
+              color: genderColors[genderLabels[index]] || '#6b7280',
+              borderRadius: [8, 8, 0, 0]
+            }
+          })),
+          emphasis: {
+            itemStyle: {
+              opacity: 0.8
+            }
+          }
+        }
+      ]
+    };
+  }, [isDark, genderLabels, genderValues, genderColors, genderGroups]);
 
   if (!mounted) {
     return (
@@ -305,6 +316,9 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
         </Card>
       </div>
 
+      {/* Users Growth Chart - Between KPIs and other charts */}
+      <UsersGrowthChart />
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Age Distribution - Pie Chart */}
@@ -316,7 +330,7 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
           <CardContent>
             {usersByAgeData.length > 0 ? (
               <div className="h-[300px]">
-                <ReactECharts option={pieChartOption} style={{ height: '100%', width: '100%' }} />
+                <OptimizedEChart option={pieChartOption} style={{ height: '100%', width: '100%' }} />
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">
@@ -333,9 +347,9 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
             <CardDescription className="text-gray-500 dark:text-white/60">Usuarios que han comprado, agrupados por género</CardDescription>
           </CardHeader>
           <CardContent>
-            {safeGenderGroups.length > 0 ? (
+            {genderLabels.length > 0 ? (
               <div className="h-[300px]">
-                <ReactECharts option={barChartOption} style={{ height: '100%', width: '100%' }} />
+                <OptimizedEChart option={barChartOption} style={{ height: '100%', width: '100%' }} />
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">
@@ -353,51 +367,59 @@ export function AnalyticsCharts({ ageGroups, genderGroups, totalUsers, totalTick
           <CardDescription className="text-gray-500 dark:text-white/60">Estadísticas completas por grupo de edad</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-white/5">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Grupo de Edad</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Usuarios</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Tickets</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Tickets Promedio</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Precio Promedio</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(ageGroups || []).map((group) => (
-                  <tr key={group.ageGroup} className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-[#202020]">
-                    <td className="py-3 px-4 text-sm">{group.ageGroup}</td>
-                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">{group.users}</td>
-                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">{group.tickets}</td>
-                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">
-                      {(group.tickets / group.users).toFixed(1)}
+          {(ageGroups || []).length === 0 ? (
+            <div className="py-12 text-center">
+              <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p className="text-sm text-gray-500 dark:text-white/40">No hay datos disponibles</p>
+              <p className="text-xs text-gray-400 dark:text-white/30 mt-1">Los datos aparecerán cuando haya usuarios con compras</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-white/5">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Grupo de Edad</th>
+                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Usuarios</th>
+                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Tickets</th>
+                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Tickets Promedio</th>
+                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-white/60">Precio Promedio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ageGroups.map((group) => (
+                    <tr key={group.ageGroup} className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-[#202020]">
+                      <td className="py-3 px-4 text-sm">{group.ageGroup}</td>
+                      <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">{group.users}</td>
+                      <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">{group.tickets}</td>
+                      <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">
+                        {group.users > 0 ? (group.tickets / group.users).toFixed(1) : '0.0'}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">
+                        {group.averagePrice ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(group.averagePrice) : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t border-gray-300 dark:border-white/10 font-medium">
+                    <td className="py-3 px-4 text-sm">Total</td>
+                    <td className="py-3 px-4 text-sm text-right">{totalUsers}</td>
+                    <td className="py-3 px-4 text-sm text-right">{totalTicketsSold}</td>
+                    <td className="py-3 px-4 text-sm text-right">
+                      {totalUsers > 0 ? (totalTicketsSold / totalUsers).toFixed(1) : '0.0'}
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-500 dark:text-white/70 text-right">
-                      {group.averagePrice ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(group.averagePrice) : '-'}
+                    <td className="py-3 px-4 text-sm text-right">
+                      {(() => {
+                        const totalPrice = ageGroups.reduce((sum, group) => sum + (group.averagePrice || 0) * group.users, 0);
+                        const avgPrice = totalUsers > 0 ? totalPrice / totalUsers : 0;
+                        return avgPrice > 0 ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(avgPrice) : '-';
+                      })()}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t border-gray-300 dark:border-white/10 font-medium">
-                  <td className="py-3 px-4 text-sm">Total</td>
-                  <td className="py-3 px-4 text-sm text-right">{totalUsers}</td>
-                  <td className="py-3 px-4 text-sm text-right">{totalTicketsSold}</td>
-                  <td className="py-3 px-4 text-sm text-right">
-                    {totalUsers > 0 ? (totalTicketsSold / totalUsers).toFixed(1) : '0.0'}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-right">
-                    {(() => {
-                      const totalPrice = (ageGroups || []).reduce((sum, group) => sum + (group.averagePrice || 0) * group.users, 0);
-                      const avgPrice = totalUsers > 0 ? totalPrice / totalUsers : 0;
-                      return avgPrice > 0 ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(avgPrice) : '-';
-                    })()}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+                </tfoot>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

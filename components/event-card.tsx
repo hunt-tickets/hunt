@@ -2,6 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes";
+import { ProgressiveBlur } from "@/components/ui/progressive-blur";
+import { useImageBrightness } from "@/hooks/use-image-brightness";
 
 interface EventCardProps {
   id: string; // Event ID for navigation
@@ -22,6 +25,15 @@ export function EventCard({
   href,
   onClick,
 }: EventCardProps) {
+  const { resolvedTheme } = useTheme();
+  const isThemeDark = resolvedTheme === "dark";
+
+  // Analyze image brightness to determine text color (only in light mode)
+  const { isDark: isImageLight } = useImageBrightness(
+    !isThemeDark ? image : null,
+    { sampleHeight: 0.35, threshold: 140 }
+  );
+
   // Parse date and convert from UTC to browser's timezone
   // Handle multiple formats: "2025-11-15 20:00:00+00", "2025-11-15T20:00:00Z", or "2025-11-15"
 
@@ -80,28 +92,51 @@ export function EventCard({
 
         {/* Date badge in top right corner */}
         <div className="absolute top-4 right-4 z-10">
-          <div className="bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center">
-            <div className="text-2xl font-bold text-white leading-none">
+          <div className={
+            isThemeDark
+              ? "bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center"
+              : isImageLight
+                ? "bg-white/80 backdrop-blur-sm border border-gray-300/50 rounded-xl px-4 py-3 text-center"
+                : "bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center"
+          }>
+            <div className={`text-2xl font-bold leading-none ${
+              isThemeDark ? "text-white" : (isImageLight ? "text-zinc-900" : "text-white")
+            }`}>
               {day}
             </div>
-            <div className="text-sm text-white/90 uppercase leading-none mt-1">
+            <div className={`text-sm uppercase leading-none mt-1 ${
+              isThemeDark ? "text-white/90" : (isImageLight ? "text-zinc-700" : "text-white/90")
+            }`}>
               {month}
             </div>
           </div>
         </div>
 
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        {/* Gradient overlay for text readability in dark mode / Progressive blur in light mode */}
+        {isThemeDark ? (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        ) : (
+          <ProgressiveBlur
+            className="pointer-events-none absolute bottom-0 left-0 h-[30%] w-full"
+            direction="bottom"
+            blurIntensity={4}
+            blurLayers={10}
+          />
+        )}
 
         {/* Event information overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6">
+        <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6 z-10">
           {/* Event title */}
-          <h2 className="text-xl sm:text-lg md:text-xl font-bold text-white text-balance mb-3 sm:mb-3 line-clamp-2">
+          <h2 className={`text-xl sm:text-lg md:text-xl font-bold text-balance mb-3 sm:mb-3 line-clamp-2 ${
+            isThemeDark ? "text-white" : (isImageLight ? "text-zinc-900" : "text-white")
+          }`}>
             {title}
           </h2>
 
           {/* Event details */}
-          <div className="flex flex-col gap-1.5 sm:gap-1.5 text-white/90 text-base sm:text-base">
+          <div className={`flex flex-col gap-1.5 sm:gap-1.5 text-base sm:text-base ${
+            isThemeDark ? "text-white/90" : (isImageLight ? "text-zinc-700" : "text-white/90")
+          }`}>
             <span className="line-clamp-1">{location}</span>
           </div>
         </div>

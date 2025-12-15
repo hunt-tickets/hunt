@@ -1,0 +1,42 @@
+{
+  "$schema": "Configuración de festivos colombianos personalizados",
+  "version": "1.0",
+  "customHolidays": [
+    {
+      "name": "Nochebuena",
+      "type": "fixed",
+      "month": 12,
+      "day": 24,
+      "enabled": false,
+      "comment": "Habilita este si tu empresa da Nochebuena como festivo"
+    },
+    {
+      "name": "Aniversario de la Empresa",
+      "type": "fixed",
+      "month": 1,
+      "day": 15,
+      "enabled": false,
+      "comment": "Ejemplo: cambia el mes/día al aniversario de tu empresa"
+    },
+    {
+      "name": "Día Cívico Regional",
+      "type": "movable",
+      "month": 8,
+      "day": 20,
+      "enabled": false,
+      "comment": "Ejemplo de festivo que se mueve al lunes (Ley Emiliani)"
+    }
+  ],
+  "disabledHolidays": {
+    "comment": "Lista de festivos oficiales que tu organización NO observa",
+    "example": "Agrega los nombres exactos de los festivos que quieres deshabilitar",
+    "holidays": []
+  },
+  "notes": [
+    "Los festivos tipo 'fixed' siempre se celebran en la misma fecha",
+    "Los festivos tipo 'movable' se mueven al siguiente lunes si no caen en lunes",
+    "Para habilitar un festivo, cambia 'enabled' a true",
+    "Los cambios requieren reiniciar el servidor en desarrollo",
+    "Ver config/README.md para más información"
+  ]
+}

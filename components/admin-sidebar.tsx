@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Settings, ArrowLeft, UserCircle, Gift } from "lucide-react";
+import { Calendar, Settings, ArrowLeft, UserCircle, Gift, Puzzle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
@@ -41,6 +41,13 @@ const primaryMenuItems = [
     exact: false, // Will match /administrador/event/[id] too
   },
   {
+    title: "Usuarios",
+    icon: UserCircle,
+    href: "/administrador/usuarios",
+    description: "Listado completo de usuarios",
+    exact: true,
+  },
+  {
     title: "Recompensas",
     icon: Gift,
     href: "/administrador/referidos",
@@ -48,10 +55,10 @@ const primaryMenuItems = [
     exact: true,
   },
   {
-    title: "Usuarios",
-    icon: UserCircle,
-    href: "/administrador/usuarios",
-    description: "Listado completo de usuarios",
+    title: "Integraciones",
+    icon: Puzzle,
+    href: "/administrador/integraciones",
+    description: "Conecta servicios externos",
     exact: true,
   },
   {

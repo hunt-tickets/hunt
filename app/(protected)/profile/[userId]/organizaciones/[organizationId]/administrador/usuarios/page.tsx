@@ -9,11 +9,23 @@ import {
 } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { UsersTable } from "@/components/users-table";
-import { AnalyticsCharts } from "@/components/analytics-charts";
+import { AnalyticsChartsLazy } from "@/components/analytics-charts-lazy";
 import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
 import { member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
+import type { Metadata } from "next";
+
+// Generate metadata for SEO
+export const metadata: Metadata = {
+  title: "Analíticas de Público - Gestión de Usuarios | Hunt Tickets",
+  description:
+    "Administra y analiza tu base de usuarios. Visualiza estadísticas demográficas, historial de compras y tendencias de tu audiencia.",
+  robots: {
+    index: false, // Don't index user-specific pages
+    follow: false,
+  },
+};
 
 interface UsuariosPageProps {
   params: Promise<{
@@ -60,48 +72,10 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
   }
 
-  // Mock users data - In production, fetch from database
-  const users = [
-    {
-      id: "user-1",
-      name: "María",
-      lastName: "García",
-      email: "maria@example.com",
-      phone: "+57 300 123 4567",
-      birthdate: "1995-06-15",
-      gender: "Femenino",
-      prefix: "+57",
-      document_id: "1234567890",
-      admin: false,
-      created_at: "2025-01-15T10:30:00Z",
-    },
-    {
-      id: "user-2",
-      name: "Carlos",
-      lastName: "Rodríguez",
-      email: "carlos@example.com",
-      phone: "+57 301 234 5678",
-      birthdate: "1988-03-22",
-      gender: "Masculino",
-      prefix: "+57",
-      document_id: "9876543210",
-      admin: true,
-      created_at: "2025-01-10T08:20:00Z",
-    },
-    {
-      id: "user-3",
-      name: "Ana",
-      lastName: "López",
-      email: "ana@example.com",
-      phone: null,
-      birthdate: "2000-11-30",
-      gender: "Femenino",
-      prefix: null,
-      document_id: null,
-      admin: false,
-      created_at: "2025-01-20T14:15:00Z",
-    },
-  ];
+  // TODO: Replace with real data fetch from database
+  // For now using mock data from centralized location
+  const { MOCK_USERS } = await import("@/lib/users/mock-data");
+  const users = MOCK_USERS;
 
   // Total registered users (including those who haven't made purchases)
   const totalRegisteredUsers = 245;
@@ -142,7 +116,7 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
             </CardContent>
           </Card>
         ) : (
-          <AnalyticsCharts
+          <AnalyticsChartsLazy
             ageGroups={purchaseStats.ageGroups}
             genderGroups={purchaseStats.genderGroups || []}
             totalUsers={purchaseStats.totalUsers}

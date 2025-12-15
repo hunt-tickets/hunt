@@ -23,19 +23,7 @@ import {
 import { Pencil } from "lucide-react";
 import { updateUserAsAdmin } from "@/lib/supabase/actions/profile";
 import { useRouter } from "next/navigation";
-
-interface User {
-  id: string;
-  name: string | null;
-  lastName: string | null;
-  email: string | null;
-  phone: string | null;
-  birthdate: string | null;
-  gender: string | null;
-  prefix: string | null;
-  document_id: string | null;
-  admin: boolean;
-}
+import type { User } from "@/lib/users/types";
 
 interface EditUserSheetProps {
   user: User;

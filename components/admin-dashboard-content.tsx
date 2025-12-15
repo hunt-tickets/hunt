@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Download, HelpCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LayoutDashboard, Download, HelpCircle, Users } from "lucide-react";
 
 interface Organization {
   id: string;
@@ -129,8 +130,20 @@ export function AdminDashboardContent({ organization }: AdminDashboardContentPro
           </div>
         </div>
 
-        {/* Dashboard Content */}
-        <div className="space-y-6">
+        {/* Tabs */}
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="vendedores" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Vendedores
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="dashboard" className="space-y-6">
             {/* Monthly Sales Chart */}
             <Card className="bg-white/[0.02] border-white/10 min-w-0">
               <CardContent className="pt-6">
@@ -309,8 +322,23 @@ export function AdminDashboardContent({ organization }: AdminDashboardContentPro
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="vendedores" className="space-y-6">
+            <Card className="bg-white/[0.02] border-white/10">
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Users className="h-12 w-12 text-white/40 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">Gestión de Vendedores</h3>
+                  <p className="text-sm text-white/50">
+                    Próximamente podrás gestionar y dar seguimiento a tu equipo de vendedores
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

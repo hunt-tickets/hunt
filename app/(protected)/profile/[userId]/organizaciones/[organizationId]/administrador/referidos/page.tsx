@@ -6,6 +6,18 @@ import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
 import { member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
+import type { Metadata } from "next";
+
+// Generate metadata for SEO
+export const metadata: Metadata = {
+  title: "Recompensas - Referidos y Rebates | Hunt Tickets",
+  description:
+    "Gana comisiones por referir productores de eventos y obtén rebates por tus ventas. Sistema de recompensas de Hunt Tickets.",
+  robots: {
+    index: false, // Don't index user-specific pages
+    follow: false,
+  },
+};
 
 interface ReferidosPageProps {
   params: Promise<{

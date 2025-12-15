@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import { EventLayoutWrapper } from "@/components/event-layout-wrapper";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
-import { member } from "@/lib/schema";
+import { member, user } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 
 interface EventLayoutProps {
@@ -37,6 +37,17 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
 
   const role = (memberRecord?.role as "owner" | "administrator" | "seller") || "seller";
 
+  // Fetch user data
+  const userData = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+    columns: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+    },
+  });
+
   return (
     <EventLayoutWrapper
       userId={userId}
@@ -44,6 +55,7 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
       eventId={eventId}
       eventName={eventName}
       role={role}
+      user={userData || null}
     >
       {children}
     </EventLayoutWrapper>

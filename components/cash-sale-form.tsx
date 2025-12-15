@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { FormInput } from "@/components/ui/form-input";
 import { Minus, Plus, Loader2, CheckCircle, AlertCircle, Mail, Ticket, Info, CreditCard, UserCheck } from "lucide-react";
 import { translateError } from "@/lib/error-messages";
 
@@ -153,24 +153,18 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
               <Mail className="h-5 w-5 text-gray-600 dark:text-white/60" />
               <h3 className="text-base font-semibold">Datos del comprador</h3>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-600 dark:text-white/60">
-                Correo electrónico <span className="text-red-400">*</span>
-              </Label>
-              <input
-                id="email"
-                type="email"
-                placeholder="correo@ejemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                required
-              />
-              <p className="text-xs text-gray-500 dark:text-white/40">
-                El usuario debe tener una cuenta registrada
-              </p>
-            </div>
+            <FormInput
+              id="email"
+              type="email"
+              label="Correo electrónico"
+              placeholder="correo@ejemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              icon={<Mail className="h-4 w-4" />}
+              hint="El usuario debe tener una cuenta registrada"
+              required
+            />
           </div>
 
           {/* Ticket Selection */}
@@ -210,7 +204,7 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
                           )}
                         </div>
                         <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-white/50">
-                          <span className="font-medium">${ticketType.price.toLocaleString()}</span>
+                          <span className="font-medium">${ticketType.price.toLocaleString('es-CO')}</span>
                           <span>•</span>
                           <span>{ticketType.available} disponibles</span>
                         </div>
@@ -257,7 +251,7 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
               <div>
                 <p className="text-sm text-gray-600 dark:text-white/60 mb-1">Total a cobrar</p>
                 <p className="text-3xl font-bold">
-                  ${totalAmount.toLocaleString()}{" "}
+                  ${totalAmount.toLocaleString('es-CO')}{" "}
                   <span className="text-base font-normal text-gray-500 dark:text-white/50">COP</span>
                 </p>
                 <p className="text-sm text-gray-600 dark:text-white/60 mt-1">

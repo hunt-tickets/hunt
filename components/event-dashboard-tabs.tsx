@@ -1,9 +1,10 @@
 "use client";
 
-import { BarChart3, FileSpreadsheet, Globe } from "lucide-react";
+import { BarChart3, FileSpreadsheet, Globe, Users } from "lucide-react";
 import { EventDashboard } from "@/components/event-dashboard";
 import { EventBorderaux } from "@/components/event-borderaux";
 import { EventWebAnalytics } from "@/components/event-web-analytics";
+import { SellersTable } from "@/components/sellers-table";
 import { useEventTabs } from "@/contexts/event-tabs-context";
 
 interface Sale {
@@ -77,6 +78,49 @@ export function EventDashboardTabs({
 }: EventDashboardTabsProps) {
   const { dashboardTab: activeTab, setDashboardTab: setActiveTab } = useEventTabs();
 
+  // Mock sellers data - In production, fetch from database
+  const mockSellers = [
+    {
+      id: "seller-1",
+      name: "Carlos",
+      lastName: "Rodríguez",
+      email: "carlos@example.com",
+      phone: "+57 300 123 4567",
+      role: "seller",
+      cashSales: 1500000,
+      gatewaySales: 1000000,
+      ticketsSold: 45,
+      commission: 250000,
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "seller-2",
+      name: "Ana",
+      lastName: "Martínez",
+      email: "ana@example.com",
+      phone: "+57 301 234 5678",
+      role: "seller",
+      cashSales: 800000,
+      gatewaySales: 1000000,
+      ticketsSold: 32,
+      commission: null,
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "seller-3",
+      name: "Luis",
+      lastName: "García",
+      email: "luis@example.com",
+      phone: "+57 302 345 6789",
+      role: "administrator",
+      cashSales: 2000000,
+      gatewaySales: 1200000,
+      ticketsSold: 58,
+      commission: 320000,
+      created_at: new Date().toISOString(),
+    },
+  ];
+
   // Tabs section
   const tabsSection = (
     <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -113,6 +157,17 @@ export function EventDashboardTabs({
         <Globe className="h-4 w-4" />
         Web
       </button>
+      <button
+        onClick={() => setActiveTab("vendedores")}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
+          activeTab === "vendedores"
+            ? "bg-white/10 text-white border border-white/20"
+            : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
+        }`}
+      >
+        <Users className="h-4 w-4" />
+        Vendedores
+      </button>
     </div>
   );
 
@@ -142,6 +197,10 @@ export function EventDashboardTabs({
           eventFlyer={eventFlyer}
           sales={sales}
         />
+      )}
+
+      {activeTab === "vendedores" && (
+        <SellersTable sellers={mockSellers} />
       )}
     </>
   );

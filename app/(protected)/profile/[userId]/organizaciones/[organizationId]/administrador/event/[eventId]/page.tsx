@@ -6,6 +6,7 @@ import { BarChart3 } from "lucide-react";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { EventStatusToggle } from "@/components/event-status-toggle";
+import { EventOptionsMenu } from "@/components/event-options-menu";
 import { createClient } from "@/lib/supabase/server";
 import { orderItem, member } from "@/lib/schema";
 import { db } from "@/lib/drizzle";
@@ -245,7 +246,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   }
 
   return (
-    <>
+    <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
       {/* Sticky Header with Tabs */}
       <EventStickyHeader
         eventName={event.name}
@@ -253,7 +254,12 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           dateStyle: "short",
           timeStyle: "short",
         })}
-        rightContent={<EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />}
+        rightContent={
+          <div className="flex items-center gap-3">
+            <EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />
+            <EventOptionsMenu eventId={eventId} eventName={event.name} />
+          </div>
+        }
       >
         <EventDashboardTabs
           financialReport={financialReport}
@@ -267,17 +273,15 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       </EventStickyHeader>
 
       {/* Content */}
-      <div className="px-3 py-3 sm:px-6 sm:py-4">
-        <EventDashboardTabs
-          financialReport={financialReport}
-          sales={sales}
-          tickets={ticketsWithAnalytics}
-          eventId={eventId}
-          eventName={event.name}
-          eventFlyer={event.flyer || "/placeholder.svg"}
-          showContentOnly
-        />
-      </div>
-    </>
+      <EventDashboardTabs
+        financialReport={financialReport}
+        sales={sales}
+        tickets={ticketsWithAnalytics}
+        eventId={eventId}
+        eventName={event.name}
+        eventFlyer={event.flyer || "/placeholder.svg"}
+        showContentOnly
+      />
+    </div>
   );
 }
