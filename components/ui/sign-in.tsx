@@ -56,8 +56,11 @@ interface SignInPageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
   onSendOtp?: (email: string) => void;
+  onSendPhoneOtp?: (phoneNumber: string) => void;
   onVerifyOtp?: (email: string, otp: string) => void;
+  onVerifyPhoneOtp?: (phoneNumber: string, otp: string) => void;
   onResendOtp?: (email: string) => void;
+  onResendPhoneOtp?: (phoneNumber: string) => void;
   onGoogleSignIn?: () => void;
   onAppleSignIn?: () => void;
   onCreateAccount?: () => void;
@@ -81,8 +84,11 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   title = <span className="font-light text-foreground tracking-tighter">Bienvenido</span>,
   description = "Accede a tu cuenta y continúa tu experiencia con nosotros",
   onSendOtp,
+  onSendPhoneOtp,
   onVerifyOtp,
+  onVerifyPhoneOtp,
   onResendOtp,
+  onResendPhoneOtp,
   onGoogleSignIn,
   onAppleSignIn,
   onCreateAccount,
@@ -119,13 +125,21 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    onSendOtp?.(email);
+    if (loginMethod === "phone") {
+      onSendPhoneOtp?.(email); // email state holds phone number when phone is selected
+    } else {
+      onSendOtp?.(email);
+    }
   };
 
   const handleResendOtp = () => {
     setResendCountdown(60);
     setCanResend(false);
-    onResendOtp?.(email);
+    if (loginMethod === "phone") {
+      onResendPhoneOtp?.(email);
+    } else {
+      onResendOtp?.(email);
+    }
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -149,7 +163,11 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    onVerifyOtp?.(email, otp.join(""));
+    if (loginMethod === "phone") {
+      onVerifyPhoneOtp?.(email, otp.join(""));
+    } else {
+      onVerifyOtp?.(email, otp.join(""));
+    }
   };
 
   return (

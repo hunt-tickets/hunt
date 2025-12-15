@@ -133,6 +133,37 @@ export const AuthSignIn = () => {
     }
   };
 
+  const handleSendPhoneOtp = async (phoneNumber: string) => {
+    setIsLoading(true);
+    setError(null);
+    setMessage(null);
+    setErrorCountdown(null);
+
+    try {
+      await authClient.phoneNumber.sendOtp({
+        phoneNumber,
+      });
+      setIsOtpSent(true);
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "Ocurrió un error";
+
+      if (errorMsg.includes("For security purposes") || errorMsg.includes("rate limit")) {
+        const match = errorMsg.match(/after (\d+) seconds/);
+        if (match) {
+          const seconds = parseInt(match[1], 10);
+          setErrorCountdown(seconds);
+          setError(`Por seguridad, puedes solicitar esto después de ${seconds} segundos.`);
+        } else {
+          setError(translateError(errorMsg));
+        }
+      } else {
+        setError(translateError(errorMsg));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleVerifyOtp = async (email: string, otp: string) => {
     setIsLoading(true);
     setError(null);
@@ -189,6 +220,70 @@ export const AuthSignIn = () => {
 
       // Check if it's a rate limiting error
       if (errorMsg.includes("For security purposes") || errorMsg.includes("Email rate limit exceeded")) {
+        const match = errorMsg.match(/after (\d+) seconds/);
+        if (match) {
+          const seconds = parseInt(match[1], 10);
+          setErrorCountdown(seconds);
+          setError(`Por seguridad, puedes solicitar esto después de ${seconds} segundos.`);
+        } else {
+          setError(translateError(errorMsg));
+        }
+      } else {
+        setError(translateError(errorMsg));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyPhoneOtp = async (phoneNumber: string, otp: string) => {
+    setIsLoading(true);
+    setError(null);
+    setErrorCountdown(null);
+
+    try {
+      await authClient.phoneNumber.verify({
+        phoneNumber,
+        code: otp,
+        disableSession: false,
+        updatePhoneNumber: false,
+      });
+      handleRedirect(getRedirectUrl());
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "Código inválido";
+
+      if (errorMsg.includes("For security purposes") || errorMsg.includes("rate limit")) {
+        const match = errorMsg.match(/after (\d+) seconds/);
+        if (match) {
+          const seconds = parseInt(match[1], 10);
+          setErrorCountdown(seconds);
+          setError(`Por seguridad, puedes solicitar esto después de ${seconds} segundos.`);
+        } else {
+          setError(translateError(errorMsg));
+        }
+      } else {
+        setError(translateError(errorMsg));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendPhoneOtp = async (phoneNumber: string) => {
+    setIsLoading(true);
+    setError(null);
+    setMessage(null);
+    setErrorCountdown(null);
+
+    try {
+      await authClient.phoneNumber.sendOtp({
+        phoneNumber,
+      });
+      setMessage("Código reenviado exitosamente");
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "Ocurrió un error";
+
+      if (errorMsg.includes("For security purposes") || errorMsg.includes("rate limit")) {
         const match = errorMsg.match(/after (\d+) seconds/);
         if (match) {
           const seconds = parseInt(match[1], 10);
@@ -273,8 +368,11 @@ export const AuthSignIn = () => {
           : "Accede a tu cuenta y descubre los mejores eventos"
       }
       onSendOtp={handleSendOtp}
+      onSendPhoneOtp={handleSendPhoneOtp}
       onVerifyOtp={handleVerifyOtp}
+      onVerifyPhoneOtp={handleVerifyPhoneOtp}
       onResendOtp={handleResendOtp}
+      onResendPhoneOtp={handleResendPhoneOtp}
       onGoogleSignIn={handleGoogleSignIn}
       onAppleSignIn={handleAppleSignIn}
       onCreateAccount={handleCreateAccount}
