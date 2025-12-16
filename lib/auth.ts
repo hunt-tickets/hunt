@@ -19,6 +19,7 @@ import { schema } from "./schema";
 import OrganizationInvitationEmail from "@/components/email-organization-invitation";
 import { ac, administrator, seller, owner } from "@/lib/auth-permissions";
 import { and, eq } from "drizzle-orm";
+import ForgotPasswordEmail from "@/components/email-reset-password";
 
 // Initialize Resend lazily
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -60,67 +61,20 @@ export const auth = betterAuth({
         return await bcrypt.compare(password, hash);
       },
     },
-    sendResetPassword: async ({ user, url }) => {
-      console.log(`📧 Sending password reset email to ${user.email}`);
 
-      // Fire and forget with inline HTML (faster than React Email rendering)
-      resend.emails
-        .send({
-          from:
-            process.env.FROM_EMAIL ||
-            "Hunt Auth <team@support.hunttickets.com>",
-          to: user.email,
-          subject: "Restablecer tu contraseña - Hunt Tickets",
-          html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background: #ffffff;">
-            <div style="text-align: center; margin-bottom: 32px;">
-              <img src="https://jtfcfsnksywotlbsddqb.supabase.co/storage/v1/object/public/default/hunt_logo.png" alt="Hunt Tickets" width="140" height="46" />
-            </div>
-            <h1 style="font-size: 28px; font-weight: bold; color: #111; text-align: center; margin-bottom: 8px;">Restablecer contraseña</h1>
-            <p style="font-size: 16px; color: #666; text-align: center; margin-bottom: 32px;">
-              Hola ${user.name || "Usuario"}, vamos a recuperar el acceso a tu cuenta
-            </p>
-            <div style="text-align: center; margin-bottom: 32px;">
-              <a href="${url}" style="background-color: #000; color: #fff; padding: 16px 48px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-block;">
-                Restablecer Contraseña
-              </a>
-            </div>
-            <div style="background: #f3e8ff; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #c4b5fd;">
-              <p style="font-size: 14px; font-weight: 600; color: #111; margin: 0 0 12px 0;">🔐 Información de seguridad:</p>
-              <p style="font-size: 14px; color: #666; margin: 0 0 8px 0;">✓ Este enlace expira en 1 hora</p>
-              <p style="font-size: 14px; color: #666; margin: 0 0 8px 0;">✓ Crearás una nueva contraseña en la siguiente página</p>
-              <p style="font-size: 14px; color: #666; margin: 0;">✓ Tu cuenta estará protegida inmediatamente</p>
-            </div>
-            <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-              <p style="font-size: 13px; color: #666; margin: 0 0 8px 0;">¿El botón no funciona? Copia este enlace:</p>
-              <p style="font-size: 12px; color: #2563eb; margin: 0; word-break: break-all; font-family: monospace;">${url}</p>
-            </div>
-            <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-              <p style="font-size: 13px; color: #666; margin: 0;">
-                <strong>¿No solicitaste esto?</strong> Puedes ignorar este correo de forma segura.
-              </p>
-            </div>
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-            <p style="font-size: 14px; color: #666; text-align: center; margin: 0;">
-              ¿Necesitas ayuda? Escríbenos a info@hunt-tickets.com<br/>
-              <span style="font-size: 13px; color: #9ca3af;">Hunt Tickets - Tu plataforma de eventos</span>
-            </p>
-          </div>
-        `,
-        })
-        .then((result) => {
-          console.log(
-            `✅ Password reset email sent to ${user.email}`,
-            result
-          );
-        })
-        .catch((error) => {
-          console.error(
-            `❌ Failed to send password reset email to ${user.email}:`,
-            error
-          );
-        });
+    sendResetPassword: async ({ user, url, token }) => {
+      resend.emails.send({
+        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        to: user.email,
+        subject: "Restablece tu contraseña",
+        react: ForgotPasswordEmail({
+          username: user.name,
+          resetUrl: url,
+          userEmail: user.email,
+        }),
+      });
     },
+
     onPasswordReset: async ({ user }) => {
       console.log(`✅ Password for user ${user.email} has been reset.`);
     },
