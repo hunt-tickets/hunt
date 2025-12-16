@@ -9,12 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  User,
-  Shield,
-  Fingerprint,
-  Link2,
-} from "lucide-react";
+import { User, Shield, Fingerprint, Link2 } from "lucide-react";
 import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
@@ -42,9 +37,6 @@ export default async function ProfilePage() {
     headers: await headers(),
   });
 
-  // Log to see what data is available
-  console.log('OAuth Accounts:', JSON.stringify(oauthAccounts, null, 2));
-
   // Helper to decode JWT and extract user info
   const decodeIdToken = (idToken: string | null) => {
     if (!idToken) return null;
@@ -60,18 +52,6 @@ export default async function ProfilePage() {
       return null;
     }
   };
-
-  // Format dates
-  // const formatDate = (dateString: string | undefined) => {
-  //   if (!dateString) return "No disponible";
-  //   return new Date(dateString).toLocaleDateString("es-ES", {
-  //     year: "numeric",
-  //     month: "long",
-  //     day: "numeric",
-  //     hour: "2-digit",
-  //     minute: "2-digit",
-  //   });
-  // };
 
   // Get provider icon component
   const getProviderIcon = (providerId: string) => {
@@ -107,9 +87,6 @@ export default async function ProfilePage() {
   const formatProviderName = (providerId: string) => {
     const providerNames: { [key: string]: string } = {
       google: "Google",
-      facebook: "Facebook",
-      github: "GitHub",
-      twitter: "Twitter",
       apple: "Apple",
     };
     return (
@@ -213,7 +190,7 @@ export default async function ProfilePage() {
           />
 
           {/* Birth Date */}
-          <BirthDateManager birthDate={null} />
+          <BirthDateManager birthDate={user.birthdate} />
 
           {/* Document Type and Number */}
           <DocumentManager documentType={null} documentNumber={null} />

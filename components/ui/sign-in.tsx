@@ -57,6 +57,7 @@ interface SignInPageProps {
   description?: React.ReactNode;
   onSendOtp?: (email: string) => void;
   onSendPhoneOtp?: (phoneNumber: string) => void;
+  onSignInWithPassword?: (email: string, password: string) => void;
   onVerifyOtp?: (email: string, otp: string) => void;
   onVerifyPhoneOtp?: (phoneNumber: string, otp: string) => void;
   onResendOtp?: (email: string) => void;
@@ -64,6 +65,7 @@ interface SignInPageProps {
   onGoogleSignIn?: () => void;
   onAppleSignIn?: () => void;
   onCreateAccount?: () => void;
+  onForgotPassword?: () => void;
   isOtpSent?: boolean;
   isLoading?: boolean;
   error?: string | null;
@@ -85,6 +87,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   description = "Accede a tu cuenta y continúa tu experiencia con nosotros",
   onSendOtp,
   onSendPhoneOtp,
+  onSignInWithPassword,
   onVerifyOtp,
   onVerifyPhoneOtp,
   onResendOtp,
@@ -92,6 +95,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   onGoogleSignIn,
   onAppleSignIn,
   onCreateAccount,
+  onForgotPassword,
   isOtpSent = false,
   isLoading = false,
   error = null,
@@ -125,7 +129,10 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginMethod === "phone") {
+    if (usePassword) {
+      // Sign in with email and password
+      onSignInWithPassword?.(email, password);
+    } else if (loginMethod === "phone") {
       onSendPhoneOtp?.(email); // email state holds phone number when phone is selected
     } else {
       onSendOtp?.(email);
@@ -257,6 +264,17 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                         </button>
                       </div>
                     </div>
+                    {onForgotPassword && (
+                      <div className="flex justify-end mt-2">
+                        <button
+                          type="button"
+                          onClick={onForgotPassword}
+                          className="text-sm text-gray-400 hover:text-foreground transition-colors"
+                        >
+                          ¿Olvidaste tu contraseña?
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

@@ -164,6 +164,36 @@ export const AuthSignIn = () => {
     }
   };
 
+  const handleSignInWithPassword = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+    setMessage(null);
+    setErrorCountdown(null);
+
+    try {
+      await authClient.signIn.email(
+        {
+          email,
+          password,
+        },
+        {
+          onSuccess: () => {
+            handleRedirect(getRedirectUrl());
+          },
+          onError: (ctx) => {
+            const errorMsg = ctx.error?.message || "Credenciales inválidas";
+            setError(translateError(errorMsg));
+          },
+        }
+      );
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "Ocurrió un error";
+      setError(translateError(errorMsg));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleVerifyOtp = async (email: string, otp: string) => {
     setIsLoading(true);
     setError(null);
@@ -355,6 +385,10 @@ export const AuthSignIn = () => {
     }
   };
 
+  const handleForgotPassword = () => {
+    router.push("/forgot-password");
+  };
+
   return (
     <SignInPage
       title={
@@ -369,6 +403,7 @@ export const AuthSignIn = () => {
       }
       onSendOtp={handleSendOtp}
       onSendPhoneOtp={handleSendPhoneOtp}
+      onSignInWithPassword={handleSignInWithPassword}
       onVerifyOtp={handleVerifyOtp}
       onVerifyPhoneOtp={handleVerifyPhoneOtp}
       onResendOtp={handleResendOtp}
@@ -376,6 +411,7 @@ export const AuthSignIn = () => {
       onGoogleSignIn={handleGoogleSignIn}
       onAppleSignIn={handleAppleSignIn}
       onCreateAccount={handleCreateAccount}
+      onForgotPassword={handleForgotPassword}
       isOtpSent={isOtpSent}
       isLoading={isLoading}
       error={error}

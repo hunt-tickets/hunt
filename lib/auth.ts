@@ -665,6 +665,55 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
+      documentId: {
+        type: "string",
+        required: false,
+        input: true,
+        fieldName: "document_id",
+      },
+      documentTypeId: {
+        type: "string",
+        required: false,
+        input: true,
+        fieldName: "document_type_id",
+      },
+      gender: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      birthdate: {
+        type: "date",
+        required: false,
+        input: true,
+      },
+      tipoPersona: {
+        type: "string",
+        required: false,
+        input: true,
+        fieldName: "tipo_persona",
+      },
+      nombres: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      apellidos: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      razonSocial: {
+        type: "string",
+        required: false,
+        input: true,
+        fieldName: "razon_social",
+      },
+      nit: {
+        type: "string",
+        required: false,
+        input: true,
+      },
     },
     changeEmail: {
       enabled: true,
@@ -695,3 +744,7 @@ export const auth = betterAuth({
     },
   },
 });
+
+// Export inferred types for use throughout the app
+export type Session = typeof auth.$Infer.Session;
+export type User = typeof auth.$Infer.Session.user;
