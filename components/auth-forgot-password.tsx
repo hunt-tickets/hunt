@@ -28,12 +28,15 @@ export const AuthForgotPassword = () => {
     setError(null);
 
     try {
-      const baseUrl = window.location.origin;
-      await authClient.requestPasswordReset({
+      const { error: resetError } = await authClient.requestPasswordReset({
         email,
-        redirectTo: `${baseUrl}/reset-password`,
+        redirectTo: "/reset-password",
       });
-      setIsEmailSent(true);
+      if (resetError) {
+        setError(resetError.message || "Ocurrió un error");
+      } else {
+        setIsEmailSent(true);
+      }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : "Ocurrió un error";
       setError(errorMsg);

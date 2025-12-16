@@ -64,26 +64,31 @@ export const auth = betterAuth({
 
     sendResetPassword: async ({ user, url }) => {
       console.log(`📧 Sending password reset email to ${user.email}`);
-      resend.emails
-        .send({
-          from: process.env.FROM_EMAIL!,
-          to: user.email,
-          subject: "Restablece tu contraseña",
-          react: ForgotPasswordEmail({
-            username: user.name,
-            resetUrl: url,
-            userEmail: user.email,
-          }),
-        })
-        .then((result) => {
-          console.log(`✅ Password reset email sent to ${user.email}`, result);
-        })
-        .catch((error) => {
-          console.error(
-            `❌ Failed to send password reset email to ${user.email}:`,
-            error
-          );
-        });
+      console.log(`📧 FROM_EMAIL: ${process.env.FROM_EMAIL}`);
+      console.log(`📧 URL: ${url}`);
+      try {
+        resend.emails
+          .send({
+            from: process.env.FROM_EMAIL!,
+            to: user.email,
+            subject: "Restablece tu contraseña - TEST",
+            html: `<p>Hola ${user.name}, haz clic aquí para restablecer: <a href="${url}">${url}</a></p>`,
+          })
+          .then((result) => {
+            console.log(
+              `✅ Password reset email sent to ${user.email}`,
+              result
+            );
+          })
+          .catch((error) => {
+            console.error(
+              `❌ Failed to send password reset email to ${user.email}:`,
+              error
+            );
+          });
+      } catch (syncError) {
+        console.error(`❌ Sync error in sendResetPassword:`, syncError);
+      }
     },
 
     onPasswordReset: async ({ user }) => {
