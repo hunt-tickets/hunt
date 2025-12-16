@@ -64,12 +64,14 @@ export const auth = betterAuth({
       console.log(`📧 Sending password reset email to ${user.email}`);
 
       // Fire and forget with inline HTML (faster than React Email rendering)
-      void resend.emails.send({
-        from:
-          process.env.FROM_EMAIL || "Hunt Auth <team@support.hunttickets.com>",
-        to: user.email,
-        subject: "Restablecer tu contraseña - Hunt Tickets",
-        html: `
+      resend.emails
+        .send({
+          from:
+            process.env.FROM_EMAIL ||
+            "Hunt Auth <team@support.hunttickets.com>",
+          to: user.email,
+          subject: "Restablecer tu contraseña - Hunt Tickets",
+          html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background: #ffffff;">
             <div style="text-align: center; margin-bottom: 32px;">
               <img src="https://jtfcfsnksywotlbsddqb.supabase.co/storage/v1/object/public/default/hunt_logo.png" alt="Hunt Tickets" width="140" height="46" />
@@ -105,7 +107,19 @@ export const auth = betterAuth({
             </p>
           </div>
         `,
-      });
+        })
+        .then((result) => {
+          console.log(
+            `✅ Password reset email sent to ${user.email}`,
+            result
+          );
+        })
+        .catch((error) => {
+          console.error(
+            `❌ Failed to send password reset email to ${user.email}:`,
+            error
+          );
+        });
     },
     onPasswordReset: async ({ user }) => {
       console.log(`✅ Password for user ${user.email} has been reset.`);
