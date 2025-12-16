@@ -112,6 +112,7 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
   // ============================================================================
   const supabase = await createClient();
 
+  const queryStart = performance.now();
   const { data: ticketsWithUsers, error } = await supabase
     .from("tickets")
     .select(
@@ -140,6 +141,9 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     `
     )
     .eq("ticket_types.events.organization_id", organizationId);
+
+  const queryTime = performance.now() - queryStart;
+  console.log(`📊 [Usuarios] Query time: ${queryTime.toFixed(0)}ms | Tickets: ${ticketsWithUsers?.length || 0}`);
 
   if (error) {
     console.error("Error fetching tickets:", error);
