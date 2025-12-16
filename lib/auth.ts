@@ -19,7 +19,7 @@ import { schema } from "./schema";
 import OrganizationInvitationEmail from "@/components/email-organization-invitation";
 import { ac, administrator, seller, owner } from "@/lib/auth-permissions";
 import { and, eq } from "drizzle-orm";
-import ForgotPasswordEmail from "@/components/email-reset-password";
+// import ForgotPasswordEmail from "@/components/email-reset-password";
 
 // Initialize Resend lazily
 const resend = new Resend(process.env.RESEND_API_KEY as string);
