@@ -64,7 +64,7 @@ export const auth = betterAuth({
 
     sendResetPassword: async ({ user, url, token }) => {
       resend.emails.send({
-        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        from: `${process.env.FROM_EMAIL} <Soporte Hunt-Tickets>`,
         to: user.email,
         subject: "Restablece tu contraseña",
         react: ForgotPasswordEmail({
