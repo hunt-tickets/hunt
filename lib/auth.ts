@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./drizzle";
@@ -64,21 +65,16 @@ export const auth = betterAuth({
 
     sendResetPassword: async ({ user, url }) => {
       console.log(`📧 Sending password reset email to ${user.email}`);
-      console.log(`📧 FROM_EMAIL: ${process.env.FROM_EMAIL}`);
-      console.log(`📧 URL: ${url}`);
-      try {
+      after(() => {
         resend.emails
           .send({
             from: process.env.FROM_EMAIL!,
             to: user.email,
-            subject: "Restablece tu contraseña - TEST",
+            subject: "Restablece tu contraseña",
             html: `<p>Hola ${user.name}, haz clic aquí para restablecer: <a href="${url}">${url}</a></p>`,
           })
           .then((result) => {
-            console.log(
-              `✅ Password reset email sent to ${user.email}`,
-              result
-            );
+            console.log(`✅ Password reset email sent to ${user.email}`, result);
           })
           .catch((error) => {
             console.error(
@@ -86,9 +82,7 @@ export const auth = betterAuth({
               error
             );
           });
-      } catch (syncError) {
-        console.error(`❌ Sync error in sendResetPassword:`, syncError);
-      }
+      });
     },
 
     onPasswordReset: async ({ user }) => {
