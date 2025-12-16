@@ -62,17 +62,28 @@ export const auth = betterAuth({
       },
     },
 
-    sendResetPassword: async ({ user, url, token }) => {
-      resend.emails.send({
-        from: `${process.env.FROM_EMAIL} <Soporte Hunt-Tickets>`,
-        to: user.email,
-        subject: "Restablece tu contraseña",
-        react: ForgotPasswordEmail({
-          username: user.name,
-          resetUrl: url,
-          userEmail: user.email,
-        }),
-      });
+    sendResetPassword: async ({ user, url }) => {
+      console.log(`📧 Sending password reset email to ${user.email}`);
+      resend.emails
+        .send({
+          from: `Soporte Hunt-Tickets <${process.env.FROM_EMAIL}>`,
+          to: user.email,
+          subject: "Restablece tu contraseña",
+          react: ForgotPasswordEmail({
+            username: user.name,
+            resetUrl: url,
+            userEmail: user.email,
+          }),
+        })
+        .then((result) => {
+          console.log(`✅ Password reset email sent to ${user.email}`, result);
+        })
+        .catch((error) => {
+          console.error(
+            `❌ Failed to send password reset email to ${user.email}:`,
+            error
+          );
+        });
     },
 
     onPasswordReset: async ({ user }) => {
