@@ -16,7 +16,6 @@ import { Resend } from "resend";
 import twilio from "twilio";
 import { sendMagicLinkEmail } from "./helpers/email";
 import { schema } from "./schema";
-import ForgotPasswordEmail from "@/components/email-reset-password";
 import OrganizationInvitationEmail from "@/components/email-organization-invitation";
 import { ac, administrator, seller, owner } from "@/lib/auth-permissions";
 import { and, eq } from "drizzle-orm";
