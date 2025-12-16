@@ -16,11 +16,10 @@ interface ForgotPasswordEmailProps {
   username: string;
   resetUrl: string;
   userEmail: string;
-  token?: string;
 }
 
 const ForgotPasswordEmail = (props: ForgotPasswordEmailProps) => {
-  const { username, resetUrl, userEmail, token } = props;
+  const { username, resetUrl, userEmail } = props;
 
   return (
     <Html lang="en" dir="ltr">
