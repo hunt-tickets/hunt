@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/drizzle";
-import { member } from "@/lib/schema";
+import { organization, member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -52,26 +52,13 @@ export async function updateOrganization(
       return { error: "Solo los propietarios pueden editar la organización" };
     }
 
-    // Update via Better Auth - all fields including additional fields
-    // are automatically handled by the organization plugin
+    // Update core fields via Better Auth API
     const result = await auth.api.updateOrganization({
       body: {
         data: {
           name: data.name,
           slug: data.slug,
           logo: data.logo || undefined,
-          // Additional fields are now supported via additionalFields in the plugin
-          tipoOrganizacion: data.tipoOrganizacion || undefined,
-          nombres: data.nombres || undefined,
-          apellidos: data.apellidos || undefined,
-          tipoDocumento: data.tipoDocumento || undefined,
-          numeroDocumento: data.numeroDocumento || undefined,
-          nit: data.nit || undefined,
-          direccion: data.direccion || undefined,
-          numeroTelefono: data.numeroTelefono || undefined,
-          correoElectronico: data.correoElectronico || undefined,
-          rutUrl: data.rutUrl || undefined,
-          cerlUrl: data.cerlUrl || undefined,
         },
         organizationId,
       },
@@ -81,6 +68,25 @@ export async function updateOrganization(
     if (!result) {
       return { error: "Error al actualizar la organización" };
     }
+
+    // Update additional fields directly in the database
+    // Better Auth reads these via additionalFields but updates need direct DB access
+    await db
+      .update(organization)
+      .set({
+        tipoOrganizacion: data.tipoOrganizacion || null,
+        nombres: data.nombres || null,
+        apellidos: data.apellidos || null,
+        tipoDocumento: data.tipoDocumento || null,
+        numeroDocumento: data.numeroDocumento || null,
+        nit: data.nit || null,
+        direccion: data.direccion || null,
+        numeroTelefono: data.numeroTelefono || null,
+        correoElectronico: data.correoElectronico || null,
+        rutUrl: data.rutUrl || null,
+        cerlUrl: data.cerlUrl || null,
+      })
+      .where(eq(organization.id, organizationId));
 
     // Revalidate paths
     revalidatePath(

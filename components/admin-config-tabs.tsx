@@ -28,13 +28,17 @@ import {
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { EditOrganizationForm } from "@/components/edit-organization-form";
 import { AdminPaymentSettings } from "@/components/admin-payment-settings";
+import type { PaymentProcessorAccount } from "@/lib/schema";
 
-interface Organization {
+// Organization type that accepts both null and undefined for optional fields
+// This is needed because Better Auth returns undefined while Drizzle uses null
+interface OrganizationData {
   id: string;
   name: string;
   slug: string;
   logo?: string | null;
-  // Custom fields from database
+  createdAt: Date;
+  metadata?: string | null;
   tipoOrganizacion?: string | null;
   nombres?: string | null;
   apellidos?: string | null;
@@ -46,12 +50,7 @@ interface Organization {
   correoElectronico?: string | null;
   rutUrl?: string | null;
   cerlUrl?: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  members?: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  invitations?: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  paymentAccounts?: any[];
+  paymentAccounts?: PaymentProcessorAccount[];
 }
 
 interface TeamMember {
@@ -76,7 +75,7 @@ interface Invitation {
 }
 
 interface AdminConfigTabsProps {
-  organization: Organization | null;
+  organization: OrganizationData | null;
   team: TeamMember[];
   invitations: Invitation[];
   currentUserRole: string;

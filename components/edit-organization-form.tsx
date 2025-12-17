@@ -25,12 +25,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { updateOrganization } from "@/actions/organizations";
 
+// Organization type that accepts both null and undefined for optional fields
+// This is needed because Better Auth returns undefined while Drizzle uses null
 interface Organization {
   id: string;
   name: string;
   slug: string;
   logo?: string | null;
-  // Custom fields from database
+  // Additional fields from Better Auth organization plugin
   tipoOrganizacion?: string | null;
   nombres?: string | null;
   apellidos?: string | null;
