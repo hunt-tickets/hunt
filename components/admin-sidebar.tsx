@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Calendar,
   Settings,
@@ -86,8 +86,17 @@ const primaryMenuItems: MenuItem[] = [
   },
 ];
 
+type OrganizationData = {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  createdAt: Date | string;
+};
+
 export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoadingRole, setIsLoadingRole] = useState(true);
@@ -96,20 +105,15 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
   const { data: organizationsData } = authClient.useListOrganizations();
 
   // Handle potential nesting - organizations might be in data.organizations or just data
-
-  type OrganizationData = {
-    id: string;
-    name: string;
-    slug: string;
-    logo?: string | null;
-    createdAt: Date | string;
-  };
-
   const organizations: OrganizationData[] = (() => {
     if (!organizationsData) return [];
     if (Array.isArray(organizationsData)) return organizationsData;
-    if (typeof organizationsData === "object" && "organizations" in organizationsData) {
-      return (organizationsData as { organizations: OrganizationData[] }).organizations;
+    if (
+      typeof organizationsData === "object" &&
+      "organizations" in organizationsData
+    ) {
+      return (organizationsData as { organizations: OrganizationData[] })
+        .organizations;
     }
     return [];
   })();
@@ -146,6 +150,13 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
   const visibleMenuItems = primaryMenuItems.filter((item) =>
     item.roles.includes(role)
   );
+
+  // Handle organization switch - navigate to the new organization's events page
+  const handleOrganizationChange = (newOrgId: string) => {
+    if (newOrgId !== organizationId) {
+      router.push(`/profile/${userId}/organizaciones/${newOrgId}/administrador/eventos`);
+    }
+  };
 
   return (
     <>
@@ -184,7 +195,11 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
           {/* Organization Selector */}
           {organizations && organizations.length > 0 && (
             <div className="mb-6">
-              <OrganizationSelector organizations={organizations} />
+              <OrganizationSelector
+                organizations={organizations}
+                selectedOrgId={organizationId}
+                onSelectOrganization={handleOrganizationChange}
+              />
             </div>
           )}
 
@@ -204,44 +219,44 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
                 ))}
               </>
             ) : (
-            /* Primary Menu Items */
-            visibleMenuItems.map((item) => {
-              const Icon = item.icon;
-              const fullHref = `/profile/${userId}/organizaciones/${organizationId}${item.href}`;
+              /* Primary Menu Items */
+              visibleMenuItems.map((item) => {
+                const Icon = item.icon;
+                const fullHref = `/profile/${userId}/organizaciones/${organizationId}${item.href}`;
 
-              // Check if current route matches this menu item
-              let isActive = false;
-              if (item.exact) {
-                isActive = pathname === fullHref;
-              } else {
-                // For non-exact matches (like /administrador/eventos which should also match /administrador/event/[id])
-                if (item.href === "/administrador/eventos") {
-                  isActive =
-                    pathname.includes("/administrador/eventos") ||
-                    (pathname.includes("/administrador/event/") &&
-                      !pathname.includes("/configuracion"));
+                // Check if current route matches this menu item
+                let isActive = false;
+                if (item.exact) {
+                  isActive = pathname === fullHref;
                 } else {
-                  isActive = pathname.includes(item.href);
+                  // For non-exact matches (like /administrador/eventos which should also match /administrador/event/[id])
+                  if (item.href === "/administrador/eventos") {
+                    isActive =
+                      pathname.includes("/administrador/eventos") ||
+                      (pathname.includes("/administrador/event/") &&
+                        !pathname.includes("/configuracion"));
+                  } else {
+                    isActive = pathname.includes(item.href);
+                  }
                 }
-              }
 
-              return (
-                <Link
-                  key={item.href}
-                  href={fullHref}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
-                    isActive
-                      ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
-                      : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
-                  )}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <div>{item.title}</div>
-                </Link>
-              );
-            })
+                return (
+                  <Link
+                    key={item.href}
+                    href={fullHref}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
+                      isActive
+                        ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
+                        : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <div>{item.title}</div>
+                  </Link>
+                );
+              })
             )}
           </nav>
 

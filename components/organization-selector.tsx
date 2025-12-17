@@ -28,7 +28,7 @@ export function OrganizationSelector({
   selectedOrgId,
   onSelectOrganization,
 }: OrganizationSelectorProps) {
-  const [selectedId, setSelectedId] = useState(selectedOrgId || organizations[0]?.id);
+  const [selectedId, setSelectedId] = useState(selectedOrgId);
 
   const selectedOrg = organizations.find((org) => org.id === selectedId);
 
@@ -44,9 +44,7 @@ export function OrganizationSelector({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          className="w-full flex items-center justify-between gap-2 p-3 rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 transition-colors"
-        >
+        <button className="w-full flex items-center justify-between gap-2 p-3 rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 transition-colors">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {selectedOrg?.logo ? (
               <img
@@ -91,7 +89,9 @@ export function OrganizationSelector({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{org.name}</p>
+              <p className="text-sm font-medium text-foreground truncate">
+                {org.name}
+              </p>
             </div>
             {selectedId === org.id && (
               <Check className="h-4 w-4 text-primary flex-shrink-0" />
