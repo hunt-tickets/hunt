@@ -340,23 +340,6 @@ export default async function ProfilePage() {
         </h2>
 
         <div className="space-y-3">
-          {/* Logout all sessions */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <div>
-                <p className="text-sm font-medium">
-                  Cerrar sesión en todos los dispositivos
-                </p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                  Cierra tu sesión en todos los dispositivos excepto este
-                </p>
-              </div>
-            </div>
-            <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors">
-              Cerrar sesiones
-            </button>
-          </div>
-
           {/* Delete Account */}
           <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
             <div className="flex items-center gap-3">
