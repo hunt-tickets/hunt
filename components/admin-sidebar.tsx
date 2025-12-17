@@ -154,7 +154,9 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
   // Handle organization switch - navigate to the new organization's events page
   const handleOrganizationChange = (newOrgId: string) => {
     if (newOrgId !== organizationId) {
-      router.push(`/profile/${userId}/organizaciones/${newOrgId}/administrador/eventos`);
+      router.push(
+        `/profile/${userId}/organizaciones/${newOrgId}/administrador/eventos`
+      );
     }
   };
 
@@ -179,7 +181,7 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
           {/* Logo/Brand with Back Button */}
           <div className="mb-6 px-3">
             <Link
-              href="/"
+              href={`/profile/${userId}/organizaciones`}
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
               <ArrowLeft className="h-5 w-5 text-gray-400 dark:text-gray-400" />
