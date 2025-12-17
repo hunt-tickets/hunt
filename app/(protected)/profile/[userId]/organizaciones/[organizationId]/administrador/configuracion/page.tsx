@@ -50,7 +50,9 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   });
 
   if (!canViewDashboard?.success) {
-    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`);
+    redirect(
+      `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
+    );
   }
 
   // Get full organization details with members and invitations
@@ -84,26 +86,30 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   };
 
   // Map team members to include phoneNumber (default to null if not present)
-  const teamMembers = (fullOrganization.members || []).map((member: {
-    id: string;
-    userId: string;
-    role: string;
-    organizationId: string;
-    createdAt: Date;
-    user?: {
+  const teamMembers = (fullOrganization.members || []).map(
+    (member: {
       id: string;
-      name: string;
-      email: string;
-      image?: string;
-      phoneNumber?: string;
-    };
-  }) => ({
-    ...member,
-    user: member.user ? {
-      ...member.user,
-      phoneNumber: member.user.phoneNumber || null,
-    } : undefined,
-  }));
+      userId: string;
+      role: string;
+      organizationId: string;
+      createdAt: Date;
+      user?: {
+        id: string;
+        name: string;
+        email: string;
+        image?: string;
+        phoneNumber?: string;
+      };
+    }) => ({
+      ...member,
+      user: member.user
+        ? {
+            ...member.user,
+            phoneNumber: member.user.phoneNumber || null,
+          }
+        : undefined,
+    })
+  );
   const invitations = fullOrganization.invitations || [];
 
   // Get MercadoPago OAuth URL
