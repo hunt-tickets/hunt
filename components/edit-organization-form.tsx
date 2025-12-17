@@ -5,16 +5,43 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { Loader2, CheckCircle2, XCircle, Settings, Building2, KeyRound, Upload, FileText, User, Building, Phone, Mail, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  Settings,
+  Building2,
+  KeyRound,
+  Upload,
+  FileText,
+  User,
+  Building,
+  Phone,
+  Mail,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
+import { updateOrganization } from "@/actions/organizations";
 
 interface Organization {
   id: string;
   name: string;
   slug: string;
   logo?: string | null;
+  // Custom fields from database
+  tipoOrganizacion?: string | null;
+  nombres?: string | null;
+  apellidos?: string | null;
+  tipoDocumento?: string | null;
+  numeroDocumento?: string | null;
+  nit?: string | null;
+  direccion?: string | null;
+  numeroTelefono?: string | null;
+  correoElectronico?: string | null;
+  rutUrl?: string | null;
+  cerlUrl?: string | null;
 }
 
 interface EditOrganizationFormProps {
@@ -31,63 +58,104 @@ export function EditOrganizationForm({
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  // Helper function to parse NIT (e.g., "900123456-7" -> { nit: "900123456", verification: "7" })
+  const parseNit = (nitValue?: string | null) => {
+    if (!nitValue) return { nit: "", verification: "" };
+    const parts = nitValue.split("-");
+    return {
+      nit: parts[0] || "",
+      verification: parts[1] || "",
+    };
+  };
+
+  // Parse NIT from organization if it's a legal entity
+  const parsedNit = parseNit(organization.nit);
+
   const [formData, setFormData] = useState({
     name: organization.name,
     slug: organization.slug,
     logo: organization.logo || "",
-    brebKey: "", // Empty for now, will be connected to backend later
+    brebKey: "", // Not in schema yet
     // Public contact information
-    publicPhone: "",
-    publicEmail: "",
+    publicPhone: organization.numeroTelefono || "",
+    publicEmail: organization.correoElectronico || "",
     // Billing data
-    personType: "natural" as "natural" | "juridica",
+    personType: (organization.tipoOrganizacion as "natural" | "juridica") || "natural",
     // Natural person fields
-    fullName: "",
-    documentType: "",
-    documentNumber: "",
-    address: "",
-    email: "",
-    rut: "",
+    fullName: organization.tipoOrganizacion === "natural" ? (organization.nombres || "") : "",
+    documentType: organization.tipoDocumento || "",
+    documentNumber: organization.numeroDocumento || "",
+    address: organization.tipoOrganizacion === "natural" ? (organization.direccion || "") : "",
+    email: organization.tipoOrganizacion === "natural" ? (organization.correoElectronico || "") : "",
+    rut: organization.tipoOrganizacion === "natural" ? (organization.rutUrl || "") : "",
     // Legal entity fields
-    legalName: "",
-    nit: "",
-    nitVerification: "",
-    legalAddress: "",
-    legalEmail: "",
-    legalRut: "",
-    cerl: "",
+    legalName: organization.tipoOrganizacion === "juridica" ? (organization.nombres || "") : "",
+    nit: parsedNit.nit,
+    nitVerification: parsedNit.verification,
+    legalAddress: organization.tipoOrganizacion === "juridica" ? (organization.direccion || "") : "",
+    legalEmail: organization.tipoOrganizacion === "juridica" ? (organization.correoElectronico || "") : "",
+    legalRut: organization.tipoOrganizacion === "juridica" ? (organization.rutUrl || "") : "",
+    cerl: organization.cerlUrl || "",
   });
-  const [logoPreview, setLogoPreview] = useState<string>(organization.logo || "");
+  const [logoPreview, setLogoPreview] = useState<string>(
+    organization.logo || ""
+  );
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [tempImageSrc, setTempImageSrc] = useState<string>("");
 
   // Check if user can edit (only owner)
   const canEdit = currentUserRole === "owner";
 
+  // Get original values for comparison
+  const getOriginalFormData = () => {
+    const originalParsedNit = parseNit(organization.nit);
+    return {
+      name: organization.name,
+      slug: organization.slug,
+      logo: organization.logo || "",
+      brebKey: "",
+      publicPhone: organization.numeroTelefono || "",
+      publicEmail: organization.correoElectronico || "",
+      personType: (organization.tipoOrganizacion as "natural" | "juridica") || "natural",
+      fullName: organization.tipoOrganizacion === "natural" ? (organization.nombres || "") : "",
+      documentType: organization.tipoDocumento || "",
+      documentNumber: organization.numeroDocumento || "",
+      address: organization.tipoOrganizacion === "natural" ? (organization.direccion || "") : "",
+      email: organization.tipoOrganizacion === "natural" ? (organization.correoElectronico || "") : "",
+      rut: organization.tipoOrganizacion === "natural" ? (organization.rutUrl || "") : "",
+      legalName: organization.tipoOrganizacion === "juridica" ? (organization.nombres || "") : "",
+      nit: originalParsedNit.nit,
+      nitVerification: originalParsedNit.verification,
+      legalAddress: organization.tipoOrganizacion === "juridica" ? (organization.direccion || "") : "",
+      legalEmail: organization.tipoOrganizacion === "juridica" ? (organization.correoElectronico || "") : "",
+      legalRut: organization.tipoOrganizacion === "juridica" ? (organization.rutUrl || "") : "",
+      cerl: organization.cerlUrl || "",
+    };
+  };
+
   // Track if there are any changes
   useEffect(() => {
+    const original = getOriginalFormData();
     const changed =
-      formData.name !== organization.name ||
-      formData.slug !== organization.slug ||
-      formData.logo !== (organization.logo || "") ||
-      formData.brebKey !== "" ||
-      // Public contact changes
-      formData.publicPhone !== "" ||
-      formData.publicEmail !== "" ||
-      // Billing data changes
-      formData.fullName !== "" ||
-      formData.documentType !== "" ||
-      formData.documentNumber !== "" ||
-      formData.address !== "" ||
-      formData.email !== "" ||
-      formData.rut !== "" ||
-      formData.legalName !== "" ||
-      formData.nit !== "" ||
-      formData.nitVerification !== "" ||
-      formData.legalAddress !== "" ||
-      formData.legalEmail !== "" ||
-      formData.legalRut !== "" ||
-      formData.cerl !== "";
+      formData.name !== original.name ||
+      formData.slug !== original.slug ||
+      formData.logo !== original.logo ||
+      formData.publicPhone !== original.publicPhone ||
+      formData.publicEmail !== original.publicEmail ||
+      formData.personType !== original.personType ||
+      formData.fullName !== original.fullName ||
+      formData.documentType !== original.documentType ||
+      formData.documentNumber !== original.documentNumber ||
+      formData.address !== original.address ||
+      formData.email !== original.email ||
+      formData.rut !== original.rut ||
+      formData.legalName !== original.legalName ||
+      formData.nit !== original.nit ||
+      formData.nitVerification !== original.nitVerification ||
+      formData.legalAddress !== original.legalAddress ||
+      formData.legalEmail !== original.legalEmail ||
+      formData.legalRut !== original.legalRut ||
+      formData.cerl !== original.cerl;
     setHasChanges(changed);
   }, [formData, organization]);
 
@@ -171,7 +239,10 @@ export function EditOrganizationForm({
     setFormData({ ...formData, logo: croppedImage });
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type (PDF)
@@ -216,23 +287,35 @@ export function EditOrganizationForm({
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
-      // Update the organization
-      const { data, error } = await authClient.organization.update({
-        data: {
-          name: formData.name,
-          slug: formData.slug,
-          logo: formData.logo || undefined,
-        },
-        organizationId: organization.id,
+      // Prepare data for server action based on person type
+      const isNatural = formData.personType === "natural";
+      const nitWithVerification = formData.nit && formData.nitVerification
+        ? `${formData.nit}-${formData.nitVerification}`
+        : formData.nit || undefined;
+
+      const result = await updateOrganization(organization.id, {
+        name: formData.name,
+        slug: formData.slug,
+        logo: formData.logo || undefined,
+        tipoOrganizacion: formData.personType,
+        nombres: isNatural ? formData.fullName : formData.legalName,
+        tipoDocumento: isNatural ? formData.documentType : undefined,
+        numeroDocumento: isNatural ? formData.documentNumber : undefined,
+        nit: isNatural ? undefined : nitWithVerification,
+        direccion: isNatural ? formData.address : formData.legalAddress,
+        numeroTelefono: formData.publicPhone || undefined,
+        correoElectronico: isNatural ? formData.email : formData.legalEmail,
+        rutUrl: isNatural ? formData.rut : formData.legalRut,
+        cerlUrl: isNatural ? undefined : formData.cerl,
       });
 
-      if (error) {
-        console.error("Error updating organization:", error);
-        toast.error(error.message || "Error al actualizar la organización");
+      if (result.error) {
+        console.error("Error updating organization:", result.error);
+        toast.error(result.error);
         return;
       }
 
-      if (data) {
+      if (result.success) {
         toast.success("Organización actualizada exitosamente");
         router.refresh();
         setHasChanges(false);
@@ -246,30 +329,7 @@ export function EditOrganizationForm({
   };
 
   const handleReset = () => {
-    setFormData({
-      name: organization.name,
-      slug: organization.slug,
-      logo: organization.logo || "",
-      brebKey: "", // Reset to empty
-      // Public contact information
-      publicPhone: "",
-      publicEmail: "",
-      // Billing data
-      personType: "natural" as "natural" | "juridica",
-      fullName: "",
-      documentType: "",
-      documentNumber: "",
-      address: "",
-      email: "",
-      rut: "",
-      legalName: "",
-      nit: "",
-      nitVerification: "",
-      legalAddress: "",
-      legalEmail: "",
-      legalRut: "",
-      cerl: "",
-    });
+    setFormData(getOriginalFormData());
     setLogoPreview(organization.logo || "");
     setSlugAvailable(null);
     setHasChanges(false);
@@ -285,7 +345,8 @@ export function EditOrganizationForm({
               Permisos insuficientes
             </h3>
             <p className="text-sm text-gray-600 dark:text-white/60 max-w-md">
-              Solo los propietarios pueden editar la configuración de la organización
+              Solo los propietarios pueden editar la configuración de la
+              organización
             </p>
           </div>
         </CardContent>
@@ -314,7 +375,9 @@ export function EditOrganizationForm({
                       type="text"
                       placeholder="Mi Organización"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       required
                       disabled={isLoading}
                       className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
@@ -348,11 +411,13 @@ export function EditOrganizationForm({
                       <Loader2 className="h-4 w-4 animate-spin text-gray-400 dark:text-white/40" />
                     </div>
                   )}
-                  {!isCheckingSlug && slugAvailable === true && formData.slug !== organization.slug && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    </div>
-                  )}
+                  {!isCheckingSlug &&
+                    slugAvailable === true &&
+                    formData.slug !== organization.slug && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      </div>
+                    )}
                   {!isCheckingSlug && slugAvailable === false && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
                       <XCircle className="h-4 w-4 text-red-500" />
@@ -364,11 +429,15 @@ export function EditOrganizationForm({
                     Este slug ya está en uso. Por favor, elige otro.
                   </p>
                 )}
-                {slugAvailable === true && formData.slug !== organization.slug && (
-                  <p className="text-xs text-green-600 dark:text-green-400">¡Slug disponible!</p>
-                )}
+                {slugAvailable === true &&
+                  formData.slug !== organization.slug && (
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      ¡Slug disponible!
+                    </p>
+                  )}
                 <p className="text-xs text-gray-600 dark:text-white/40">
-                  Este será usado en URLs: hunt-tickets.com/org/{formData.slug || "..."}
+                  Este será usado en URLs: hunt-tickets.com/org/
+                  {formData.slug || "..."}
                 </p>
               </div>
 
@@ -384,23 +453,30 @@ export function EditOrganizationForm({
                       type="text"
                       placeholder="Número de celular, cédula, correo o código alfanumérico"
                       value={formData.brebKey}
-                      onChange={(e) => setFormData({ ...formData, brebKey: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, brebKey: e.target.value })
+                      }
                       disabled={isLoading}
                       className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                     />
                   </div>
                 </div>
                 <p className="text-xs text-gray-600 dark:text-white/40">
-                  Necesario para recibir los pagos del programa de referidos. Puedes usar tu número de celular, cédula, correo o código alfanumérico del banco.
+                  Necesario para recibir los pagos del programa de referidos.
+                  Puedes usar tu número de celular, cédula, correo o código
+                  alfanumérico del banco.
                 </p>
               </div>
 
               {/* Public Contact Information Section */}
               <div className="pt-4 border-t border-gray-200 dark:border-[#2a2a2a] space-y-4">
                 <div className="space-y-1">
-                  <h4 className="text-sm font-semibold">Información de Contacto Público</h4>
+                  <h4 className="text-sm font-semibold">
+                    Información de Contacto Público
+                  </h4>
                   <p className="text-xs text-gray-600 dark:text-white/40">
-                    Esta información será visible para los usuarios en los eventos
+                    Esta información será visible para los usuarios en los
+                    eventos
                   </p>
                 </div>
 
@@ -416,7 +492,12 @@ export function EditOrganizationForm({
                         type="tel"
                         placeholder="+57 300 123 4567"
                         value={formData.publicPhone}
-                        onChange={(e) => setFormData({ ...formData, publicPhone: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            publicPhone: e.target.value,
+                          })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -436,7 +517,12 @@ export function EditOrganizationForm({
                         type="email"
                         placeholder="contacto@empresa.com"
                         value={formData.publicEmail}
-                        onChange={(e) => setFormData({ ...formData, publicEmail: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            publicEmail: e.target.value,
+                          })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -518,7 +604,9 @@ export function EditOrganizationForm({
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, personType: "natural" })}
+                  onClick={() =>
+                    setFormData({ ...formData, personType: "natural" })
+                  }
                   disabled={isLoading}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     formData.personType === "natural"
@@ -531,7 +619,9 @@ export function EditOrganizationForm({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, personType: "juridica" })}
+                  onClick={() =>
+                    setFormData({ ...formData, personType: "juridica" })
+                  }
                   disabled={isLoading}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     formData.personType === "juridica"
@@ -549,7 +639,8 @@ export function EditOrganizationForm({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="fullName" className="text-sm font-medium">
-                      Nombres y apellidos completos <span className="text-red-400">*</span>
+                      Nombres y apellidos completos{" "}
+                      <span className="text-red-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -557,7 +648,9 @@ export function EditOrganizationForm({
                         type="text"
                         placeholder="Juan Pérez García"
                         value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, fullName: e.target.value })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -565,14 +658,22 @@ export function EditOrganizationForm({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="documentType" className="text-sm font-medium">
+                    <Label
+                      htmlFor="documentType"
+                      className="text-sm font-medium"
+                    >
                       Tipo de documento <span className="text-red-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <select
                         id="documentType"
                         value={formData.documentType}
-                        onChange={(e) => setFormData({ ...formData, documentType: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            documentType: e.target.value,
+                          })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full"
                       >
@@ -585,8 +686,12 @@ export function EditOrganizationForm({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="documentNumber" className="text-sm font-medium">
-                      Número de identificación <span className="text-red-400">*</span>
+                    <Label
+                      htmlFor="documentNumber"
+                      className="text-sm font-medium"
+                    >
+                      Número de identificación{" "}
+                      <span className="text-red-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -594,7 +699,12 @@ export function EditOrganizationForm({
                         type="text"
                         placeholder="1234567890"
                         value={formData.documentNumber}
-                        onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            documentNumber: e.target.value,
+                          })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -611,7 +721,9 @@ export function EditOrganizationForm({
                         type="text"
                         placeholder="Calle 123 #45-67"
                         value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -628,7 +740,9 @@ export function EditOrganizationForm({
                         type="email"
                         placeholder="correo@ejemplo.com"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -660,14 +774,16 @@ export function EditOrganizationForm({
                           </label>
                           <button
                             type="button"
-                            onClick={() => window.open(formData.rut, '_blank')}
+                            onClick={() => window.open(formData.rut, "_blank")}
                             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:bg-gray-100 dark:hover:bg-[#252525] transition-colors text-sm font-medium"
                           >
                             Ver completo
                           </button>
                           <button
                             type="button"
-                            onClick={() => setFormData({ ...formData, rut: "" })}
+                            onClick={() =>
+                              setFormData({ ...formData, rut: "" })
+                            }
                             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-sm font-medium text-red-600 dark:text-red-400"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -704,7 +820,8 @@ export function EditOrganizationForm({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="legalName" className="text-sm font-medium">
-                      Razón social completa <span className="text-red-400">*</span>
+                      Razón social completa{" "}
+                      <span className="text-red-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -712,7 +829,12 @@ export function EditOrganizationForm({
                         type="text"
                         placeholder="Empresa S.A.S."
                         value={formData.legalName}
-                        onChange={(e) => setFormData({ ...formData, legalName: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            legalName: e.target.value,
+                          })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -730,12 +852,16 @@ export function EditOrganizationForm({
                           type="text"
                           placeholder="900123456"
                           value={formData.nit}
-                          onChange={(e) => setFormData({ ...formData, nit: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, nit: e.target.value })
+                          }
                           disabled={isLoading}
                           className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                         />
                       </div>
-                      <span className="text-gray-400 dark:text-white/40">-</span>
+                      <span className="text-gray-400 dark:text-white/40">
+                        -
+                      </span>
                       <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors w-16">
                         <input
                           id="nitVerification"
@@ -743,7 +869,12 @@ export function EditOrganizationForm({
                           placeholder="7"
                           maxLength={1}
                           value={formData.nitVerification}
-                          onChange={(e) => setFormData({ ...formData, nitVerification: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              nitVerification: e.target.value,
+                            })
+                          }
                           disabled={isLoading}
                           className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full text-center placeholder:text-gray-500 dark:placeholder:text-white/40"
                         />
@@ -755,8 +886,12 @@ export function EditOrganizationForm({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="legalAddress" className="text-sm font-medium">
-                      Dirección del domicilio social <span className="text-red-400">*</span>
+                    <Label
+                      htmlFor="legalAddress"
+                      className="text-sm font-medium"
+                    >
+                      Dirección del domicilio social{" "}
+                      <span className="text-red-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -764,7 +899,12 @@ export function EditOrganizationForm({
                         type="text"
                         placeholder="Carrera 7 #12-34, Bogotá"
                         value={formData.legalAddress}
-                        onChange={(e) => setFormData({ ...formData, legalAddress: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            legalAddress: e.target.value,
+                          })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -781,7 +921,12 @@ export function EditOrganizationForm({
                         type="email"
                         placeholder="contacto@empresa.com"
                         value={formData.legalEmail}
-                        onChange={(e) => setFormData({ ...formData, legalEmail: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            legalEmail: e.target.value,
+                          })
+                        }
                         disabled={isLoading}
                         className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 dark:placeholder:text-white/40"
                       />
@@ -813,14 +958,18 @@ export function EditOrganizationForm({
                           </label>
                           <button
                             type="button"
-                            onClick={() => window.open(formData.legalRut, '_blank')}
+                            onClick={() =>
+                              window.open(formData.legalRut, "_blank")
+                            }
                             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:bg-gray-100 dark:hover:bg-[#252525] transition-colors text-sm font-medium"
                           >
                             Ver completo
                           </button>
                           <button
                             type="button"
-                            onClick={() => setFormData({ ...formData, legalRut: "" })}
+                            onClick={() =>
+                              setFormData({ ...formData, legalRut: "" })
+                            }
                             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-sm font-medium text-red-600 dark:text-red-400"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -875,14 +1024,16 @@ export function EditOrganizationForm({
                           </label>
                           <button
                             type="button"
-                            onClick={() => window.open(formData.cerl, '_blank')}
+                            onClick={() => window.open(formData.cerl, "_blank")}
                             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:bg-gray-100 dark:hover:bg-[#252525] transition-colors text-sm font-medium"
                           >
                             Ver completo
                           </button>
                           <button
                             type="button"
-                            onClick={() => setFormData({ ...formData, cerl: "" })}
+                            onClick={() =>
+                              setFormData({ ...formData, cerl: "" })
+                            }
                             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-sm font-medium text-red-600 dark:text-red-400"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -908,7 +1059,8 @@ export function EditOrganizationForm({
                       className="hidden"
                     />
                     <p className="text-xs text-gray-600 dark:text-white/40">
-                      Certificado de Existencia y Representación Legal (PDF, máx. 5MB)
+                      Certificado de Existencia y Representación Legal (PDF,
+                      máx. 5MB)
                     </p>
                   </div>
                 </div>

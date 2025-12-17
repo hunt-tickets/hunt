@@ -549,6 +549,77 @@ export const auth = betterAuth({
     }),
 
     organization({
+      // Schema customization with additional fields
+      // These fields will be automatically accepted and returned by the API endpoints
+      schema: {
+        organization: {
+          additionalFields: {
+            tipoOrganizacion: {
+              type: "string",
+              required: false,
+              input: true,
+              fieldName: "tipo_organizacion",
+            },
+            nombres: {
+              type: "string",
+              required: false,
+              input: true,
+            },
+            apellidos: {
+              type: "string",
+              required: false,
+              input: true,
+            },
+            tipoDocumento: {
+              type: "string",
+              required: false,
+              input: true,
+              fieldName: "tipo_documento",
+            },
+            numeroDocumento: {
+              type: "string",
+              required: false,
+              input: true,
+              fieldName: "numero_documento",
+            },
+            nit: {
+              type: "string",
+              required: false,
+              input: true,
+            },
+            direccion: {
+              type: "string",
+              required: false,
+              input: true,
+            },
+            numeroTelefono: {
+              type: "string",
+              required: false,
+              input: true,
+              fieldName: "numero_telefono",
+            },
+            correoElectronico: {
+              type: "string",
+              required: false,
+              input: true,
+              fieldName: "correo_electronico",
+            },
+            rutUrl: {
+              type: "string",
+              required: false,
+              input: true,
+              fieldName: "rut_url",
+            },
+            cerlUrl: {
+              type: "string",
+              required: false,
+              input: true,
+              fieldName: "cerl_url",
+            },
+          },
+        },
+      },
+
       // If the requireEmailVerificationOnInvitation option is enabled in your organization configuration, users must verify their email address before they can accept invitations. This adds an extra security layer to ensure that only verified users can join your organization.
       requireEmailVerificationOnInvitation: true,
 

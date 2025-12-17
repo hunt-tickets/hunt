@@ -79,10 +79,12 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   );
   const currentUserRole = currentUserMember?.role || "member";
 
-  // Prepare data for AdminConfigTabs
+  // Organization data with payment accounts
+  // Additional fields (tipoOrganizacion, nombres, etc.) are automatically
+  // included by Better Auth via additionalFields in the organization plugin
   const organizationData = {
     ...fullOrganization,
-    paymentAccounts: paymentAccounts,
+    paymentAccounts,
   };
 
   // Map team members to include phoneNumber (default to null if not present)

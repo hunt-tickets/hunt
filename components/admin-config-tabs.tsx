@@ -3,7 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Settings, Mail, Shield, CreditCard, MailCheck, Search, Phone, X } from "lucide-react";
+import {
+  Users,
+  Settings,
+  Mail,
+  Shield,
+  CreditCard,
+  MailCheck,
+  Search,
+  Phone,
+  X,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -24,6 +34,18 @@ interface Organization {
   name: string;
   slug: string;
   logo?: string | null;
+  // Custom fields from database
+  tipoOrganizacion?: string | null;
+  nombres?: string | null;
+  apellidos?: string | null;
+  tipoDocumento?: string | null;
+  numeroDocumento?: string | null;
+  nit?: string | null;
+  direccion?: string | null;
+  numeroTelefono?: string | null;
+  correoElectronico?: string | null;
+  rutUrl?: string | null;
+  cerlUrl?: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   members?: any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,7 +95,9 @@ export function AdminConfigTabs({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [searchQuery, setSearchQuery] = useState("");
-  const [cancelingInvitation, setCancelingInvitation] = useState<string | null>(null);
+  const [cancelingInvitation, setCancelingInvitation] = useState<string | null>(
+    null
+  );
 
   const displayTeam = team.length > 0 ? team : [];
 
@@ -105,16 +129,16 @@ export function AdminConfigTabs({
 
   // Combine team members with pending invitations
   const combinedTeamData = [
-    ...displayTeam.map(member => ({ ...member, isPending: false })),
+    ...displayTeam.map((member) => ({ ...member, isPending: false })),
     ...invitations
-      .filter(inv => inv.status === "pending")
-      .map(inv => ({
+      .filter((inv) => inv.status === "pending")
+      .map((inv) => ({
         id: inv.id,
         email: inv.email,
         role: inv.role,
         isPending: true,
-        user: null
-      }))
+        user: null,
+      })),
   ];
 
   // Filter combined data based on search query
@@ -122,17 +146,24 @@ export function AdminConfigTabs({
     if (!searchQuery) return true;
 
     const query = searchQuery.toLowerCase();
-    const name = member.isPending ? "invitación pendiente" : (member.user?.name || "").toLowerCase();
+    const name = member.isPending
+      ? "invitación pendiente"
+      : (member.user?.name || "").toLowerCase();
     const email = member.isPending
-      ? ("email" in member ? member.email.toLowerCase() : "")
+      ? "email" in member
+        ? member.email.toLowerCase()
+        : ""
       : (member.user?.email || "").toLowerCase();
     const role = formatRole(member.role || "").toLowerCase();
 
-    return name.includes(query) || email.includes(query) || role.includes(query);
+    return (
+      name.includes(query) || email.includes(query) || role.includes(query)
+    );
   });
 
   // Check permissions
-  const canInvite = currentUserRole === "owner" || currentUserRole === "administrator";
+  const canInvite =
+    currentUserRole === "owner" || currentUserRole === "administrator";
 
   // Format role for display
   const formatRole = (role: string) => {
@@ -210,41 +241,54 @@ export function AdminConfigTabs({
               <div className="md:hidden space-y-3">
                 {filteredTeamData.map((member) => {
                   const isPending = member.isPending;
-                  const fullName = isPending ? "Invitación Pendiente" : (member.user?.name || "Usuario sin nombre");
+                  const fullName = isPending
+                    ? "Invitación Pendiente"
+                    : member.user?.name || "Usuario sin nombre";
                   const email = isPending
-                    ? ("email" in member ? member.email : "Sin correo")
-                    : (member.user?.email || "Sin correo");
+                    ? "email" in member
+                      ? member.email
+                      : "Sin correo"
+                    : member.user?.email || "Sin correo";
                   const role = member.role || "member";
 
                   const initials = isPending
                     ? "?"
                     : fullName
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()
-                      .slice(0, 2);
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2);
 
                   return (
-                    <Card key={member.id} className="bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10 min-w-0">
+                    <Card
+                      key={member.id}
+                      className="bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10 min-w-0"
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-sm ring-1 ${
-                              isPending
-                                ? "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 ring-orange-300 dark:ring-orange-700"
-                                : "bg-gray-200 dark:bg-white/[0.08] text-gray-700 dark:text-white/90 ring-gray-300 dark:ring-white/10"
-                            }`}>
+                            <div
+                              className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-sm ring-1 ${
+                                isPending
+                                  ? "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 ring-orange-300 dark:ring-orange-700"
+                                  : "bg-gray-200 dark:bg-white/[0.08] text-gray-700 dark:text-white/90 ring-gray-300 dark:ring-white/10"
+                              }`}
+                            >
                               {initials}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className={`font-medium truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}>
+                              <p
+                                className={`font-medium truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
+                              >
                                 {fullName}
                               </p>
                               {email !== "Sin correo" && (
                                 <div className="flex items-center gap-1 mt-1">
                                   <Mail className="h-3 w-3 text-gray-400 dark:text-white/40 flex-shrink-0" />
-                                  <span className="text-xs text-gray-600 dark:text-white/60 truncate">{email}</span>
+                                  <span className="text-xs text-gray-600 dark:text-white/60 truncate">
+                                    {email}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -269,21 +313,33 @@ export function AdminConfigTabs({
                                 </button>
                               </>
                             ) : role === "owner" ? (
-                              <Badge variant="default" className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-2 border-gray-900 dark:border-gray-100 text-xs font-semibold">
+                              <Badge
+                                variant="default"
+                                className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-2 border-gray-900 dark:border-gray-100 text-xs font-semibold"
+                              >
                                 <Shield className="h-3 w-3 mr-1" />
                                 {formatRole(role)}
                               </Badge>
                             ) : role === "administrator" ? (
-                              <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 text-xs">
+                              <Badge
+                                variant="outline"
+                                className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 text-xs"
+                              >
                                 <Shield className="h-3 w-3 mr-1" />
                                 {formatRole(role)}
                               </Badge>
                             ) : role === "seller" ? (
-                              <Badge variant="outline" className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 text-xs">
+                              <Badge
+                                variant="outline"
+                                className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 text-xs"
+                              >
                                 {formatRole(role)}
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 bg-gray-50 dark:bg-white/[0.02] text-xs">
+                              <Badge
+                                variant="outline"
+                                className="border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 bg-gray-50 dark:bg-white/[0.02] text-xs"
+                              >
                                 {formatRole(role)}
                               </Badge>
                             )}
@@ -318,21 +374,27 @@ export function AdminConfigTabs({
                     <TableBody>
                       {filteredTeamData.map((member) => {
                         const isPending = member.isPending;
-                        const fullName = isPending ? "Invitación Pendiente" : (member.user?.name || "Usuario sin nombre");
+                        const fullName = isPending
+                          ? "Invitación Pendiente"
+                          : member.user?.name || "Usuario sin nombre";
                         const email = isPending
-                          ? ("email" in member ? member.email : "Sin correo")
-                          : (member.user?.email || "Sin correo");
-                        const phoneNumber = isPending ? null : (member.user?.phoneNumber || null);
+                          ? "email" in member
+                            ? member.email
+                            : "Sin correo"
+                          : member.user?.email || "Sin correo";
+                        const phoneNumber = isPending
+                          ? null
+                          : member.user?.phoneNumber || null;
                         const role = member.role || "member";
 
                         const initials = isPending
                           ? "?"
                           : fullName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .toUpperCase()
-                            .slice(0, 2);
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2);
 
                         return (
                           <TableRow
@@ -341,15 +403,19 @@ export function AdminConfigTabs({
                           >
                             <TableCell className="py-5 pl-6">
                               <div className="flex items-center gap-3">
-                                <div className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-sm ring-1 ${
-                                  isPending
-                                    ? "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 ring-orange-300 dark:ring-orange-700"
-                                    : "bg-gray-200 dark:bg-white/[0.08] text-gray-700 dark:text-white/90 ring-gray-300 dark:ring-white/10"
-                                }`}>
+                                <div
+                                  className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-sm ring-1 ${
+                                    isPending
+                                      ? "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 ring-orange-300 dark:ring-orange-700"
+                                      : "bg-gray-200 dark:bg-white/[0.08] text-gray-700 dark:text-white/90 ring-gray-300 dark:ring-white/10"
+                                  }`}
+                                >
                                   {initials}
                                 </div>
                                 <div className="flex flex-col min-w-0 gap-0.5">
-                                  <span className={`font-medium truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}>
+                                  <span
+                                    className={`font-medium truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
+                                  >
                                     {fullName}
                                   </span>
                                 </div>
@@ -360,10 +426,14 @@ export function AdminConfigTabs({
                               {email !== "Sin correo" ? (
                                 <div className="flex items-center gap-2">
                                   <Mail className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
-                                  <span className="text-sm text-gray-600 dark:text-white/70">{email}</span>
+                                  <span className="text-sm text-gray-600 dark:text-white/70">
+                                    {email}
+                                  </span>
                                 </div>
                               ) : (
-                                <span className="text-sm text-gray-400 dark:text-white/30">Sin correo</span>
+                                <span className="text-sm text-gray-400 dark:text-white/30">
+                                  Sin correo
+                                </span>
                               )}
                             </TableCell>
 
@@ -371,10 +441,14 @@ export function AdminConfigTabs({
                               {phoneNumber ? (
                                 <div className="flex items-center gap-2">
                                   <Phone className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
-                                  <span className="text-sm text-gray-600 dark:text-white/70">{phoneNumber}</span>
+                                  <span className="text-sm text-gray-600 dark:text-white/70">
+                                    {phoneNumber}
+                                  </span>
                                 </div>
                               ) : (
-                                <span className="text-sm text-gray-400 dark:text-white/30">Sin teléfono</span>
+                                <span className="text-sm text-gray-400 dark:text-white/30">
+                                  Sin teléfono
+                                </span>
                               )}
                             </TableCell>
 
@@ -436,16 +510,22 @@ export function AdminConfigTabs({
                   </Table>
                 </div>
               </div>
-
             </div>
           )}
 
           {activeTab === "general" && organization && (
-            <EditOrganizationForm organization={organization} currentUserRole={currentUserRole} />
+            <EditOrganizationForm
+              organization={organization}
+              currentUserRole={currentUserRole}
+            />
           )}
 
           {activeTab === "procesadores" && organization && (
-            <AdminPaymentSettings organization={organization} currentUserRole={currentUserRole} mpOauthUrl={mpOauthUrl} />
+            <AdminPaymentSettings
+              organization={organization}
+              currentUserRole={currentUserRole}
+              mpOauthUrl={mpOauthUrl}
+            />
           )}
         </div>
       </div>

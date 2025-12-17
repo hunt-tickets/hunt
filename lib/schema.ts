@@ -342,6 +342,7 @@ export const organization = pgTable(
     numeroDocumento: text("numero_documento"),
     nit: text("nit"),
     direccion: text("direccion"),
+    numeroTelefono: text("numero_telefono"),
     correoElectronico: text("correo_electronico"),
     rutUrl: text("rut_url"),
     cerlUrl: text("cerl_url"),
@@ -403,28 +404,25 @@ export const invitation = pgTable(
 );
 
 // Payment processor account linking (OAuth-based)
-export const paymentProcessorAccount = pgTable(
-  "payment_processor_account",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    organizationId: text("organization_id").references(() => organization.id, {
-      onDelete: "cascade",
-    }),
-    processorType: paymentProcessorType("processor_type").notNull(),
-    processorAccountId: text("processor_account_id").notNull(),
-    accessToken: text("access_token").notNull(),
-    refreshToken: text("refresh_token"),
-    tokenExpiresAt: timestamp("token_expires_at"),
-    scope: text("scope"),
-    status: paymentProcessorStatus("status").notNull().default("inactive"),
-    metadata: jsonb("metadata"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  }
-);
+export const paymentProcessorAccount = pgTable("payment_processor_account", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  organizationId: text("organization_id").references(() => organization.id, {
+    onDelete: "cascade",
+  }),
+  processorType: paymentProcessorType("processor_type").notNull(),
+  processorAccountId: text("processor_account_id").notNull(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  tokenExpiresAt: timestamp("token_expires_at"),
+  scope: text("scope"),
+  status: paymentProcessorStatus("status").notNull().default("inactive"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
 
 // Hunt-Tickets specific tables
 
@@ -918,8 +916,12 @@ export type Member = InferSelectModel<typeof member>;
 export type NewMember = InferInsertModel<typeof member>;
 export type EmailLog = InferSelectModel<typeof emailLogs>;
 export type NewEmailLog = InferInsertModel<typeof emailLogs>;
-export type PaymentProcessorAccount = InferSelectModel<typeof paymentProcessorAccount>;
-export type NewPaymentProcessorAccount = InferInsertModel<typeof paymentProcessorAccount>;
+export type PaymentProcessorAccount = InferSelectModel<
+  typeof paymentProcessorAccount
+>;
+export type NewPaymentProcessorAccount = InferInsertModel<
+  typeof paymentProcessorAccount
+>;
 
 // Keep backward compatibility
 export type orderItem = OrderItem;

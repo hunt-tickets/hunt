@@ -8,9 +8,11 @@ import {
   phoneNumberClient,
   adminClient,
   organizationClient,
+  inferOrgAdditionalFields,
 } from "better-auth/client/plugins";
 import { passkeyClient } from "@better-auth/passkey/client";
 import { ac, owner, administrator, seller } from "@/lib/auth-permissions";
+import type { auth } from "@/lib/auth";
 
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
@@ -26,6 +28,8 @@ export const authClient = createAuthClient({
         administrator,
         seller,
       },
+      // Infer additional fields from the auth object type
+      schema: inferOrgAdditionalFields<typeof auth>(),
     }),
     adminClient(),
   ],
