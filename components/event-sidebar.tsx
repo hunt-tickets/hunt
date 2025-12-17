@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ticket, Settings, ArrowLeft, ScanLine, Banknote, ShoppingBag } from "lucide-react";
+import {
+  LayoutDashboard,
+  Ticket,
+  Settings,
+  ArrowLeft,
+  ScanLine,
+  Banknote,
+  ShoppingBag,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
@@ -70,17 +78,27 @@ const menuItems = [
   },
 ];
 
-export function EventSidebar({ userId, organizationId, eventId, eventName, role = "seller", user }: EventSidebarProps) {
+export function EventSidebar({
+  userId,
+  organizationId,
+  eventId,
+  eventName,
+  role = "seller",
+  // user,
+}: EventSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
 
   const baseEventPath = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}`;
-  const backHref = role === "seller"
-    ? `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
-    : `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`;
+  const backHref =
+    role === "seller"
+      ? `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
+      : `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`;
 
   // Filter menu items based on role
-  const visibleMenuItems = menuItems.filter((item) => item.requiredRoles.includes(role));
+  const visibleMenuItems = menuItems.filter((item) =>
+    item.requiredRoles.includes(role)
+  );
 
   return (
     <>
@@ -107,11 +125,17 @@ export function EventSidebar({ userId, organizationId, eventId, eventName, role 
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
               <ArrowLeft className="h-5 w-5 text-gray-400 dark:text-gray-400" />
-              <div className="text-xl font-bold text-foreground" style={{ fontFamily: "LOT, sans-serif" }}>
+              <div
+                className="text-xl font-bold text-foreground"
+                style={{ fontFamily: "LOT, sans-serif" }}
+              >
                 HUNT
               </div>
             </Link>
-            <div className="text-xs text-gray-500 dark:text-white/40 truncate mt-2 ml-8" title={eventName}>
+            <div
+              className="text-xs text-gray-500 dark:text-white/40 truncate mt-2 ml-8"
+              title={eventName}
+            >
               {eventName}
             </div>
           </div>
@@ -148,7 +172,6 @@ export function EventSidebar({ userId, organizationId, eventId, eventName, role 
 
             {/* User Menu */}
             <SidebarUserMenu
-              user={user}
               userId={userId}
               onMenuClose={() => setIsMobileMenuOpen(false)}
             />

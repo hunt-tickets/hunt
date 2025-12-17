@@ -14,7 +14,7 @@ interface Organization {
   name: string;
   slug: string;
   logo?: string | null;
-  createdAt: Date;
+  createdAt: Date | string;
 }
 
 interface OrganizationSelectorProps {

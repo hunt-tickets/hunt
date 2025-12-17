@@ -1,12 +1,7 @@
 import React, { ReactNode } from "react";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { AdminLayoutWrapper } from "@/components/admin-layout-wrapper";
 import { Metadata } from "next";
-import { db } from "@/lib/drizzle";
-import { member } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -22,28 +17,11 @@ interface AdministradorLayoutProps {
   }>;
 }
 
-const AdministradorLayout = async ({ children, params }: AdministradorLayoutProps) => {
+const AdministradorLayout = async ({
+  children,
+  params,
+}: AdministradorLayoutProps) => {
   const { userId, organizationId } = await params;
-
-  // Get user session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  // Fetch user's role in the organization for sidebar display
-  const memberRecord = await db.query.member.findFirst({
-    where: and(
-      eq(member.userId, userId),
-      eq(member.organizationId, organizationId)
-    ),
-  });
-
-  const role = (memberRecord?.role as "owner" | "administrator" | "seller") || "seller";
-
-  // Fetch user's organizations using Better Auth API
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
-  });
 
   return (
     <AdminLayoutWrapper>
@@ -51,10 +29,7 @@ const AdministradorLayout = async ({ children, params }: AdministradorLayoutProp
         {/* Sidebar */}
         <AdminSidebar
           userId={userId}
-          organizationId={organizationId}
-          role={role}
-          organizations={organizations || []}
-          user={session?.user || null}
+          organizationId={organizationId} // First render organization_id
         />
 
         {/* Main Content - with left margin to accommodate fixed sidebar */}

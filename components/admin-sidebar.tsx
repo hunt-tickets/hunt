@@ -2,43 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Settings, ArrowLeft, UserCircle, Gift, Puzzle } from "lucide-react";
+import {
+  Calendar,
+  Settings,
+  ArrowLeft,
+  UserCircle,
+  Gift,
+  Puzzle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
 import { OrganizationSelector } from "@/components/organization-selector";
 import { SidebarUserMenu } from "@/components/sidebar-user-menu";
+import { authClient } from "@/lib/auth-client";
+import { Member } from "@/lib/schema";
+import { useEffect, useState } from "react";
 
-interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  logo?: string | null;
-  createdAt: Date;
-}
-
-interface UserData {
-  id: string;
-  name: string | null;
-  email: string;
-  image?: string | null;
-}
+type Role = "owner" | "administrator" | "seller";
 
 interface AdminSidebarProps {
   userId: string;
   organizationId: string;
-  role: "owner" | "administrator" | "seller";
-  organizations: Organization[];
-  user: UserData | null;
 }
 
-const primaryMenuItems = [
+interface MenuItem {
+  title: string;
+  icon: typeof Calendar;
+  href: string;
+  description: string;
+  exact: boolean;
+  roles: Role[]; // Which roles can see this item
+}
+
+const primaryMenuItems: MenuItem[] = [
   {
     title: "Eventos",
     icon: Calendar,
     href: "/administrador/eventos",
     description: "Crea y gestiona eventos",
-    exact: false, // Will match /administrador/event/[id] too
+    exact: false,
+    roles: ["owner", "administrator", "seller"], // Everyone can see events
+  },
+  {
+    title: "Mis Ventas",
+    icon: Calendar, // You may want a different icon
+    href: "/administrador/mis-ventas",
+    description: "Historial de ventas",
+    exact: true,
+    roles: ["seller"], // Only sellers see this
   },
   {
     title: "Usuarios",
@@ -46,6 +58,7 @@ const primaryMenuItems = [
     href: "/administrador/usuarios",
     description: "Listado completo de usuarios",
     exact: true,
+    roles: ["owner", "administrator"], // Sellers cannot access
   },
   {
     title: "Recompensas",
@@ -53,6 +66,7 @@ const primaryMenuItems = [
     href: "/administrador/referidos",
     description: "Programa de referidos y rebate",
     exact: true,
+    roles: ["owner", "administrator"], // Sellers cannot access
   },
   {
     title: "Integraciones",
@@ -60,6 +74,7 @@ const primaryMenuItems = [
     href: "/administrador/integraciones",
     description: "Conecta servicios externos",
     exact: true,
+    roles: ["owner", "administrator"], // Sellers cannot access
   },
   {
     title: "Configuración",
@@ -67,12 +82,70 @@ const primaryMenuItems = [
     href: "/administrador/configuracion",
     description: "Ajustes del sistema",
     exact: true,
+    roles: ["owner", "administrator"], // Sellers cannot access
   },
 ];
 
-export function AdminSidebar({ userId, organizationId, organizations, user }: AdminSidebarProps) {
+export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useAdminMenu();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoadingRole, setIsLoadingRole] = useState(true);
+
+  // Fetch all sidebar data client-side
+  const { data: organizationsData } = authClient.useListOrganizations();
+
+  // Handle potential nesting - organizations might be in data.organizations or just data
+
+  type OrganizationData = {
+    id: string;
+    name: string;
+    slug: string;
+    logo?: string | null;
+    createdAt: Date | string;
+  };
+
+  const organizations: OrganizationData[] = (() => {
+    if (!organizationsData) return [];
+    if (Array.isArray(organizationsData)) return organizationsData;
+    if (typeof organizationsData === "object" && "organizations" in organizationsData) {
+      return (organizationsData as { organizations: OrganizationData[] }).organizations;
+    }
+    return [];
+  })();
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      setIsLoadingRole(true);
+      try {
+        const { data, error } = await authClient.organization.listMembers({
+          query: { organizationId },
+        });
+        if (data && !error) {
+          // Handle potential nesting - data might be array or object with members
+          const membersArray = Array.isArray(data)
+            ? data
+            : (data as unknown as { members?: unknown[] })?.members || [];
+          setMembers(membersArray as Member[]);
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      } finally {
+        setIsLoadingRole(false);
+      }
+    };
+
+    fetchMembers();
+  }, [organizationId]);
+
+  // Find current user's role from members list
+  const currentUserMember = members?.find((m: Member) => m.userId === userId);
+  const role: Role = (currentUserMember?.role as Role) || "seller";
+
+  // Filter menu items based on role
+  const visibleMenuItems = primaryMenuItems.filter((item) =>
+    item.roles.includes(role)
+  );
 
   return (
     <>
@@ -99,14 +172,17 @@ export function AdminSidebar({ userId, organizationId, organizations, user }: Ad
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
               <ArrowLeft className="h-5 w-5 text-gray-400 dark:text-gray-400" />
-              <div className="text-xl font-bold text-foreground" style={{ fontFamily: "LOT, sans-serif" }}>
+              <div
+                className="text-xl font-bold text-foreground"
+                style={{ fontFamily: "LOT, sans-serif" }}
+              >
                 HUNT
               </div>
             </Link>
           </div>
 
           {/* Organization Selector */}
-          {organizations.length > 0 && (
+          {organizations && organizations.length > 0 && (
             <div className="mb-6">
               <OrganizationSelector organizations={organizations} />
             </div>
@@ -114,8 +190,22 @@ export function AdminSidebar({ userId, organizationId, organizations, user }: Ad
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1">
-            {/* Primary Menu Items */}
-            {primaryMenuItems.map((item) => {
+            {/* Loading skeleton while fetching role */}
+            {isLoadingRole ? (
+              <>
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 px-4 py-2 rounded-full"
+                  >
+                    <div className="h-4 w-4 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+                    <div className="h-4 w-24 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+                  </div>
+                ))}
+              </>
+            ) : (
+            /* Primary Menu Items */
+            visibleMenuItems.map((item) => {
               const Icon = item.icon;
               const fullHref = `/profile/${userId}/organizaciones/${organizationId}${item.href}`;
 
@@ -126,7 +216,10 @@ export function AdminSidebar({ userId, organizationId, organizations, user }: Ad
               } else {
                 // For non-exact matches (like /administrador/eventos which should also match /administrador/event/[id])
                 if (item.href === "/administrador/eventos") {
-                  isActive = pathname.includes("/administrador/eventos") || (pathname.includes("/administrador/event/") && !pathname.includes("/configuracion"));
+                  isActive =
+                    pathname.includes("/administrador/eventos") ||
+                    (pathname.includes("/administrador/event/") &&
+                      !pathname.includes("/configuracion"));
                 } else {
                   isActive = pathname.includes(item.href);
                 }
@@ -148,7 +241,8 @@ export function AdminSidebar({ userId, organizationId, organizations, user }: Ad
                   <div>{item.title}</div>
                 </Link>
               );
-            })}
+            })
+            )}
           </nav>
 
           {/* Footer */}
@@ -157,7 +251,6 @@ export function AdminSidebar({ userId, organizationId, organizations, user }: Ad
 
             {/* User Menu */}
             <SidebarUserMenu
-              user={user}
               userId={userId}
               onMenuClose={() => setIsMobileMenuOpen(false)}
             />

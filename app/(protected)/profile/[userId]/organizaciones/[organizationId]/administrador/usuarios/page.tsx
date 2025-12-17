@@ -69,81 +69,86 @@ function formatGender(gender: string | null): string {
 const UsuariosPage = async ({ params }: UsuariosPageProps) => {
   const { userId, organizationId } = await params;
   const reqHeaders = await headers();
+  const supabase = await createClient();
 
-  // Auth check using Better Auth
-  const session = await auth.api.getSession({
-    headers: reqHeaders,
-  });
-
+  // Auth check
+  const session = await auth.api.getSession({ headers: reqHeaders });
   if (!session || session.user.id !== userId) {
     redirect("/sign-in");
   }
+  // ============================================================================
+  // PARALLEL FETCHES: Run all auth checks + data query simultaneously
+  // ============================================================================
+  const queryStart = performance.now();
 
-  // Verify user is a member of the organization
-  const memberRecord = await db.query.member.findFirst({
-    where: and(
-      eq(member.userId, userId),
-      eq(member.organizationId, organizationId)
-    ),
-  });
+  const [memberRecord, canViewAnalytics, { data: ticketsWithUsers, error }] =
+    await Promise.all([
+      // Member check
+      db.query.member.findFirst({
+        where: and(
+          eq(member.userId, userId),
+          eq(member.organizationId, organizationId)
+        ),
+      }),
+
+      // Permission check
+      auth.api.hasPermission({
+        headers: reqHeaders,
+        body: {
+          permission: { analytics: ["view"] },
+          organizationId,
+        },
+      }),
+
+      // Main data query (runs in parallel with auth checks)
+      supabase
+        .from("tickets")
+        .select(
+          `
+          id,
+          user_id,
+          ticket_types!inner (
+            id,
+            price,
+            events!inner (
+              id,
+              organization_id
+            )
+          ),
+          user:user_id (
+            id,
+            name,
+            apellidos,
+            email,
+            phoneNumber,
+            birthdate,
+            gender,
+            document_id,
+            createdAt
+          )
+        `
+        )
+        .eq("ticket_types.events.organization_id", organizationId),
+    ]);
+
+  const queryTime = performance.now() - queryStart;
+  console.log(
+    `📊 [Usuarios] Parallel fetch time: ${queryTime.toFixed(0)}ms | Tickets: ${ticketsWithUsers?.length || 0}`
+  );
+
+  // ============================================================================
+  // VALIDATE AUTH RESULTS (after parallel fetch completes)
+  // ============================================================================
 
   if (!memberRecord) {
     notFound();
   }
-
-  // Check if user can view analytics (sellers cannot)
-  const canViewAnalytics = await auth.api.hasPermission({
-    headers: reqHeaders,
-    body: {
-      permission: { analytics: ["view"] },
-      organizationId,
-    },
-  });
 
   if (!canViewAnalytics?.success) {
     redirect(
       `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
     );
   }
-
-  // ============================================================================
-  // SINGLE EFFICIENT QUERY: Get tickets with user data for this organization
-  // Path: tickets → ticket_types → events (filtered by org_id) → user
-  // ============================================================================
-  const supabase = await createClient();
-
-  const queryStart = performance.now();
-  const { data: ticketsWithUsers, error } = await supabase
-    .from("tickets")
-    .select(
-      `
-      id,
-      user_id,
-      ticket_types!inner (
-        id,
-        price,
-        events!inner (
-          id,
-          organization_id
-        )
-      ),
-      user:user_id (
-        id,
-        name,
-        apellidos,
-        email,
-        phoneNumber,
-        birthdate,
-        gender,
-        document_id,
-        createdAt
-      )
-    `
-    )
-    .eq("ticket_types.events.organization_id", organizationId);
-
-  const queryTime = performance.now() - queryStart;
-  console.log(`📊 [Usuarios] Query time: ${queryTime.toFixed(0)}ms | Tickets: ${ticketsWithUsers?.length || 0}`);
 
   if (error) {
     console.error("Error fetching tickets:", error);
@@ -190,7 +195,9 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     if (!userData) continue;
 
     // ticket_types is a single object due to !inner join
-    const ticketType = ticket.ticket_types as unknown as { price: string | number } | null;
+    const ticketType = ticket.ticket_types as unknown as {
+      price: string | number;
+    } | null;
     const ticketPrice = Number(ticketType?.price || 0);
 
     totalTicketsSold++;
@@ -223,7 +230,11 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     const age = calculateAge(userData.birthdate);
     const ageGroup = getAgeGroup(age);
     if (!ageGroupStats.has(ageGroup)) {
-      ageGroupStats.set(ageGroup, { users: new Set(), tickets: 0, totalSpent: 0 });
+      ageGroupStats.set(ageGroup, {
+        users: new Set(),
+        tickets: 0,
+        totalSpent: 0,
+      });
     }
     const ageStat = ageGroupStats.get(ageGroup)!;
     ageStat.users.add(userData.id);
@@ -234,7 +245,11 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
     const gender = formatGender(userData.gender);
     if (gender !== "Sin especificar") {
       if (!genderStats.has(gender)) {
-        genderStats.set(gender, { users: new Set(), tickets: 0, totalSpent: 0 });
+        genderStats.set(gender, {
+          users: new Set(),
+          tickets: 0,
+          totalSpent: 0,
+        });
       }
       const genderStat = genderStats.get(gender)!;
       genderStat.users.add(userData.id);
@@ -256,7 +271,8 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
         ageGroup,
         users: stat.users.size,
         tickets: stat.tickets,
-        averagePrice: stat.tickets > 0 ? Math.round(stat.totalSpent / stat.tickets) : 0,
+        averagePrice:
+          stat.tickets > 0 ? Math.round(stat.totalSpent / stat.tickets) : 0,
       };
     });
 
@@ -270,7 +286,8 @@ const UsuariosPage = async ({ params }: UsuariosPageProps) => {
         gender,
         users: stat.users.size,
         tickets: stat.tickets,
-        averagePrice: stat.tickets > 0 ? Math.round(stat.totalSpent / stat.tickets) : 0,
+        averagePrice:
+          stat.tickets > 0 ? Math.round(stat.totalSpent / stat.tickets) : 0,
       };
     });
 
