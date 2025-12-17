@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, LogOut, X } from "lucide-react";
 import { parseUserAgent, formatSessionTime } from "@/lib/utils/session-parser";
 import { toast } from "sonner";
 
@@ -12,17 +13,21 @@ interface Session {
   token: string;
   userId: string;
   expiresAt: Date;
-  ipAddress: string | null;
-  userAgent: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export function ActiveSessionsCard() {
+interface ActiveSessionProps {
+  activeSession: Session;
+}
+
+export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [revokingToken, setRevokingToken] = useState<string | null>(null);
-  const { data: currentSession } = authClient.useSession();
+  const [revokingToken, setRevokingToken] = useState<string | null>(null);
+  const [revokingAll, setRevokingAll] = useState(false);
 
   useEffect(() => {
     loadSessions();
@@ -50,26 +55,55 @@ export function ActiveSessionsCard() {
     }
   };
 
-  // const handleRevokeSession = async (token: string) => {
-  //   setRevokingToken(token);
-  //   try {
-  //     const { error } = await authClient.revokeSession({ token });
+  const revokeSession = async (token: string) => {
+    try {
+      setRevokingToken(token);
+      const { error } = await authClient.revokeSession({ token });
 
-  //     if (error) {
-  //       console.error("Error revoking session:", error);
-  //       toast.error("Error al cerrar la sesión");
-  //       return;
-  //     }
+      if (error) {
+        console.error("Error revoking session:", error);
+        toast.error("Error al cerrar la sesión");
+        return;
+      }
 
-  //     toast.success("Sesión cerrada exitosamente");
-  //     await loadSessions();
-  //   } catch (error) {
-  //     console.error("Error revoking session:", error);
-  //     toast.error("Error al cerrar la sesión");
-  //   } finally {
-  //     setRevokingToken(null);
-  //   }
-  // };
+      // Remove the session from the list
+      setSessions((prev) => prev.filter((s) => s.token !== token));
+      toast.success("Sesión cerrada correctamente");
+    } catch (error) {
+      console.error("Error revoking session:", error);
+      toast.error("Error al cerrar la sesión");
+    } finally {
+      setRevokingToken(null);
+    }
+  };
+
+  const revokeOtherSessions = async () => {
+    try {
+      setRevokingAll(true);
+      const { error } = await authClient.revokeOtherSessions();
+
+      if (error) {
+        console.error("Error revoking other sessions:", error);
+        toast.error("Error al cerrar las otras sesiones");
+        return;
+      }
+
+      // Keep only the current session
+      setSessions((prev) =>
+        prev.filter((s) => s.token === activeSession.token)
+      );
+      toast.success("Otras sesiones cerradas correctamente");
+    } catch (error) {
+      console.error("Error revoking other sessions:", error);
+      toast.error("Error al cerrar las otras sesiones");
+    } finally {
+      setRevokingAll(false);
+    }
+  };
+
+  const otherSessionsCount = sessions.filter(
+    (s) => s.token !== activeSession.token
+  ).length;
 
   const getDeviceIcon = (deviceType: "desktop" | "mobile" | "tablet") => {
     switch (deviceType) {
@@ -243,51 +277,99 @@ export function ActiveSessionsCard() {
   }
 
   return (
-    <div className="space-y-3">
-      {sessions.map((session) => {
-        const parsed = parseUserAgent(session.userAgent);
-        const isCurrentSession =
-          currentSession?.session?.token === session.token;
-
-        return (
-          <div
-            key={session.id}
-            className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 p-4 rounded-xl border border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
+    <div className="space-y-4">
+      {/* Revoke all other sessions button */}
+      {otherSessionsCount > 0 && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={revokeOtherSessions}
+            disabled={revokingAll}
+            className="text-red-500 hover:text-red-600 hover:bg-red-500/10 border-red-500/20"
           >
-            <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-              <div className="flex-shrink-0 text-muted-foreground mt-1">
-                {getDeviceIcon(parsed.deviceType)}
+            {revokingAll ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4 mr-2" />
+            )}
+            Cerrar otras sesiones ({otherSessionsCount})
+          </Button>
+        </div>
+      )}
+
+      {/* Sessions list */}
+      <div className="space-y-3">
+        {sessions.map((session) => {
+          const parsed = parseUserAgent(session?.userAgent ?? null);
+          const isCurrentSession =
+            activeSession.token === session.token;
+          const isRevoking = revokingToken === session.token;
+
+          return (
+            <div
+              key={session.id}
+              className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 p-4 rounded-xl border border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors group"
+            >
+              <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                <div className="flex-shrink-0 text-muted-foreground mt-1">
+                  {getDeviceIcon(parsed.deviceType)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                    <p className="font-medium text-sm sm:text-base truncate">
+                      {parsed.deviceName}
+                    </p>
+                    {isCurrentSession && (
+                      <Badge
+                        variant="secondary"
+                        className="text-xs px-2 py-0.5 bg-green-500/10 text-green-400 border-green-500/20 shrink-0"
+                      >
+                        Este dispositivo
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-500 space-y-1">
+                    <p className="truncate">
+                      {parsed.browser} {parsed.browserVersion}
+                    </p>
+                    <p className="truncate">
+                      {session.ipAddress && `${session.ipAddress} (Bogotá, CO)`}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                  <p className="font-medium text-sm sm:text-base truncate">{parsed.deviceName}</p>
-                  {isCurrentSession && (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs px-2 py-0.5 bg-green-500/10 text-green-400 border-green-500/20 shrink-0"
-                    >
-                      Este dispositivo
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-xs sm:text-sm text-gray-500 space-y-1">
-                  <p className="truncate">
-                    {parsed.browser} {parsed.browserVersion}
-                  </p>
-                  <p className="truncate">
-                    {session.ipAddress && `${session.ipAddress} (Bogotá, CO)`}
-                  </p>
-                </div>
+              <div className="flex items-center gap-3 sm:items-start justify-between sm:justify-end">
+                <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">
+                  {formatSessionTime(new Date(session.createdAt))}
+                </span>
+                {!isCurrentSession && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => revokeSession(session.token)}
+                    disabled={isRevoking || revokingAll}
+                    className="text-gray-400 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 p-0"
+                    title="Cerrar esta sesión"
+                  >
+                    {isRevoking ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
-            <div className="flex items-center sm:items-start justify-between sm:justify-end">
-              <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">
-                {formatSessionTime(new Date(session.createdAt))}
-              </span>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
+
+      {sessions.length === 0 && (
+        <p className="text-center text-sm text-gray-500 py-4">
+          No hay sesiones activas
+        </p>
+      )}
     </div>
   );
 }

@@ -330,13 +330,13 @@ export default async function ProfilePage() {
         <h2 className="text-xl font-semibold leading-tight">
           Dispositivos activos
         </h2>
-        <ActiveSessionsCard />
+        <ActiveSessionsCard activeSession={session.session} />
       </div>
 
       {/* Danger Zone */}
       <div className="space-y-5">
         <h2 className="text-xl font-semibold leading-tight text-red-500">
-          Danger Zone
+          Zona de Peligro
         </h2>
 
         <div className="space-y-3">
