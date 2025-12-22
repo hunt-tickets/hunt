@@ -78,7 +78,7 @@ const ProductorHero = () => {
   }, []);
 
   return (
-    <div className="min-h-svh w-screen bg-background flex flex-col items-center justify-center p-8 relative overflow-hidden">
+    <div className="min-h-svh w-screen bg-background flex flex-col items-center justify-center pt-24 md:pt-32 pb-8 px-8 relative overflow-hidden">
       <div className="w-full max-w-6xl space-y-12 relative z-10">
         <div className="flex flex-col items-center text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 border border-foreground/20 hover:border-foreground/30 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/5">
