@@ -37,30 +37,24 @@ export default function SobreNosotrosPage() {
         {/* Gradient Mesh Background */}
         <div className="absolute inset-0 z-0">
           <GradientMeshBackground />
-          {/* Overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
         </div>
 
         {/* Hero Content */}
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <h1
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight mb-6"
-            style={{ fontFamily: "LOT, sans-serif" }}
-          >
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight mb-6">
             CREANDO{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">
-              EXPERIENCIAS
-            </span>
+            <span className="text-primary">EXPERIENCIAS</span>
             <br />
             INOLVIDABLES
           </h1>
-          <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-10">
+          <p className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10">
             Conectamos personas con los mejores eventos. Descubre, compara y vive momentos únicos.
           </p>
 
           {/* Scroll Indicator */}
           <div className="animate-bounce">
-            <ChevronDown className="h-8 w-8 text-white/50 mx-auto" />
+            <ChevronDown className="h-8 w-8 text-white/40 mx-auto" />
           </div>
         </div>
       </section>
@@ -74,11 +68,8 @@ export default function SobreNosotrosPage() {
               <p className="text-primary font-medium mb-3 text-sm uppercase tracking-wider">
                 Nuestra Historia
               </p>
-              <h2
-                className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6"
-                style={{ fontFamily: "LOT, sans-serif" }}
-              >
-                EL ECOSISTEMA HUNT
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
+                El Ecosistema Hunt
               </h2>
               <p className="text-muted-foreground text-lg leading-relaxed mb-6">
                 Hunt está evolucionando para ser más que una plataforma de tickets.
@@ -91,11 +82,8 @@ export default function SobreNosotrosPage() {
               </p>
             </div>
             <div className="relative">
-              <div className="aspect-square rounded-3xl bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center">
-                <span
-                  className="text-8xl sm:text-9xl font-black text-white/10"
-                  style={{ fontFamily: "LOT, sans-serif" }}
-                >
+              <div className="aspect-square rounded-3xl bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10 flex items-center justify-center">
+                <span className="text-8xl sm:text-9xl font-bold text-muted-foreground/20">
                   H
                 </span>
               </div>
@@ -107,19 +95,16 @@ export default function SobreNosotrosPage() {
         <div className="container mx-auto max-w-6xl px-6 pb-16 sm:pb-24">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {/* Misión - Large Card */}
-            <div className="col-span-2 row-span-2 rounded-3xl bg-gradient-to-br from-purple-600 to-purple-900 p-6 sm:p-8 flex flex-col justify-between min-h-[280px] sm:min-h-[320px]">
+            <div className="col-span-2 row-span-2 rounded-3xl bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10 p-6 sm:p-8 flex flex-col justify-between min-h-[280px] sm:min-h-[320px]">
               <div>
-                <p className="text-purple-200 text-sm font-medium mb-2 uppercase tracking-wider">
+                <p className="text-muted-foreground text-sm font-medium mb-2 uppercase tracking-wider">
                   Nuestra Misión
                 </p>
-                <h3
-                  className="text-2xl sm:text-3xl font-bold text-white mb-4"
-                  style={{ fontFamily: "LOT, sans-serif" }}
-                >
-                  DEMOCRATIZAR EL ACCESO A EVENTOS
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+                  Democratizar el acceso a eventos
                 </h3>
               </div>
-              <p className="text-purple-100/80 text-sm sm:text-base leading-relaxed">
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                 Facilitar la conexión entre personas y experiencias que crean
                 recuerdos inolvidables, sin importar dónde estés.
               </p>
@@ -135,10 +120,7 @@ export default function SobreNosotrosPage() {
                 >
                   <Icon className="h-5 w-5 text-muted-foreground mb-3" />
                   <div>
-                    <p
-                      className="text-2xl sm:text-3xl font-bold text-foreground"
-                      style={{ fontFamily: "LOT, sans-serif" }}
-                    >
+                    <p className="text-2xl sm:text-3xl font-bold text-foreground">
                       {stat.value}
                     </p>
                     <p className="text-muted-foreground text-sm">{stat.label}</p>
@@ -148,19 +130,16 @@ export default function SobreNosotrosPage() {
             })}
 
             {/* Visión - Large Card */}
-            <div className="col-span-2 rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-700 p-6 sm:p-8 flex flex-col justify-between min-h-[180px]">
+            <div className="col-span-2 rounded-3xl bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10 p-6 sm:p-8 flex flex-col justify-between min-h-[180px]">
               <div>
-                <p className="text-blue-200 text-sm font-medium mb-2 uppercase tracking-wider">
+                <p className="text-muted-foreground text-sm font-medium mb-2 uppercase tracking-wider">
                   Nuestra Visión
                 </p>
-                <h3
-                  className="text-xl sm:text-2xl font-bold text-white mb-3"
-                  style={{ fontFamily: "LOT, sans-serif" }}
-                >
-                  LÍDERES EN LATAM
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3">
+                  Líderes en Latinoamérica
                 </h3>
               </div>
-              <p className="text-blue-100/80 text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Ser la plataforma líder donde cada experiencia cuenta y cada
                 evento es una oportunidad de crear momentos únicos.
               </p>
@@ -171,11 +150,8 @@ export default function SobreNosotrosPage() {
         {/* ============ VALUES SECTION ============ */}
         <div className="container mx-auto max-w-6xl px-6 pb-16 sm:pb-24">
           <div className="text-center mb-12">
-            <h2
-              className="text-3xl sm:text-4xl font-bold text-foreground"
-              style={{ fontFamily: "LOT, sans-serif" }}
-            >
-              NUESTROS VALORES
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+              Nuestros Valores
             </h2>
           </div>
 
@@ -187,14 +163,11 @@ export default function SobreNosotrosPage() {
                   key={index}
                   className="group rounded-3xl bg-muted/30 dark:bg-white/[0.03] border border-border dark:border-white/10 p-6 sm:p-8 hover:bg-muted/50 dark:hover:bg-white/[0.06] transition-all duration-300"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors">
-                    <Icon className="h-6 w-6 text-primary" />
+                  <div className="w-12 h-12 rounded-2xl bg-muted dark:bg-white/10 flex items-center justify-center mb-5 group-hover:bg-muted-foreground/10 transition-colors">
+                    <Icon className="h-6 w-6 text-foreground" />
                   </div>
-                  <h3
-                    className="text-xl font-bold text-foreground mb-3"
-                    style={{ fontFamily: "LOT, sans-serif" }}
-                  >
-                    {value.title.toUpperCase()}
+                  <h3 className="text-xl font-bold text-foreground mb-3">
+                    {value.title}
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     {value.description}
@@ -207,20 +180,17 @@ export default function SobreNosotrosPage() {
 
         {/* ============ CTA SECTION ============ */}
         <div className="container mx-auto max-w-4xl px-6 pb-20 sm:pb-32">
-          <div className="rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 p-8 sm:p-12 text-center">
-            <h2
-              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
-              style={{ fontFamily: "LOT, sans-serif" }}
-            >
-              ¿LISTO PARA LA AVENTURA?
+          <div className="rounded-3xl bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10 p-8 sm:p-12 text-center">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+              ¿Listo para la aventura?
             </h2>
-            <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
+            <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
               Únete a miles de personas que ya están descubriendo los mejores eventos con Hunt.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/eventos"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white text-gray-900 font-medium hover:bg-white/90 transition-colors"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
               >
                 Explorar Eventos
               </Link>
@@ -228,7 +198,7 @@ export default function SobreNosotrosPage() {
                 href="https://wa.me/573228597640"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white/10 text-white font-medium border border-white/20 hover:bg-white/20 transition-colors"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-muted dark:bg-white/10 text-foreground font-medium border border-border dark:border-white/20 hover:bg-muted-foreground/10 dark:hover:bg-white/20 transition-colors"
               >
                 Contáctanos
               </Link>
