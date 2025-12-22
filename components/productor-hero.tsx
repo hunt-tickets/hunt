@@ -87,7 +87,7 @@ const ProductorHero = () => {
           </div>
 
           <div className="space-y-6 flex items-center justify-center flex-col ">
-            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl" style={{ fontFamily: 'LOT, sans-serif' }}>
+            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl">
               Impulsa tus eventos
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
