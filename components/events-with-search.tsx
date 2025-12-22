@@ -165,12 +165,12 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
         {/* Active filters indicator */}
         {(searchQuery || selectedCity || selectedCategory) && (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-white/60">
+            <span className="text-sm text-gray-500 dark:text-white/60">
               {filteredEvents.length} de {events.length} eventos
             </span>
             <button
               onClick={resetFilters}
-              className="text-sm text-white/70 hover:text-white transition-colors"
+              className="text-sm text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               Limpiar filtros
             </button>
@@ -181,13 +181,13 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
       {/* Show message if no events found after filtering */}
       {filteredEvents.length === 0 ? (
         <div className="text-center py-12 sm:py-16 md:py-20">
-          <div className="inline-flex p-3 sm:p-4 bg-white/5 rounded-xl sm:rounded-2xl border border-white/10 mb-4 sm:mb-6">
-            <Filter className="h-10 w-10 sm:h-12 sm:w-12 text-white/60" />
+          <div className="inline-flex p-3 sm:p-4 bg-gray-100 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-white/10 mb-4 sm:mb-6">
+            <Filter className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 dark:text-white/60" />
           </div>
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-3 px-4">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 px-4">
             No se encontraron eventos
           </h3>
-          <p className="text-sm sm:text-base text-white/60 mb-5 sm:mb-6 max-w-md mx-auto px-4">
+          <p className="text-sm sm:text-base text-gray-500 dark:text-white/60 mb-5 sm:mb-6 max-w-md mx-auto px-4">
             {selectedCity && `No hay eventos disponibles en ${selectedCity}`}
             {searchQuery &&
               !selectedCity &&
@@ -198,7 +198,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
           </p>
           <button
             onClick={resetFilters}
-            className="px-5 py-2.5 sm:px-6 sm:py-3 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/30 rounded-full text-white text-sm sm:text-base font-medium transition-all duration-300"
+            className="px-5 py-2.5 sm:px-6 sm:py-3 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 border border-gray-200 dark:border-white/20 hover:border-gray-300 dark:hover:border-white/30 rounded-full text-gray-900 dark:text-white text-sm sm:text-base font-medium transition-all duration-300"
           >
             Mostrar todos los eventos
           </button>
