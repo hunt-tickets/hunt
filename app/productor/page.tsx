@@ -1,5 +1,5 @@
 import { ProductorHero } from "@/components/productor-hero";
-import { BarChart3, Ticket, Megaphone, QrCode, CreditCard, Users, TrendingUp, Shield } from "lucide-react";
+import { BarChart3, Ticket, Megaphone, QrCode, CreditCard, Users, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 const features = [
