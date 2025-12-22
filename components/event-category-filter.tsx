@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Definición de categorías y subcategorías
@@ -53,8 +52,6 @@ export function EventCategoryFilter({
   onCategoryChange,
   onSubcategoryChange,
 }: EventCategoryFilterProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const handleCategoryClick = (categoryKey: CategoryKey) => {
     if (selectedCategory === categoryKey) {
       // Si la categoría ya está seleccionada, la deseleccionamos
