@@ -19,12 +19,12 @@ export function GradientMeshBackground({ className = "" }: GradientMeshBackgroun
     let animationFrameId: number;
     let time = 0;
 
-    // Blob configuration - muted, dark colors
+    // Blob configuration - pure gray tones
     const blobs = [
-      { x: 0.3, y: 0.3, radius: 0.5, color: "rgba(80, 80, 100, 0.4)", speedX: 0.0002, speedY: 0.00015 },
-      { x: 0.7, y: 0.6, radius: 0.45, color: "rgba(60, 70, 90, 0.35)", speedX: -0.00015, speedY: 0.0002 },
-      { x: 0.5, y: 0.8, radius: 0.4, color: "rgba(70, 60, 80, 0.3)", speedX: 0.00015, speedY: -0.00015 },
-      { x: 0.2, y: 0.7, radius: 0.35, color: "rgba(50, 60, 70, 0.25)", speedX: 0.0002, speedY: 0.0001 },
+      { x: 0.3, y: 0.3, radius: 0.5, color: "rgba(90, 90, 90, 0.4)", speedX: 0.0002, speedY: 0.00015 },
+      { x: 0.7, y: 0.6, radius: 0.45, color: "rgba(70, 70, 70, 0.35)", speedX: -0.00015, speedY: 0.0002 },
+      { x: 0.5, y: 0.8, radius: 0.4, color: "rgba(80, 80, 80, 0.3)", speedX: 0.00015, speedY: -0.00015 },
+      { x: 0.2, y: 0.7, radius: 0.35, color: "rgba(60, 60, 60, 0.25)", speedX: 0.0002, speedY: 0.0001 },
     ];
 
     const resize = () => {
