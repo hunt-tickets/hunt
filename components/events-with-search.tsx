@@ -137,21 +137,19 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
     <>
       {/* Search and Filter Bar */}
       <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-        {/* Search and filter row */}
-        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full">
+        {/* Search and filter row - same line on mobile */}
+        <div className="flex flex-row gap-2.5 sm:gap-3 w-full">
           <div className="flex-1">
             <EnhancedSearchBar
               searchQuery={searchQuery}
               onSearchChange={handleSearch}
             />
           </div>
-          <div className="w-full sm:w-64 lg:w-72">
-            <EnhancedCityFilter
-              cities={cities}
-              selectedCity={selectedCity}
-              onCityChange={handleCityChange}
-            />
-          </div>
+          <EnhancedCityFilter
+            cities={cities}
+            selectedCity={selectedCity}
+            onCityChange={handleCityChange}
+          />
         </div>
 
         {/* Category Filter */}
@@ -161,21 +159,6 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
           onCategoryChange={handleCategoryChange}
           onSubcategoryChange={handleSubcategoryChange}
         />
-
-        {/* Active filters indicator */}
-        {(searchQuery || selectedCity || selectedCategory) && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-500 dark:text-white/60">
-              {filteredEvents.length} de {events.length} eventos
-            </span>
-            <button
-              onClick={resetFilters}
-              className="text-sm text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              Limpiar filtros
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Show message if no events found after filtering */}
