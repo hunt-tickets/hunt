@@ -108,7 +108,7 @@ const ProductorHero = () => {
             <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-foreground">
               Impulsa tus eventos
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-lg text-gray-600 dark:text-[#B0B0B0] max-w-2xl">
               Gestiona, promociona y maximiza el éxito de tus eventos con nuestras herramientas especializadas.
             </p>
             <div className="flex flex-row gap-2 sm:gap-3 items-center">
@@ -147,7 +147,7 @@ const ProductorHero = () => {
             >
               <feature.icon size={18} className="text-foreground/80 md:w-5 md:h-5" />
               <h3 className="text-sm md:text-base font-medium text-foreground">{feature.title}</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">{feature.description}</p>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-[#B0B0B0]">{feature.description}</p>
             </div>
           ))}
         </div>
