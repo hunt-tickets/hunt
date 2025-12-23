@@ -1,6 +1,6 @@
 "use client"
 
-import { WaveBackground } from "@/components/ui/wave-background";
+import { ShaderAnimation } from "@/components/ui/shader-animation";
 import { HoverButton } from "@/components/ui/hover-glow-button";
 import { Users, BarChart3, Shield, Zap } from "lucide-react";
 import Link from "next/link";
@@ -78,19 +78,19 @@ const ProductorHero = () => {
   }, []);
 
   return (
-    <div className="min-h-svh w-screen bg-background flex flex-col items-center justify-center pt-24 md:pt-32 pb-8 px-8 relative overflow-hidden">
+    <div className="min-h-svh w-screen bg-black flex flex-col items-center justify-center pt-24 md:pt-32 pb-8 px-8 relative overflow-hidden">
       <div className="w-full max-w-6xl space-y-12 relative z-10">
         <div className="flex flex-col items-center text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 border border-foreground/20 hover:border-foreground/30 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/5">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-gradient-to-r from-white/10 via-white/5 to-white/10 border border-white/20 hover:border-white/30 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
             <span className="text-xl">✨</span>
-            <span className="text-sm font-medium tracking-wide">Plataforma para Productores</span>
+            <span className="text-sm font-medium tracking-wide text-white">Plataforma para Productores</span>
           </div>
 
           <div className="space-y-6 flex items-center justify-center flex-col ">
-            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl">
+            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
               Impulsa tus eventos
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-lg text-white/70 max-w-2xl">
               Gestiona, promociona y maximiza el éxito de tus eventos con nuestras herramientas especializadas.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 items-center">
@@ -98,8 +98,8 @@ const ProductorHero = () => {
                 data-cal-namespace="15min"
                 data-cal-link="hunt-tickets/15min"
                 data-cal-config='{"layout":"month_view"}'
-                className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-primary text-primary-foreground"
-                glowColor="#000000"
+                className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-white text-black"
+                glowColor="#ffffff"
                 backgroundColor="transparent"
                 textColor="inherit"
                 hoverTextColor="inherit"
@@ -108,7 +108,7 @@ const ProductorHero = () => {
               </HoverButton>
               <Link href="/eventos">
                 <HoverButton
-                  className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-background/50 text-foreground border border-[#303030] backdrop-blur-sm"
+                  className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-white/10 text-white border border-white/20 backdrop-blur-sm"
                   glowColor="#ffffff"
                   backgroundColor="transparent"
                   textColor="inherit"
@@ -125,16 +125,16 @@ const ProductorHero = () => {
           {features.map((feature, idx) => (
             <div
               key={idx}
-              className="backdrop-blur-sm bg-foreground/5 border border-foreground/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+              className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
             >
-              <feature.icon size={18} className="text-foreground/80 md:w-5 md:h-5" />
-              <h3 className="text-sm md:text-base font-medium">{feature.title}</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">{feature.description}</p>
+              <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
+              <h3 className="text-sm md:text-base font-medium text-white">{feature.title}</h3>
+              <p className="text-xs md:text-sm text-white/60">{feature.description}</p>
             </div>
           ))}
         </div>
       </div>
-      <WaveBackground />
+      <ShaderAnimation />
     </div>
   );
 };
