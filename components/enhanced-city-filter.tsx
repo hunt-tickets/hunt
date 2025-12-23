@@ -28,8 +28,8 @@ export function EnhancedCityFilter({ cities, selectedCity, onCityChange }: Enhan
       {/* Desktop: Full width with text */}
       <SelectTrigger
         className={`
-          /* Mobile: circle button */
-          w-11 h-11 p-0 rounded-full
+          /* Mobile: circle button - same height as search bar */
+          w-12 h-12 p-0 rounded-full
           /* Desktop: full width with padding */
           sm:w-64 lg:w-72 sm:!h-12 sm:pl-4 sm:pr-4 sm:py-0 sm:rounded-3xl
           /* Common styles */
