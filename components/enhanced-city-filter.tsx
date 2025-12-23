@@ -28,13 +28,13 @@ export function EnhancedCityFilter({ cities, selectedCity, onCityChange }: Enhan
       {/* Desktop: Full width with text */}
       <SelectTrigger
         className={`
-          !w-12 !h-12 !min-h-12 !max-h-12 p-0 rounded-full
-          sm:!w-64 lg:!w-72 sm:pl-4 sm:pr-4 sm:py-0 sm:rounded-3xl
+          !h-12 !min-h-12 !max-h-12 px-4 rounded-3xl
+          sm:!w-64 lg:!w-72 sm:pl-4 sm:pr-4 sm:py-0
           bg-gray-50 dark:bg-white/10 border text-base text-gray-900 dark:text-white
           data-[placeholder]:text-gray-400 dark:data-[placeholder]:text-white/50
           focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20
           focus-visible:ring-offset-0 transition-all duration-200
-          flex items-center justify-center sm:justify-start
+          flex items-center justify-center sm:justify-start gap-2
           ${
             isFocused
               ? 'border-gray-300 dark:border-white/40 bg-white dark:bg-white/15'
@@ -46,18 +46,10 @@ export function EnhancedCityFilter({ cities, selectedCity, onCityChange }: Enhan
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       >
-        {/* Mobile: Icon only */}
-        <MapPin className={`h-5 w-5 sm:hidden transition-colors duration-200 ${
-          selectedCity ? 'text-gray-700 dark:text-white' : 'text-gray-400 dark:text-white/50'
+        <MapPin className={`h-5 w-5 flex-shrink-0 transition-colors duration-200 ${
+          isFocused || selectedCity ? 'text-gray-700 dark:text-white' : 'text-gray-400 dark:text-white/50'
         }`} />
-
-        {/* Desktop: Icon + Text */}
-        <div className="hidden sm:flex items-center gap-2">
-          <MapPin className={`h-5 w-5 transition-colors duration-200 ${
-            isFocused ? 'text-gray-700 dark:text-white/80' : 'text-gray-400 dark:text-white/50'
-          }`} />
-          <SelectValue placeholder="Todas las ciudades" />
-        </div>
+        <SelectValue placeholder="Ciudad" className="truncate" />
       </SelectTrigger>
 
       <SelectContent className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-2xl text-gray-900 dark:text-white text-base shadow-xl">
