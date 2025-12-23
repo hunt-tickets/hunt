@@ -49,7 +49,9 @@ export function EnhancedCityFilter({ cities, selectedCity, onCityChange }: Enhan
         <MapPin className={`h-5 w-5 flex-shrink-0 transition-colors duration-200 ${
           isFocused || selectedCity ? 'text-gray-700 dark:text-white' : 'text-gray-400 dark:text-white/50'
         }`} />
-        <SelectValue placeholder="Ciudad" className="truncate" />
+        <span className="hidden sm:block">
+          <SelectValue placeholder="Ciudad" className="truncate" />
+        </span>
       </SelectTrigger>
 
       <SelectContent className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-2xl text-gray-900 dark:text-white text-base shadow-xl">
