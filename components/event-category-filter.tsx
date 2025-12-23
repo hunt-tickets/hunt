@@ -100,79 +100,36 @@ export function EventCategoryFilter({
   };
 
   const categories = Object.entries(EVENT_CATEGORIES) as [CategoryKey, typeof EVENT_CATEGORIES[CategoryKey]][];
-  const hasActiveFilters = selectedCategory || selectedSubcategory;
 
-  return (
-    <div className="space-y-3">
-      {/* Categorías principales - Carrusel horizontal */}
+  // Si hay una categoría seleccionada, mostrar layout colapsado
+  if (selectedCategory) {
+    const SelectedIcon = EVENT_CATEGORIES[selectedCategory].icon;
+
+    return (
       <div className="flex items-center gap-2">
-        {/* Botón Limpiar - siempre visible cuando hay filtros */}
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="flex-shrink-0 flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:gap-1.5 sm:px-3 sm:py-2 rounded-full text-sm font-medium bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-300 border border-red-200 dark:border-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/30 transition-all"
-            aria-label="Limpiar filtros"
-          >
-            <X className="h-4 w-4" />
-            <span className="hidden sm:inline">Limpiar</span>
-          </button>
-        )}
+        {/* Categoría seleccionada */}
+        <button
+          onClick={() => handleCategoryClick(selectedCategory)}
+          className="flex-shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-full bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
+        >
+          <SelectedIcon className="h-4 w-4" aria-hidden="true" />
+          <span>{EVENT_CATEGORIES[selectedCategory].label}</span>
+        </button>
 
-        <div className="relative group/scroll flex-1 min-w-0">
-          {/* Botón scroll izquierda */}
-          <button
-            onClick={() => scroll(scrollContainerRef, "left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
-            aria-label="Scroll izquierda"
-          >
-            <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-white/70" />
-          </button>
+        {/* Botón limpiar */}
+        <button
+          onClick={clearFilters}
+          className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-300 border border-red-200 dark:border-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/30 transition-all"
+          aria-label="Limpiar filtros"
+        >
+          <X className="h-4 w-4" />
+        </button>
 
-          {/* Contenedor de categorías con scroll */}
-          <div
-            ref={scrollContainerRef}
-            role="tablist"
-            aria-label="Categorías de eventos"
-            className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0 sm:px-6"
-          >
-            {categories.map(([key, category]) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === key;
-              return (
-                <button
-                  key={key}
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => handleCategoryClick(key)}
-                  className={cn(
-                    "flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap",
-                    isActive
-                      ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
-                      : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10"
-                  )}
-                >
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                  <span>{category.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Separador */}
+        <div className="w-px h-6 bg-gray-200 dark:bg-white/20 flex-shrink-0" />
 
-          {/* Botón scroll derecha */}
-          <button
-            onClick={() => scroll(scrollContainerRef, "right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
-            aria-label="Scroll derecha"
-          >
-            <ChevronRight className="h-4 w-4 text-gray-600 dark:text-white/70" />
-          </button>
-        </div>
-      </div>
-
-      {/* Subcategorías - Carrusel horizontal cuando hay categoría seleccionada */}
-      {selectedCategory && (
-        <div className="relative group/sub animate-in fade-in slide-in-from-top-2 duration-300">
-          {/* Botón scroll izquierda */}
+        {/* Subcategorías carousel */}
+        <div className="relative group/sub flex-1 min-w-0">
           <button
             onClick={() => scroll(subcategoryScrollRef, "left")}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/sub:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
@@ -183,7 +140,7 @@ export function EventCategoryFilter({
 
           <div
             ref={subcategoryScrollRef}
-            className="flex gap-2 overflow-x-auto pb-1 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0 sm:px-5"
+            className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0 sm:px-5"
           >
             {EVENT_CATEGORIES[selectedCategory].subcategories.map((subcategory) => {
               const isActive = selectedSubcategory === subcategory;
@@ -204,7 +161,6 @@ export function EventCategoryFilter({
             })}
           </div>
 
-          {/* Botón scroll derecha */}
           <button
             onClick={() => scroll(subcategoryScrollRef, "right")}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/sub:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
@@ -213,7 +169,53 @@ export function EventCategoryFilter({
             <ChevronRight className="h-3.5 w-3.5 text-gray-600 dark:text-white/70" />
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // Sin categoría seleccionada - mostrar carrusel completo
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative group/scroll flex-1 min-w-0">
+        <button
+          onClick={() => scroll(scrollContainerRef, "left")}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
+          aria-label="Scroll izquierda"
+        >
+          <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-white/70" />
+        </button>
+
+        <div
+          ref={scrollContainerRef}
+          role="tablist"
+          aria-label="Categorías de eventos"
+          className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0 sm:px-6"
+        >
+          {categories.map(([key, category]) => {
+            const Icon = category.icon;
+            return (
+              <button
+                key={key}
+                role="tab"
+                aria-selected={false}
+                onClick={() => handleCategoryClick(key)}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10"
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                <span>{category.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={() => scroll(scrollContainerRef, "right")}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
+          aria-label="Scroll derecha"
+        >
+          <ChevronRight className="h-4 w-4 text-gray-600 dark:text-white/70" />
+        </button>
+      </div>
     </div>
   );
 }
