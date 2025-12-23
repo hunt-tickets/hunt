@@ -112,12 +112,12 @@ const ProductorHero = () => {
             <p className="text-lg text-white/70 max-w-2xl">
               Gestiona, promociona y maximiza el éxito de tus eventos con nuestras herramientas especializadas.
             </p>
-            <div className="flex flex-row gap-3 items-center">
+            <div className="flex flex-row gap-2 sm:gap-3 items-center">
               <HoverButton
                 data-cal-namespace="15min"
                 data-cal-link="hunt-tickets/15min"
                 data-cal-config='{"layout":"month_view"}'
-                className="px-4 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-xs sm:text-base font-medium bg-white text-black"
+                className="h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-white text-black flex items-center justify-center"
                 glowColor="#ffffff"
                 backgroundColor="transparent"
                 textColor="inherit"
@@ -127,7 +127,7 @@ const ProductorHero = () => {
               </HoverButton>
               <Link href="/eventos">
                 <HoverButton
-                  className="px-4 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-xs sm:text-base font-medium bg-white/10 text-white border border-white/20 backdrop-blur-sm"
+                  className="h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-white/10 text-white border border-white/20 backdrop-blur-sm flex items-center justify-center"
                   glowColor="#ffffff"
                   backgroundColor="transparent"
                   textColor="inherit"
