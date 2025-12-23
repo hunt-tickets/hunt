@@ -163,7 +163,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   };
 
   return (
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md pb-8 md:pb-0">
           <div className="flex flex-col gap-6">
             <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight text-foreground">{title}</h1>
             <p className="animate-element animate-delay-200 text-gray-400">
@@ -237,7 +237,9 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               </div>
 
               <div className="animate-element animate-delay-300 space-y-2">
-                <label className="text-sm font-medium text-gray-400">Fecha de nacimiento</label>
+                <label className="text-sm font-medium text-gray-400">
+                  Fecha de nacimiento <span className="text-gray-500 font-normal">(opcional)</span>
+                </label>
                 <SimpleDatePicker
                   name="birthday"
                   value={birthday}
@@ -248,7 +250,9 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="animate-element animate-delay-300 space-y-2">
-                  <label className="text-sm font-medium text-gray-400">Tipo de documento</label>
+                  <label className="text-sm font-medium text-gray-400">
+                    Tipo de documento <span className="text-gray-500 font-normal">(opcional)</span>
+                  </label>
                   <GlassInputWrapper>
                     <select
                       name="tipoDocumento"
@@ -256,7 +260,6 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
                       value={tipoDocumento}
                       onChange={(e) => setTipoDocumento(e.target.value)}
-                      required
                     >
                       <option value="CC">Cédula de Ciudadanía</option>
                       <option value="CE">Cédula de Extranjería</option>
@@ -268,7 +271,9 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 </div>
 
                 <div className="animate-element animate-delay-300 space-y-2">
-                  <label className="text-sm font-medium text-gray-400">Número de documento</label>
+                  <label className="text-sm font-medium text-gray-400">
+                    Número de documento <span className="text-gray-500 font-normal">(opcional)</span>
+                  </label>
                   <GlassInputWrapper>
                     <input
                       name="numeroDocumento"
@@ -283,7 +288,6 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       }}
                       maxLength={20}
                       pattern="[A-Z0-9]+"
-                      required
                     />
                   </GlassInputWrapper>
                 </div>
