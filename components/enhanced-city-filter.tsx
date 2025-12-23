@@ -54,10 +54,13 @@ export function EnhancedCityFilter({ cities, selectedCity, onCityChange }: Enhan
         </span>
       </SelectTrigger>
 
-      <SelectContent className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-2xl text-gray-900 dark:text-white text-base shadow-xl">
+      <SelectContent
+        className="rounded-2xl border dark:border-zinc-800 bg-background/95 backdrop-blur-md shadow-lg"
+        sideOffset={8}
+      >
         <SelectItem
           value="all"
-          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 focus:bg-gray-100 dark:focus:bg-zinc-800 text-base"
+          className="rounded-xl cursor-pointer text-base"
         >
           Todas las ciudades
         </SelectItem>
@@ -66,7 +69,7 @@ export function EnhancedCityFilter({ cities, selectedCity, onCityChange }: Enhan
           <SelectItem
             key={city}
             value={city}
-            className="cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 focus:bg-gray-100 dark:focus:bg-zinc-800 text-base"
+            className="rounded-xl cursor-pointer text-base"
           >
             {city}
           </SelectItem>
