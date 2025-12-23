@@ -15,7 +15,7 @@ export default function AuthLayout({
         {/* Back button */}
         <Link
           href="/"
-          className="absolute top-6 left-6 z-50 flex items-center gap-2 text-sm text-gray-400 hover:text-foreground transition-colors group"
+          className="absolute top-6 left-6 z-10 flex items-center gap-2 text-sm text-gray-400 hover:text-foreground transition-colors group"
         >
           <div className="p-2 rounded-full border dark:border-[#303030] bg-background/80 backdrop-blur-sm group-hover:bg-background transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -24,7 +24,7 @@ export default function AuthLayout({
         </Link>
 
         {/* Left column: dynamic content */}
-        <section className="flex-1 flex items-center justify-center p-8">
+        <section className="flex-1 flex items-center justify-center p-8 pt-20 md:pt-8">
           {children}
         </section>
 
