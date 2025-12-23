@@ -105,10 +105,10 @@ const ProductorHero = () => {
           </div>
 
           <div className="space-y-6 flex items-center justify-center flex-col">
-            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-foreground">
+            <h1 className="text-[clamp(1.5rem,6vw,3.75rem)] font-black leading-tight tracking-tight max-w-3xl text-foreground">
               Impulsa tus eventos
             </h1>
-            <p className="text-lg text-gray-600 dark:text-[#B0B0B0] max-w-2xl">
+            <p className="text-[clamp(1rem,3vw,1.5rem)] text-gray-600 dark:text-[#B0B0B0] leading-relaxed max-w-2xl">
               Gestiona, promociona y maximiza el éxito de tus eventos con nuestras herramientas especializadas.
             </p>
             <div className="flex flex-row gap-2 sm:gap-3 items-center">
