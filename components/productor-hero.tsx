@@ -100,9 +100,8 @@ const ProductorHero = () => {
     <div className="relative z-10 min-h-svh w-screen flex flex-col items-center justify-center pt-24 md:pt-32 pb-8 px-8">
       <div className="w-full max-w-6xl space-y-12">
         <div className="flex flex-col items-center text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 border border-foreground/20 hover:border-foreground/30 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/5">
-            <span className="text-xl">✨</span>
-            <span className="text-sm font-medium tracking-wide text-foreground">Plataforma para Productores</span>
+          <div className="inline-flex items-center px-3 py-1.5 rounded-full backdrop-blur-md bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 border border-foreground/20">
+            <span className="text-xs font-medium tracking-wide text-foreground">Para Productores</span>
           </div>
 
           <div className="space-y-6 flex items-center justify-center flex-col">
