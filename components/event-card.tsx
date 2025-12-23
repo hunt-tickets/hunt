@@ -122,7 +122,7 @@ export function EventCard({
 
         {/* Gradient overlay for text readability in dark mode / Progressive blur in light mode */}
         {isThemeDark ? (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         ) : (
           <ProgressiveBlur
             className="pointer-events-none absolute bottom-0 left-0 h-[30%] w-full"
