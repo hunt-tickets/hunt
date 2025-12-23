@@ -2,7 +2,7 @@
 
 import { ShaderAnimation } from "@/components/ui/shader-animation";
 import { HoverButton } from "@/components/ui/hover-glow-button";
-import { Users, BarChart3, Shield, Zap } from "lucide-react";
+import { Users, BarChart3, Shield, Zap, Ticket, QrCode, Megaphone, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -10,12 +10,12 @@ const features = [
   {
     icon: Users,
     title: "Alcance Masivo",
-    description: "Conecta con miles de usuarios.",
+    description: "Conecta con miles de usuarios interesados en tus eventos.",
   },
   {
     icon: BarChart3,
-    title: "Análisis Real",
-    description: "Métricas detalladas de ventas y comportamiento.",
+    title: "Métricas en Tiempo Real",
+    description: "Dashboard completo con estadísticas de ventas.",
   },
   {
     icon: Shield,
@@ -26,6 +26,26 @@ const features = [
     icon: Zap,
     title: "Gestión Simple",
     description: "Herramientas intuitivas para tus eventos.",
+  },
+  {
+    icon: Ticket,
+    title: "Gestión de Tickets",
+    description: "Control total sobre precios y disponibilidad.",
+  },
+  {
+    icon: QrCode,
+    title: "Escaneo QR",
+    description: "Validación instantánea de entradas.",
+  },
+  {
+    icon: Megaphone,
+    title: "Promoción",
+    description: "Marketing integrado para maximizar ventas.",
+  },
+  {
+    icon: CreditCard,
+    title: "Cobros Fáciles",
+    description: "Recibe pagos directamente en tu cuenta.",
   },
 ];
 
@@ -93,12 +113,12 @@ const ProductorHero = () => {
             <p className="text-lg text-white/70 max-w-2xl">
               Gestiona, promociona y maximiza el éxito de tus eventos con nuestras herramientas especializadas.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 items-center">
+            <div className="flex flex-row gap-3 items-center">
               <HoverButton
                 data-cal-namespace="15min"
                 data-cal-link="hunt-tickets/15min"
                 data-cal-config='{"layout":"month_view"}'
-                className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-white text-black"
+                className="px-4 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-xs sm:text-base font-medium bg-white text-black"
                 glowColor="#ffffff"
                 backgroundColor="transparent"
                 textColor="inherit"
@@ -108,7 +128,7 @@ const ProductorHero = () => {
               </HoverButton>
               <Link href="/eventos">
                 <HoverButton
-                  className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-white/10 text-white border border-white/20 backdrop-blur-sm"
+                  className="px-4 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-xs sm:text-base font-medium bg-white/10 text-white border border-white/20 backdrop-blur-sm"
                   glowColor="#ffffff"
                   backgroundColor="transparent"
                   textColor="inherit"
