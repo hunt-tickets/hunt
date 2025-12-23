@@ -30,7 +30,7 @@ export function ShaderAnimation() {
       }
     `
 
-    // Fragment shader - Gray color scheme matching landing page
+    // Fragment shader - Transparent background with visible lines
     const fragmentShader = `
       #define TWO_PI 6.2831853072
       #define PI 3.14159265359
@@ -49,10 +49,13 @@ export function ShaderAnimation() {
           brightness += lineWidth*float(i*i) / abs(fract(t + float(i)*0.01)*5.0 - length(uv) + mod(uv.x+uv.y, 0.2));
         }
 
-        // Gray color matching landing page (vec3(0.6) from glsl-hills)
-        vec3 color = vec3(0.6) * brightness;
+        // Gray color for the lines
+        vec3 color = vec3(0.5);
 
-        gl_FragColor = vec4(color, 1.0);
+        // Use brightness as alpha - lines are visible, background is transparent
+        float alpha = clamp(brightness * 0.8, 0.0, 1.0);
+
+        gl_FragColor = vec4(color, alpha);
       }
     `
 
@@ -72,13 +75,19 @@ export function ShaderAnimation() {
       uniforms: uniforms,
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
+      transparent: true,
     })
 
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    // Enable alpha transparency in the renderer
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    })
     renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setClearColor(0x000000, 0) // Transparent background
 
     container.appendChild(renderer.domElement)
 
