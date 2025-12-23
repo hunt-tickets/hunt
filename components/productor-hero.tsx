@@ -97,14 +97,14 @@ const ProductorHero = () => {
   }, []);
 
   return (
-    <div className="relative z-10 min-h-svh w-screen flex flex-col items-center justify-center pt-24 md:pt-32 pb-8 px-8">
-      <div className="w-full max-w-6xl space-y-12">
-        <div className="flex flex-col items-center text-center space-y-8">
+    <div className="relative z-10 min-h-svh w-screen flex flex-col items-center justify-center pt-20 md:pt-32 pb-6 md:pb-8 px-4 sm:px-6 md:px-8">
+      <div className="w-full max-w-6xl space-y-8 md:space-y-12">
+        <div className="flex flex-col items-center text-center space-y-6 md:space-y-8">
           <div className="inline-flex items-center px-3 py-1.5 rounded-full backdrop-blur-md bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 border border-foreground/20">
             <span className="text-xs font-medium tracking-wide text-foreground">Para Productores</span>
           </div>
 
-          <div className="space-y-6 flex items-center justify-center flex-col">
+          <div className="space-y-4 md:space-y-6 flex items-center justify-center flex-col">
             <h1 className="text-[clamp(1.5rem,6vw,3.75rem)] font-black leading-tight tracking-tight max-w-3xl text-foreground">
               Impulsa tus eventos
             </h1>
