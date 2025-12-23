@@ -52,7 +52,7 @@ export function AuthButton() {
     return (
       <Link href="/sign-in">
         <div
-          className="h-10 px-4 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 bg-white dark:bg-white text-black hover:bg-gray-50 dark:hover:bg-gray-100"
+          className="h-10 px-4 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 bg-foreground text-background hover:bg-foreground/90"
         >
           <span className="text-sm font-medium">Ingresar</span>
         </div>
