@@ -10,20 +10,15 @@ import AddPaymentProcessorDialog from "./add-payment-processor-dialog";
 import { PaymentAccountActions } from "./payment-status-actions";
 import { PaymentStatusSwitch } from "./payment-status-switch";
 import Image from "next/image";
-import {
+import type {
   PaymentProcessorType,
   PaymentProcessorAccount,
-} from "@/types/payment-processor";
-
-interface OrganizationWithPayments {
-  id: string;
-  paymentAccounts?: PaymentProcessorAccount[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any; // Allow other organization properties
-}
+  OrganizationData,
+  MercadoPagoMetadata,
+} from "@/lib/schema";
 
 interface PaymentSettingsProps {
-  org: OrganizationWithPayments | null;
+  org: OrganizationData;
   mpOauthUrl?: string;
 }
 
@@ -37,10 +32,7 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
         return "Stripe";
       case "mercadopago":
         return "MercadoPago";
-      case "toast":
-        return "Toast POS";
       default:
-        // This should never happen with proper typing, but handle gracefully
         return String(type).charAt(0).toUpperCase() + String(type).slice(1);
     }
   };
@@ -59,18 +51,6 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
             <Image
               src="/MP_RGB_HANDSHAKE_color_vertical.svg"
               alt="MercadoPago"
-              width={32}
-              height={32}
-              className="h-6 w-auto"
-            />
-          </div>
-        );
-      case "toast":
-        return (
-          <div className="h-8 w-8 flex items-center justify-center">
-            <Image
-              src="/Toast POS.svg"
-              alt="Toast POS"
               width={32}
               height={32}
               className="h-6 w-auto"
@@ -109,12 +89,12 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
                   Active
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <div className="h-1.5 w-1.5 bg-yellow-500 rounded-full"></div>
+                  <div className="h-1.5 w-1.5 bg-red-500 rounded-full"></div>
                   {
-                    paymentAccounts.filter((acc) => acc.status === "pending")
+                    paymentAccounts.filter((acc) => acc.status === "suspended")
                       .length
                   }{" "}
-                  Pending
+                  Suspended
                 </div>
               </div>
             )}
@@ -163,9 +143,13 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
                                   )}
                                 />
                               </div>
-                              {account.metadata?.email ? (
+                              {(account.metadata as MercadoPagoMetadata | null)
+                                ?.email ? (
                                 <p className="text-xs text-muted-foreground">
-                                  {account.metadata.email}
+                                  {
+                                    (account.metadata as MercadoPagoMetadata)
+                                      .email
+                                  }
                                 </p>
                               ) : (
                                 <p className="text-xs text-muted-foreground">
@@ -178,32 +162,33 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
 
                             {/* Metadata */}
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                              {account.metadata?.live_mode !== undefined && (
+                              {(account.metadata as MercadoPagoMetadata | null)
+                                ?.live_mode !== undefined && (
                                 <div className="flex items-center gap-1.5 text-xs">
                                   <div
                                     className={`h-1.5 w-1.5 rounded-full ${
-                                      account.metadata.live_mode
+                                      (account.metadata as MercadoPagoMetadata)
+                                        .live_mode
                                         ? "bg-green-500"
                                         : "bg-yellow-500"
                                     }`}
                                   />
                                   <span className="text-muted-foreground">
-                                    {account.metadata.live_mode
+                                    {(account.metadata as MercadoPagoMetadata)
+                                      .live_mode
                                       ? "Live"
                                       : "Test"}
                                   </span>
                                 </div>
                               )}
 
-                              {account.metadata?.country && (
+                              {(account.metadata as MercadoPagoMetadata | null)
+                                ?.country_id && (
                                 <div className="text-xs text-muted-foreground">
-                                  {account.metadata.country}
-                                </div>
-                              )}
-
-                              {account.metadata?.business_type && (
-                                <div className="text-xs text-muted-foreground capitalize">
-                                  {account.metadata.business_type}
+                                  {
+                                    (account.metadata as MercadoPagoMetadata)
+                                      .country_id
+                                  }
                                 </div>
                               )}
 

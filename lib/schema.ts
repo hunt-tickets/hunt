@@ -941,12 +941,52 @@ export type Member = InferSelectModel<typeof member>;
 export type NewMember = InferInsertModel<typeof member>;
 export type EmailLog = InferSelectModel<typeof emailLogs>;
 export type NewEmailLog = InferInsertModel<typeof emailLogs>;
+export type Invitation = InferSelectModel<typeof invitation>;
+export type NewInvitation = InferInsertModel<typeof invitation>;
 export type PaymentProcessorAccount = InferSelectModel<
   typeof paymentProcessorAccount
 >;
 export type NewPaymentProcessorAccount = InferInsertModel<
   typeof paymentProcessorAccount
 >;
+export type PaymentProcessorType =
+  (typeof paymentProcessorType.enumValues)[number];
+export type PaymentProcessorStatus =
+  (typeof paymentProcessorStatus.enumValues)[number];
+
+// MercadoPago OAuth metadata shape
+export interface MercadoPagoMetadata {
+  email: string;
+  user_id: string;
+  nickname: string;
+  last_name: string;
+  live_mode: boolean;
+  country_id: string;
+  first_name: string;
+  public_key: string;
+}
+
+// Organization data as returned by Better Auth API (optional fields can be undefined)
+export interface OrganizationData {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  createdAt: Date;
+  metadata?: string | null;
+  tipoOrganizacion?: string | null;
+  nombres?: string | null;
+  apellidos?: string | null;
+  tipoDocumento?: string | null;
+  numeroDocumento?: string | null;
+  nit?: string | null;
+  direccion?: string | null;
+  numeroTelefono?: string | null;
+  correoElectronico?: string | null;
+  rutUrl?: string | null;
+  cerlUrl?: string | null;
+  paymentAccounts?: PaymentProcessorAccount[];
+}
 
 // Keep backward compatibility
 export type orderItem = OrderItem;

@@ -4,18 +4,10 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import PaymentSettings from "@/components/organization-payment-accounts-settings";
-
-interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  logo?: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  paymentAccounts?: any[];
-}
+import type { OrganizationData } from "@/lib/schema";
 
 interface AdminPaymentSettingsProps {
-  organization: Organization;
+  organization: OrganizationData;
   currentUserRole: string;
   mpOauthUrl?: string;
 }
@@ -38,8 +30,8 @@ export function AdminPaymentSettings({
               Permisos insuficientes
             </h3>
             <p className="text-sm text-white/60 max-w-md">
-              Solo los propietarios pueden gestionar los procesadores de pago de la
-              organización
+              Solo los propietarios pueden gestionar los procesadores de pago de
+              la organización
             </p>
           </div>
         </CardContent>
@@ -48,69 +40,74 @@ export function AdminPaymentSettings({
   }
 
   // If no payment accounts, show available payment processors
-  if (!organization.paymentAccounts || organization.paymentAccounts.length === 0) {
+  if (
+    !organization.paymentAccounts ||
+    organization.paymentAccounts.length === 0
+  ) {
     return (
       <div className="space-y-6">
         {/* Available Processors Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Mercado Pago Card */}
-              <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-8 hover:border-gray-300 dark:hover:border-[#3a3a3a] transition-colors">
-                <div className="flex flex-col h-full items-center text-center">
-                  {/* Logo */}
-                  <div className="mb-6">
-                    <div className="h-16 w-16 bg-white rounded-xl flex items-center justify-center p-3">
-                      <Image
-                        src="/mercadopago-logo.webp"
-                        alt="MercadoPago"
-                        width={40}
-                        height={40}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 mb-6">
-                    <h4 className="text-lg font-semibold">Mercado Pago</h4>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="w-full">
-                    {mpOauthUrl ? (
-                      <Link href={mpOauthUrl} className="block">
-                        <Button className="w-full bg-white/90 hover:bg-white text-black dark:bg-white/90 dark:hover:bg-white dark:text-black">
-                          Conectar
-                        </Button>
-                      </Link>
-                    ) : (
-                      <Button disabled className="w-full">
-                        No disponible
-                      </Button>
-                    )}
-                  </div>
+          {/* Mercado Pago Card */}
+          <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-8 hover:border-gray-300 dark:hover:border-[#3a3a3a] transition-colors">
+            <div className="flex flex-col h-full items-center text-center">
+              {/* Logo */}
+              <div className="mb-6">
+                <div className="h-16 w-16 bg-white rounded-xl flex items-center justify-center p-3">
+                  <Image
+                    src="/mercadopago-logo.webp"
+                    alt="MercadoPago"
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               </div>
 
-              {/* Placeholder card for future processors */}
-              <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-8 opacity-60">
-                <div className="flex flex-col h-full items-center text-center">
-                  <div className="mb-6">
-                    <div className="h-16 w-16 bg-gray-200 dark:bg-[#2a2a2a] rounded-xl flex items-center justify-center">
-                      <CreditCard className="h-8 w-8 text-gray-400 dark:text-white/30" />
-                    </div>
-                  </div>
-                  <div className="flex-1 mb-6">
-                    <h4 className="text-lg font-semibold text-gray-400 dark:text-white/40">Próximamente</h4>
-                  </div>
-                  <div className="w-full">
-                    <Button disabled className="w-full">
-                      Próximamente
+              {/* Content */}
+              <div className="flex-1 mb-6">
+                <h4 className="text-lg font-semibold">Mercado Pago</h4>
+              </div>
+
+              {/* Action Button */}
+              <div className="w-full">
+                {mpOauthUrl ? (
+                  <Link href={mpOauthUrl} className="block">
+                    <Button className="w-full bg-white/90 hover:bg-white text-black dark:bg-white/90 dark:hover:bg-white dark:text-black">
+                      Conectar
                     </Button>
-                  </div>
-                </div>
+                  </Link>
+                ) : (
+                  <Button disabled className="w-full">
+                    No disponible
+                  </Button>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Placeholder card for future processors */}
+          <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-8 opacity-60">
+            <div className="flex flex-col h-full items-center text-center">
+              <div className="mb-6">
+                <div className="h-16 w-16 bg-gray-200 dark:bg-[#2a2a2a] rounded-xl flex items-center justify-center">
+                  <CreditCard className="h-8 w-8 text-gray-400 dark:text-white/30" />
+                </div>
+              </div>
+              <div className="flex-1 mb-6">
+                <h4 className="text-lg font-semibold text-gray-400 dark:text-white/40">
+                  Próximamente
+                </h4>
+              </div>
+              <div className="w-full">
+                <Button disabled className="w-full">
+                  Próximamente
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -125,7 +122,9 @@ export function AdminPaymentSettings({
               <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs sm:text-sm text-white/50">Total Procesadores</p>
+              <p className="text-xs sm:text-sm text-white/50">
+                Total Procesadores
+              </p>
               <p className="text-lg sm:text-xl font-bold text-white">
                 {organization.paymentAccounts?.length || 0}
               </p>
@@ -142,8 +141,9 @@ export function AdminPaymentSettings({
               <p className="text-xs sm:text-sm text-white/50">Activos</p>
               <p className="text-lg sm:text-xl font-bold text-white">
                 {
-                  organization.paymentAccounts?.filter((acc) => acc.status === "active")
-                    .length
+                  organization.paymentAccounts?.filter(
+                    (acc) => acc.status === "active"
+                  ).length
                 }
               </p>
             </div>
@@ -156,11 +156,11 @@ export function AdminPaymentSettings({
               <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
             </div>
             <div>
-              <p className="text-xs sm:text-sm text-white/50">Pendientes</p>
+              <p className="text-xs sm:text-sm text-white/50">Inactivos</p>
               <p className="text-lg sm:text-xl font-bold text-white">
                 {
                   organization.paymentAccounts?.filter(
-                    (acc) => acc.status === "pending"
+                    (acc) => acc.status === "inactive"
                   ).length
                 }
               </p>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { PaymentProcessorStatus } from "@/types/payment-processor";
+import { PaymentProcessorStatus } from "@/lib/schema";
 
 interface PaymentStatusSwitchProps {
   accountId: string;
@@ -100,10 +100,7 @@ function getStatusColor(status: PaymentProcessorStatus): string {
       return "bg-green-100 text-green-800 border-green-200";
     case "inactive":
       return "bg-gray-100 text-gray-800 border-gray-200";
-    case "pending":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "expired":
-    case "revoked":
+    case "suspended":
       return "bg-red-100 text-red-800 border-red-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";

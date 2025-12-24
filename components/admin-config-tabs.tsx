@@ -28,55 +28,21 @@ import {
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { EditOrganizationForm } from "@/components/edit-organization-form";
 import { AdminPaymentSettings } from "@/components/admin-payment-settings";
-import type { PaymentProcessorAccount } from "@/lib/schema";
+import type { OrganizationData, Invitation, User } from "@/lib/schema";
 
-// Organization type that accepts both null and undefined for optional fields
-// This is needed because Better Auth returns undefined while Drizzle uses null
-interface OrganizationData {
-  id: string;
-  name: string;
-  slug: string;
-  logo?: string | null;
-  createdAt: Date;
-  metadata?: string | null;
-  tipoOrganizacion?: string | null;
-  nombres?: string | null;
-  apellidos?: string | null;
-  tipoDocumento?: string | null;
-  numeroDocumento?: string | null;
-  nit?: string | null;
-  direccion?: string | null;
-  numeroTelefono?: string | null;
-  correoElectronico?: string | null;
-  rutUrl?: string | null;
-  cerlUrl?: string | null;
-  paymentAccounts?: PaymentProcessorAccount[];
-}
-
-interface TeamMember {
+// Member data as returned by Better Auth API (role is string, not enum)
+interface MemberWithUser {
   id: string;
   userId: string;
+  organizationId: string;
   role: string;
-  user?: {
-    id: string;
-    name: string | null;
-    email: string | null;
-    phoneNumber: string | null;
-  };
-}
-
-interface Invitation {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  expiresAt: Date;
-  inviterId: string;
+  createdAt: Date;
+  user?: Pick<User, "id" | "name" | "email" | "phoneNumber">;
 }
 
 interface AdminConfigTabsProps {
   organization: OrganizationData | null;
-  team: TeamMember[];
+  team: MemberWithUser[];
   invitations: Invitation[];
   currentUserRole: string;
   mpOauthUrl?: string;
