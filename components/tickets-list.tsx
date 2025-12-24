@@ -76,7 +76,6 @@ export function TicketsList({ ticketsByEvent }: TicketsListProps) {
       {Object.entries(ticketsByEvent).map(
         ([eventId, { event, tickets: eventTickets }]) => {
           const isExpanded = expandedEvent === eventId;
-          const validTickets = eventTickets.filter(t => t.status === "valid").length;
 
           return (
             <div key={eventId} className="space-y-3">
