@@ -109,7 +109,7 @@ export default async function ProfilePage() {
   );
 
   return (
-    <div className="space-y-6 sm:space-y-10 overflow-x-hidden py-4 sm:py-8 px-3 sm:px-0">
+    <div className="space-y-6 sm:space-y-10 overflow-x-hidden py-4 sm:py-8 px-3 sm:px-0 pb-12 sm:pb-16">
       {/* Profile Header */}
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
         <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">

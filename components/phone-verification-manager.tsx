@@ -98,6 +98,30 @@ export function PhoneVerificationManager({
     }
   };
 
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain');
+    const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+
+    if (digits.length > 0) {
+      const newOtp = [...otp];
+      for (let i = 0; i < digits.length && i < 6; i++) {
+        newOtp[i] = digits[i];
+      }
+      setOtp(newOtp);
+
+      // Focus the next empty input or last input
+      const nextEmptyIndex = newOtp.findIndex(digit => digit === '');
+      const focusIndex = nextEmptyIndex !== -1 ? nextEmptyIndex : 5;
+      inputRefs.current[focusIndex]?.focus();
+
+      // Auto-verify if all digits are filled
+      if (digits.length === 6) {
+        handleVerifyOTP(digits);
+      }
+    }
+  };
+
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -261,9 +285,11 @@ export function PhoneVerificationManager({
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
+                  autoComplete="one-time-code"
                   className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] hover:border-gray-300 dark:hover:border-[#3a3a3a] focus:border-primary/50 focus:outline-none transition-colors"
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onPaste={handleOtpPaste}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
                   disabled={isVerifyingOTP}
                 />
@@ -271,18 +297,18 @@ export function PhoneVerificationManager({
             </div>
 
             {/* Footer: Resend and status */}
-            <div className="mt-4 flex items-center justify-between">
+            <div className="mt-4 flex items-center justify-between gap-2">
               <button
                 onClick={handleResendOTP}
                 disabled={resendTimer > 0 || isSendingOTP}
-                className="text-sm text-gray-400 hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-sm text-gray-400 hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
                 {resendTimer > 0 ? `Reenviar en ${resendTimer}s` : "Reenviar código"}
               </button>
               {isVerifyingOTP && (
-                <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="flex items-center gap-2 text-sm text-gray-400 flex-shrink-0">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Verificando...
+                  <span className="whitespace-nowrap">Verificando...</span>
                 </div>
               )}
             </div>
