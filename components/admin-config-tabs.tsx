@@ -209,7 +209,7 @@ export function AdminConfigTabs({
 
           {/* Search and Add Member Button - Only show in Equipo tab */}
           {activeTab === "equipo" && (
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto">
               {/* Search Input */}
               <div className="relative flex-1 sm:flex-initial">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-white/40" />
@@ -222,10 +222,17 @@ export function AdminConfigTabs({
                 />
               </div>
 
-              {/* Add Member Button */}
+              {/* Add Member Button - Icon only on mobile, full button on desktop */}
               {organization && canInvite && (
-                <div className="w-full sm:w-auto">
-                  <InviteMemberDialog organizationId={organization.id} />
+                <div className="flex-shrink-0">
+                  {/* Mobile: Icon only */}
+                  <div className="sm:hidden">
+                    <InviteMemberDialog organizationId={organization.id} iconOnly />
+                  </div>
+                  {/* Desktop: Full button */}
+                  <div className="hidden sm:block">
+                    <InviteMemberDialog organizationId={organization.id} />
+                  </div>
                 </div>
               )}
             </div>
@@ -262,13 +269,13 @@ export function AdminConfigTabs({
                   return (
                     <Card
                       key={member.id}
-                      className="bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10 min-w-0"
+                      className="bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10 min-w-0 overflow-hidden"
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3">
+                          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                             <div
-                              className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-sm ring-1 ${
+                              className={`h-10 w-10 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-xs sm:text-sm ring-1 ${
                                 isPending
                                   ? "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 ring-orange-300 dark:ring-orange-700"
                                   : "bg-gray-200 dark:bg-white/[0.08] text-gray-700 dark:text-white/90 ring-gray-300 dark:ring-white/10"
@@ -278,12 +285,12 @@ export function AdminConfigTabs({
                             </div>
                             <div className="min-w-0 flex-1">
                               <p
-                                className={`font-medium truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
+                                className={`font-medium text-sm sm:text-base truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
                               >
                                 {fullName}
                               </p>
                               {email !== "Sin correo" && (
-                                <div className="flex items-center gap-1 mt-1">
+                                <div className="flex items-center gap-1 mt-0.5 sm:mt-1">
                                   <Mail className="h-3 w-3 text-gray-400 dark:text-white/40 flex-shrink-0" />
                                   <span className="text-xs text-gray-600 dark:text-white/60 truncate">
                                     {email}
@@ -292,10 +299,10 @@ export function AdminConfigTabs({
                               )}
                             </div>
                           </div>
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-1.5 sm:gap-2 flex-shrink-0">
                             {isPending ? (
                               <>
-                                <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 text-xs">
+                                <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 text-xs whitespace-nowrap">
                                   <MailCheck className="h-3 w-3 mr-1" />
                                   Pendiente
                                 </Badge>
@@ -305,10 +312,10 @@ export function AdminConfigTabs({
                                     handleCancelInvitation(member.id);
                                   }}
                                   disabled={cancelingInvitation === member.id}
-                                  className="px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center justify-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs text-red-600 dark:text-red-400 font-medium"
+                                  className="px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center justify-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs text-red-600 dark:text-red-400 font-medium whitespace-nowrap"
                                 >
                                   <X className="h-3 w-3" />
-                                  Cancelar
+                                  <span className="hidden xs:inline">Cancelar</span>
                                 </button>
                               </>
                             ) : role === "owner" ? (
