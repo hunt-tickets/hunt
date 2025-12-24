@@ -109,34 +109,34 @@ export default async function ProfilePage() {
   );
 
   return (
-    <div className="space-y-10 overflow-x-hidden py-8">
+    <div className="space-y-6 sm:space-y-10 overflow-x-hidden py-4 sm:py-8 px-3 sm:px-0">
       {/* Profile Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+        <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
           {/* Avatar */}
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             {user.image ? (
               <img
                 src={user.image}
                 alt={user.name || "Usuario"}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-primary/20"
+                className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-primary/20"
               />
             ) : (
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/20 flex items-center justify-center">
-                <User className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/20 flex items-center justify-center">
+                <User className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary" />
               </div>
             )}
           </div>
 
           {/* Name and Email */}
-          <div>
-            <h1 className="text-3xl font-bold leading-tight">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight truncate">
               {user.name || "Usuario sin nombre"}
             </h1>
             {user.role === "admin" && (
               <Badge
                 variant="default"
-                className="mt-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 border-purple-500/20"
+                className="mt-1 sm:mt-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 border-purple-500/20 text-xs"
               >
                 <Shield className="h-3 w-3 mr-1" />
                 Administrador
@@ -147,17 +147,17 @@ export default async function ProfilePage() {
       </div>
 
       {/* User Data Section */}
-      <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight">
+      <div className="space-y-4 sm:space-y-5">
+        <h2 className="text-lg sm:text-xl font-semibold leading-tight">
           Datos de usuario
         </h2>
         <div className="space-y-3">
-          {/* Name and Last Name - Two columns */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Name and Last Name - Two columns on desktop, stacked on mobile */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* First Name */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-              <div className="flex items-center gap-3 flex-1">
-                <User className="h-5 w-5 text-gray-400" />
+            <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
                 <input
                   type="text"
                   defaultValue={user.name?.split(" ")[0] || ""}
@@ -168,9 +168,9 @@ export default async function ProfilePage() {
             </div>
 
             {/* Last Name */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-              <div className="flex items-center gap-3 flex-1">
-                <User className="h-5 w-5 text-gray-400" />
+            <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
                 <input
                   type="text"
                   defaultValue={user.name?.split(" ").slice(1).join(" ") || ""}
@@ -198,8 +198,8 @@ export default async function ProfilePage() {
       </div>
 
       {/* Connected Accounts Section */}
-      <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight">
+      <div className="space-y-4 sm:space-y-5">
+        <h2 className="text-lg sm:text-xl font-semibold leading-tight">
           Cuentas conectadas
         </h2>
         <div className="space-y-3">
@@ -217,24 +217,24 @@ export default async function ProfilePage() {
               return (
                 <div
                   key={account.id}
-                  className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
+                  className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                     <div className="flex-shrink-0">
                       {getProviderIcon(account.providerId)}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                         <span className="text-sm font-medium">
                           {formatProviderName(account.providerId)}
                         </span>
                         <span className="flex items-center gap-2">
-                          <span className="relative flex h-1.5 w-1.5">
+                          <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
                           </span>
                           {accountEmail && (
-                            <span className="text-sm text-gray-500">
+                            <span className="text-xs sm:text-sm text-gray-500 truncate">
                               {accountEmail}
                             </span>
                           )}
@@ -242,7 +242,7 @@ export default async function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                     {account.providerId !== "credential" && (
                       <UnlinkAccountButton
                         accountId={account.id}
@@ -259,20 +259,20 @@ export default async function ProfilePage() {
           {availableToLink.map((provider) => (
             <div
               key={provider.id}
-              className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 <div className="flex-shrink-0">
                   {getProviderIcon(provider.id)}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{provider.name}</span>
                   {(provider.id === "apple" || provider.id === "google") && (
-                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-orange-500 flex-shrink-0"></span>
                   )}
                 </div>
               </div>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0">
                 <LinkAccountButton
                   providerId={provider.id}
                   providerName={provider.name}
@@ -284,41 +284,41 @@ export default async function ProfilePage() {
       </div>
 
       {/* Security Section */}
-      <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight">Seguridad</h2>
+      <div className="space-y-4 sm:space-y-5">
+        <h2 className="text-lg sm:text-xl font-semibold leading-tight">Seguridad</h2>
 
         <div className="space-y-3">
           {/* Password */}
           <PasswordManager />
 
           {/* Two-step verification */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <Shield className="h-5 w-5 text-gray-400" />
-              <div>
-                <p className="text-sm font-medium">Verificación en dos pasos</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+          <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Verificación en dos pasos</p>
+                <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed truncate">
                   Google Authenticator, Outlook, etc.
                 </p>
               </div>
             </div>
-            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
+            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all flex-shrink-0">
               <span className="text-xl">⋯</span>
             </button>
           </div>
 
           {/* Passkey */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <Fingerprint className="h-5 w-5 text-gray-400" />
-              <div>
-                <p className="text-sm font-medium">Passkey</p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+          <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <Fingerprint className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Passkey</p>
+                <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed truncate">
                   Inicio de sesión sin contraseña
                 </p>
               </div>
             </div>
-            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all">
+            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all flex-shrink-0">
               <span className="text-xl">⋯</span>
             </button>
           </div>
@@ -326,33 +326,33 @@ export default async function ProfilePage() {
       </div>
 
       {/* Active Devices */}
-      <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight">
+      <div className="space-y-4 sm:space-y-5">
+        <h2 className="text-lg sm:text-xl font-semibold leading-tight">
           Dispositivos activos
         </h2>
         <ActiveSessionsCard activeSession={session.session} />
       </div>
 
       {/* Danger Zone */}
-      <div className="space-y-5">
-        <h2 className="text-xl font-semibold leading-tight text-red-500">
+      <div className="space-y-4 sm:space-y-5">
+        <h2 className="text-lg sm:text-xl font-semibold leading-tight text-red-500">
           Zona de Peligro
         </h2>
 
         <div className="space-y-3">
           {/* Delete Account */}
-          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <div>
-                <p className="text-sm font-medium">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
                   Eliminar cuenta permanentemente
                 </p>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed">
                   Una vez eliminada, no podrás recuperar tu cuenta
                 </p>
               </div>
             </div>
-            <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors">
+            <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors w-full sm:w-auto flex-shrink-0">
               Eliminar cuenta
             </button>
           </div>
