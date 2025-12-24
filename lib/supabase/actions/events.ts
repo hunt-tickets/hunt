@@ -9,36 +9,7 @@ import { formatISO } from "date-fns";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import type { Event as EventSchema } from "@/lib/schema";
-
-export const EVENT_CATEGORIES = [
-  "musica",
-  "deportes",
-  "gastronomia",
-  "rumba",
-  "familiar",
-  "arte",
-  "aire_libre",
-  "bienestar",
-  "negocios",
-  "educacion",
-  "mercados",
-  "otro",
-] as const;
-
-export const EVENT_CATEGORY_LABELS: Record<typeof EVENT_CATEGORIES[number], string> = {
-  musica: "Música",
-  deportes: "Deportes",
-  gastronomia: "Gastronomía",
-  rumba: "Rumba",
-  familiar: "Familiar",
-  arte: "Arte",
-  aire_libre: "Aire Libre",
-  bienestar: "Bienestar",
-  negocios: "Negocios",
-  educacion: "Educación",
-  mercados: "Mercados",
-  otro: "Otro",
-};
+import { EVENT_CATEGORIES } from "@/lib/constants/event-categories";
 
 const eventFormSchema = z.object({
   organization_id: z.string().min(1, "El ID de la organización es requerido"),

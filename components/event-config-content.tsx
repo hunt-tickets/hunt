@@ -40,7 +40,7 @@ import { Input } from "@/components/ui/input";
 import {
   EVENT_CATEGORIES,
   EVENT_CATEGORY_LABELS,
-} from "@/lib/supabase/actions/events";
+} from "@/lib/constants/event-categories";
 
 interface EventData {
   id: string;
