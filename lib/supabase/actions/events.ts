@@ -4,63 +4,26 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import type { EventFinancialReport } from "@/lib/supabase/types";
-import { toZonedTime } from "date-fns-tz";
-import { formatISO } from "date-fns";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import type { Event as EventSchema, TicketType } from "@/lib/schema";
 import { EVENT_CATEGORIES } from "@/constants/event-categories";
 
 const eventFormSchema = z.object({
-  organization_id: z.string().min(1, "El ID de la organización es requerido"),
-  category: z.enum(EVENT_CATEGORIES, {
-    message: "Selecciona una categoría válida",
-  }),
-  name: z.string().optional(),
-  description: z.string().optional(),
-  start_date: z.string().optional(),
-  start_time: z.string().optional(),
-  end_date: z.string().optional(),
-  end_time: z.string().optional(),
-  venue_id: z.string().optional(),
-  age: z.string().optional(),
-  cash_sales: z.string().optional(),
-  status: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  address: z.string().optional(),
-  extra_info: z.string().optional(),
-  variable_fee: z.string().optional(),
-  fixed_fee: z.string().optional(),
+  name: z.string().min(1, "El nombre del evento es requerido"),
 });
 
 export type EventFormState = {
   errors?: {
-    organization_id?: string[];
-    category?: string[];
     name?: string[];
-    description?: string[];
-    start_date?: string[];
-    start_time?: string[];
-    end_date?: string[];
-    end_time?: string[];
-    venue_id?: string[];
-    age?: string[];
-    cash_sales?: string[];
-    status?: string[];
-    city?: string[];
-    country?: string[];
-    address?: string[];
-    extra_info?: string[];
-    variable_fee?: string[];
-    fixed_fee?: string[];
   };
   message?: string;
   success?: boolean;
 };
 
 export async function createEvent(
-  prevState: EventFormState,
+  organizationId: string,
+  _prevState: EventFormState,
   formData: FormData
 ): Promise<EventFormState> {
   // Get session using Better Auth
@@ -78,71 +41,12 @@ export async function createEvent(
   const user = session.user;
   const supabase = await createClient();
 
-  // Extract form data
-  const rawFormData = {
-    organization_id: formData.get("organization_id"),
-    category: formData.get("category"),
+  // Validate form data
+  const validatedFields = eventFormSchema.safeParse({
     name: formData.get("name"),
-    description: formData.get("description"),
-    start_date: formData.get("start_date"),
-    start_time: formData.get("start_time"),
-    end_date: formData.get("end_date"),
-    end_time: formData.get("end_time"),
-    venue_id: formData.get("venue_id"),
-    age: formData.get("age"),
-    cash_sales: formData.get("cash_sales"),
-    status: formData.get("status"),
-    city: formData.get("city") || "",
-    country: formData.get("country") || "",
-    address: formData.get("address") || "",
-    extra_info: formData.get("extra_info") || "",
-    variable_fee: formData.get("variable_fee") || "",
-    fixed_fee: formData.get("fixed_fee") || "",
-  };
-
-  // Extract files for logging
-  const flyerFile = formData.get("flyer") as File;
-  const walletFile = formData.get("wallet") as File;
-  const flyerOverlayFile = formData.get("flyer_overlay") as File;
-  const flyerBackgroundFile = formData.get("flyer_background") as File;
-  const flyerBannerFile = formData.get("flyer_banner") as File;
-
-  console.log("📋 Raw FormData before validation:", rawFormData);
-  console.log("📁 Files received:", {
-    flyer: flyerFile
-      ? { name: flyerFile.name, size: flyerFile.size, type: flyerFile.type }
-      : null,
-    wallet: walletFile
-      ? { name: walletFile.name, size: walletFile.size, type: walletFile.type }
-      : null,
-    flyer_overlay: flyerOverlayFile
-      ? {
-          name: flyerOverlayFile.name,
-          size: flyerOverlayFile.size,
-          type: flyerOverlayFile.type,
-        }
-      : null,
-    flyer_background: flyerBackgroundFile
-      ? {
-          name: flyerBackgroundFile.name,
-          size: flyerBackgroundFile.size,
-          type: flyerBackgroundFile.type,
-        }
-      : null,
-    flyer_banner: flyerBannerFile
-      ? {
-          name: flyerBannerFile.name,
-          size: flyerBannerFile.size,
-          type: flyerBannerFile.type,
-        }
-      : null,
   });
 
-  // Validate form data
-  const validatedFields = eventFormSchema.safeParse(rawFormData);
-
   if (!validatedFields.success) {
-    // Format errors from issues (Zod v4 stable API)
     const fieldErrors: Record<string, string[]> = {};
 
     for (const issue of validatedFields.error.issues) {
@@ -155,11 +59,6 @@ export async function createEvent(
       }
     }
 
-    console.log("✅ Validation result:", {
-      success: false,
-      errors: fieldErrors,
-    });
-
     return {
       errors: fieldErrors as EventFormState["errors"],
       message: "Campos inválidos. Por favor revise el formulario.",
@@ -167,153 +66,14 @@ export async function createEvent(
     };
   }
 
-  console.log("✅ Validation result:", {
-    success: true,
-    errors: null,
-  });
-
   const { data: validData } = validatedFields;
-  console.log(validData);
 
   try {
-    // Convert dates from Bogota timezone to UTC (matching mobile app behavior)
-    const BOGOTA_TZ = "America/Bogota";
-
-    let startDateTime = null;
-    if (validData.start_date && validData.start_time) {
-      const startDateTimeBogota = toZonedTime(
-        `${validData.start_date}T${validData.start_time}`,
-        BOGOTA_TZ
-      );
-      startDateTime = formatISO(startDateTimeBogota);
-    }
-
-    let endDateTime = null;
-    if (validData.end_date && validData.end_time) {
-      const endDateTimeBogota = toZonedTime(
-        `${validData.end_date}T${validData.end_time}`,
-        BOGOTA_TZ
-      );
-      endDateTime = formatISO(endDateTimeBogota);
-    }
-
-    // File upload validation
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    const ALLOWED_TYPES = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-    ];
-
-    // Validate flyer file
-    if (flyerFile && flyerFile.size > 0) {
-      if (flyerFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen del flyer es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para flyer. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    // Validate wallet file
-    if (walletFile && walletFile.size > 0) {
-      if (walletFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de wallet es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(walletFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para wallet. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    // Validate additional flyer files
-    if (flyerOverlayFile && flyerOverlayFile.size > 0) {
-      if (flyerOverlayFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de overlay es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerOverlayFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para overlay. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    if (flyerBackgroundFile && flyerBackgroundFile.size > 0) {
-      if (flyerBackgroundFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de background es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerBackgroundFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para background. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    if (flyerBannerFile && flyerBannerFile.size > 0) {
-      if (flyerBannerFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de banner es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerBannerFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para banner. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    // Create event in database
-    const { data: eventData, error: eventError } = await supabase
-      .from("events")
-      .insert({
-        organization_id: validData.organization_id,
-        category: validData.category,
-        name: validData.name || null,
-        description: validData.description || null,
-        date: startDateTime,
-        end_date: endDateTime,
-        venue_id: validData.venue_id || null,
-        age: validData.age ? parseInt(validData.age) : null,
-        status: validData.status === "Activo",
-        cash: validData.cash_sales === "Activo",
-        city: validData.city || null,
-        country: validData.country || null,
-        address: validData.address || null,
-        extra_info: validData.extra_info || null,
-        variable_fee: validData.variable_fee
-          ? parseFloat(validData.variable_fee)
-          : null,
-        fixed_fee: validData.fixed_fee ? parseFloat(validData.fixed_fee) : null,
-      })
-      .select()
-      .single();
+    // Create event in database with just name and organization
+    const { error: eventError } = await supabase.from("events").insert({
+      organization_id: organizationId,
+      name: validData.name,
+    });
 
     if (eventError) {
       console.error("Error creating event:", eventError);
@@ -323,150 +83,9 @@ export async function createEvent(
       };
     }
 
-    let flyerUrl = null;
-    let walletUrl = null;
-    let flyerOverlayUrl = null;
-    let flyerBackgroundUrl = null;
-    let flyerBannerUrl = null;
-
-    // Upload flyer if provided (using event ID from created event)
-    if (flyerFile && flyerFile.size > 0) {
-      const flyerExt = flyerFile.name.split(".").pop();
-      const flyerPath = `flyers/${eventData.id}.${flyerExt}`;
-
-      const { error: flyerError } = await supabase.storage
-        .from("events")
-        .upload(flyerPath, flyerFile);
-
-      if (flyerError) {
-        console.error("Error uploading flyer:", flyerError);
-        return {
-          message: `Error al subir la imagen del flyer: ${flyerError.message}`,
-          success: false,
-        };
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("events").getPublicUrl(flyerPath);
-      flyerUrl = publicUrl;
-    }
-
-    // Upload wallet image if provided (to variants folder)
-    if (walletFile && walletFile.size > 0) {
-      const walletExt = walletFile.name.split(".").pop();
-      const walletPath = `variants/${eventData.id}.${walletExt}`;
-
-      const { error: walletError } = await supabase.storage
-        .from("events")
-        .upload(walletPath, walletFile);
-
-      if (walletError) {
-        console.error("Error uploading wallet:", walletError);
-        return {
-          message: `Error al subir la imagen de wallet: ${walletError.message}`,
-          success: false,
-        };
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("events").getPublicUrl(walletPath);
-      walletUrl = publicUrl;
-    }
-
-    // Upload flyer overlay if provided
-    if (flyerOverlayFile && flyerOverlayFile.size > 0) {
-      const ext = flyerOverlayFile.name.split(".").pop();
-      const path = `flyers/overlay_${eventData.id}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("events")
-        .upload(path, flyerOverlayFile);
-
-      if (error) {
-        console.error("Error uploading flyer overlay:", error);
-      } else {
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("events").getPublicUrl(path);
-        flyerOverlayUrl = publicUrl;
-      }
-    }
-
-    // Upload flyer background if provided
-    if (flyerBackgroundFile && flyerBackgroundFile.size > 0) {
-      const ext = flyerBackgroundFile.name.split(".").pop();
-      const path = `flyers/background_${eventData.id}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("events")
-        .upload(path, flyerBackgroundFile);
-
-      if (error) {
-        console.error("Error uploading flyer background:", error);
-      } else {
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("events").getPublicUrl(path);
-        flyerBackgroundUrl = publicUrl;
-      }
-    }
-
-    // Upload flyer banner if provided
-    if (flyerBannerFile && flyerBannerFile.size > 0) {
-      const ext = flyerBannerFile.name.split(".").pop();
-      const path = `flyers/banner_${eventData.id}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("events")
-        .upload(path, flyerBannerFile);
-
-      if (error) {
-        console.error("Error uploading flyer banner:", error);
-      } else {
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("events").getPublicUrl(path);
-        flyerBannerUrl = publicUrl;
-      }
-    }
-
-    // Update event with image URLs if uploaded
-    if (
-      flyerUrl ||
-      walletUrl ||
-      flyerOverlayUrl ||
-      flyerBackgroundUrl ||
-      flyerBannerUrl
-    ) {
-      const updateData: {
-        flyer?: string;
-        flyer_apple?: string;
-        flyer_overlay?: string;
-        flyer_background?: string;
-        flyer_banner?: string;
-      } = {};
-      if (flyerUrl) updateData.flyer = flyerUrl;
-      if (walletUrl) updateData.flyer_apple = walletUrl;
-      if (flyerOverlayUrl) updateData.flyer_overlay = flyerOverlayUrl;
-      if (flyerBackgroundUrl) updateData.flyer_background = flyerBackgroundUrl;
-      if (flyerBannerUrl) updateData.flyer_banner = flyerBannerUrl;
-
-      const { error: updateError } = await supabase
-        .from("events")
-        .update(updateData)
-        .eq("id", eventData.id);
-
-      if (updateError) {
-        console.error("Error updating event with image URLs:", updateError);
-        // Don't fail the whole operation, images are uploaded successfully
-      }
-    }
-
     // Revalidate the administrador page to show the new event
     revalidatePath(
-      `/profile/${user.id}/organizaciones/${validData.organization_id}/administrador/eventos`
+      `/profile/${user.id}/organizaciones/${organizationId}/administrador/eventos`
     );
 
     return {
