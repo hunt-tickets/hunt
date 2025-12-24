@@ -55,9 +55,9 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
     }
   };
 
-  const revokeSession = async (token: string) => {
+  const revokeSession = async (sessionId: string, token: string) => {
     // If revoking current session, sign out
-    if (token === activeSession.token) {
+    if (sessionId === activeSession.id) {
       await authClient.signOut();
       return;
     }
@@ -106,7 +106,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
   };
 
   const otherSessionsCount = sessions.filter(
-    (s) => s.token !== activeSession.token
+    (s) => s.id !== activeSession.id
   ).length;
 
   const getDeviceIcon = (deviceType: "desktop" | "mobile" | "tablet") => {
@@ -306,8 +306,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
       <div className="space-y-3">
         {sessions.map((session) => {
           const parsed = parseUserAgent(session?.userAgent ?? null);
-          const isCurrentSession =
-            activeSession.token === session.token;
+          const isCurrentSession = activeSession.id === session.id;
           const isRevoking = revokingToken === session.token;
 
           return (
@@ -351,7 +350,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => revokeSession(session.token)}
+                    onClick={() => revokeSession(session.id, session.token)}
                     disabled={isRevoking || revokingAll}
                     className="text-gray-400 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 p-0"
                     title="Cerrar esta sesión"
