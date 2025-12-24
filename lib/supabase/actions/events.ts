@@ -8,7 +8,7 @@ import { toZonedTime } from "date-fns-tz";
 import { formatISO } from "date-fns";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import type { Event as EventSchema } from "@/lib/schema";
+import type { Event as EventSchema, TicketType } from "@/lib/schema";
 import { EVENT_CATEGORIES } from "@/lib/constants/event-categories";
 
 const eventFormSchema = z.object({
@@ -1118,23 +1118,7 @@ export type EventDetail = {
   venue_longitude: string | null;
   hour: string;
   end_hour: string;
-  tickets: {
-    id: string;
-    eventId: string;
-    name: string;
-    description: string | null;
-    price: string;
-    capacity: number;
-    soldCount: number;
-    reservedCount: number;
-    minPerOrder: number;
-    maxPerOrder: number;
-    saleStart: Date | null;
-    saleEnd: Date | null;
-    createdAt: Date;
-    updatedAt: Date | null;
-    active: boolean;
-  }[];
+  tickets: TicketType[];
 };
 
 /**

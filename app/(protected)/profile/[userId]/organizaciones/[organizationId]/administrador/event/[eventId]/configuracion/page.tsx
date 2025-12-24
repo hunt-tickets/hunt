@@ -71,7 +71,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     date: event.date?.toISOString(),
     end_date: event.endDate?.toISOString(),
     status: event.status ?? false,
-    age: event.age ? Number(event.age) : undefined,
+    age: event.minAge ? Number(event.minAge) : undefined,
     variable_fee: event.variableFee ? Number(event.variableFee) : undefined,
     fixed_fee: event.fixedFee ? Number(event.fixedFee) : undefined,
     city: event.city || undefined,

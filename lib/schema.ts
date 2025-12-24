@@ -21,7 +21,6 @@ import { sql, type InferSelectModel, type InferInsertModel } from "drizzle-orm";
 //   3. Backend: Convert reservation to order + tickets (atomic)
 //   4. Backend: Call Edge Function or send emails directly
 //   5. INSERT into email_logs table
-
 export const accountTypeEnum = pgEnum("account_type_enum", [
   "savings",
   "checking",
@@ -127,7 +126,6 @@ export const genderType = pgEnum("gender_type", [
   "otro",
   "prefiero_no_decir",
 ]);
-
 // Core ticketing system enums
 export const reservationStatus = pgEnum("reservation_status", [
   "active",
@@ -135,14 +133,12 @@ export const reservationStatus = pgEnum("reservation_status", [
   "converted",
   "cancelled",
 ]);
-
 export const orderPaymentStatus = pgEnum("order_payment_status", [
   "pending",
   "paid",
   "failed",
   "refunded",
 ]);
-
 export const ticketStatus = pgEnum("ticket_status", [
   "valid",
   "used",
@@ -164,6 +160,7 @@ export const eventCategory = pgEnum("event_category", [
   "otro",
 ]);
 
+
 // Countries table
 export const countries = pgTable(
   "countries",
@@ -175,7 +172,6 @@ export const countries = pgTable(
   },
   (table) => [unique("countries_country_name_key").on(table.countryName)]
 );
-
 // Document Type table
 export const documentType = pgTable(
   "document_type",
@@ -194,7 +190,6 @@ export const documentType = pgTable(
     }),
   ]
 );
-
 export const user = pgTable(
   "user",
   {
@@ -242,7 +237,6 @@ export const user = pgTable(
     }),
   ]
 );
-
 export const session = pgTable(
   "session",
   {
@@ -268,7 +262,6 @@ export const session = pgTable(
     unique("session_token_key").on(table.token),
   ]
 );
-
 export const account = pgTable(
   "account",
   {
@@ -296,7 +289,6 @@ export const account = pgTable(
     }).onDelete("cascade"),
   ]
 );
-
 export const verification = pgTable("verification", {
   id: text().primaryKey().notNull(),
   identifier: text().notNull(),
@@ -309,7 +301,6 @@ export const verification = pgTable("verification", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
-
 export const passkey = pgTable(
   "passkey",
   {
@@ -336,7 +327,6 @@ export const passkey = pgTable(
     unique("passkey_credentialID_key").on(table.credentialID),
   ]
 );
-
 export const organization = pgTable(
   "organization",
   {
@@ -363,7 +353,6 @@ export const organization = pgTable(
   },
   (table) => [unique("organization_slug_key").on(table.slug)]
 );
-
 export const member = pgTable(
   "member",
   {
@@ -388,7 +377,6 @@ export const member = pgTable(
     }).onDelete("cascade"),
   ]
 );
-
 export const invitation = pgTable(
   "invitation",
   {
@@ -619,7 +607,7 @@ export const events = pgTable(
     venueId: uuid("venue_id").references(() => venues.id),
     variableFee: decimal("variable_fee"),
     fixedFee: decimal("fixed_fee"),
-    age: decimal("age"),
+    minAge: decimal("age"),
     cash: boolean("cash").notNull().default(false),
     extraInfo: text("extra_info"),
     ics: text("ics"),
@@ -628,21 +616,20 @@ export const events = pgTable(
     flyerOverlay: text("flyer_overlay"),
     flyerBackground: text("flyer_background"),
     flyerBanner: text("flyer_banner"),
-    posFee: decimal("pos_fee"),
-
-    hex: text("hex"),
-    priority: boolean("priority").notNull().default(false),
-    hexText: text("hex_text"),
-    guestList: boolean("guest_list").notNull().default(false),
-    privateList: boolean("private_list").notNull().default(false),
-    accessPass: boolean("access_pass").notNull().default(false),
-    guestListMaxHour: timestamp("guest_list_max_hour", { withTimezone: true }),
-    guestListQuantity: decimal("guest_list_quantity"),
-    guestListInfo: text("guest_list_info"),
-    hexTextSecondary: text("hex_text_secondary").notNull().default("A3A3A3"),
-    lateFee: decimal("late_fee"),
-    guestEmail: text("guest_email"),
-    guestName: text("guest_name"),
+    // posFee: decimal("pos_fee"),
+    // hex: text("hex"),
+    // priority: boolean("priority").notNull().default(false),
+    // hexText: text("hex_text"),
+    // guestList: boolean("guest_list").notNull().default(false),
+    // privateList: boolean("private_list").notNull().default(false),
+    // accessPass: boolean("access_pass").notNull().default(false),
+    // guestListMaxHour: timestamp("guest_list_max_hour", { withTimezone: true }),
+    // guestListQuantity: decimal("guest_list_quantity"),
+    // guestListInfo: text("guest_list_info"),
+    // hexTextSecondary: text("hex_text_secondary").notNull().default("A3A3A3"),
+    // lateFee: decimal("late_fee"),
+    // guestEmail: text("guest_email"),
+    // guestName: text("guest_name"),
     faqs: jsonb("faqs").$type<Array<Record<string, unknown>>>(),
   },
   (table) => [
@@ -661,6 +648,25 @@ export const events = pgTable(
   ]
 );
 
+// Event Days (for multi-day events like festivals)
+export const eventDays = pgTable(
+  "event_days",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    date: timestamp("date", { withTimezone: true }).notNull(),
+    name: text("name"), // "Pre-Party", "Día 1", "Viernes"
+    sortOrder: integer("sort_order").default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_event_days_event").on(table.eventId)]
+);
+
+export type EventDay = InferSelectModel<typeof eventDays>;
+export type NewEventDay = InferInsertModel<typeof eventDays>;
+
 // Ticket Types (palcos, VIP, general, etc.)
 export const ticketTypes = pgTable(
   "ticket_types",
@@ -669,6 +675,7 @@ export const ticketTypes = pgTable(
     eventId: uuid("event_id")
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
+    eventDayId: uuid("event_day_id").references(() => eventDays.id, { onDelete: "set null" }), // null = all days
     name: text("name").notNull(),
     description: text("description"),
     price: decimal("price", { precision: 10, scale: 2 }).notNull(),
@@ -679,6 +686,7 @@ export const ticketTypes = pgTable(
     maxPerOrder: integer("max_per_order").notNull().default(10),
     saleStart: timestamp("sale_start", { withTimezone: true }),
     saleEnd: timestamp("sale_end", { withTimezone: true }),
+    isAddon: boolean("is_addon").notNull().default(false), // true = requires base ticket
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -838,6 +846,7 @@ export const tickets = pgTable(
     ticketTypeId: uuid("ticket_type_id")
       .notNull()
       .references(() => ticketTypes.id, { onDelete: "cascade" }),
+    eventDayId: uuid("event_day_id").references(() => eventDays.id, { onDelete: "set null" }), // which day this ticket is for
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
