@@ -56,11 +56,9 @@ export function Header() {
 
       {/* Header bar */}
       <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled
+        isScrolled && !isMobileMenuOpen
           ? 'bg-background/80 backdrop-blur-md'
-          : isMobileMenuOpen
-            ? 'bg-transparent'
-            : 'bg-transparent'
+          : 'bg-transparent'
       }`}>
         <div className="container mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Left side - Logo and Navigation */}
