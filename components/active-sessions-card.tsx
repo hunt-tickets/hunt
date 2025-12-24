@@ -89,9 +89,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
       }
 
       // Keep only the current session
-      setSessions((prev) =>
-        prev.filter((s) => s.token === activeSession.token)
-      );
+      setSessions([activeSession]);
       toast.success("Otras sesiones cerradas correctamente");
     } catch (error) {
       console.error("Error revoking other sessions:", error);
