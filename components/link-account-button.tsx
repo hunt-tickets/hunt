@@ -70,12 +70,13 @@ export function LinkAccountButton({
     <Button
       onClick={handleLinkAccount}
       disabled={isLoading}
-      className="bg-white/90 text-black hover:bg-gray-200/90 active:bg-gray-300/90 rounded-full px-6 font-medium transition-all shadow-sm hover:shadow-md"
+      className="bg-white/90 text-black hover:bg-gray-200/90 active:bg-gray-300/90 rounded-full px-3 sm:px-6 py-1.5 sm:py-2 h-auto text-xs sm:text-sm font-medium transition-all shadow-sm hover:shadow-md"
     >
       {isLoading ? (
         <>
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          Conectando...
+          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Conectando...</span>
+          <span className="sm:hidden">...</span>
         </>
       ) : (
         "Conectar"

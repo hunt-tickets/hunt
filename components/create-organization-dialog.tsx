@@ -13,7 +13,11 @@ import {
 import { CreateOrganizationForm } from "./create-organization-form";
 import { Plus } from "lucide-react";
 
-export function CreateOrganizationDialog() {
+interface CreateOrganizationDialogProps {
+  variant?: "default" | "icon-only";
+}
+
+export function CreateOrganizationDialog({ variant = "default" }: CreateOrganizationDialogProps) {
   const [open, setOpen] = useState(false);
 
   const handleSuccess = () => {
@@ -24,10 +28,16 @@ export function CreateOrganizationDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          <span>Crear Organización</span>
-        </Button>
+        {variant === "icon-only" ? (
+          <Button size="icon" className="h-8 w-8 rounded-full">
+            <Plus className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            <span>Crear Organización</span>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md max-h-[75vh] sm:max-h-[85vh] overflow-y-auto overflow-x-hidden p-5 sm:p-6">
         <DialogHeader className="space-y-1.5 pb-3">

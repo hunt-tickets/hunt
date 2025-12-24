@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Shield, Fingerprint, Link2 } from "lucide-react";
+import { User, Shield, Link2, LogOut } from "lucide-react";
 import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
@@ -19,6 +19,7 @@ import { PhoneVerificationManager } from "@/components/phone-verification-manage
 import { BirthDateManager } from "@/components/birth-date-manager";
 import { EmailManager } from "@/components/email-manager";
 import { DocumentManager } from "@/components/document-manager";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -290,38 +291,6 @@ export default async function ProfilePage() {
         <div className="space-y-3">
           {/* Password */}
           <PasswordManager />
-
-          {/* Two-step verification */}
-          <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">Verificación en dos pasos</p>
-                <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed truncate">
-                  Google Authenticator, Outlook, etc.
-                </p>
-              </div>
-            </div>
-            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all flex-shrink-0">
-              <span className="text-xl">⋯</span>
-            </button>
-          </div>
-
-          {/* Passkey */}
-          <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <Fingerprint className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">Passkey</p>
-                <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed truncate">
-                  Inicio de sesión sin contraseña
-                </p>
-              </div>
-            </div>
-            <button className="text-gray-400 hover:text-gray-300 invisible group-hover:visible transition-all flex-shrink-0">
-              <span className="text-xl">⋯</span>
-            </button>
-          </div>
         </div>
       </div>
 
@@ -340,22 +309,25 @@ export default async function ProfilePage() {
         </h2>
 
         <div className="space-y-3">
-          {/* Delete Account */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group gap-3">
-            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  Eliminar cuenta permanentemente
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed">
-                  Una vez eliminada, no podrás recuperar tu cuenta
-                </p>
+          {/* Logout */}
+          <SignOutButton>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[60px] sm:min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <LogOut className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    Cerrar sesión
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed">
+                    Salir de tu cuenta en este dispositivo
+                  </p>
+                </div>
               </div>
+              <span className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors w-full sm:w-auto flex-shrink-0 text-right sm:text-left">
+                Cerrar sesión
+              </span>
             </div>
-            <button className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors w-full sm:w-auto flex-shrink-0">
-              Eliminar cuenta
-            </button>
-          </div>
+          </SignOutButton>
         </div>
       </div>
 

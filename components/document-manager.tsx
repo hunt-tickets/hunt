@@ -50,7 +50,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
               backgroundSize: '1.25em 1.25em'
             }}
           >
-            <option value="" disabled>Tipo de documento</option>
+            <option value="" disabled>Tipo de documento (Opcional)</option>
             <option value="CC">Cédula de Ciudadanía</option>
             <option value="CE">Cédula de Extranjería</option>
             <option value="TI">Tarjeta de Identidad</option>
@@ -70,7 +70,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
             onChange={(e) => handleDocumentNumberChange(e.target.value)}
             onBlur={handleSave}
             disabled={isLoading}
-            placeholder="Número de documento"
+            placeholder="Número de documento (Opcional)"
             maxLength={20}
             autoComplete="off"
             className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"

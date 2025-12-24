@@ -84,7 +84,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
           <div className="flex items-center gap-3 flex-1">
             <CalendarIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
             <span className={cn("text-sm font-medium", !selected && "text-gray-500")}>
-              {selected ? formatDisplayDate(selected) : "Agregar fecha de nacimiento"}
+              {selected ? formatDisplayDate(selected) : "Fecha de nacimiento (Opcional)"}
             </span>
           </div>
           {selected && (
