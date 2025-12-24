@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
  */
 const Footer = () => {
   return (
-    <footer className="w-full border-t dark:border-t-[#303030] bg-white dark:bg-[#101010] pb-[68px] md:pb-0 relative z-10">
+    <footer className="w-full border-t dark:border-t-[#303030] bg-white dark:bg-[#101010] pb-[80px] md:pb-0 relative z-10">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Logo & Brand Column */}
