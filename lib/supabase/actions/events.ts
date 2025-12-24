@@ -10,8 +10,41 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import type { Event as EventSchema } from "@/lib/schema";
 
+export const EVENT_CATEGORIES = [
+  "musica",
+  "deportes",
+  "gastronomia",
+  "rumba",
+  "familiar",
+  "arte",
+  "aire_libre",
+  "bienestar",
+  "negocios",
+  "educacion",
+  "mercados",
+  "otro",
+] as const;
+
+export const EVENT_CATEGORY_LABELS: Record<typeof EVENT_CATEGORIES[number], string> = {
+  musica: "Música",
+  deportes: "Deportes",
+  gastronomia: "Gastronomía",
+  rumba: "Rumba",
+  familiar: "Familiar",
+  arte: "Arte",
+  aire_libre: "Aire Libre",
+  bienestar: "Bienestar",
+  negocios: "Negocios",
+  educacion: "Educación",
+  mercados: "Mercados",
+  otro: "Otro",
+};
+
 const eventFormSchema = z.object({
   organization_id: z.string().min(1, "El ID de la organización es requerido"),
+  category: z.enum(EVENT_CATEGORIES, {
+    message: "Selecciona una categoría válida",
+  }),
   name: z.string().optional(),
   description: z.string().optional(),
   start_date: z.string().optional(),
@@ -47,6 +80,7 @@ const eventFormSchema = z.object({
 export type EventFormState = {
   errors?: {
     organization_id?: string[];
+    category?: string[];
     name?: string[];
     description?: string[];
     start_date?: string[];
@@ -104,6 +138,7 @@ export async function createEvent(
   // Extract form data
   const rawFormData = {
     organization_id: formData.get("organization_id"),
+    category: formData.get("category"),
     name: formData.get("name"),
     description: formData.get("description"),
     start_date: formData.get("start_date"),
@@ -325,6 +360,7 @@ export async function createEvent(
       .from("events")
       .insert({
         organization_id: validData.organization_id,
+        category: validData.category,
         name: validData.name || null,
         description: validData.description || null,
         date: startDateTime,
@@ -912,6 +948,7 @@ export async function getEventTicketTypes(eventId: string) {
 export async function updateEventConfiguration(eventId: string, formData: {
   name?: string;
   description?: string;
+  category?: typeof EVENT_CATEGORIES[number];
   date?: string;
   end_date?: string;
   age?: number;
@@ -927,10 +964,16 @@ export async function updateEventConfiguration(eventId: string, formData: {
     return { success: false, message: "No autenticado" };
   }
 
+  // Validate category if provided
+  if (formData.category && !EVENT_CATEGORIES.includes(formData.category)) {
+    return { success: false, message: "Categoría inválida" };
+  }
+
   // Build update object with only provided fields
   const updateData: Partial<{
     name: string;
     description: string;
+    category: string;
     date: string;
     end_date: string;
     age: number;
@@ -941,6 +984,7 @@ export async function updateEventConfiguration(eventId: string, formData: {
 
   if (formData.name !== undefined) updateData.name = formData.name;
   if (formData.description !== undefined) updateData.description = formData.description;
+  if (formData.category !== undefined) updateData.category = formData.category;
   if (formData.date !== undefined) updateData.date = formData.date;
   if (formData.end_date !== undefined) updateData.end_date = formData.end_date;
   if (formData.age !== undefined) updateData.age = formData.age;

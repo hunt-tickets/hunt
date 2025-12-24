@@ -149,6 +149,20 @@ export const ticketStatus = pgEnum("ticket_status", [
   "cancelled",
   "transferred",
 ]);
+export const eventCategory = pgEnum("event_category", [
+  "musica",
+  "deportes",
+  "gastronomia",
+  "rumba",
+  "familiar",
+  "arte",
+  "aire_libre",
+  "bienestar",
+  "negocios",
+  "educacion",
+  "mercados",
+  "otro",
+]);
 
 // Countries table
 export const countries = pgTable(
@@ -592,6 +606,7 @@ export const events = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+    category: eventCategory("category"),
     name: text("name"),
     description: text("description"),
     date: timestamp("date", { withTimezone: true }),

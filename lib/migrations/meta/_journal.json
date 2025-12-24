@@ -162,6 +162,13 @@
       "when": 1766536577576,
       "tag": "0022_quiet_havok",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1766544723746,
+      "tag": "0023_lush_sir_ram",
+      "breakpoints": true
     }
   ]
 }

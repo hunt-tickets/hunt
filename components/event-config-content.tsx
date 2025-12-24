@@ -37,11 +37,16 @@ import {
   Info,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  EVENT_CATEGORIES,
+  EVENT_CATEGORY_LABELS,
+} from "@/lib/supabase/actions/events";
 
 interface EventData {
   id: string;
   name: string;
   description?: string;
+  category?: string;
   date?: string;
   end_date?: string;
   age?: number;
@@ -76,6 +81,7 @@ export function EventConfigContent({
   const [formData, setFormData] = useState({
     eventName: "",
     description: "",
+    category: "" as typeof EVENT_CATEGORIES[number] | "",
     venueName: "",
     location: "",
     city: "",
@@ -107,6 +113,7 @@ export function EventConfigContent({
       setFormData({
         eventName: eventData.name || "",
         description: eventData.description || "",
+        category: (eventData.category as typeof EVENT_CATEGORIES[number]) || "",
         venueName: eventData.venues?.name || "",
         location: eventData.venues?.address || "",
         city: eventData.venues?.city || "",
@@ -279,6 +286,7 @@ export function EventConfigContent({
         const result = await updateEventConfiguration(eventId, {
           name: formData.eventName,
           description: formData.description,
+          category: formData.category || undefined,
           date: formData.startDate,
           end_date: formData.endDate,
           age: formData.age,
@@ -419,6 +427,29 @@ export function EventConfigContent({
                 maxLength={1000}
                 showCharCount
               />
+
+              {/* Category */}
+              <FormSelect
+                id="category"
+                name="category"
+                label="Categoría"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    category: e.target.value as typeof EVENT_CATEGORIES[number],
+                  }))
+                }
+                hint="Selecciona la categoría que mejor describe tu evento"
+                required
+              >
+                <option value="">Selecciona una categoría</option>
+                {EVENT_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {EVENT_CATEGORY_LABELS[cat]}
+                  </option>
+                ))}
+              </FormSelect>
 
               {/* Age Restriction */}
               <FormSelect

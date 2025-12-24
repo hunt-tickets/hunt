@@ -22,6 +22,8 @@ import { Label } from "@/components/ui/label";
 import {
   createEvent,
   type EventFormState,
+  EVENT_CATEGORIES,
+  EVENT_CATEGORY_LABELS,
 } from "@/lib/supabase/actions/events";
 import { CreateEventSubmitButton } from "@/components/create-event-submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -86,6 +88,7 @@ export function CreateEventDialog({
   const [state, formAction] = useActionState(createEvent, initialState);
 
   // Form field states for controlled selects and dates
+  const [category, setCategory] = useState("");
   const [venueId, setVenueId] = useState("");
   const [age, setAge] = useState("");
   const [status, setStatus] = useState("Inactivo");
@@ -99,6 +102,7 @@ export function CreateEventDialog({
   useEffect(() => {
     if (state.success) {
       // Reset form
+      setCategory("");
       setVenueId("");
       setAge("");
       setStatus("Inactivo");
@@ -193,6 +197,31 @@ export function CreateEventDialog({
                     <p className="text-sm text-destructive flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {state.errors.name[0]}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    Categoría <span className="text-destructive">*</span>
+                  </Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" side="bottom" align="start">
+                      {EVENT_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {EVENT_CATEGORY_LABELS[cat]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <input type="hidden" name="category" value={category} />
+                  {state.errors?.category && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {state.errors.category[0]}
                     </p>
                   )}
                 </div>

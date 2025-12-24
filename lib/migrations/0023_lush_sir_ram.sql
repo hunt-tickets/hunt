@@ -1,0 +1,2 @@
+CREATE TYPE "public"."event_category" AS ENUM('musica', 'deportes', 'gastronomia', 'rumba', 'familiar', 'arte', 'aire_libre', 'bienestar', 'negocios', 'educacion', 'mercados', 'otro');--> statement-breakpoint
+ALTER TABLE "events" ADD COLUMN "category" "event_category";
