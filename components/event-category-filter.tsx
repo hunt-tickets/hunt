@@ -8,52 +8,37 @@ import {
   Music2,
   Tent,
   Store,
+  Trophy,
+  Theater,
   ChevronLeft,
   ChevronRight,
   X,
+  LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  EVENT_CATEGORIES,
+  EVENT_CATEGORY_LABELS,
+  EVENT_SUBCATEGORIES,
+  type EventCategory,
+} from "@/constants/event-categories";
 
-// Definición de categorías y subcategorías con iconos de Lucide
-export const EVENT_CATEGORIES = {
-  wellness: {
-    label: "Wellness",
-    icon: Heart,
-    subcategories: ["Yoga", "Meditación", "Spa", "Retiros", "Bienestar Mental", "Fitness"],
-  },
-  parties: {
-    label: "Parties",
-    icon: PartyPopper,
-    subcategories: ["Electrónica", "Reggaeton", "Hip-Hop", "Techno", "House", "Latina"],
-  },
-  clases: {
-    label: "Clases",
-    icon: GraduationCap,
-    subcategories: ["Cocina", "Arte", "Música", "Baile", "Idiomas", "Fotografía"],
-  },
-  concerts: {
-    label: "Concerts",
-    icon: Music2,
-    subcategories: ["Rock", "Pop", "Jazz", "Clásica", "Indie", "Urbana"],
-  },
-  festivals: {
-    label: "Festivals",
-    icon: Tent,
-    subcategories: ["Música", "Gastronomía", "Cultura", "Cine", "Arte", "Cerveza"],
-  },
-  ferias: {
-    label: "Ferias",
-    icon: Store,
-    subcategories: ["Artesanía", "Emprendedores", "Gastronómica", "Navideña", "Vintage", "Libros"],
-  },
-} as const;
-
-export type CategoryKey = keyof typeof EVENT_CATEGORIES;
+// Mapeo de categorías a iconos
+const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
+  fiestas: PartyPopper,
+  conciertos: Music2,
+  festivales: Tent,
+  bienestar: Heart,
+  clases: GraduationCap,
+  ferias: Store,
+  deportes: Trophy,
+  teatro: Theater,
+};
 
 interface EventCategoryFilterProps {
-  selectedCategory: CategoryKey | null;
+  selectedCategory: EventCategory | null;
   selectedSubcategory: string | null;
-  onCategoryChange: (category: CategoryKey | null) => void;
+  onCategoryChange: (category: EventCategory | null) => void;
   onSubcategoryChange: (subcategory: string | null) => void;
 }
 
@@ -66,7 +51,7 @@ export function EventCategoryFilter({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const subcategoryScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleCategoryClick = (categoryKey: CategoryKey) => {
+  const handleCategoryClick = (categoryKey: EventCategory) => {
     if (selectedCategory === categoryKey) {
       onCategoryChange(null);
       onSubcategoryChange(null);
@@ -99,11 +84,10 @@ export function EventCategoryFilter({
     }
   };
 
-  const categories = Object.entries(EVENT_CATEGORIES) as [CategoryKey, typeof EVENT_CATEGORIES[CategoryKey]][];
-
   // Si hay una categoría seleccionada, mostrar layout colapsado
   if (selectedCategory) {
-    const SelectedIcon = EVENT_CATEGORIES[selectedCategory].icon;
+    const SelectedIcon = CATEGORY_ICONS[selectedCategory];
+    const subcategories = EVENT_SUBCATEGORIES[selectedCategory];
 
     return (
       <div className="flex items-center gap-2">
@@ -113,7 +97,7 @@ export function EventCategoryFilter({
           className="flex-shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-full bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
         >
           <SelectedIcon className="h-4 w-4" aria-hidden="true" />
-          <span>{EVENT_CATEGORIES[selectedCategory].label}</span>
+          <span>{EVENT_CATEGORY_LABELS[selectedCategory]}</span>
         </button>
 
         {/* Botón limpiar */}
@@ -142,7 +126,7 @@ export function EventCategoryFilter({
             ref={subcategoryScrollRef}
             className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0 sm:px-5"
           >
-            {EVENT_CATEGORIES[selectedCategory].subcategories.map((subcategory) => {
+            {subcategories.map((subcategory) => {
               const isActive = selectedSubcategory === subcategory;
               return (
                 <button
@@ -191,18 +175,19 @@ export function EventCategoryFilter({
           aria-label="Categorías de eventos"
           className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0 sm:px-6"
         >
-          {categories.map(([key, category]) => {
-            const Icon = category.icon;
+          {EVENT_CATEGORIES.map((categoryKey) => {
+            const Icon = CATEGORY_ICONS[categoryKey];
+            const label = EVENT_CATEGORY_LABELS[categoryKey];
             return (
               <button
-                key={key}
+                key={categoryKey}
                 role="tab"
                 aria-selected={false}
-                onClick={() => handleCategoryClick(key)}
+                onClick={() => handleCategoryClick(categoryKey)}
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10"
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
-                <span>{category.label}</span>
+                <span>{label}</span>
               </button>
             );
           })}
@@ -219,3 +204,6 @@ export function EventCategoryFilter({
     </div>
   );
 }
+
+// Re-export types for convenience
+export type { EventCategory };

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
-import { EventCategoryFilter, type CategoryKey } from "@/components/event-category-filter";
+import { EventCategoryFilter, type EventCategory } from "@/components/event-category-filter";
 import { Filter } from "lucide-react";
 import type { PopularEventWithVenue } from "@/lib/supabase/actions/events";
 
@@ -21,7 +21,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
   // State for selected city filter
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   // State for selected category and subcategory
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<EventCategory | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   /**
@@ -116,7 +116,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
   };
 
   // Handle category changes
-  const handleCategoryChange = (category: CategoryKey | null) => {
+  const handleCategoryChange = (category: EventCategory | null) => {
     setSelectedCategory(category);
   };
 
