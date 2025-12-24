@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
+import { EventCategoryFilter, type CategoryKey } from "@/components/event-category-filter";
 import { Filter } from "lucide-react";
 import type { PopularEventWithVenue } from "@/lib/supabase/actions/events";
 
@@ -19,6 +20,9 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   // State for selected city filter
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  // State for selected category and subcategory
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   /**
    * Extract unique cities from events using useMemo
@@ -111,59 +115,62 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
     setSelectedCity(city);
   };
 
+  // Handle category changes
+  const handleCategoryChange = (category: CategoryKey | null) => {
+    setSelectedCategory(category);
+  };
+
+  // Handle subcategory changes
+  const handleSubcategoryChange = (subcategory: string | null) => {
+    setSelectedSubcategory(subcategory);
+  };
+
   // Reset all filters
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCity(null);
+    setSelectedCategory(null);
+    setSelectedSubcategory(null);
   };
 
   return (
     <>
       {/* Search and Filter Bar */}
       <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-        {/* Search and filter row */}
-        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full">
+        {/* Search and filter row - same line on mobile */}
+        <div className="flex flex-row gap-2.5 sm:gap-3 w-full">
           <div className="flex-1">
             <EnhancedSearchBar
               searchQuery={searchQuery}
               onSearchChange={handleSearch}
             />
           </div>
-          <div className="w-full sm:w-64 lg:w-72">
-            <EnhancedCityFilter
-              cities={cities}
-              selectedCity={selectedCity}
-              onCityChange={handleCityChange}
-            />
-          </div>
+          <EnhancedCityFilter
+            cities={cities}
+            selectedCity={selectedCity}
+            onCityChange={handleCityChange}
+          />
         </div>
 
-        {/* Active filters indicator */}
-        {(searchQuery || selectedCity) && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-white/60">
-              {filteredEvents.length} de {events.length} eventos
-            </span>
-            <button
-              onClick={resetFilters}
-              className="text-sm text-white/70 hover:text-white transition-colors"
-            >
-              Limpiar filtros
-            </button>
-          </div>
-        )}
+        {/* Category Filter */}
+        <EventCategoryFilter
+          selectedCategory={selectedCategory}
+          selectedSubcategory={selectedSubcategory}
+          onCategoryChange={handleCategoryChange}
+          onSubcategoryChange={handleSubcategoryChange}
+        />
       </div>
 
       {/* Show message if no events found after filtering */}
       {filteredEvents.length === 0 ? (
         <div className="text-center py-12 sm:py-16 md:py-20">
-          <div className="inline-flex p-3 sm:p-4 bg-white/5 rounded-xl sm:rounded-2xl border border-white/10 mb-4 sm:mb-6">
-            <Filter className="h-10 w-10 sm:h-12 sm:w-12 text-white/60" />
+          <div className="inline-flex p-3 sm:p-4 bg-gray-100 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-white/10 mb-4 sm:mb-6">
+            <Filter className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 dark:text-white/60" />
           </div>
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-3 px-4">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 px-4">
             No se encontraron eventos
           </h3>
-          <p className="text-sm sm:text-base text-white/60 mb-5 sm:mb-6 max-w-md mx-auto px-4">
+          <p className="text-sm sm:text-base text-gray-500 dark:text-white/60 mb-5 sm:mb-6 max-w-md mx-auto px-4">
             {selectedCity && `No hay eventos disponibles en ${selectedCity}`}
             {searchQuery &&
               !selectedCity &&
@@ -174,7 +181,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
           </p>
           <button
             onClick={resetFilters}
-            className="px-5 py-2.5 sm:px-6 sm:py-3 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/30 rounded-full text-white text-sm sm:text-base font-medium transition-all duration-300"
+            className="px-5 py-2.5 sm:px-6 sm:py-3 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 border border-gray-200 dark:border-white/20 hover:border-gray-300 dark:hover:border-white/30 rounded-full text-gray-900 dark:text-white text-sm sm:text-base font-medium transition-all duration-300"
           >
             Mostrar todos los eventos
           </button>

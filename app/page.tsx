@@ -11,12 +11,12 @@ export default function Page() {
       </FixedHeroWrapper>
 
       {/* Popular Events Section - Parallax effect */}
-      <section className="relative z-10 py-12 sm:py-16 md:py-20 bg-[#101010] rounded-t-[24px] sm:rounded-t-[32px] md:rounded-t-[48px] -mt-12 sm:-mt-16 md:-mt-20">
+      <section className="relative z-10 py-12 sm:py-16 md:py-20 bg-white dark:bg-[#101010] rounded-t-[24px] sm:rounded-t-[32px] md:rounded-t-[48px] -mt-12 sm:-mt-16 md:-mt-20">
         <div className="container mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <div className="mb-6 sm:mb-8">
             <h2
-              className="text-2xl sm:text-3xl md:text-4xl font-bold text-white"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
               style={{ fontFamily: "LOT, sans-serif" }}
             >
               Eventos Populares

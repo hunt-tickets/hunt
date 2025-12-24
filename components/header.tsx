@@ -38,122 +38,132 @@ export function Header() {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
+
   return (
-    <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-      isScrolled || isMobileMenuOpen
-        ? 'bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/80'
-        : 'bg-transparent'
-    }`}>
-      <div className="container mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Left side - Logo and Navigation */}
-        <div className="flex items-center gap-8">
-          <Link
-            href="/"
-            className="flex items-center"
-          >
-            <span className="text-2xl font-bold tracking-tight transition-all duration-300 ease-out hover:tracking-wide" style={{ fontFamily: 'LOT, sans-serif' }}>
-              HUNT
-            </span>
-          </Link>
+    <>
+      {/* Blur overlay - appears behind everything when menu is open */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-md md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-          {/* Desktop Navigation - Hide in profile route */}
-          {!isProfileRoute && (
-            <nav className="hidden md:flex items-center gap-1">
-              <Link
-                href="/eventos"
-                className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
-              >
-                Eventos
-              </Link>
-              <Link
-                href="/productor"
-                className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
-              >
-                Productor
-              </Link>
-              <Link
-                href="/sobre-nosotros"
-                className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
-              >
-                Sobre Nosotros
-              </Link>
-            </nav>
-          )}
-        </div>
+      {/* Header bar */}
+      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled
+          ? 'bg-background/80 backdrop-blur-md'
+          : isMobileMenuOpen
+            ? 'bg-transparent'
+            : 'bg-transparent'
+      }`}>
+        <div className="container mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          {/* Left side - Logo and Navigation */}
+          <div className="flex items-center gap-8">
+            <Link
+              href="/"
+              className="flex items-center"
+            >
+              <span className="text-2xl font-bold tracking-tight transition-all duration-300 ease-out hover:tracking-wide" style={{ fontFamily: 'LOT, sans-serif' }}>
+                HUNT
+              </span>
+            </Link>
 
-        {/* Right side - Desktop */}
-        <div className="hidden md:flex items-center gap-2">
-          <ThemeToggle />
-          {!isProfileRoute && <AuthButton />}
-        </div>
-
-        {/* Right side - Mobile */}
-        <div className="flex md:hidden items-center gap-2">
-          {!isAdminRoute && (
-            <>
-              <ThemeToggle />
-
-              {!isProfileRoute && (
-                <button
-                  className="flex items-center justify-center h-10 w-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 bg-zinc-100 border border-zinc-300 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-zinc-700 dark:hover:bg-zinc-800"
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            {/* Desktop Navigation - Hide in profile route */}
+            {!isProfileRoute && (
+              <nav className="hidden md:flex items-center gap-1">
+                <Link
+                  href="/eventos"
+                  className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
                 >
-                  {isMobileMenuOpen ? (
-                    <X className="h-5 w-5 text-zinc-900 dark:text-white" />
-                  ) : (
-                    <Menu className="h-5 w-5 text-zinc-900 dark:text-white" />
-                  )}
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+                  Eventos
+                </Link>
+                <Link
+                  href="/productor"
+                  className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
+                >
+                  Productor
+                </Link>
+                <Link
+                  href="/sobre-nosotros"
+                  className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
+                >
+                  Sobre Nosotros
+                </Link>
+              </nav>
+            )}
+          </div>
 
-      {/* Mobile Menu - Dropdown from Header - Hide in profile route */}
+          {/* Right side - Desktop */}
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
+            {!isProfileRoute && <AuthButton />}
+          </div>
+
+          {/* Right side - Mobile */}
+          <div className="flex md:hidden items-center gap-2">
+            {!isAdminRoute && (
+              <>
+                <ThemeToggle />
+
+                {!isProfileRoute && (
+                  <button
+                    className="flex items-center justify-center h-10 w-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 bg-zinc-100 border border-zinc-300 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+                  >
+                    {isMobileMenuOpen ? (
+                      <X className="h-5 w-5 text-zinc-900 dark:text-white" />
+                    ) : (
+                      <Menu className="h-5 w-5 text-zinc-900 dark:text-white" />
+                    )}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Menu - Now a sibling of header, not a child */}
       {!isProfileRoute && (
         <div
-          className={`fixed top-16 left-0 right-0 md:hidden transition-all duration-300 ${
+          className={`fixed top-16 left-0 right-0 z-50 md:hidden transition-all duration-300 ${
             isMobileMenuOpen
               ? 'translate-y-0 opacity-100 pointer-events-auto'
               : '-translate-y-4 opacity-0 pointer-events-none'
           }`}
-          style={{ zIndex: 45 }}
         >
-        {/* Glass Background with its own blur */}
-        <div className="bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 border-b border-white/10 shadow-2xl">
-          {/* Menu Content */}
+          {/* Menu Content - no blur here, blur is on the overlay behind */}
           <nav className="flex flex-col items-center gap-4 px-6 py-6 max-w-sm mx-auto">
             <Link
               href="/eventos"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-muted/50 dark:hover:bg-accent/30"
+              className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-white/10 dark:hover:bg-white/10"
             >
               Eventos
             </Link>
             <Link
               href="/productor"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-muted/50 dark:hover:bg-accent/30"
+              className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-white/10 dark:hover:bg-white/10"
             >
               Productor
             </Link>
             <Link
               href="/sobre-nosotros"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-muted/50 dark:hover:bg-accent/30"
+              className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-white/10 dark:hover:bg-white/10"
             >
               Sobre Nosotros
             </Link>
 
-            <div className="mt-4 w-full flex justify-center border-t border-white/10 pt-6">
+            <div className="mt-4 w-full flex justify-center border-t border-foreground/10 pt-6">
               <AuthButton />
             </div>
           </nav>
         </div>
-      </div>
       )}
-    </header>
+    </>
   );
 }

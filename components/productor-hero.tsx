@@ -1,8 +1,7 @@
 "use client"
 
-import { WaveBackground } from "@/components/ui/wave-background";
 import { HoverButton } from "@/components/ui/hover-glow-button";
-import { Users, BarChart3, Shield, Zap } from "lucide-react";
+import { Users, BarChart3, Shield, Zap, Ticket, QrCode, Megaphone, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -10,12 +9,12 @@ const features = [
   {
     icon: Users,
     title: "Alcance Masivo",
-    description: "Conecta con miles de usuarios.",
+    description: "Conecta con miles de usuarios interesados en tus eventos.",
   },
   {
     icon: BarChart3,
-    title: "Análisis Real",
-    description: "Métricas detalladas de ventas y comportamiento.",
+    title: "Métricas en Tiempo Real",
+    description: "Dashboard completo con estadísticas de ventas.",
   },
   {
     icon: Shield,
@@ -26,6 +25,26 @@ const features = [
     icon: Zap,
     title: "Gestión Simple",
     description: "Herramientas intuitivas para tus eventos.",
+  },
+  {
+    icon: Ticket,
+    title: "Gestión de Tickets",
+    description: "Control total sobre precios y disponibilidad.",
+  },
+  {
+    icon: QrCode,
+    title: "Escaneo QR",
+    description: "Validación instantánea de entradas.",
+  },
+  {
+    icon: Megaphone,
+    title: "Promoción",
+    description: "Marketing integrado para maximizar ventas.",
+  },
+  {
+    icon: CreditCard,
+    title: "Cobros Fáciles",
+    description: "Recibe pagos directamente en tu cuenta.",
   },
 ];
 
@@ -78,27 +97,26 @@ const ProductorHero = () => {
   }, []);
 
   return (
-    <div className="min-h-svh w-screen bg-background flex flex-col items-center justify-center p-8 relative overflow-hidden">
-      <div className="w-full max-w-6xl space-y-12 relative z-10">
-        <div className="flex flex-col items-center text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 border border-foreground/20 hover:border-foreground/30 transition-all duration-300 hover:shadow-lg hover:shadow-foreground/5">
-            <span className="text-xl">✨</span>
-            <span className="text-sm font-medium tracking-wide">Plataforma para Productores</span>
+    <div className="relative z-10 min-h-svh w-screen flex flex-col items-center justify-center pt-20 md:pt-32 pb-6 md:pb-8 px-4 sm:px-6 md:px-8">
+      <div className="w-full max-w-6xl space-y-8 md:space-y-12">
+        <div className="flex flex-col items-center text-center space-y-6 md:space-y-8">
+          <div className="inline-flex items-center px-3 py-1.5 rounded-full backdrop-blur-md bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 border border-foreground/20">
+            <span className="text-xs font-medium tracking-wide text-foreground">Para Productores</span>
           </div>
 
-          <div className="space-y-6 flex items-center justify-center flex-col ">
-            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl" style={{ fontFamily: 'LOT, sans-serif' }}>
+          <div className="space-y-4 md:space-y-6 flex items-center justify-center flex-col">
+            <h1 className="text-[clamp(1.5rem,6vw,3.75rem)] font-black leading-tight tracking-tight max-w-3xl text-foreground">
               Impulsa tus eventos
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-[clamp(1rem,3vw,1.5rem)] text-gray-600 dark:text-[#B0B0B0] leading-relaxed max-w-2xl">
               Gestiona, promociona y maximiza el éxito de tus eventos con nuestras herramientas especializadas.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 items-center">
+            <div className="flex flex-row gap-2 sm:gap-3 items-center">
               <HoverButton
                 data-cal-namespace="15min"
                 data-cal-link="hunt-tickets/15min"
                 data-cal-config='{"layout":"month_view"}'
-                className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-primary text-primary-foreground"
+                className="h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-primary text-primary-foreground flex items-center justify-center"
                 glowColor="#000000"
                 backgroundColor="transparent"
                 textColor="inherit"
@@ -108,8 +126,8 @@ const ProductorHero = () => {
               </HoverButton>
               <Link href="/eventos">
                 <HoverButton
-                  className="px-6 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-background/50 text-foreground border border-[#303030] backdrop-blur-sm"
-                  glowColor="#ffffff"
+                  className="h-[52px] sm:h-[56px] px-6 sm:px-8 rounded-full whitespace-nowrap text-sm sm:text-base font-medium bg-background/50 text-foreground border border-border backdrop-blur-sm flex items-center justify-center"
+                  glowColor="#888888"
                   backgroundColor="transparent"
                   textColor="inherit"
                   hoverTextColor="inherit"
@@ -128,13 +146,12 @@ const ProductorHero = () => {
               className="backdrop-blur-sm bg-foreground/5 border border-foreground/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
             >
               <feature.icon size={18} className="text-foreground/80 md:w-5 md:h-5" />
-              <h3 className="text-sm md:text-base font-medium">{feature.title}</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">{feature.description}</p>
+              <h3 className="text-sm md:text-base font-medium text-foreground">{feature.title}</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-[#B0B0B0]">{feature.description}</p>
             </div>
           ))}
         </div>
       </div>
-      <WaveBackground />
     </div>
   );
 };

@@ -20,7 +20,7 @@ export async function PopularEvents({ limit = 6 }: PopularEventsProps) {
   if (!events || events.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-white/70">
+        <p className="text-gray-500 dark:text-white/70">
           No hay eventos populares disponibles en este momento
         </p>
       </div>
