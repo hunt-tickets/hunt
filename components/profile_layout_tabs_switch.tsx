@@ -66,7 +66,7 @@ const ProfileTabs = () => {
       </div>
 
       {/* Mobile: Fixed bottom navigation */}
-      <div data-profile-menu-bar className="md:hidden fixed bottom-0 left-0 right-0 w-full h-20 bg-background/95 backdrop-blur-md border-t border-gray-200 dark:border-[#303030] z-50 grid grid-cols-3 safe-area-inset-bottom">
+      <div data-profile-menu-bar className="md:hidden fixed bottom-0 left-0 right-0 w-full h-[72px] bg-background/95 backdrop-blur-md border-t border-gray-200 dark:border-[#303030] z-50 grid grid-cols-3 safe-area-inset-bottom">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.value;
@@ -75,7 +75,7 @@ const ProfileTabs = () => {
               key={tab.value}
               onClick={() => handleTabChange(tab.value)}
               className={`
-                flex flex-col items-center justify-center gap-1.5
+                flex flex-col items-center justify-center gap-1
                 transition-all duration-300
                 ${
                   isActive
@@ -84,8 +84,8 @@ const ProfileTabs = () => {
                 }
               `}
             >
-              <Icon className="h-6 w-6" />
-              <span className="text-sm font-medium">{tab.label}</span>
+              <Icon className="h-5 w-5" />
+              <span className="text-xs font-medium">{tab.label}</span>
             </button>
           );
         })}
