@@ -34,14 +34,6 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/sobre-nosotros"
-                  className="text-sm text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors"
-                >
-                  Sobre nosotros
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/eventos"
                   className="text-sm text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors"
                 >

@@ -87,12 +87,6 @@ export function Header() {
                 >
                   Productor
                 </Link>
-                <Link
-                  href="/sobre-nosotros"
-                  className="px-4 py-2 text-sm font-medium text-foreground/80 transition-all duration-200 hover:bg-muted hover:text-foreground dark:hover:bg-accent/50 dark:hover:text-accent-foreground rounded-full"
-                >
-                  Sobre Nosotros
-                </Link>
               </nav>
             )}
           </div>
@@ -152,13 +146,6 @@ export function Header() {
               className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-white/10 dark:hover:bg-white/10"
             >
               Productor
-            </Link>
-            <Link
-              href="/sobre-nosotros"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center px-6 py-3 text-lg font-semibold text-foreground/80 transition-all duration-200 hover:text-foreground hover:scale-105 rounded-xl hover:bg-white/10 dark:hover:bg-white/10"
-            >
-              Sobre Nosotros
             </Link>
 
             <div className="mt-4 w-full flex justify-center border-t border-foreground/10 pt-6">
