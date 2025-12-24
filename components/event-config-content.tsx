@@ -37,26 +37,28 @@ import {
   Info,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  EVENT_CATEGORIES,
+  EVENT_CATEGORY_LABELS,
+} from "@/lib/constants/event-categories";
 
 interface EventData {
   id: string;
   name: string;
   description?: string;
+  category?: string;
   date?: string;
   end_date?: string;
   age?: number;
   variable_fee?: number;
   fixed_fee?: number;
+  city?: string;
+  country?: string;
+  address?: string;
   flyer?: string;
   flyer_apple?: string;
   venue_id?: string;
   faqs?: Array<{ id: string; question: string; answer: string }>;
-  venues?: {
-    id: string;
-    name: string;
-    address?: string;
-    city?: string;
-  };
 }
 
 interface EventConfigContentProps {
@@ -76,10 +78,11 @@ export function EventConfigContent({
   const [formData, setFormData] = useState({
     eventName: "",
     description: "",
+    category: "" as typeof EVENT_CATEGORIES[number] | "",
     venueName: "",
-    location: "",
     city: "",
     country: "",
+    address: "",
     startDate: "",
     endDate: "",
     age: 18,
@@ -107,10 +110,11 @@ export function EventConfigContent({
       setFormData({
         eventName: eventData.name || "",
         description: eventData.description || "",
-        venueName: eventData.venues?.name || "",
-        location: eventData.venues?.address || "",
-        city: eventData.venues?.city || "",
-        country: "",
+        category: (eventData.category as typeof EVENT_CATEGORIES[number]) || "",
+        venueName: "",
+        city: eventData.city || "",
+        country: eventData.country || "",
+        address: eventData.address || "",
         startDate: eventData.date ? formatDateForInput(eventData.date) : "",
         endDate: eventData.end_date
           ? formatDateForInput(eventData.end_date)
@@ -279,9 +283,13 @@ export function EventConfigContent({
         const result = await updateEventConfiguration(eventId, {
           name: formData.eventName,
           description: formData.description,
+          category: formData.category || undefined,
           date: formData.startDate,
           end_date: formData.endDate,
           age: formData.age,
+          city: formData.city,
+          country: formData.country,
+          address: formData.address,
           variable_fee: huntCosts.commissionPercentage / 100,
           fixed_fee: huntCosts.costPerTicket,
         });
@@ -420,6 +428,29 @@ export function EventConfigContent({
                 showCharCount
               />
 
+              {/* Category */}
+              <FormSelect
+                id="category"
+                name="category"
+                label="Categoría"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    category: e.target.value as typeof EVENT_CATEGORIES[number],
+                  }))
+                }
+                hint="Selecciona la categoría que mejor describe tu evento"
+                required
+              >
+                <option value="">Selecciona una categoría</option>
+                {EVENT_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {EVENT_CATEGORY_LABELS[cat]}
+                  </option>
+                ))}
+              </FormSelect>
+
               {/* Age Restriction */}
               <FormSelect
                 id="age"
@@ -471,11 +502,11 @@ export function EventConfigContent({
               {/* Full Address with Google Places Autocomplete - TODO: Fix Google Maps types */}
               {/* <GooglePlacesAutocomplete
                 label="Dirección"
-                defaultValue={formData.location}
+                defaultValue={formData.address}
                 onPlaceSelect={(place) => {
                   setFormData((prev) => ({
                     ...prev,
-                    location: place.address,
+                    address: place.address,
                     city: place.city || prev.city,
                     country: place.country || prev.country,
                   }));
@@ -483,10 +514,10 @@ export function EventConfigContent({
                 required
               /> */}
               <FormInput
-                id="location"
-                name="location"
+                id="address"
+                name="address"
                 label="Dirección"
-                value={formData.location}
+                value={formData.address}
                 onChange={handleInputChange}
                 placeholder="ej. Calle 123 #45-67"
                 icon={<MapPinned className="h-4 w-4" />}

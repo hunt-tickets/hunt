@@ -5,9 +5,11 @@ import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ticket, HelpCircle, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { CreateTicketTypeDialog } from "@/components/create-ticket-type-dialog";
 import { EditTicketSheet } from "@/components/edit-ticket-sheet";
 import { ChannelSalesChart, TicketRevenueDistributionChart } from "@/components/event-charts";
+import { updateTicketTypeActive } from "@/lib/supabase/actions/tickets";
 
 interface TicketTypeFilter {
   id: string;
@@ -66,6 +68,16 @@ export function EventTicketsContent({
 
   const [selectedTicketType, setSelectedTicketType] = useState<string>("all");
   const [selectedPriceTab, setSelectedPriceTab] = useState<Record<string, 'app' | 'cash'>>({});
+  const [togglingTickets, setTogglingTickets] = useState<Record<string, boolean>>({});
+
+  const handleToggleActive = async (ticketId: string, currentStatus: boolean) => {
+    setTogglingTickets((prev) => ({ ...prev, [ticketId]: true }));
+    const result = await updateTicketTypeActive(ticketId, !currentStatus);
+    setTogglingTickets((prev) => ({ ...prev, [ticketId]: false }));
+    if (result.success) {
+      router.refresh();
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
@@ -303,9 +315,11 @@ export function EventTicketsContent({
                         <h3 className="text-base font-bold">{ticket.name}</h3>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${ticket.status ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                          {ticket.status ? 'Activo' : 'Inactivo'}
-                        </div>
+                        <Switch
+                          checked={ticket.status}
+                          disabled={togglingTickets[ticket.id]}
+                          onCheckedChange={() => handleToggleActive(ticket.id, ticket.status)}
+                        />
                         <EditTicketSheet ticket={ticket} />
                       </div>
                     </div>

@@ -10,7 +10,6 @@ import {
   organizationClient,
   inferOrgAdditionalFields,
 } from "better-auth/client/plugins";
-import { passkeyClient } from "@better-auth/passkey/client";
 import { ac, owner, administrator, seller } from "@/lib/auth-permissions";
 import type { auth } from "@/lib/auth";
 
@@ -19,7 +18,6 @@ export const authClient = createAuthClient({
   plugins: [
     magicLinkClient(),
     emailOTPClient(),
-    passkeyClient(),
     phoneNumberClient(),
     organizationClient({
       ac,

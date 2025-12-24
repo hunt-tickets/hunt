@@ -149,6 +149,20 @@ export const ticketStatus = pgEnum("ticket_status", [
   "cancelled",
   "transferred",
 ]);
+export const eventCategory = pgEnum("event_category", [
+  "musica",
+  "deportes",
+  "gastronomia",
+  "rumba",
+  "familiar",
+  "arte",
+  "aire_libre",
+  "bienestar",
+  "negocios",
+  "educacion",
+  "mercados",
+  "otro",
+]);
 
 // Countries table
 export const countries = pgTable(
@@ -592,6 +606,7 @@ export const events = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+    category: eventCategory("category"),
     name: text("name"),
     description: text("description"),
     date: timestamp("date", { withTimezone: true }),
@@ -599,6 +614,7 @@ export const events = pgTable(
     status: boolean("status").default(false),
     city: text("city"),
     country: text("country"),
+    address: text("address"),
     flyer: text("flyer"),
     venueId: uuid("venue_id").references(() => venues.id),
     variableFee: decimal("variable_fee"),
@@ -667,7 +683,7 @@ export const ticketTypes = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-    active: boolean("active"),
+    active: boolean("active").notNull().default(false),
   },
   (table) => [
     index("idx_ticket_types_event").on(table.eventId),

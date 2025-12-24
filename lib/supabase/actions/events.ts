@@ -9,9 +9,13 @@ import { formatISO } from "date-fns";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import type { Event as EventSchema } from "@/lib/schema";
+import { EVENT_CATEGORIES } from "@/lib/constants/event-categories";
 
 const eventFormSchema = z.object({
   organization_id: z.string().min(1, "El ID de la organización es requerido"),
+  category: z.enum(EVENT_CATEGORIES, {
+    message: "Selecciona una categoría válida",
+  }),
   name: z.string().optional(),
   description: z.string().optional(),
   start_date: z.string().optional(),
@@ -32,6 +36,7 @@ const eventFormSchema = z.object({
   guest_list_max_time: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
+  address: z.string().optional(),
   extra_info: z.string().optional(),
   variable_fee: z.string().optional(),
   fixed_fee: z.string().optional(),
@@ -47,6 +52,7 @@ const eventFormSchema = z.object({
 export type EventFormState = {
   errors?: {
     organization_id?: string[];
+    category?: string[];
     name?: string[];
     description?: string[];
     start_date?: string[];
@@ -67,6 +73,7 @@ export type EventFormState = {
     guest_list_max_time?: string[];
     city?: string[];
     country?: string[];
+    address?: string[];
     extra_info?: string[];
     variable_fee?: string[];
     fixed_fee?: string[];
@@ -104,6 +111,7 @@ export async function createEvent(
   // Extract form data
   const rawFormData = {
     organization_id: formData.get("organization_id"),
+    category: formData.get("category"),
     name: formData.get("name"),
     description: formData.get("description"),
     start_date: formData.get("start_date"),
@@ -124,6 +132,7 @@ export async function createEvent(
     guest_list_max_time: formData.get("guest_list_max_time") || "",
     city: formData.get("city") || "",
     country: formData.get("country") || "",
+    address: formData.get("address") || "",
     extra_info: formData.get("extra_info") || "",
     variable_fee: formData.get("variable_fee") || "",
     fixed_fee: formData.get("fixed_fee") || "",
@@ -325,6 +334,7 @@ export async function createEvent(
       .from("events")
       .insert({
         organization_id: validData.organization_id,
+        category: validData.category,
         name: validData.name || null,
         description: validData.description || null,
         date: startDateTime,
@@ -344,6 +354,7 @@ export async function createEvent(
         guest_list_max_hour: guestListMaxHour,
         city: validData.city || null,
         country: validData.country || null,
+        address: validData.address || null,
         extra_info: validData.extra_info || null,
         variable_fee: validData.variable_fee ? parseFloat(validData.variable_fee) : null,
         fixed_fee: validData.fixed_fee ? parseFloat(validData.fixed_fee) : null,
@@ -894,6 +905,7 @@ export async function getEventTicketTypes(eventId: string) {
       .from("ticket_types")
       .select("*")
       .eq("event_id", eventId)
+      .eq("active", true)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -911,11 +923,15 @@ export async function getEventTicketTypes(eventId: string) {
 export async function updateEventConfiguration(eventId: string, formData: {
   name?: string;
   description?: string;
+  category?: typeof EVENT_CATEGORIES[number];
   date?: string;
   end_date?: string;
   age?: number;
   variable_fee?: number;
   fixed_fee?: number;
+  city?: string;
+  country?: string;
+  address?: string;
   faqs?: Array<{ id: string; question: string; answer: string }>;
 }) {
   const supabase = await createClient();
@@ -926,25 +942,38 @@ export async function updateEventConfiguration(eventId: string, formData: {
     return { success: false, message: "No autenticado" };
   }
 
+  // Validate category if provided
+  if (formData.category && !EVENT_CATEGORIES.includes(formData.category)) {
+    return { success: false, message: "Categoría inválida" };
+  }
+
   // Build update object with only provided fields
   const updateData: Partial<{
     name: string;
     description: string;
+    category: string;
     date: string;
     end_date: string;
     age: number;
     variable_fee: number;
     fixed_fee: number;
+    city: string;
+    country: string;
+    address: string;
     faqs: Array<{ id: string; question: string; answer: string }>;
   }> = {};
 
   if (formData.name !== undefined) updateData.name = formData.name;
   if (formData.description !== undefined) updateData.description = formData.description;
+  if (formData.category !== undefined) updateData.category = formData.category;
   if (formData.date !== undefined) updateData.date = formData.date;
   if (formData.end_date !== undefined) updateData.end_date = formData.end_date;
   if (formData.age !== undefined) updateData.age = formData.age;
   if (formData.variable_fee !== undefined) updateData.variable_fee = formData.variable_fee;
   if (formData.fixed_fee !== undefined) updateData.fixed_fee = formData.fixed_fee;
+  if (formData.city !== undefined) updateData.city = formData.city;
+  if (formData.country !== undefined) updateData.country = formData.country;
+  if (formData.address !== undefined) updateData.address = formData.address;
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
 
   const { error } = await supabase
@@ -1104,7 +1133,7 @@ export type EventDetail = {
     saleEnd: Date | null;
     createdAt: Date;
     updatedAt: Date | null;
-    active: boolean | null;
+    active: boolean;
   }[];
 };
 
@@ -1141,7 +1170,7 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
         .eq("id", eventId)
         .single(),
       // Use RPC for accurate availability with lazy expiration
-      supabase.rpc("get_ticket_availability", { p_event_id: eventId }),
+      supabase.rpc("get_ticket_availability_v2", { p_event_id: eventId }),
     ]);
 
     if (eventResult.error) {
@@ -1206,7 +1235,7 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
         saleEnd: t.sale_end ? new Date(t.sale_end as string) : null,
         createdAt: new Date(),
         updatedAt: null,
-        active: (t.active as boolean | null) ?? true,
+        active: true, // RPC only returns active tickets
       })),
     };
 

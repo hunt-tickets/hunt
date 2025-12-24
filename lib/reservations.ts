@@ -313,7 +313,7 @@ export async function getTicketAvailability(
 ): Promise<TicketAvailability[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("get_ticket_availability", {
+  const { data, error } = await supabase.rpc("get_ticket_availability_v2", {
     p_event_id: eventId,
   });
 
