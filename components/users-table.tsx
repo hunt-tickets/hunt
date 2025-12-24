@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import {
   Table,
   TableBody,
@@ -11,9 +11,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Phone, Mail, Cake, Search, X, FileSpreadsheet } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Phone,
+  Mail,
+  Cake,
+  Search,
+  X,
+  FileSpreadsheet,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { PAGINATION, DEBOUNCE_DELAYS } from "@/lib/constants";
+import { PAGINATION, DEBOUNCE_DELAYS } from "@/constants/constants";
 import type { User } from "@/lib/users/types";
 import {
   formatUserPhone,
@@ -25,7 +34,10 @@ import {
 
 // Lazy load UserProfileSheet - only needed when user clicks on a row
 const UserProfileSheet = dynamic(
-  () => import("@/components/user-profile-sheet").then(mod => ({ default: mod.UserProfileSheet })),
+  () =>
+    import("@/components/user-profile-sheet").then((mod) => ({
+      default: mod.UserProfileSheet,
+    })),
   { ssr: false }
 );
 
@@ -58,15 +70,20 @@ export function UsersTable({ users }: UsersTableProps) {
 
     const search = searchTerm.toLowerCase();
     return users.filter((user) => {
-      const fullName = [user.name, user.lastName].filter(Boolean).join(' ').toLowerCase();
+      const fullName = [user.name, user.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
       const email = (user.email || "").toLowerCase();
       const phone = (user.phone || "").toLowerCase();
       const document = (user.document_id || "").toLowerCase();
 
-      return fullName.includes(search) ||
+      return (
+        fullName.includes(search) ||
         email.includes(search) ||
         phone.includes(search) ||
-        document.includes(search);
+        document.includes(search)
+      );
     });
   }, [users, searchTerm]);
 
@@ -81,9 +98,12 @@ export function UsersTable({ users }: UsersTableProps) {
   }, [filteredUsers, currentPage, pageSize]);
 
   // Memoized callbacks to prevent recreation on every render
-  const goToPage = useCallback((page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (page: number) => {
+      setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    },
+    [totalPages]
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _handlePageSizeChange = useCallback((newSize: string) => {
@@ -98,38 +118,68 @@ export function UsersTable({ users }: UsersTableProps) {
     // Rate limiting: Prevent spam exports (max 1 per 10 seconds)
     const now = Date.now();
     if (now - lastExportTime.current < DEBOUNCE_DELAYS.EXPORT_RATE_LIMIT) {
-      const remainingSeconds = Math.ceil((DEBOUNCE_DELAYS.EXPORT_RATE_LIMIT - (now - lastExportTime.current)) / 1000);
-      alert(`Por favor espera ${remainingSeconds} segundos antes de exportar nuevamente.`);
+      const remainingSeconds = Math.ceil(
+        (DEBOUNCE_DELAYS.EXPORT_RATE_LIMIT - (now - lastExportTime.current)) /
+          1000
+      );
+      alert(
+        `Por favor espera ${remainingSeconds} segundos antes de exportar nuevamente.`
+      );
       return;
     }
     lastExportTime.current = now;
 
     // Create CSV content with sanitized fields
-    const headers = ['Nombre', 'Apellido', 'Email', 'Teléfono', 'Edad', 'Género', 'Documento', 'Fecha Registro'];
-    const csvRows = [headers.join(',')];
+    const headers = [
+      "Nombre",
+      "Apellido",
+      "Email",
+      "Teléfono",
+      "Edad",
+      "Género",
+      "Documento",
+      "Fecha Registro",
+    ];
+    const csvRows = [headers.join(",")];
 
-    filteredUsers.forEach(user => {
+    filteredUsers.forEach((user) => {
       const fullName = sanitizeForCSV(user.name);
       const lastName = sanitizeForCSV(user.lastName);
       const email = sanitizeForCSV(user.email);
-      const phone = formatUserPhone(user.phone, user.prefix) || '';
-      const age = user.birthdate ? String(getUserAge(user.birthdate) ?? '') : '';
+      const phone = formatUserPhone(user.phone, user.prefix) || "";
+      const age = user.birthdate
+        ? String(getUserAge(user.birthdate) ?? "")
+        : "";
       const gender = sanitizeForCSV(user.gender);
       const document = sanitizeForCSV(user.document_id);
-      const createdAt = new Date(user.created_at).toLocaleDateString('es-CO');
+      const createdAt = new Date(user.created_at).toLocaleDateString("es-CO");
 
-      const row = [fullName, lastName, email, phone, age, gender, document, createdAt];
-      csvRows.push(row.map(field => `"${sanitizeForCSV(field)}"`).join(','));
+      const row = [
+        fullName,
+        lastName,
+        email,
+        phone,
+        age,
+        gender,
+        document,
+        createdAt,
+      ];
+      csvRows.push(row.map((field) => `"${sanitizeForCSV(field)}"`).join(","));
     });
 
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
 
-    link.setAttribute('href', url);
-    link.setAttribute('download', `usuarios_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `usuarios_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -155,7 +205,8 @@ export function UsersTable({ users }: UsersTableProps) {
             aria-describedby="search-description"
           />
           <span id="search-description" className="sr-only">
-            Busca usuarios por nombre, apellido, correo electrónico, teléfono o número de documento
+            Busca usuarios por nombre, apellido, correo electrónico, teléfono o
+            número de documento
           </span>
           {searchInput && (
             <button
@@ -186,34 +237,44 @@ export function UsersTable({ users }: UsersTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-white/5">
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 py-3 text-xs uppercase tracking-wider">Usuario</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Correo</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Teléfono</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Edad</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 py-3 text-xs uppercase tracking-wider">
+                Usuario
+              </TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">
+                Correo
+              </TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">
+                Teléfono
+              </TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">
+                Edad
+              </TableHead>
             </TableRow>
           </TableHeader>
-            <TableBody>
-              {currentUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="py-24">
-                    <div className="text-center">
-                      <Search className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                      <p className="text-sm text-gray-400 dark:text-white/40 mb-2">No se encontraron usuarios</p>
-                      {hasActiveFilters && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSearchInput("")}
-                          className="text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10"
-                        >
-                          Limpiar búsqueda
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                currentUsers.map((user) => {
+          <TableBody>
+            {currentUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="py-24">
+                  <div className="text-center">
+                    <Search className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm text-gray-400 dark:text-white/40 mb-2">
+                      No se encontraron usuarios
+                    </p>
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSearchInput("")}
+                        className="text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10"
+                      >
+                        Limpiar búsqueda
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              currentUsers.map((user) => {
                 const fullName = getFullName(user.name, user.lastName);
                 const phoneNumber = formatUserPhone(user.phone, user.prefix);
                 const initials = getUserInitials(user.name, user.lastName);
@@ -224,7 +285,7 @@ export function UsersTable({ users }: UsersTableProps) {
                 };
 
                 const handleKeyDown = (e: React.KeyboardEvent) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     handleRowClick();
                   }
@@ -258,7 +319,9 @@ export function UsersTable({ users }: UsersTableProps) {
                           {user.email}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400 dark:text-white/40">-</span>
+                        <span className="text-sm text-gray-400 dark:text-white/40">
+                          -
+                        </span>
                       )}
                     </TableCell>
 
@@ -270,7 +333,9 @@ export function UsersTable({ users }: UsersTableProps) {
                           {phoneNumber}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400 dark:text-white/40">-</span>
+                        <span className="text-sm text-gray-400 dark:text-white/40">
+                          -
+                        </span>
                       )}
                     </TableCell>
 
@@ -282,15 +347,17 @@ export function UsersTable({ users }: UsersTableProps) {
                           {getUserAge(user.birthdate)} años
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400 dark:text-white/40">-</span>
+                        <span className="text-sm text-gray-400 dark:text-white/40">
+                          -
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>
                 );
               })
-              )}
-            </TableBody>
-          </Table>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination Controls */}
@@ -319,8 +386,13 @@ export function UsersTable({ users }: UsersTableProps) {
                 // Add ellipsis
                 if (index > 0 && page - array[index - 1] > 1) {
                   return (
-                    <div key={`ellipsis-${page}`} className="flex items-center gap-1">
-                      <span className="text-gray-400 dark:text-white/30 px-1">·</span>
+                    <div
+                      key={`ellipsis-${page}`}
+                      className="flex items-center gap-1"
+                    >
+                      <span className="text-gray-400 dark:text-white/30 px-1">
+                        ·
+                      </span>
                       <Button
                         variant="ghost"
                         size="sm"

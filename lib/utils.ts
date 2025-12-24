@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { DATE_FORMATS, LOCALE } from "./constants";
+import { DATE_FORMATS, LOCALE } from "../constants/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -24,7 +24,10 @@ export function calculateAge(birthdate: string | null): number | null {
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
 
@@ -42,15 +45,15 @@ export function calculateAge(birthdate: string | null): number | null {
  */
 export function formatDate(
   date: string | Date,
-  format: keyof typeof DATE_FORMATS = 'SHORT'
+  format: keyof typeof DATE_FORMATS = "SHORT"
 ): string {
   try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    if (isNaN(dateObj.getTime())) return '-';
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) return "-";
 
     return dateObj.toLocaleDateString(LOCALE, DATE_FORMATS[format]);
   } catch {
-    return '-';
+    return "-";
   }
 }
 
@@ -60,18 +63,18 @@ export function formatDate(
  * @returns Sanitized field safe for CSV export
  */
 export function sanitizeCSVField(field: string): string {
-  if (!field) return '';
+  if (!field) return "";
 
   const fieldStr = String(field);
 
   // Prevent formula injection by prepending single quote to potentially dangerous characters
   if (
-    fieldStr.startsWith('=') ||
-    fieldStr.startsWith('+') ||
-    fieldStr.startsWith('-') ||
-    fieldStr.startsWith('@') ||
-    fieldStr.startsWith('\t') ||
-    fieldStr.startsWith('\r')
+    fieldStr.startsWith("=") ||
+    fieldStr.startsWith("+") ||
+    fieldStr.startsWith("-") ||
+    fieldStr.startsWith("@") ||
+    fieldStr.startsWith("\t") ||
+    fieldStr.startsWith("\r")
   ) {
     return `'${fieldStr}`;
   }

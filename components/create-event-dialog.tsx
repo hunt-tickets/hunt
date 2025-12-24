@@ -19,11 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { createEvent, type EventFormState } from "@/lib/supabase/actions/events";
+import {
+  createEvent,
+  type EventFormState,
+} from "@/lib/supabase/actions/events";
 import {
   EVENT_CATEGORIES,
   EVENT_CATEGORY_LABELS,
-} from "@/lib/constants/event-categories";
+} from "@/constants/event-categories";
 import { CreateEventSubmitButton } from "@/components/create-event-submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle, Plus } from "lucide-react";
@@ -53,17 +56,10 @@ interface StatusSelectProps {
   onChange: (value: string) => void;
 }
 
-function StatusSelect({
-  label,
-  name,
-  value,
-  onChange,
-}: StatusSelectProps) {
+function StatusSelect({ label, name, value, onChange }: StatusSelectProps) {
   return (
     <div className="space-y-2">
-      <Label className="text-sm font-medium">
-        {label}
-      </Label>
+      <Label className="text-sm font-medium">{label}</Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
           <SelectValue />
@@ -92,10 +88,6 @@ export function CreateEventDialog({
   const [age, setAge] = useState("");
   const [status, setStatus] = useState("Inactivo");
   const [cashSales, setCashSales] = useState("Inactivo");
-  const [priority, setPriority] = useState("Inactivo");
-  const [lists, setLists] = useState("Inactivo");
-  const [courtesies, setCourtesies] = useState("Inactivo");
-  const [guestList, setGuestList] = useState("Inactivo");
 
   // Close dialog on success
   useEffect(() => {
@@ -106,10 +98,6 @@ export function CreateEventDialog({
       setAge("");
       setStatus("Inactivo");
       setCashSales("Inactivo");
-      setPriority("Inactivo");
-      setLists("Inactivo");
-      setCourtesies("Inactivo");
-      setGuestList("Inactivo");
       setOpen(false);
     }
   }, [state.success]);
@@ -153,7 +141,11 @@ export function CreateEventDialog({
               id="create-event-form"
             >
               {/* Hidden organization ID */}
-              <input type="hidden" name="organization_id" value={organizationId} />
+              <input
+                type="hidden"
+                name="organization_id"
+                value={organizationId}
+              />
 
               {/* Error message */}
               {state.message && !state.success && (
@@ -208,7 +200,11 @@ export function CreateEventDialog({
                     <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
                       <SelectValue placeholder="Selecciona una categoría" />
                     </SelectTrigger>
-                    <SelectContent position="popper" side="bottom" align="start">
+                    <SelectContent
+                      position="popper"
+                      side="bottom"
+                      align="start"
+                    >
                       {EVENT_CATEGORIES.map((cat) => (
                         <SelectItem key={cat} value={cat}>
                           {EVENT_CATEGORY_LABELS[cat]}
@@ -332,9 +328,7 @@ export function CreateEventDialog({
                 </h3>
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    Venue
-                  </Label>
+                  <Label className="text-sm font-medium">Venue</Label>
                   <Select value={venueId} onValueChange={setVenueId}>
                     <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
                       <SelectValue placeholder="Seleccione un venue" />
@@ -419,9 +413,7 @@ export function CreateEventDialog({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">
-                      Edad Mínima
-                    </Label>
+                    <Label className="text-sm font-medium">Edad Mínima</Label>
                     <Select value={age} onValueChange={setAge}>
                       <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
                         <SelectValue placeholder="Seleccione edad" />
@@ -522,7 +514,10 @@ export function CreateEventDialog({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="flyer_overlay" className="text-sm font-medium">
+                    <Label
+                      htmlFor="flyer_overlay"
+                      className="text-sm font-medium"
+                    >
                       Flyer Overlay
                     </Label>
                     <Input
@@ -538,7 +533,10 @@ export function CreateEventDialog({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="flyer_background" className="text-sm font-medium">
+                    <Label
+                      htmlFor="flyer_background"
+                      className="text-sm font-medium"
+                    >
                       Flyer Background
                     </Label>
                     <Input
@@ -554,7 +552,10 @@ export function CreateEventDialog({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="flyer_banner" className="text-sm font-medium">
+                    <Label
+                      htmlFor="flyer_banner"
+                      className="text-sm font-medium"
+                    >
                       Flyer Banner
                     </Label>
                     <Input
@@ -579,7 +580,10 @@ export function CreateEventDialog({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="variable_fee" className="text-sm font-medium">
+                    <Label
+                      htmlFor="variable_fee"
+                      className="text-sm font-medium"
+                    >
                       Tarifa Variable (%)
                     </Label>
                     <Input
@@ -626,132 +630,6 @@ export function CreateEventDialog({
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="pos_fee" className="text-sm font-medium">
-                      Tarifa POS
-                    </Label>
-                    <Input
-                      id="pos_fee"
-                      name="pos_fee"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="Ej: 3000"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Tarifa para ventas en punto de venta
-                    </p>
-                    {state.errors?.pos_fee && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.pos_fee[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="late_fee" className="text-sm font-medium">
-                      Tarifa Tardía
-                    </Label>
-                    <Input
-                      id="late_fee"
-                      name="late_fee"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="Ej: 2000"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Tarifa adicional para compras tardías
-                    </p>
-                    {state.errors?.late_fee && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.late_fee[0]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Personalización */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Personalización de Tema
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="hex" className="text-sm font-medium">
-                      Color Principal (Hex)
-                    </Label>
-                    <Input
-                      id="hex"
-                      name="hex"
-                      type="text"
-                      placeholder="Ej: #FF5733"
-                      maxLength={7}
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Color del tema del evento
-                    </p>
-                    {state.errors?.hex && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.hex[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="hex_text" className="text-sm font-medium">
-                      Color de Texto (Hex)
-                    </Label>
-                    <Input
-                      id="hex_text"
-                      name="hex_text"
-                      type="text"
-                      placeholder="Ej: #FFFFFF"
-                      maxLength={7}
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Color del texto principal
-                    </p>
-                    {state.errors?.hex_text && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.hex_text[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="hex_text_secondary" className="text-sm font-medium">
-                      Color Texto Secundario
-                    </Label>
-                    <Input
-                      id="hex_text_secondary"
-                      name="hex_text_secondary"
-                      type="text"
-                      placeholder="Ej: #A3A3A3"
-                      maxLength={7}
-                      defaultValue="#A3A3A3"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Color del texto secundario
-                    </p>
-                    {state.errors?.hex_text_secondary && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.hex_text_secondary[0]}
-                      </p>
-                    )}
-                  </div>
                 </div>
               </div>
 
@@ -761,194 +639,12 @@ export function CreateEventDialog({
                   Configuración de Ventas
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <StatusSelect
-                    label="Venta en Efectivo"
-                    name="cash_sales"
-                    value={cashSales}
-                    onChange={setCashSales}
-                  />
-
-                  <StatusSelect
-                    label="Prioridad"
-                    name="priority"
-                    value={priority}
-                    onChange={setPriority}
-                  />
-
-                  <StatusSelect
-                    label="Listas"
-                    name="lists"
-                    value={lists}
-                    onChange={setLists}
-                  />
-
-                  <StatusSelect
-                    label="Cortesías"
-                    name="courtesies"
-                    value={courtesies}
-                    onChange={setCourtesies}
-                  />
-                </div>
-              </div>
-
-              {/* Guest List */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Guest List
-                </h3>
-
                 <StatusSelect
-                  label="Habilitar Guest List"
-                  name="guest_list"
-                  value={guestList}
-                  onChange={setGuestList}
+                  label="Venta en Efectivo"
+                  name="cash_sales"
+                  value={cashSales}
+                  onChange={setCashSales}
                 />
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="guest_list_quantity"
-                    className="text-sm font-medium"
-                  >
-                    Cantidad Máxima
-                  </Label>
-                  <Input
-                    id="guest_list_quantity"
-                    name="guest_list_quantity"
-                    type="number"
-                    placeholder="Ej: 100"
-                    min="0"
-                    className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                  />
-                  {state.errors?.guest_list_quantity && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.guest_list_quantity[0]}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="guest_list_max_date"
-                      className="text-sm font-medium"
-                    >
-                      Fecha Límite
-                    </Label>
-                    <Input
-                      id="guest_list_max_date"
-                      name="guest_list_max_date"
-                      type="date"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Fecha límite para guest list
-                    </p>
-                    {state.errors?.guest_list_max_date && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.guest_list_max_date[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="guest_list_max_time"
-                      className="text-sm font-medium"
-                    >
-                      Hora Límite
-                    </Label>
-                    <Input
-                      id="guest_list_max_time"
-                      name="guest_list_max_time"
-                      type="time"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Hora límite para guest list
-                    </p>
-                    {state.errors?.guest_list_max_time && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.guest_list_max_time[0]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="guest_email"
-                      className="text-sm font-medium"
-                    >
-                      Email de Contacto
-                    </Label>
-                    <Input
-                      id="guest_email"
-                      name="guest_email"
-                      type="email"
-                      placeholder="contacto@ejemplo.com"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Email para consultas de guest list
-                    </p>
-                    {state.errors?.guest_email && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.guest_email[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="guest_name"
-                      className="text-sm font-medium"
-                    >
-                      Nombre de Contacto
-                    </Label>
-                    <Input
-                      id="guest_name"
-                      name="guest_name"
-                      placeholder="Ej: Juan Pérez"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Nombre de la persona a cargo del guest list
-                    </p>
-                    {state.errors?.guest_name && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.guest_name[0]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="guest_list_info"
-                    className="text-sm font-medium"
-                  >
-                    Información Adicional
-                  </Label>
-                  <Textarea
-                    id="guest_list_info"
-                    name="guest_list_info"
-                    placeholder="Información adicional sobre el guest list..."
-                    className="min-h-[80px] resize-none bg-background/50 border-[#303030] focus-visible:ring-primary"
-                  />
-                  {state.errors?.guest_list_info && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.guest_list_info[0]}
-                    </p>
-                  )}
-                </div>
               </div>
             </form>
           </div>

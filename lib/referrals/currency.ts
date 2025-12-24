@@ -5,7 +5,7 @@
  * consistent currency display across all referral-related components.
  */
 
-import { LOCALE } from "@/lib/constants";
+import { LOCALE } from "@/constants/constants";
 
 /**
  * Formats a number as Colombian Peso (COP) currency

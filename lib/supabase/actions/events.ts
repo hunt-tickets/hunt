@@ -9,7 +9,7 @@ import { formatISO } from "date-fns";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import type { Event as EventSchema, TicketType } from "@/lib/schema";
-import { EVENT_CATEGORIES } from "@/lib/constants/event-categories";
+import { EVENT_CATEGORIES } from "@/constants/event-categories";
 
 const eventFormSchema = z.object({
   organization_id: z.string().min(1, "El ID de la organización es requerido"),
@@ -26,27 +26,12 @@ const eventFormSchema = z.object({
   age: z.string().optional(),
   cash_sales: z.string().optional(),
   status: z.string().optional(),
-  priority: z.string().optional(),
-  lists: z.string().optional(),
-  courtesies: z.string().optional(),
-  guest_list: z.string().optional(),
-  guest_list_quantity: z.string().optional(),
-  guest_list_info: z.string().optional(),
-  guest_list_max_date: z.string().optional(),
-  guest_list_max_time: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
   address: z.string().optional(),
   extra_info: z.string().optional(),
   variable_fee: z.string().optional(),
   fixed_fee: z.string().optional(),
-  pos_fee: z.string().optional(),
-  late_fee: z.string().optional(),
-  hex: z.string().optional(),
-  hex_text: z.string().optional(),
-  hex_text_secondary: z.string().optional(),
-  guest_email: z.string().optional(),
-  guest_name: z.string().optional(),
 });
 
 export type EventFormState = {
@@ -63,27 +48,12 @@ export type EventFormState = {
     age?: string[];
     cash_sales?: string[];
     status?: string[];
-    priority?: string[];
-    lists?: string[];
-    courtesies?: string[];
-    guest_list?: string[];
-    guest_list_quantity?: string[];
-    guest_list_info?: string[];
-    guest_list_max_date?: string[];
-    guest_list_max_time?: string[];
     city?: string[];
     country?: string[];
     address?: string[];
     extra_info?: string[];
     variable_fee?: string[];
     fixed_fee?: string[];
-    pos_fee?: string[];
-    late_fee?: string[];
-    hex?: string[];
-    hex_text?: string[];
-    hex_text_secondary?: string[];
-    guest_email?: string[];
-    guest_name?: string[];
   };
   message?: string;
   success?: boolean;
@@ -122,27 +92,12 @@ export async function createEvent(
     age: formData.get("age"),
     cash_sales: formData.get("cash_sales"),
     status: formData.get("status"),
-    priority: formData.get("priority"),
-    lists: formData.get("lists"),
-    courtesies: formData.get("courtesies"),
-    guest_list: formData.get("guest_list"),
-    guest_list_quantity: formData.get("guest_list_quantity") || "",
-    guest_list_info: formData.get("guest_list_info") || "",
-    guest_list_max_date: formData.get("guest_list_max_date") || "",
-    guest_list_max_time: formData.get("guest_list_max_time") || "",
     city: formData.get("city") || "",
     country: formData.get("country") || "",
     address: formData.get("address") || "",
     extra_info: formData.get("extra_info") || "",
     variable_fee: formData.get("variable_fee") || "",
     fixed_fee: formData.get("fixed_fee") || "",
-    pos_fee: formData.get("pos_fee") || "",
-    late_fee: formData.get("late_fee") || "",
-    hex: formData.get("hex") || "",
-    hex_text: formData.get("hex_text") || "",
-    hex_text_secondary: formData.get("hex_text_secondary") || "",
-    guest_email: formData.get("guest_email") || "",
-    guest_name: formData.get("guest_name") || "",
   };
 
   // Extract files for logging
@@ -161,13 +116,25 @@ export async function createEvent(
       ? { name: walletFile.name, size: walletFile.size, type: walletFile.type }
       : null,
     flyer_overlay: flyerOverlayFile
-      ? { name: flyerOverlayFile.name, size: flyerOverlayFile.size, type: flyerOverlayFile.type }
+      ? {
+          name: flyerOverlayFile.name,
+          size: flyerOverlayFile.size,
+          type: flyerOverlayFile.type,
+        }
       : null,
     flyer_background: flyerBackgroundFile
-      ? { name: flyerBackgroundFile.name, size: flyerBackgroundFile.size, type: flyerBackgroundFile.type }
+      ? {
+          name: flyerBackgroundFile.name,
+          size: flyerBackgroundFile.size,
+          type: flyerBackgroundFile.type,
+        }
       : null,
     flyer_banner: flyerBannerFile
-      ? { name: flyerBannerFile.name, size: flyerBannerFile.size, type: flyerBannerFile.type }
+      ? {
+          name: flyerBannerFile.name,
+          size: flyerBannerFile.size,
+          type: flyerBannerFile.type,
+        }
       : null,
   });
 
@@ -230,16 +197,6 @@ export async function createEvent(
       endDateTime = formatISO(endDateTimeBogota);
     }
 
-    // Parse guest list max hour if provided
-    let guestListMaxHour = null;
-    if (validData.guest_list_max_date && validData.guest_list_max_time) {
-      const guestListMaxBogota = toZonedTime(
-        `${validData.guest_list_max_date}T${validData.guest_list_max_time}`,
-        BOGOTA_TZ
-      );
-      guestListMaxHour = formatISO(guestListMaxBogota);
-    }
-
     // File upload validation
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     const ALLOWED_TYPES = [
@@ -293,7 +250,8 @@ export async function createEvent(
       }
       if (!ALLOWED_TYPES.includes(flyerOverlayFile.type)) {
         return {
-          message: "Formato de imagen no válido para overlay. Use JPG, PNG o WebP.",
+          message:
+            "Formato de imagen no válido para overlay. Use JPG, PNG o WebP.",
           success: false,
         };
       }
@@ -308,7 +266,8 @@ export async function createEvent(
       }
       if (!ALLOWED_TYPES.includes(flyerBackgroundFile.type)) {
         return {
-          message: "Formato de imagen no válido para background. Use JPG, PNG o WebP.",
+          message:
+            "Formato de imagen no válido para background. Use JPG, PNG o WebP.",
           success: false,
         };
       }
@@ -323,7 +282,8 @@ export async function createEvent(
       }
       if (!ALLOWED_TYPES.includes(flyerBannerFile.type)) {
         return {
-          message: "Formato de imagen no válido para banner. Use JPG, PNG o WebP.",
+          message:
+            "Formato de imagen no válido para banner. Use JPG, PNG o WebP.",
           success: false,
         };
       }
@@ -342,29 +302,15 @@ export async function createEvent(
         venue_id: validData.venue_id || null,
         age: validData.age ? parseInt(validData.age) : null,
         status: validData.status === "Activo",
-        priority: validData.priority === "Activo",
         cash: validData.cash_sales === "Activo",
-        private_list: validData.lists === "Activo",
-        access_pass: validData.courtesies === "Activo",
-        guest_list: validData.guest_list === "Activo",
-        guest_list_quantity: validData.guest_list_quantity
-          ? parseInt(validData.guest_list_quantity)
-          : null,
-        guest_list_info: validData.guest_list_info || null,
-        guest_list_max_hour: guestListMaxHour,
         city: validData.city || null,
         country: validData.country || null,
         address: validData.address || null,
         extra_info: validData.extra_info || null,
-        variable_fee: validData.variable_fee ? parseFloat(validData.variable_fee) : null,
+        variable_fee: validData.variable_fee
+          ? parseFloat(validData.variable_fee)
+          : null,
         fixed_fee: validData.fixed_fee ? parseFloat(validData.fixed_fee) : null,
-        pos_fee: validData.pos_fee ? parseFloat(validData.pos_fee) : null,
-        late_fee: validData.late_fee ? parseFloat(validData.late_fee) : null,
-        hex: validData.hex || null,
-        hex_text: validData.hex_text || null,
-        hex_text_secondary: validData.hex_text_secondary || "A3A3A3",
-        guest_email: validData.guest_email || null,
-        guest_name: validData.guest_name || null,
       })
       .select()
       .single();
@@ -441,7 +387,9 @@ export async function createEvent(
       if (error) {
         console.error("Error uploading flyer overlay:", error);
       } else {
-        const { data: { publicUrl } } = supabase.storage.from("events").getPublicUrl(path);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("events").getPublicUrl(path);
         flyerOverlayUrl = publicUrl;
       }
     }
@@ -458,7 +406,9 @@ export async function createEvent(
       if (error) {
         console.error("Error uploading flyer background:", error);
       } else {
-        const { data: { publicUrl } } = supabase.storage.from("events").getPublicUrl(path);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("events").getPublicUrl(path);
         flyerBackgroundUrl = publicUrl;
       }
     }
@@ -475,13 +425,21 @@ export async function createEvent(
       if (error) {
         console.error("Error uploading flyer banner:", error);
       } else {
-        const { data: { publicUrl } } = supabase.storage.from("events").getPublicUrl(path);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("events").getPublicUrl(path);
         flyerBannerUrl = publicUrl;
       }
     }
 
     // Update event with image URLs if uploaded
-    if (flyerUrl || walletUrl || flyerOverlayUrl || flyerBackgroundUrl || flyerBannerUrl) {
+    if (
+      flyerUrl ||
+      walletUrl ||
+      flyerOverlayUrl ||
+      flyerBackgroundUrl ||
+      flyerBannerUrl
+    ) {
       const updateData: {
         flyer?: string;
         flyer_apple?: string;
@@ -507,7 +465,9 @@ export async function createEvent(
     }
 
     // Revalidate the administrador page to show the new event
-    revalidatePath(`/profile/${user.id}/organizaciones/${validData.organization_id}/administrador/eventos`);
+    revalidatePath(
+      `/profile/${user.id}/organizaciones/${validData.organization_id}/administrador/eventos`
+    );
 
     return {
       message: "Evento creado exitosamente",
@@ -543,13 +503,15 @@ export async function getOrganizationEvents(
   try {
     const { data: events, error } = await supabase
       .from("events")
-      .select(`
+      .select(
+        `
         *,
         venues (
           name,
           city
         )
-      `)
+      `
+      )
       .eq("organization_id", organizationId)
       .order("date", { ascending: false, nullsFirst: false });
 
@@ -559,12 +521,18 @@ export async function getOrganizationEvents(
     }
 
     // Transform the data to flatten venue info
-    const eventsWithVenue: EventWithVenue[] = (events || []).map((event: EventSchema & { venues?: { name: string | null; city: string | null } | null }) => ({
-      ...event,
-      venue_name: event.venues?.name || null,
-      venue_city: event.venues?.city || null,
-      venues: undefined, // Remove the nested venues object
-    }));
+    const eventsWithVenue: EventWithVenue[] = (events || []).map(
+      (
+        event: EventSchema & {
+          venues?: { name: string | null; city: string | null } | null;
+        }
+      ) => ({
+        ...event,
+        venue_name: event.venues?.name || null,
+        venue_city: event.venues?.city || null,
+        venues: undefined, // Remove the nested venues object
+      })
+    );
 
     return eventsWithVenue;
   } catch (error) {
@@ -623,7 +591,7 @@ export async function getEventProducers(eventId: string) {
   }
 
   // Then get the producers for those producer_ids
-  const producerIds = eventProducers.map(ep => ep.producer_id);
+  const producerIds = eventProducers.map((ep) => ep.producer_id);
 
   const { data: producers, error: producersError } = await supabase
     .from("producers")
@@ -636,16 +604,16 @@ export async function getEventProducers(eventId: string) {
   }
 
   // Combine the data
-  return eventProducers.map(ep => {
-    const producer = producers?.find(p => p.id === ep.producer_id);
+  return eventProducers.map((ep) => {
+    const producer = producers?.find((p) => p.id === ep.producer_id);
     return {
       id: ep.id,
       created_at: ep.created_at,
       producer: producer || {
         id: ep.producer_id,
         name: null,
-        logo: null
-      }
+        logo: null,
+      },
     };
   });
 }
@@ -678,15 +646,16 @@ export async function addProducerToEvent(eventId: string, producerId: string) {
     .single();
 
   if (existing) {
-    return { success: false, message: "El productor ya está asignado a este evento" };
+    return {
+      success: false,
+      message: "El productor ya está asignado a este evento",
+    };
   }
 
-  const { error } = await supabase
-    .from("events_producers")
-    .insert({
-      event_id: eventId,
-      producer_id: producerId
-    });
+  const { error } = await supabase.from("events_producers").insert({
+    event_id: eventId,
+    producer_id: producerId,
+  });
 
   if (error) {
     console.error("Error adding producer to event:", error);
@@ -717,7 +686,7 @@ export async function getEventArtists(eventId: string) {
   }
 
   // Then get the artists for those artist_ids
-  const artistIds = lineup.map(l => l.artist_id);
+  const artistIds = lineup.map((l) => l.artist_id);
 
   const { data: artists, error: artistsError } = await supabase
     .from("artists")
@@ -730,8 +699,8 @@ export async function getEventArtists(eventId: string) {
   }
 
   // Combine the data
-  return lineup.map(l => {
-    const artist = artists?.find(a => a.id === l.artist_id);
+  return lineup.map((l) => {
+    const artist = artists?.find((a) => a.id === l.artist_id);
     return {
       id: l.id,
       created_at: l.created_at,
@@ -740,8 +709,8 @@ export async function getEventArtists(eventId: string) {
         name: null,
         description: null,
         category: null,
-        logo: null
-      }
+        logo: null,
+      },
     };
   });
 }
@@ -774,15 +743,16 @@ export async function addArtistToEvent(eventId: string, artistId: string) {
     .single();
 
   if (existing) {
-    return { success: false, message: "El artista ya está asignado a este evento" };
+    return {
+      success: false,
+      message: "El artista ya está asignado a este evento",
+    };
   }
 
-  const { error } = await supabase
-    .from("lineup")
-    .insert({
-      event_id: eventId,
-      artist_id: artistId
-    });
+  const { error } = await supabase.from("lineup").insert({
+    event_id: eventId,
+    artist_id: artistId,
+  });
 
   if (error) {
     console.error("Error adding artist to event:", error);
@@ -877,7 +847,10 @@ export async function createTicketType(
       };
     }
 
-    revalidatePath(`/profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId]/entradas`, "page");
+    revalidatePath(
+      `/profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId]/entradas`,
+      "page"
+    );
 
     return {
       message: "Tipo de entrada creado exitosamente",
@@ -920,24 +893,29 @@ export async function getEventTicketTypes(eventId: string) {
   }
 }
 
-export async function updateEventConfiguration(eventId: string, formData: {
-  name?: string;
-  description?: string;
-  category?: typeof EVENT_CATEGORIES[number];
-  date?: string;
-  end_date?: string;
-  age?: number;
-  variable_fee?: number;
-  fixed_fee?: number;
-  city?: string;
-  country?: string;
-  address?: string;
-  faqs?: Array<{ id: string; question: string; answer: string }>;
-}) {
+export async function updateEventConfiguration(
+  eventId: string,
+  formData: {
+    name?: string;
+    description?: string;
+    category?: (typeof EVENT_CATEGORIES)[number];
+    date?: string;
+    end_date?: string;
+    age?: number;
+    variable_fee?: number;
+    fixed_fee?: number;
+    city?: string;
+    country?: string;
+    address?: string;
+    faqs?: Array<{ id: string; question: string; answer: string }>;
+  }
+) {
   const supabase = await createClient();
 
   // Get current user
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     return { success: false, message: "No autenticado" };
   }
@@ -964,13 +942,16 @@ export async function updateEventConfiguration(eventId: string, formData: {
   }> = {};
 
   if (formData.name !== undefined) updateData.name = formData.name;
-  if (formData.description !== undefined) updateData.description = formData.description;
+  if (formData.description !== undefined)
+    updateData.description = formData.description;
   if (formData.category !== undefined) updateData.category = formData.category;
   if (formData.date !== undefined) updateData.date = formData.date;
   if (formData.end_date !== undefined) updateData.end_date = formData.end_date;
   if (formData.age !== undefined) updateData.age = formData.age;
-  if (formData.variable_fee !== undefined) updateData.variable_fee = formData.variable_fee;
-  if (formData.fixed_fee !== undefined) updateData.fixed_fee = formData.fixed_fee;
+  if (formData.variable_fee !== undefined)
+    updateData.variable_fee = formData.variable_fee;
+  if (formData.fixed_fee !== undefined)
+    updateData.fixed_fee = formData.fixed_fee;
   if (formData.city !== undefined) updateData.city = formData.city;
   if (formData.country !== undefined) updateData.country = formData.country;
   if (formData.address !== undefined) updateData.address = formData.address;
@@ -986,7 +967,10 @@ export async function updateEventConfiguration(eventId: string, formData: {
     return { success: false, message: "Error al actualizar la configuración" };
   }
 
-  revalidatePath(`/profile/[userId]/administrador/event/${eventId}/configuracion`, "page");
+  revalidatePath(
+    `/profile/[userId]/administrador/event/${eventId}/configuracion`,
+    "page"
+  );
 
   return { success: true, message: "Configuración actualizada exitosamente" };
 }
@@ -1008,12 +992,15 @@ export async function toggleEventStatus(eventId: string, status: boolean) {
     return { success: false, message: "Error al cambiar el estado del evento" };
   }
 
-  revalidatePath(`/profile/[userId]/organizaciones/[organizationId]/administrador/event/${eventId}`, "page");
+  revalidatePath(
+    `/profile/[userId]/organizaciones/[organizationId]/administrador/event/${eventId}`,
+    "page"
+  );
 
   return {
     success: true,
     message: status ? "Evento activado" : "Evento desactivado",
-    status
+    status,
   };
 }
 
@@ -1036,7 +1023,9 @@ export type PopularEventWithVenue = {
  * Fetches popular/active events from the database for the home page
  * Returns events that are active and haven't ended yet, ordered by priority and date
  */
-export async function getPopularEvents(limit: number = 12): Promise<PopularEventWithVenue[]> {
+export async function getPopularEvents(
+  limit: number = 12
+): Promise<PopularEventWithVenue[]> {
   const supabase = await createClient();
 
   try {
@@ -1044,7 +1033,8 @@ export async function getPopularEvents(limit: number = 12): Promise<PopularEvent
 
     const { data: events, error } = await supabase
       .from("events")
-      .select(`
+      .select(
+        `
         id,
         name,
         description,
@@ -1052,15 +1042,14 @@ export async function getPopularEvents(limit: number = 12): Promise<PopularEvent
         end_date,
         status,
         flyer,
-        priority,
         venues (
           name,
           city
         )
-      `)
+      `
+      )
       .eq("status", true)
       .or(`end_date.gte.${now},end_date.is.null`)
-      .order("priority", { ascending: false })
       .order("date", { ascending: true })
       .limit(limit);
 
@@ -1070,26 +1059,30 @@ export async function getPopularEvents(limit: number = 12): Promise<PopularEvent
     }
 
     // Transform the data to flatten venue info and match expected type
-    const eventsWithVenue: PopularEventWithVenue[] = (events || []).map((event) => {
-      // Handle venue data - Supabase returns object for single FK relation, array for many
-      // TypeScript infers array, but runtime is object for one-to-one (event.venueId -> venues.id)
-      const venueData = event.venues as unknown;
-      const venue = Array.isArray(venueData)
-        ? (venueData[0] as { name: string | null; city: string | null } | undefined)
-        : (venueData as { name: string | null; city: string | null } | null);
+    const eventsWithVenue: PopularEventWithVenue[] = (events || []).map(
+      (event) => {
+        // Handle venue data - Supabase returns object for single FK relation, array for many
+        // TypeScript infers array, but runtime is object for one-to-one (event.venueId -> venues.id)
+        const venueData = event.venues as unknown;
+        const venue = Array.isArray(venueData)
+          ? (venueData[0] as
+              | { name: string | null; city: string | null }
+              | undefined)
+          : (venueData as { name: string | null; city: string | null } | null);
 
-      return {
-        id: event.id,
-        name: event.name,
-        description: event.description,
-        date: event.date ? new Date(event.date) : null,
-        endDate: event.end_date ? new Date(event.end_date) : null,
-        status: event.status,
-        flyer: event.flyer,
-        venue_name: venue?.name || "Venue",
-        venue_city: venue?.city || "Ciudad",
-      };
-    });
+        return {
+          id: event.id,
+          name: event.name,
+          description: event.description,
+          date: event.date ? new Date(event.date) : null,
+          endDate: event.end_date ? new Date(event.end_date) : null,
+          status: event.status,
+          flyer: event.flyer,
+          venue_name: venue?.name || "Venue",
+          venue_city: venue?.city || "Ciudad",
+        };
+      }
+    );
 
     return eventsWithVenue;
   } catch (error) {
@@ -1125,7 +1118,9 @@ export type EventDetail = {
  * Fetches a single event by ID with all details for the event page
  * Uses get_ticket_availability RPC for accurate ticket counts with lazy expiration
  */
-export async function getEventById(eventId: string): Promise<{ data: EventDetail | null; error: { message: string } | null }> {
+export async function getEventById(
+  eventId: string
+): Promise<{ data: EventDetail | null; error: { message: string } | null }> {
   const supabase = await createClient();
 
   try {
@@ -1133,7 +1128,8 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
     const [eventResult, ticketResult] = await Promise.all([
       supabase
         .from("events")
-        .select(`
+        .select(
+          `
           id,
           name,
           description,
@@ -1150,7 +1146,8 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
             latitude,
             longitude
           )
-        `)
+        `
+        )
         .eq("id", eventId)
         .single(),
       // Use RPC for accurate availability with lazy expiration
@@ -1175,8 +1172,22 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
     // Handle venue data
     const venueData = event.venues as unknown;
     const venue = Array.isArray(venueData)
-      ? (venueData[0] as { name: string | null; city: string | null; address: string | null; latitude: string | null; longitude: string | null } | undefined)
-      : (venueData as { name: string | null; city: string | null; address: string | null; latitude: string | null; longitude: string | null } | null);
+      ? (venueData[0] as
+          | {
+              name: string | null;
+              city: string | null;
+              address: string | null;
+              latitude: string | null;
+              longitude: string | null;
+            }
+          | undefined)
+      : (venueData as {
+          name: string | null;
+          city: string | null;
+          address: string | null;
+          latitude: string | null;
+          longitude: string | null;
+        } | null);
 
     // Handle ticket types from RPC result
     const ticketTypes = ticketResult.data || [];
@@ -1184,7 +1195,10 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
     // Format hours from date
     const formatHour = (date: string | null): string => {
       if (!date) return "--:--";
-      return new Date(date).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+      return new Date(date).toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     };
 
     const eventDetail: EventDetail = {
