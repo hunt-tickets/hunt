@@ -277,6 +277,36 @@ export function PhoneVerificationManager({
           {/* OTP Input Section */}
           <div>
             <p className="text-sm font-medium text-gray-400 mb-3">Código de verificación</p>
+            {/* Hidden input for autocomplete */}
+            <input
+              type="text"
+              autoComplete="one-time-code"
+              inputMode="numeric"
+              maxLength={6}
+              className="sr-only"
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                if (value.length > 0) {
+                  const digits = value.split('');
+                  const newOtp = [...otp];
+                  digits.forEach((digit, index) => {
+                    if (index < 6) newOtp[index] = digit;
+                  });
+                  setOtp(newOtp);
+                  // Focus the next empty input or last input
+                  const nextEmptyIndex = newOtp.findIndex(d => d === '');
+                  if (nextEmptyIndex !== -1) {
+                    inputRefs.current[nextEmptyIndex]?.focus();
+                  } else {
+                    inputRefs.current[5]?.focus();
+                  }
+                  // Auto-verify if all 6 digits are present
+                  if (value.length === 6) {
+                    handleVerifyOTP(value);
+                  }
+                }
+              }}
+            />
             <div className="flex gap-2 justify-center">
               {otp.map((digit, index) => (
                 <input
@@ -285,7 +315,7 @@ export function PhoneVerificationManager({
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
-                  autoComplete="one-time-code"
+                  autoComplete="off"
                   className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] hover:border-gray-300 dark:hover:border-[#3a3a3a] focus:border-primary/50 focus:outline-none transition-colors"
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
