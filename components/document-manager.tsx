@@ -3,19 +3,6 @@
 import { useState } from "react";
 import { Fingerprint } from "lucide-react";
 
-// Sanitization helper
-const sanitizeDocumentNumber = (doc: string): string => {
-  // Allow only alphanumeric characters
-  return doc
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .replace(/[<>]/g, '') // Remove < and >
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+=/gi, '') // Remove event handlers
-    .toUpperCase()
-    .trim()
-    .slice(0, 20); // Limit length
-};
-
 interface DocumentManagerProps {
   documentType?: string | null;
   documentNumber?: string | null;
