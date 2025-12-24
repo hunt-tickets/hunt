@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2 } from "lucide-react";
 import { unlinkAccount } from "@/actions/profile";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/constants/profile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,11 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-interface UnlinkAccountButtonProps {
-  accountId: string;
-  providerName: string;
-}
+import type { UnlinkAccountButtonProps } from "@/lib/profile/types";
 
 export function UnlinkAccountButton({
   accountId,
@@ -28,23 +25,25 @@ export function UnlinkAccountButton({
 }: UnlinkAccountButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleUnlink = async () => {
+  const handleUnlink = useCallback(async () => {
     setIsLoading(true);
     try {
       const result = await unlinkAccount(accountId);
 
       if (result.error) {
-        toast.error(result.error);
+        toast.error({ title: result.error });
       } else if (result.success) {
-        toast.success(`Cuenta de ${providerName} desvinculada exitosamente`);
+        toast.success({ title: SUCCESS_MESSAGES.ACCOUNT_UNLINKED });
       }
     } catch (error) {
-      toast.error("Error al desvincular la cuenta");
-      console.error("Error unlinking account:", error);
+      toast.error({ title: ERROR_MESSAGES.UNLINK_ACCOUNT_FAILED });
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error unlinking account:", error);
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [accountId]);
 
   return (
     <AlertDialog>
@@ -54,15 +53,16 @@ export function UnlinkAccountButton({
           size="sm"
           className="text-destructive hover:text-destructive hover:bg-destructive/10"
           disabled={isLoading}
+          aria-label={`Desvincular cuenta de ${providerName}`}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           )}
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="rounded-2xl border dark:border-[#2a2a2a]">
         <AlertDialogHeader>
           <AlertDialogTitle>¿Desvincular cuenta de {providerName}?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -71,15 +71,17 @@ export function UnlinkAccountButton({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel className="rounded-xl" disabled={isLoading}>
+            Cancelar
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleUnlink}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                 Desvinculando...
               </>
             ) : (
