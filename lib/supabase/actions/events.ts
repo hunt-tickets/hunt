@@ -36,6 +36,7 @@ const eventFormSchema = z.object({
   guest_list_max_time: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
+  address: z.string().optional(),
   extra_info: z.string().optional(),
   variable_fee: z.string().optional(),
   fixed_fee: z.string().optional(),
@@ -72,6 +73,7 @@ export type EventFormState = {
     guest_list_max_time?: string[];
     city?: string[];
     country?: string[];
+    address?: string[];
     extra_info?: string[];
     variable_fee?: string[];
     fixed_fee?: string[];
@@ -130,6 +132,7 @@ export async function createEvent(
     guest_list_max_time: formData.get("guest_list_max_time") || "",
     city: formData.get("city") || "",
     country: formData.get("country") || "",
+    address: formData.get("address") || "",
     extra_info: formData.get("extra_info") || "",
     variable_fee: formData.get("variable_fee") || "",
     fixed_fee: formData.get("fixed_fee") || "",
@@ -351,6 +354,7 @@ export async function createEvent(
         guest_list_max_hour: guestListMaxHour,
         city: validData.city || null,
         country: validData.country || null,
+        address: validData.address || null,
         extra_info: validData.extra_info || null,
         variable_fee: validData.variable_fee ? parseFloat(validData.variable_fee) : null,
         fixed_fee: validData.fixed_fee ? parseFloat(validData.fixed_fee) : null,
@@ -925,6 +929,9 @@ export async function updateEventConfiguration(eventId: string, formData: {
   age?: number;
   variable_fee?: number;
   fixed_fee?: number;
+  city?: string;
+  country?: string;
+  address?: string;
   faqs?: Array<{ id: string; question: string; answer: string }>;
 }) {
   const supabase = await createClient();
@@ -950,6 +957,9 @@ export async function updateEventConfiguration(eventId: string, formData: {
     age: number;
     variable_fee: number;
     fixed_fee: number;
+    city: string;
+    country: string;
+    address: string;
     faqs: Array<{ id: string; question: string; answer: string }>;
   }> = {};
 
@@ -961,6 +971,9 @@ export async function updateEventConfiguration(eventId: string, formData: {
   if (formData.age !== undefined) updateData.age = formData.age;
   if (formData.variable_fee !== undefined) updateData.variable_fee = formData.variable_fee;
   if (formData.fixed_fee !== undefined) updateData.fixed_fee = formData.fixed_fee;
+  if (formData.city !== undefined) updateData.city = formData.city;
+  if (formData.country !== undefined) updateData.country = formData.country;
+  if (formData.address !== undefined) updateData.address = formData.address;
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
 
   const { error } = await supabase

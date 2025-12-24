@@ -169,6 +169,13 @@
       "when": 1766544723746,
       "tag": "0023_lush_sir_ram",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1766549070823,
+      "tag": "0024_right_tusk",
+      "breakpoints": true
     }
   ]
 }

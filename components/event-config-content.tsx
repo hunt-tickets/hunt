@@ -52,16 +52,13 @@ interface EventData {
   age?: number;
   variable_fee?: number;
   fixed_fee?: number;
+  city?: string;
+  country?: string;
+  address?: string;
   flyer?: string;
   flyer_apple?: string;
   venue_id?: string;
   faqs?: Array<{ id: string; question: string; answer: string }>;
-  venues?: {
-    id: string;
-    name: string;
-    address?: string;
-    city?: string;
-  };
 }
 
 interface EventConfigContentProps {
@@ -83,9 +80,9 @@ export function EventConfigContent({
     description: "",
     category: "" as typeof EVENT_CATEGORIES[number] | "",
     venueName: "",
-    location: "",
     city: "",
     country: "",
+    address: "",
     startDate: "",
     endDate: "",
     age: 18,
@@ -114,10 +111,10 @@ export function EventConfigContent({
         eventName: eventData.name || "",
         description: eventData.description || "",
         category: (eventData.category as typeof EVENT_CATEGORIES[number]) || "",
-        venueName: eventData.venues?.name || "",
-        location: eventData.venues?.address || "",
-        city: eventData.venues?.city || "",
-        country: "",
+        venueName: "",
+        city: eventData.city || "",
+        country: eventData.country || "",
+        address: eventData.address || "",
         startDate: eventData.date ? formatDateForInput(eventData.date) : "",
         endDate: eventData.end_date
           ? formatDateForInput(eventData.end_date)
@@ -290,6 +287,9 @@ export function EventConfigContent({
           date: formData.startDate,
           end_date: formData.endDate,
           age: formData.age,
+          city: formData.city,
+          country: formData.country,
+          address: formData.address,
           variable_fee: huntCosts.commissionPercentage / 100,
           fixed_fee: huntCosts.costPerTicket,
         });
@@ -502,11 +502,11 @@ export function EventConfigContent({
               {/* Full Address with Google Places Autocomplete - TODO: Fix Google Maps types */}
               {/* <GooglePlacesAutocomplete
                 label="Dirección"
-                defaultValue={formData.location}
+                defaultValue={formData.address}
                 onPlaceSelect={(place) => {
                   setFormData((prev) => ({
                     ...prev,
-                    location: place.address,
+                    address: place.address,
                     city: place.city || prev.city,
                     country: place.country || prev.country,
                   }));
@@ -514,10 +514,10 @@ export function EventConfigContent({
                 required
               /> */}
               <FormInput
-                id="location"
-                name="location"
+                id="address"
+                name="address"
                 label="Dirección"
-                value={formData.location}
+                value={formData.address}
                 onChange={handleInputChange}
                 placeholder="ej. Calle 123 #45-67"
                 icon={<MapPinned className="h-4 w-4" />}

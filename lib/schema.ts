@@ -614,6 +614,7 @@ export const events = pgTable(
     status: boolean("status").default(false),
     city: text("city"),
     country: text("country"),
+    address: text("address"),
     flyer: text("flyer"),
     venueId: uuid("venue_id").references(() => venues.id),
     variableFee: decimal("variable_fee"),

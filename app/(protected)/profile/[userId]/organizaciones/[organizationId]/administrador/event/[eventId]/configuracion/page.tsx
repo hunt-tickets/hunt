@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { EventConfigContent } from "@/components/event-config-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { db } from "@/lib/drizzle";
-import { member } from "@/lib/schema";
+import { member, events } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 
 interface ConfiguracionPageProps {
@@ -50,27 +50,37 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`);
   }
 
-  // Mock event data - In production, fetch from database
+  // Fetch event data from database
+  const event = await db.query.events.findFirst({
+    where: and(
+      eq(events.id, eventId),
+      eq(events.organizationId, organizationId)
+    ),
+  });
+
+  if (!event) {
+    notFound();
+  }
+
+  // Format event data for the config component
   const eventData = {
-    id: eventId,
-    name: "Concierto de Rock",
-    description: "Gran concierto de rock con bandas locales",
-    date: "2025-12-15",
-    end_date: "2025-12-15",
-    status: true,
-    age: 18,
-    variable_fee: 8,
-    fixed_fee: 3000,
-    flyer: "/placeholder.svg",
-    flyer_apple: undefined,
-    venue_id: "venue-1",
-    faqs: [],
-    venues: {
-      id: "venue-1",
-      name: "Teatro Principal",
-      address: "Calle 100 #10-20",
-      city: "Bogotá",
-    },
+    id: event.id,
+    name: event.name || "",
+    description: event.description || "",
+    category: event.category || undefined,
+    date: event.date?.toISOString(),
+    end_date: event.endDate?.toISOString(),
+    status: event.status ?? false,
+    age: event.age ? Number(event.age) : undefined,
+    variable_fee: event.variableFee ? Number(event.variableFee) : undefined,
+    fixed_fee: event.fixedFee ? Number(event.fixedFee) : undefined,
+    city: event.city || undefined,
+    country: event.country || undefined,
+    address: event.address || undefined,
+    flyer: event.flyer || undefined,
+    flyer_apple: event.flyerApple || undefined,
+    venue_id: event.venueId || undefined,
+    faqs: (event.faqs as Array<{ id: string; question: string; answer: string }>) || [],
   };
 
   return (

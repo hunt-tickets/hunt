@@ -399,6 +399,24 @@ export function CreateEventDialog({
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="address" className="text-sm font-medium">
+                    Dirección
+                  </Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    placeholder="Ej: Calle 100 #10-20"
+                    className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                  />
+                  {state.errors?.address && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {state.errors.address[0]}
+                    </p>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
