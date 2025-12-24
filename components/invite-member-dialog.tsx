@@ -11,16 +11,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { InviteMemberForm } from "./invite-member-form";
-import { Mail } from "lucide-react";
+import { Plus, Mail } from "lucide-react";
 
 interface InviteMemberDialogProps {
   organizationId: string;
   size?: "default" | "sm" | "lg" | "icon";
+  iconOnly?: boolean;
 }
 
 export function InviteMemberDialog({
   organizationId,
   size = "sm",
+  iconOnly = false,
 }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
 
@@ -32,9 +34,19 @@ export function InviteMemberDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={size} className="rounded-full">
-          <Mail className="h-4 w-4 mr-2" />
-          Invitar
+        <Button
+          size={iconOnly ? "icon" : size}
+          className="rounded-full flex-shrink-0"
+          aria-label={iconOnly ? "Invitar miembro" : undefined}
+        >
+          {iconOnly ? (
+            <Plus className="h-4 w-4" />
+          ) : (
+            <>
+              <Mail className="h-4 w-4 mr-2" />
+              Invitar
+            </>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-xl max-h-[85vh] overflow-y-auto bg-gray-50 dark:bg-[#1a1a1a] border-gray-200 dark:border-[#2a2a2a]">
