@@ -56,6 +56,12 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
   };
 
   const revokeSession = async (token: string) => {
+    // If revoking current session, sign out
+    if (token === activeSession.token) {
+      await authClient.signOut();
+      return;
+    }
+
     try {
       setRevokingToken(token);
       const { error } = await authClient.revokeSession({ token });
