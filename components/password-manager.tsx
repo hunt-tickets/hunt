@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { changePassword, checkHasPassword } from "@/actions/profile";
 import { toast } from "@/lib/toast";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, VALIDATION } from "@/constants/profile";
+import { validatePasswordStrength } from "@/lib/profile/utils";
 
 export function PasswordManager() {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
@@ -19,19 +21,42 @@ export function PasswordManager() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [revokeOtherSessions, setRevokeOtherSessions] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
-    checkHasPassword().then(setHasPassword);
+    checkHasPassword().then(setHasPassword).catch((error) => {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error checking password:", error);
+      }
+    });
   }, []);
 
-  const handleSubmit = async () => {
-    if (newPassword !== confirmPassword) {
-      toast.error({ title: "Las contraseñas no coinciden" });
+  // Real-time password validation
+  useEffect(() => {
+    if (!newPassword) {
+      setPasswordError(null);
       return;
     }
 
-    if (newPassword.length < 8) {
-      toast.error({ title: "La nueva contraseña debe tener al menos 8 caracteres" });
+    const validation = validatePasswordStrength(newPassword);
+    setPasswordError(validation.isValid ? null : validation.error || null);
+  }, [newPassword]);
+
+  const handleSubmit = useCallback(async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error({ title: ERROR_MESSAGES.PASSWORD_MISMATCH });
+      return;
+    }
+
+    if (newPassword.length < VALIDATION.MIN_PASSWORD_LENGTH) {
+      toast.error({ title: ERROR_MESSAGES.PASSWORD_TOO_SHORT });
+      return;
+    }
+
+    // Additional validation using utility function
+    const validation = validatePasswordStrength(newPassword);
+    if (!validation.isValid) {
+      toast.error({ title: validation.error || ERROR_MESSAGES.PASSWORD_INVALID });
       return;
     }
 
@@ -49,35 +74,40 @@ export function PasswordManager() {
       } else {
         toast.success({
           title: revokeOtherSessions
-            ? "Contraseña cambiada. Se han cerrado todas las demás sesiones"
-            : "Contraseña cambiada exitosamente"
+            ? SUCCESS_MESSAGES.PASSWORD_CHANGED_WITH_REVOKE
+            : SUCCESS_MESSAGES.PASSWORD_CHANGED
         });
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
         setRevokeOtherSessions(false);
+        setPasswordError(null);
         setIsChanging(false);
       }
-    } catch {
-      toast.error({ title: "Error al cambiar la contraseña" });
+    } catch (error) {
+      toast.error({ title: ERROR_MESSAGES.PASSWORD_CHANGE_FAILED });
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error changing password:", error);
+      }
     } finally {
       setIsPending(false);
     }
-  };
+  }, [currentPassword, newPassword, confirmPassword, revokeOtherSessions]);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setIsChanging(false);
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
     setRevokeOtherSessions(false);
-  };
+    setPasswordError(null);
+  }, []);
 
   if (hasPassword === null) {
     return (
       <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px]">
         <div className="flex items-center gap-3">
-          <Lock className="h-5 w-5 text-gray-400" />
+          <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
           <span className="text-sm font-medium text-gray-500">Cargando...</span>
         </div>
       </div>
@@ -86,9 +116,13 @@ export function PasswordManager() {
 
   if (!hasPassword) {
     return (
-      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+      <div
+        className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors"
+        role="region"
+        aria-label="Información de contraseña"
+      >
         <div className="flex items-center gap-3 mb-3">
-          <Lock className="h-5 w-5 text-gray-400" />
+          <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
           <span className="text-sm font-medium">Contraseña</span>
         </div>
         <div className="pl-8 space-y-2">
@@ -107,7 +141,7 @@ export function PasswordManager() {
     return (
       <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
         <div className="flex items-center gap-3 mb-4">
-          <Lock className="h-5 w-5 text-gray-400" />
+          <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
           <div>
             <p className="text-sm font-medium">Contraseña</p>
           </div>
@@ -121,17 +155,22 @@ export function PasswordManager() {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Contraseña actual"
-              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500"
+              autoComplete="current-password"
+              aria-label="Contraseña actual"
+              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              disabled={isPending}
             />
             <button
               type="button"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+              aria-label={showCurrentPassword ? "Ocultar contraseña actual" : "Mostrar contraseña actual"}
+              disabled={isPending}
             >
               {showCurrentPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeOff className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <Eye className="h-4 w-4" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -143,17 +182,23 @@ export function PasswordManager() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Nueva contraseña"
-              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500"
+              autoComplete="new-password"
+              aria-label="Nueva contraseña"
+              aria-describedby={passwordError ? "password-error" : undefined}
+              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              disabled={isPending}
             />
             <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+              aria-label={showNewPassword ? "Ocultar nueva contraseña" : "Mostrar nueva contraseña"}
+              disabled={isPending}
             >
               {showNewPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeOff className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <Eye className="h-4 w-4" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -165,21 +210,33 @@ export function PasswordManager() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirmar contraseña"
-              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500"
+              autoComplete="new-password"
+              aria-label="Confirmar contraseña"
+              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              disabled={isPending}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+              aria-label={showConfirmPassword ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
+              disabled={isPending}
             >
               {showConfirmPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeOff className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <Eye className="h-4 w-4" aria-hidden="true" />
               )}
             </button>
           </div>
         </div>
+
+        {/* Password validation feedback */}
+        {passwordError && (
+          <div id="password-error" className="mt-2 text-xs text-red-500" role="alert">
+            {passwordError}
+          </div>
+        )}
 
         <div className="space-y-3 mt-3">
           <div className="flex items-center space-x-2">
@@ -201,15 +258,18 @@ export function PasswordManager() {
               onClick={resetForm}
               variant="ghost"
               size="sm"
-              className="h-9"
+              className="h-9 rounded-xl"
+              disabled={isPending}
+              aria-label="Cancelar cambio de contraseña"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={isPending || !currentPassword || !newPassword || !confirmPassword}
+              disabled={isPending || !currentPassword || !newPassword || !confirmPassword || !!passwordError}
               size="sm"
-              className="h-9 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Guardar nueva contraseña"
             >
               {isPending ? "Guardando..." : "Guardar"}
             </Button>
@@ -220,12 +280,16 @@ export function PasswordManager() {
   }
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+    <div
+      className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
+      role="region"
+      aria-label="Configuración de contraseña"
+    >
       <div className="flex items-center gap-3">
-        <Lock className="h-5 w-5 text-gray-400" />
+        <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
         <div>
           <p className="text-sm font-medium">Contraseña</p>
-          <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+          <p className="text-xs text-gray-500 mt-1 leading-relaxed" aria-label="Contraseña oculta">
             ••••••••••
           </p>
         </div>
@@ -234,6 +298,7 @@ export function PasswordManager() {
         <button
           onClick={() => setIsChanging(true)}
           className="text-sm font-medium hover:underline"
+          aria-label="Actualizar contraseña"
         >
           Actualizar contraseña
         </button>

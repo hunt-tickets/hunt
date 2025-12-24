@@ -103,8 +103,11 @@ export const ERROR_MESSAGES = {
   // Password errors
   PASSWORD_MISMATCH: "Las contraseñas no coinciden",
   PASSWORD_WEAK: "La contraseña es demasiado débil",
+  PASSWORD_TOO_SHORT: "La contraseña debe tener al menos 8 caracteres",
+  PASSWORD_INVALID: "La contraseña no cumple con los requisitos de seguridad",
   PASSWORD_MIN_LENGTH: "La contraseña debe tener al menos {minLength} caracteres",
   PASSWORD_UPDATE_FAILED: "Error al actualizar la contraseña. Por favor intenta de nuevo.",
+  PASSWORD_CHANGE_FAILED: "Error al cambiar la contraseña. Por favor intenta de nuevo.",
 
   // Session errors
   SESSION_LOAD_FAILED: "Error al cargar las sesiones",
@@ -131,6 +134,8 @@ export const SUCCESS_MESSAGES = {
 
   // Password
   PASSWORD_UPDATED: "Contraseña actualizada correctamente",
+  PASSWORD_CHANGED: "Contraseña cambiada exitosamente",
+  PASSWORD_CHANGED_WITH_REVOKE: "Contraseña cambiada. Se han cerrado todas las demás sesiones",
 
   // Sessions
   SESSION_REVOKED: "Sesión cerrada correctamente",
