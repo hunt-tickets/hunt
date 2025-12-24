@@ -74,7 +74,8 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
         max_per_order,
         sale_start,
         sale_end,
-        created_at
+        created_at,
+        active
       ),
       orders (
         id,
@@ -160,7 +161,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     max_date: tt.sale_end, // Map sale_end to max_date for display
     quantity: tt.capacity, // Map capacity to quantity (available tickets)
     reference: null,
-    status: true, // Ticket types don't have status, assume active
+    status: tt.active, // Map active to status
     section: null,
     row: null,
     seat: null,

@@ -366,3 +366,22 @@ export async function getAllVenues() {
 
   return data || [];
 }
+
+export async function updateTicketTypeActive(
+  ticketTypeId: string,
+  active: boolean
+): Promise<{ success: boolean; message?: string }> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("ticket_types")
+    .update({ active })
+    .eq("id", ticketTypeId);
+
+  if (error) {
+    console.error("Error updating ticket type active status:", error);
+    return { success: false, message: error.message };
+  }
+
+  return { success: true };
+}
