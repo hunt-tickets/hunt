@@ -65,6 +65,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
     )
     .eq("id", eventId)
     .eq("organization_id", organizationId)
+    .eq("ticket_types.active", true)
     .single();
 
   if (!event) {

@@ -667,7 +667,7 @@ export const ticketTypes = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-    active: boolean("active"),
+    active: boolean("active").notNull().default(false),
   },
   (table) => [
     index("idx_ticket_types_event").on(table.eventId),

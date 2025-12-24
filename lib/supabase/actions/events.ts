@@ -894,6 +894,7 @@ export async function getEventTicketTypes(eventId: string) {
       .from("ticket_types")
       .select("*")
       .eq("event_id", eventId)
+      .eq("active", true)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -1104,7 +1105,7 @@ export type EventDetail = {
     saleEnd: Date | null;
     createdAt: Date;
     updatedAt: Date | null;
-    active: boolean | null;
+    active: boolean;
   }[];
 };
 
@@ -1141,7 +1142,7 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
         .eq("id", eventId)
         .single(),
       // Use RPC for accurate availability with lazy expiration
-      supabase.rpc("get_ticket_availability", { p_event_id: eventId }),
+      supabase.rpc("get_ticket_availability_v2", { p_event_id: eventId }),
     ]);
 
     if (eventResult.error) {
@@ -1206,7 +1207,7 @@ export async function getEventById(eventId: string): Promise<{ data: EventDetail
         saleEnd: t.sale_end ? new Date(t.sale_end as string) : null,
         createdAt: new Date(),
         updatedAt: null,
-        active: (t.active as boolean | null) ?? true,
+        active: true, // RPC only returns active tickets
       })),
     };
 
