@@ -39,6 +39,11 @@ export function Header() {
     };
   }, [isMobileMenuOpen]);
 
+  // Close mobile menu when pathname changes (user navigates)
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <>
       {/* Blur overlay - appears behind everything when menu is open */}
