@@ -37,35 +37,7 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
     "create"
   );
 
-  // Mock venues data - TODO: fetch from database
-  const venues = [
-    {
-      id: "venue-1",
-      name: "Teatro Principal",
-      address: "Calle 100 #10-20",
-      latitude: 4.678,
-      longitude: -74.048,
-      city: "Bogotá",
-      cities: {
-        id: "city-1",
-        name: "Bogotá",
-      },
-    },
-    {
-      id: "venue-2",
-      name: "Movistar Arena",
-      address: "Calle 61 #70-38",
-      latitude: 4.678,
-      longitude: -74.048,
-      city: "Bogotá",
-      cities: {
-        id: "city-1",
-        name: "Bogotá",
-      },
-    },
-  ];
-
-  // Fetch real events from database
+  // Fetch events from database
   const organizationEvents = await getOrganizationEvents(organizationId);
 
   return (
@@ -79,7 +51,7 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
       {/* Organization Events */}
       <div className="space-y-4">
         {organizationEvents.length > 0 ? (
-          <AdminEventsList events={organizationEvents} userId={userId} eventVenues={venues} organizationId={organizationId} />
+          <AdminEventsList events={organizationEvents} userId={userId} organizationId={organizationId} />
         ) : (
           <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
             <CardContent className="pt-6">
@@ -89,7 +61,7 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
                   Comienza creando tu primer evento para gestionar entradas y
                   ventas
                 </p>
-                <CreateEventDialog eventVenues={venues} organizationId={organizationId} />
+                <CreateEventDialog organizationId={organizationId} />
               </div>
             </CardContent>
           </Card>

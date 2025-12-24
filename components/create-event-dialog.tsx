@@ -29,17 +29,18 @@ import {
 } from "@/constants/event-categories";
 import { CreateEventSubmitButton } from "@/components/create-event-submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, AlertCircle, Plus } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Calendar,
+  Clock,
+  ImageIcon,
+} from "lucide-react";
 import { HoverButton } from "@/components/ui/hover-glow-button";
-
-interface VenueOption {
-  id: string;
-  name: string;
-}
 
 interface CreateEventDialogProps {
   className?: string;
-  eventVenues?: VenueOption[];
   organizationId: string;
 }
 
@@ -49,58 +50,38 @@ const initialState: EventFormState = {
   success: false,
 };
 
-interface StatusSelectProps {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-}
-
-function StatusSelect({ label, name, value, onChange }: StatusSelectProps) {
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">{label}</Label>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent position="popper" side="bottom" align="start">
-          <SelectItem value="Activo">Activo</SelectItem>
-          <SelectItem value="Inactivo">Inactivo</SelectItem>
-        </SelectContent>
-      </Select>
-      <input type="hidden" name={name} value={value} />
-    </div>
-  );
-}
-
 export function CreateEventDialog({
   className,
-  eventVenues = [],
   organizationId,
 }: CreateEventDialogProps) {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useActionState(createEvent, initialState);
 
-  // Form field states for controlled selects and dates
+  // Form field states
   const [category, setCategory] = useState("");
-  const [venueId, setVenueId] = useState("");
-  const [age, setAge] = useState("");
-  const [status, setStatus] = useState("Inactivo");
-  const [cashSales, setCashSales] = useState("Inactivo");
+  const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
 
   // Close dialog on success
   useEffect(() => {
     if (state.success) {
-      // Reset form
       setCategory("");
-      setVenueId("");
-      setAge("");
-      setStatus("Inactivo");
-      setCashSales("Inactivo");
+      setFlyerPreview(null);
       setOpen(false);
     }
   }, [state.success]);
+
+  const handleFlyerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFlyerPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFlyerPreview(null);
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -115,21 +96,20 @@ export function CreateEventDialog({
         <Plus className="h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0" />
         <span className="hidden sm:inline">Crear Evento</span>
       </HoverButton>
+
       <SheetContent
         side="right"
-        className="w-full sm:max-w-xl lg:max-w-2xl p-0 bg-[#101010] border-l border-[#303030] overflow-y-auto"
+        className="w-full sm:max-w-md p-0 bg-[#0a0a0a] border-l border-[#1a1a1a] overflow-y-auto"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <SheetHeader className="px-6 py-6 border-b border-[#303030] bg-[#101010] sticky top-0 z-10">
-            <SheetTitle
-              className="text-2xl font-bold"
-              style={{ fontFamily: "LOT, sans-serif" }}
-            >
-              CREAR EVENTO
+          <SheetHeader className="px-6 py-5 border-b border-[#1a1a1a]">
+            <SheetTitle className="text-xl font-semibold">
+              Nuevo Evento
             </SheetTitle>
-            <p className="text-sm text-[#B0B0B0] mt-2">
-              Completa la información para crear un nuevo evento
+            <p className="text-sm text-muted-foreground">
+              Crea tu evento en segundos. Podrás configurar más detalles
+              después.
             </p>
           </SheetHeader>
 
@@ -137,7 +117,7 @@ export function CreateEventDialog({
           <div className="flex-1 px-6 py-6">
             <form
               action={formAction}
-              className="space-y-8"
+              className="space-y-6"
               id="create-event-form"
             >
               {/* Hidden organization ID */}
@@ -147,7 +127,7 @@ export function CreateEventDialog({
                 value={organizationId}
               />
 
-              {/* Error message */}
+              {/* Messages */}
               {state.message && !state.success && (
                 <Alert
                   variant="destructive"
@@ -158,510 +138,188 @@ export function CreateEventDialog({
                 </Alert>
               )}
 
-              {/* Success message */}
               {state.message && state.success && (
                 <Alert className="border-green-500/50 bg-green-500/10">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <AlertDescription className="text-green-600 dark:text-green-400">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <AlertDescription className="text-green-500">
                     {state.message}
                   </AlertDescription>
                 </Alert>
               )}
 
-              {/* Información Básica */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Información Básica
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Nombre del Evento
-                  </Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    placeholder="Ej: Fiesta de Año Nuevo"
-                    className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+              {/* Flyer Upload - Visual first */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  Flyer del evento
+                </Label>
+                <label
+                  htmlFor="flyer"
+                  className="relative flex flex-col items-center justify-center w-full aspect-[3/4] rounded-xl border-2 border-dashed border-[#2a2a2a] hover:border-[#3a3a3a] bg-[#111] cursor-pointer transition-colors overflow-hidden group"
+                >
+                  {flyerPreview ? (
+                    <>
+                      <img
+                        src={flyerPreview}
+                        alt="Preview"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p className="text-sm text-white">Cambiar imagen</p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                      <div className="h-12 w-12 rounded-full bg-[#1a1a1a] flex items-center justify-center">
+                        <ImageIcon className="h-6 w-6" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-foreground">
+                          Arrastra tu flyer aquí
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          o haz clic para seleccionar
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    id="flyer"
+                    name="flyer"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleFlyerChange}
+                    className="sr-only"
                   />
-                  {state.errors?.name && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.name[0]}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    Categoría <span className="text-destructive">*</span>
-                  </Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
-                      <SelectValue placeholder="Selecciona una categoría" />
-                    </SelectTrigger>
-                    <SelectContent
-                      position="popper"
-                      side="bottom"
-                      align="start"
-                    >
-                      {EVENT_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {EVENT_CATEGORY_LABELS[cat]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <input type="hidden" name="category" value={category} />
-                  {state.errors?.category && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.category[0]}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium">
-                    Descripción
-                  </Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    placeholder="Describe el evento..."
-                    className="min-h-[100px] resize-none bg-background/50 border-[#303030] focus-visible:ring-primary"
-                  />
-                  {state.errors?.description && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.description[0]}
-                    </p>
-                  )}
-                </div>
+                </label>
               </div>
 
-              {/* Fechas y Horarios */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Fechas y Horarios
-                </h3>
+              {/* Name */}
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Nombre del evento
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Ej: Fiesta de Año Nuevo 2025"
+                  className="h-11 bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
+                />
+                {state.errors?.name && (
+                  <p className="text-sm text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {state.errors.name[0]}
+                  </p>
+                )}
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start_date" className="text-sm font-medium">
-                      Fecha de Inicio
-                    </Label>
+              {/* Category */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Categoría</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="h-11 bg-[#111] border-[#2a2a2a]">
+                    <SelectValue placeholder="Selecciona una categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EVENT_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {EVENT_CATEGORY_LABELS[cat]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <input type="hidden" name="category" value={category} />
+              </div>
+
+              {/* Date & Time - Compact */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">¿Cuándo es?</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                     <Input
-                      id="start_date"
                       name="start_date"
                       type="date"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                      className="h-11 pl-10 bg-[#111] border-[#2a2a2a]"
                     />
-                    {state.errors?.start_date && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.start_date[0]}
-                      </p>
-                    )}
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="start_time" className="text-sm font-medium">
-                      Hora de Inicio
-                    </Label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                     <Input
-                      id="start_time"
                       name="start_time"
                       type="time"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
+                      className="h-11 pl-10 bg-[#111] border-[#2a2a2a]"
                     />
-                    {state.errors?.start_time && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.start_time[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="end_date" className="text-sm font-medium">
-                      Fecha de Finalización
-                    </Label>
-                    <Input
-                      id="end_date"
-                      name="end_date"
-                      type="date"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    {state.errors?.end_date && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.end_date[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="end_time" className="text-sm font-medium">
-                      Hora de Finalización
-                    </Label>
-                    <Input
-                      id="end_time"
-                      name="end_time"
-                      type="time"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    {state.errors?.end_time && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.end_time[0]}
-                      </p>
-                    )}
                   </div>
                 </div>
+                {(state.errors?.start_date || state.errors?.start_time) && (
+                  <p className="text-sm text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {state.errors?.start_date?.[0] ||
+                      state.errors?.start_time?.[0]}
+                  </p>
+                )}
               </div>
 
-              {/* Ubicación y Detalles */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Ubicación y Detalles
-                </h3>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Venue</Label>
-                  <Select value={venueId} onValueChange={setVenueId}>
-                    <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
-                      <SelectValue placeholder="Seleccione un venue" />
-                    </SelectTrigger>
-                    <SelectContent
-                      position="popper"
-                      side="bottom"
-                      align="start"
-                      className="max-h-[200px]"
-                    >
-                      {eventVenues.map((venue) => (
-                        <SelectItem key={venue.id} value={venue.id}>
-                          {venue.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <input type="hidden" name="venue_id" value={venueId} />
-                  {state.errors?.venue_id && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.venue_id[0]}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city" className="text-sm font-medium">
-                      Ciudad
-                    </Label>
-                    <Input
-                      id="city"
-                      name="city"
-                      placeholder="Ej: Bogotá"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    {state.errors?.city && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.city[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="country" className="text-sm font-medium">
-                      País
-                    </Label>
-                    <Input
-                      id="country"
-                      name="country"
-                      placeholder="Ej: Colombia"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    {state.errors?.country && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.country[0]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="text-sm font-medium">
-                    Dirección
-                  </Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    placeholder="Ej: Calle 100 #10-20"
-                    className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                  />
-                  {state.errors?.address && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.address[0]}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Edad Mínima</Label>
-                    <Select value={age} onValueChange={setAge}>
-                      <SelectTrigger className="h-10 bg-background/50 border-[#303030]">
-                        <SelectValue placeholder="Seleccione edad" />
-                      </SelectTrigger>
-                      <SelectContent
-                        position="popper"
-                        side="bottom"
-                        align="start"
-                      >
-                        <SelectItem value="0">0+</SelectItem>
-                        <SelectItem value="12">12+</SelectItem>
-                        <SelectItem value="15">15+</SelectItem>
-                        <SelectItem value="18">18+</SelectItem>
-                        <SelectItem value="21">21+</SelectItem>
-                        <SelectItem value="25">25+</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <input type="hidden" name="age" value={age} />
-                    {state.errors?.age && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.age[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <StatusSelect
-                    label="Estado"
-                    name="status"
-                    value={status}
-                    onChange={setStatus}
-                  />
-                </div>
+              {/* Description - Optional, collapsible feel */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="description"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Descripción{" "}
+                  <span className="text-xs text-muted-foreground/60">
+                    (opcional)
+                  </span>
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Cuéntale a la gente de qué trata tu evento..."
+                  className="min-h-[80px] resize-none bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
+                />
               </div>
 
-              {/* Información Adicional */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Información Adicional
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="extra_info" className="text-sm font-medium">
-                    Información Extra
-                  </Label>
-                  <Textarea
-                    id="extra_info"
-                    name="extra_info"
-                    placeholder="Información adicional sobre el evento..."
-                    className="min-h-[80px] resize-none bg-background/50 border-[#303030] focus-visible:ring-primary"
-                  />
-                  {state.errors?.extra_info && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {state.errors.extra_info[0]}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Imágenes */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Imágenes
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="flyer" className="text-sm font-medium">
-                      Flyer del Evento
-                    </Label>
-                    <Input
-                      id="flyer"
-                      name="flyer"
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Imagen principal del evento (Máx. 5MB)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="wallet" className="text-sm font-medium">
-                      Imagen para Wallet
-                    </Label>
-                    <Input
-                      id="wallet"
-                      name="wallet"
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Para Apple/Google Wallet (Máx. 5MB)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="flyer_overlay"
-                      className="text-sm font-medium"
-                    >
-                      Flyer Overlay
-                    </Label>
-                    <Input
-                      id="flyer_overlay"
-                      name="flyer_overlay"
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Imagen de overlay (Máx. 5MB)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="flyer_background"
-                      className="text-sm font-medium"
-                    >
-                      Flyer Background
-                    </Label>
-                    <Input
-                      id="flyer_background"
-                      name="flyer_background"
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Imagen de fondo (Máx. 5MB)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="flyer_banner"
-                      className="text-sm font-medium"
-                    >
-                      Flyer Banner
-                    </Label>
-                    <Input
-                      id="flyer_banner"
-                      name="flyer_banner"
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      className="h-10 cursor-pointer bg-background/50 border-[#303030]"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Banner del evento (Máx. 5MB)
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tarifas y Comisiones */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Tarifas y Comisiones
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="variable_fee"
-                      className="text-sm font-medium"
-                    >
-                      Tarifa Variable (%)
-                    </Label>
-                    <Input
-                      id="variable_fee"
-                      name="variable_fee"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="Ej: 10.00"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Porcentaje de comisión sobre el precio del ticket
-                    </p>
-                    {state.errors?.variable_fee && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.variable_fee[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="fixed_fee" className="text-sm font-medium">
-                      Tarifa Fija
-                    </Label>
-                    <Input
-                      id="fixed_fee"
-                      name="fixed_fee"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="Ej: 5000"
-                      className="h-10 bg-background/50 border-[#303030] focus-visible:ring-primary"
-                    />
-                    <p className="text-xs text-[#B0B0B0]">
-                      Monto fijo de comisión por ticket
-                    </p>
-                    {state.errors?.fixed_fee && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {state.errors.fixed_fee[0]}
-                      </p>
-                    )}
-                  </div>
-
-                </div>
-              </div>
-
-              {/* Configuración de Ventas */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#B0B0B0]">
-                  Configuración de Ventas
-                </h3>
-
-                <StatusSelect
-                  label="Venta en Efectivo"
-                  name="cash_sales"
-                  value={cashSales}
-                  onChange={setCashSales}
+              {/* City - Simple */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="city"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Ciudad{" "}
+                  <span className="text-xs text-muted-foreground/60">
+                    (opcional)
+                  </span>
+                </Label>
+                <Input
+                  id="city"
+                  name="city"
+                  placeholder="Ej: Bogotá"
+                  className="h-11 bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
                 />
               </div>
             </form>
           </div>
 
-          {/* Footer with buttons */}
-          <div className="px-6 py-4 border-t border-[#303030] bg-[#101010] sticky bottom-0 z-10">
-            <div className="flex gap-3 justify-end">
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-[#1a1a1a] bg-[#0a0a0a]">
+            <div className="flex gap-3">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={() => setOpen(false)}
-                className="h-10 px-6 border-[#303030] hover:bg-white/5"
+                className="flex-1 h-11"
               >
                 Cancelar
               </Button>
-              <CreateEventSubmitButton form="create-event-form" />
+              <CreateEventSubmitButton
+                form="create-event-form"
+                className="flex-1 h-11"
+              />
             </div>
+            <p className="text-xs text-center text-muted-foreground mt-3">
+              Podrás agregar más detalles, días del evento y boletos después de
+              crear el evento.
+            </p>
           </div>
         </div>
       </SheetContent>

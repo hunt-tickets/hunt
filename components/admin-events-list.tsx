@@ -7,15 +7,9 @@ import { EventCard } from "@/components/event-card";
 import { CreateEventDialog } from "@/components/create-event-dialog";
 import type { EventWithVenue } from "@/lib/supabase/actions/events";
 
-interface VenueOption {
-  id: string;
-  name: string;
-}
-
 interface AdminEventsListProps {
   events: EventWithVenue[];
   userId: string;
-  eventVenues?: VenueOption[];
   organizationId: string;
 }
 
@@ -24,7 +18,6 @@ const SCROLL_POSITION_KEY = "admin-events-list-scroll";
 export function AdminEventsList({
   events,
   userId,
-  eventVenues = [],
   organizationId,
 }: AdminEventsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,7 +65,6 @@ export function AdminEventsList({
         </div>
         <div className="flex items-center">
           <CreateEventDialog
-            eventVenues={eventVenues}
             organizationId={organizationId}
             className="sm:px-6 px-3 sm:rounded-full rounded-full"
           />
