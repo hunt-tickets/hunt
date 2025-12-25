@@ -73,18 +73,6 @@ export function PhoneVerificationManager({
     return phone;
   }, []);
 
-  // Auto-send OTP when a valid phone number is entered for the first time
-  useEffect(() => {
-    if (phoneInput && phoneInput.length >= VALIDATION.MIN_PHONE_LENGTH && !hasAutoSent && !phoneNumber) {
-      const timer = setTimeout(() => {
-        handleSendOTP(true);
-        setHasAutoSent(true);
-      }, PROFILE_DELAYS.OTP_AUTO_SEND);
-
-      return () => clearTimeout(timer);
-    }
-  }, [phoneInput, hasAutoSent, phoneNumber, handleSendOTP]);
-
   const handleOtpChange = useCallback((index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
 
@@ -142,8 +130,8 @@ export function PhoneVerificationManager({
 
     // Rate limiting - prevent sending OTP too frequently
     const now = Date.now();
-    if (now - lastOTPRequest < PROFILE_DELAYS.OTP_RATE_LIMIT) {
-      const waitSeconds = Math.ceil((PROFILE_DELAYS.OTP_RATE_LIMIT - (now - lastOTPRequest)) / 1000);
+    if (now - lastOTPRequest < PROFILE_DELAYS.RATE_LIMIT_OTP) {
+      const waitSeconds = Math.ceil((PROFILE_DELAYS.RATE_LIMIT_OTP - (now - lastOTPRequest)) / 1000);
       toast.error({
         title: ERROR_MESSAGES.OTP_RATE_LIMIT.replace("{seconds}", waitSeconds.toString()),
       });
@@ -201,6 +189,18 @@ export function PhoneVerificationManager({
       setIsSendingOTP(false);
     }
   }, []);
+
+  // Auto-send OTP when a valid phone number is entered for the first time
+  useEffect(() => {
+    if (phoneInput && phoneInput.length >= VALIDATION.MIN_PHONE_LENGTH && !hasAutoSent && !phoneNumber) {
+      const timer = setTimeout(() => {
+        handleSendOTP(true);
+        setHasAutoSent(true);
+      }, PROFILE_DELAYS.OTP_AUTO_SEND);
+
+      return () => clearTimeout(timer);
+    }
+  }, [phoneInput, hasAutoSent, phoneNumber, handleSendOTP]);
 
   const handleVerifyOTP = useCallback(async (code: string) => {
     if (code.length !== 6) {
