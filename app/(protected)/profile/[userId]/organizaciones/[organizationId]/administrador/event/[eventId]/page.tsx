@@ -222,6 +222,9 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   const hasLocation = !!(event.city || event.venue_id);
   const needsSetup = !hasDate || !hasFlyer || !hasTicketTypes || !hasLocation;
 
+  // Event can only be published when required items are complete
+  const canPublish = hasDate && hasTicketTypes;
+
   // Build URLs for setup actions
   const configUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
   const ticketsUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/entradas`;
@@ -238,11 +241,15 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
                 Panel de Administración
               </p>
             </div>
-            <EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />
+            <EventStatusToggle
+              eventId={eventId}
+              initialStatus={event.status ?? false}
+              disabled={!canPublish}
+              disabledReason="Completa la fecha y crea al menos una entrada para publicar"
+            />
           </div>
 
           <EventSetupChecklist
-            eventName={event.name}
             hasDate={hasDate}
             hasFlyer={hasFlyer}
             hasTicketTypes={hasTicketTypes}
@@ -266,7 +273,12 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         })}
         rightContent={
           <div className="flex items-center gap-3">
-            <EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />
+            <EventStatusToggle
+              eventId={eventId}
+              initialStatus={event.status ?? false}
+              disabled={!canPublish}
+              disabledReason="Completa la fecha y crea al menos una entrada para publicar"
+            />
             <EventOptionsMenu eventId={eventId} />
           </div>
         }
@@ -285,7 +297,6 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       {/* Setup Checklist - shown if event still needs configuration */}
       {needsSetup && (
         <EventSetupChecklist
-          eventName={event.name}
           hasDate={hasDate}
           hasFlyer={hasFlyer}
           hasTicketTypes={hasTicketTypes}

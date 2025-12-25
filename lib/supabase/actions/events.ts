@@ -607,6 +607,37 @@ export async function updateEventConfiguration(
 export async function toggleEventStatus(eventId: string, status: boolean) {
   const supabase = await createClient();
 
+  // If activating the event, validate requirements are met
+  if (status === true) {
+    const { data: event, error: fetchError } = await supabase
+      .from("events")
+      .select(`
+        id,
+        date,
+        ticket_types (id)
+      `)
+      .eq("id", eventId)
+      .single();
+
+    if (fetchError || !event) {
+      console.error("Error fetching event for validation:", fetchError);
+      return { success: false, message: "Error al validar el evento" };
+    }
+
+    const hasDate = !!event.date;
+    const hasTicketTypes = (event.ticket_types?.length ?? 0) > 0;
+
+    if (!hasDate || !hasTicketTypes) {
+      const missing = [];
+      if (!hasDate) missing.push("fecha");
+      if (!hasTicketTypes) missing.push("al menos una entrada");
+      return {
+        success: false,
+        message: `No se puede activar el evento. Falta: ${missing.join(", ")}`,
+      };
+    }
+  }
+
   const { error } = await supabase
     .from("events")
     .update({ status })
