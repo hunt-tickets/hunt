@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +24,7 @@ import { HoverButton } from "@/components/ui/hover-glow-button";
 interface CreateEventDialogProps {
   className?: string;
   organizationId: string;
+  userId: string;
 }
 
 const initialState: EventFormState = {
@@ -34,19 +36,23 @@ const initialState: EventFormState = {
 export function CreateEventDialog({
   className,
   organizationId,
+  userId,
 }: CreateEventDialogProps) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const createEventWithOrg = createEvent.bind(null, organizationId);
   const [state, formAction] = useActionState(createEventWithOrg, initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Close dialog on success
+  // Redirect to event page on success
   useEffect(() => {
-    if (state.success) {
+    if (state.success && state.eventId) {
       setOpen(false);
-      setIsSubmitting(false);
+      router.push(
+        `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${state.eventId}`
+      );
     }
-  }, [state.success]);
+  }, [state.success, state.eventId, router, userId, organizationId]);
 
   useEffect(() => {
     if (!open) {

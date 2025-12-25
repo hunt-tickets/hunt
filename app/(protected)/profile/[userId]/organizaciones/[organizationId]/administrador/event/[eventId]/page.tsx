@@ -1,12 +1,11 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { Card, CardContent } from "@/components/ui/card";
-import { BarChart3 } from "lucide-react";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { EventStatusToggle } from "@/components/event-status-toggle";
 import { EventOptionsMenu } from "@/components/event-options-menu";
+import { EventSetupChecklist } from "@/components/event-setup-checklist";
 import { createClient } from "@/lib/supabase/server";
 import { orderItem, member } from "@/lib/schema";
 import { db } from "@/lib/drizzle";
@@ -67,6 +66,9 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       name,
       status,
       flyer,
+      date,
+      city,
+      venue_id,
       ticket_types (*),
       orders (
         *,
@@ -213,7 +215,18 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     }))
   );
 
-  // Empty state - no ticket types yet
+  // Determine setup completion status
+  const hasDate = !!event.date;
+  const hasFlyer = !!event.flyer;
+  const hasTicketTypes = ticketTypes.length > 0;
+  const hasLocation = !!(event.city || event.venue_id);
+  const needsSetup = !hasDate || !hasFlyer || !hasTicketTypes || !hasLocation;
+
+  // Build URLs for setup actions
+  const configUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
+  const ticketsUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/entradas`;
+
+  // Empty state - no ticket types yet, show setup checklist
   if (ticketTypes.length === 0) {
     return (
       <div className="min-h-screen">
@@ -228,18 +241,15 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
             <EventStatusToggle eventId={eventId} initialStatus={event.status ?? false} />
           </div>
 
-          <Card>
-            <CardContent className="py-12 text-center">
-              <BarChart3 className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-1">
-                Sin tipos de entrada
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Crea tipos de entrada en la sección &quot;Entradas&quot; para
-                ver las estadísticas.
-              </p>
-            </CardContent>
-          </Card>
+          <EventSetupChecklist
+            eventName={event.name}
+            hasDate={hasDate}
+            hasFlyer={hasFlyer}
+            hasTicketTypes={hasTicketTypes}
+            hasLocation={hasLocation}
+            configUrl={configUrl}
+            ticketsUrl={ticketsUrl}
+          />
         </div>
       </div>
     );
@@ -271,6 +281,19 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           showTabsOnly
         />
       </EventStickyHeader>
+
+      {/* Setup Checklist - shown if event still needs configuration */}
+      {needsSetup && (
+        <EventSetupChecklist
+          eventName={event.name}
+          hasDate={hasDate}
+          hasFlyer={hasFlyer}
+          hasTicketTypes={hasTicketTypes}
+          hasLocation={hasLocation}
+          configUrl={configUrl}
+          ticketsUrl={ticketsUrl}
+        />
+      )}
 
       {/* Content */}
       <EventDashboardTabs

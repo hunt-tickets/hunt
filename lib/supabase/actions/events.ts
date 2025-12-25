@@ -19,6 +19,7 @@ export type EventFormState = {
   };
   message?: string;
   success?: boolean;
+  eventId?: string;
 };
 
 export async function createEvent(
@@ -70,12 +71,16 @@ export async function createEvent(
 
   try {
     // Create event in database with just name and organization
-    const { error: eventError } = await supabase.from("events").insert({
-      organization_id: organizationId,
-      name: validData.name,
-    });
+    const { data: eventData, error: eventError } = await supabase
+      .from("events")
+      .insert({
+        organization_id: organizationId,
+        name: validData.name,
+      })
+      .select("id")
+      .single();
 
-    if (eventError) {
+    if (eventError || !eventData) {
       console.error("Error creating event:", eventError);
       return {
         message: "Error al crear el evento. Por favor intente nuevamente.",
@@ -91,6 +96,7 @@ export async function createEvent(
     return {
       message: "Evento creado exitosamente",
       success: true,
+      eventId: eventData.id,
     };
   } catch (error) {
     console.error("Error creating event:", error);
