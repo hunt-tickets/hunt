@@ -17,7 +17,7 @@ import {
 } from "@/lib/supabase/actions/events";
 import { CreateEventSubmitButton } from "@/components/create-event-submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, AlertCircle, Plus, Info } from "lucide-react";
+import { AlertCircle, Plus, Info } from "lucide-react";
 import { HoverButton } from "@/components/ui/hover-glow-button";
 
 interface CreateEventDialogProps {
@@ -38,13 +38,21 @@ export function CreateEventDialog({
   const [open, setOpen] = useState(false);
   const createEventWithOrg = createEvent.bind(null, organizationId);
   const [state, formAction] = useActionState(createEventWithOrg, initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Close dialog on success
   useEffect(() => {
     if (state.success) {
       setOpen(false);
+      setIsSubmitting(false);
     }
   }, [state.success]);
+
+  useEffect(() => {
+    if (!open) {
+      setIsSubmitting(false);
+    }
+  }, [open]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -76,14 +84,17 @@ export function CreateEventDialog({
             </p>
           </SheetHeader>
 
-          {/* Form Content */}
-          <div className="flex-1 px-6 py-6">
-            <form
-              action={formAction}
-              className="space-y-6"
-              id="create-event-form"
-            >
-              {/* Messages */}
+          <form
+            action={async (formData: FormData) => {
+              setIsSubmitting(true);
+              await formAction(formData);
+              setIsSubmitting(false);
+            }}
+            className="flex-1 flex flex-col"
+          >
+            {/* Form Content */}
+            <div className="flex-1 px-6 py-6 space-y-6">
+              {/* Error message */}
               {state.message && !state.success && (
                 <Alert
                   variant="destructive"
@@ -91,15 +102,6 @@ export function CreateEventDialog({
                 >
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{state.message}</AlertDescription>
-                </Alert>
-              )}
-
-              {state.message && state.success && (
-                <Alert className="border-green-500/50 bg-green-500/10">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <AlertDescription className="text-green-500">
-                    {state.message}
-                  </AlertDescription>
                 </Alert>
               )}
 
@@ -114,6 +116,7 @@ export function CreateEventDialog({
                   placeholder="Ej: Fiesta de Año Nuevo 2025"
                   className="h-11 bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
                   autoFocus
+                  disabled={isSubmitting}
                 />
                 {state.errors?.name && (
                   <p className="text-sm text-destructive flex items-center gap-1">
@@ -131,26 +134,24 @@ export function CreateEventDialog({
                   boletos y más detalles.
                 </p>
               </div>
-            </form>
-          </div>
-
-          {/* Footer */}
-          <div className="px-6 py-4 border-t border-[#1a1a1a] bg-[#0a0a0a]">
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setOpen(false)}
-                className="flex-1 h-11"
-              >
-                Cancelar
-              </Button>
-              <CreateEventSubmitButton
-                form="create-event-form"
-                className="flex-1 h-11"
-              />
             </div>
-          </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-[#1a1a1a] bg-[#0a0a0a]">
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setOpen(false)}
+                  className="flex-1 h-11"
+                  disabled={isSubmitting}
+                >
+                  Cancelar
+                </Button>
+                <CreateEventSubmitButton className="flex-1 h-11" />
+              </div>
+            </div>
+          </form>
         </div>
       </SheetContent>
     </Sheet>
