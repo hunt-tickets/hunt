@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, forwardRef } from "react";
+import React, { useState, useEffect, forwardRef, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,11 +16,13 @@ import { toast } from "@/lib/toast";
 import PhoneInputWithCountry from 'react-phone-number-input';
 import type { E164Number } from 'libphonenumber-js/core';
 import 'react-phone-number-input/style.css';
-
-interface PhoneVerificationManagerProps {
-  phoneNumber?: string | null;
-  phoneNumberVerified?: boolean;
-}
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  VALIDATION,
+  PROFILE_DELAYS,
+} from "@/constants/profile";
+import type { PhoneVerificationManagerProps } from "@/lib/profile/types";
 
 const InputComponent = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>((props, ref) => (
   <input {...props} ref={ref} />
@@ -38,6 +40,7 @@ export function PhoneVerificationManager({
   const [phoneInput, setPhoneInput] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(0);
+  const [lastOTPRequest, setLastOTPRequest] = useState<number>(0);
 
   const [showOTPInput, setShowOTPInput] = useState(false);
   const [pendingPhoneNumber, setPendingPhoneNumber] = useState("");
@@ -45,7 +48,7 @@ export function PhoneVerificationManager({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const router = useRouter();
-  const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Timer for resend functionality
   useEffect(() => {
@@ -58,30 +61,31 @@ export function PhoneVerificationManager({
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Auto-send OTP when a valid phone number is entered for the first time
-  useEffect(() => {
-    if (phoneInput && phoneInput.length >= 10 && !hasAutoSent && !phoneNumber) {
-      const timer = setTimeout(() => {
-        handleSendOTP(true);
-        setHasAutoSent(true);
-      }, 2000); // 2 second delay to ensure user finished typing
-
-      return () => clearTimeout(timer);
-    }
-  }, [phoneInput, hasAutoSent, phoneNumber]);
-
-  const formatPhoneNumber = (phone: string) => {
+  // Format phone number for display
+  const formatPhoneNumber = useCallback((phone: string) => {
     if (!phone) return phone;
     if (phone.startsWith("+")) {
       return phone;
     }
-    if (phone.length >= 10) {
+    if (phone.length >= VALIDATION.MIN_PHONE_LENGTH) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
     }
     return phone;
-  };
+  }, []);
 
-  const handleOtpChange = (index: number, value: string) => {
+  // Auto-send OTP when a valid phone number is entered for the first time
+  useEffect(() => {
+    if (phoneInput && phoneInput.length >= VALIDATION.MIN_PHONE_LENGTH && !hasAutoSent && !phoneNumber) {
+      const timer = setTimeout(() => {
+        handleSendOTP(true);
+        setHasAutoSent(true);
+      }, PROFILE_DELAYS.OTP_AUTO_SEND);
+
+      return () => clearTimeout(timer);
+    }
+  }, [phoneInput, hasAutoSent, phoneNumber, handleSendOTP]);
+
+  const handleOtpChange = useCallback((index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
 
     const newOtp = [...otp];
@@ -96,9 +100,9 @@ export function PhoneVerificationManager({
     if (newOtp.every(digit => digit !== '') && index === 5) {
       handleVerifyOTP(newOtp.join(''));
     }
-  };
+  }, [otp]);
 
-  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  const handleOtpPaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text/plain');
     const digits = pastedData.replace(/\D/g, '').slice(0, 6);
@@ -120,71 +124,87 @@ export function PhoneVerificationManager({
         handleVerifyOTP(digits);
       }
     }
-  };
+  }, [otp]);
 
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleOtpKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
-  };
+  }, [otp]);
 
-  const handleSendOTP = async (autoSend = false) => {
-    if (!phoneInput || phoneInput.length < 10) {
+  const handleSendOTP = useCallback(async (autoSend = false) => {
+    if (!phoneInput || phoneInput.length < VALIDATION.MIN_PHONE_LENGTH) {
       if (!autoSend) {
-        toast.error({ title: "Por favor ingresa un número de teléfono válido" });
+        toast.error({ title: ERROR_MESSAGES.PHONE_INVALID });
       }
       return;
     }
 
+    // Rate limiting - prevent sending OTP too frequently
+    const now = Date.now();
+    if (now - lastOTPRequest < PROFILE_DELAYS.OTP_RATE_LIMIT) {
+      const waitSeconds = Math.ceil((PROFILE_DELAYS.OTP_RATE_LIMIT - (now - lastOTPRequest)) / 1000);
+      toast.error({
+        title: ERROR_MESSAGES.OTP_RATE_LIMIT.replace("{seconds}", waitSeconds.toString()),
+      });
+      return;
+    }
+
     setIsSendingOTP(true);
+    setLastOTPRequest(now);
+
     try {
       await authClient.phoneNumber.sendOtp({
         phoneNumber: phoneInput,
       });
 
-      toast.success({ title: "¡Código de verificación enviado!" });
+      toast.success({ title: SUCCESS_MESSAGES.OTP_SENT });
       setPendingPhoneNumber(phoneInput);
-      setResendTimer(60);
+      setResendTimer(PROFILE_DELAYS.OTP_RESEND_COOLDOWN / 1000);
       setShowOTPInput(true);
       setIsEditing(false);
     } catch (error: unknown) {
-      console.error("Failed to send OTP:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Error al enviar el código de verificación. Por favor intenta de nuevo.";
+          : ERROR_MESSAGES.OTP_SEND_FAILED;
       toast.error({ title: errorMessage });
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to send OTP:", error);
+      }
     } finally {
       setIsSendingOTP(false);
     }
-  };
+  }, [phoneInput, lastOTPRequest]);
 
-  const handleSendOTPExisting = async (existingPhoneNumber: string) => {
+  const handleSendOTPExisting = useCallback(async (existingPhoneNumber: string) => {
     setIsSendingOTP(true);
     try {
       await authClient.phoneNumber.sendOtp({
         phoneNumber: existingPhoneNumber,
       });
 
-      toast.success({ title: "¡Código de verificación enviado!" });
+      toast.success({ title: SUCCESS_MESSAGES.OTP_SENT });
       setPendingPhoneNumber(existingPhoneNumber);
-      setResendTimer(60);
+      setResendTimer(PROFILE_DELAYS.OTP_RESEND_COOLDOWN / 1000);
       setShowOTPInput(true);
     } catch (error: unknown) {
-      console.error("Failed to send OTP:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Error al enviar el código de verificación. Por favor intenta de nuevo.";
+          : ERROR_MESSAGES.OTP_SEND_FAILED;
       toast.error({ title: errorMessage });
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to send OTP:", error);
+      }
     } finally {
       setIsSendingOTP(false);
     }
-  };
+  }, []);
 
-  const handleVerifyOTP = async (code: string) => {
+  const handleVerifyOTP = useCallback(async (code: string) => {
     if (code.length !== 6) {
-      toast.error({ title: "Por favor ingresa el código de verificación de 6 dígitos" });
+      toast.error({ title: ERROR_MESSAGES.OTP_INVALID_LENGTH });
       return;
     }
 
@@ -199,7 +219,7 @@ export function PhoneVerificationManager({
         updatePhoneNumber: !isExistingPhone,
       });
 
-      toast.success({ title: "¡Número de teléfono verificado exitosamente!" });
+      toast.success({ title: SUCCESS_MESSAGES.PHONE_VERIFIED });
 
       setOtp(["", "", "", "", "", ""]);
       setShowOTPInput(false);
@@ -208,19 +228,21 @@ export function PhoneVerificationManager({
 
       router.refresh();
     } catch (error: unknown) {
-      console.error("Failed to verify OTP:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Código de verificación inválido. Por favor intenta de nuevo.";
+          : ERROR_MESSAGES.OTP_VERIFY_FAILED;
       toast.error({ title: errorMessage });
       setOtp(["", "", "", "", "", ""]);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to verify OTP:", error);
+      }
     } finally {
       setIsVerifyingOTP(false);
     }
-  };
+  }, [pendingPhoneNumber, phoneNumber, router]);
 
-  const handleResendOTP = async () => {
+  const handleResendOTP = useCallback(async () => {
     if (resendTimer > 0) return;
 
     setIsSendingOTP(true);
@@ -229,17 +251,19 @@ export function PhoneVerificationManager({
         phoneNumber: pendingPhoneNumber,
       });
 
-      toast.success({ title: "¡Nuevo código de verificación enviado!" });
-      setResendTimer(60);
+      toast.success({ title: SUCCESS_MESSAGES.OTP_RESENT });
+      setResendTimer(PROFILE_DELAYS.OTP_RESEND_COOLDOWN / 1000);
     } catch (error: unknown) {
-      console.error("Failed to resend OTP:", error);
-      toast.error({ title: "Error al reenviar el código. Por favor intenta de nuevo." });
+      toast.error({ title: ERROR_MESSAGES.OTP_SEND_FAILED });
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to resend OTP:", error);
+      }
     } finally {
       setIsSendingOTP(false);
     }
-  };
+  }, [pendingPhoneNumber, resendTimer]);
 
-  const resetDialogs = () => {
+  const resetDialogs = useCallback(() => {
     setShowOTPInput(false);
     setPhoneInput("");
     setOtp(["", "", "", "", "", ""]);
@@ -247,7 +271,7 @@ export function PhoneVerificationManager({
     setResendTimer(0);
     setIsEditing(false);
     setHasAutoSent(false);
-  };
+  }, []);
 
   return (
     <>

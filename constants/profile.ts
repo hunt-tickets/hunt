@@ -90,6 +90,7 @@ export const ERROR_MESSAGES = {
   PHONE_INVALID: "El número de teléfono no es válido",
   OTP_SEND_FAILED: "Error al enviar el código. Por favor intenta de nuevo.",
   OTP_VERIFY_FAILED: "Error al verificar el código. Por favor intenta de nuevo.",
+  OTP_INVALID_LENGTH: "Por favor ingresa el código de verificación de 6 dígitos",
   OTP_RATE_LIMIT: "Por favor espera {seconds} segundos antes de solicitar otro código",
 
   // Document errors
@@ -123,6 +124,7 @@ export const ERROR_MESSAGES = {
 export const SUCCESS_MESSAGES = {
   // Phone verification
   OTP_SENT: "¡Código de verificación enviado!",
+  OTP_RESENT: "¡Nuevo código de verificación enviado!",
   PHONE_VERIFIED: "¡Teléfono verificado correctamente!",
 
   // Document

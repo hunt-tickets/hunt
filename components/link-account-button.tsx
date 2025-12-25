@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "@/lib/toast";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/constants/profile";
+import { ERROR_MESSAGES } from "@/constants/profile";
 import type { LinkAccountButtonProps } from "@/lib/profile/types";
 
 export function LinkAccountButton({
