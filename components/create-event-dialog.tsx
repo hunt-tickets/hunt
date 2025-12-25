@@ -44,12 +44,12 @@ export function CreateEventDialog({
   const [state, formAction] = useActionState(createEventWithOrg, initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect to event page on success
+  // Redirect to configuration page on success
   useEffect(() => {
     if (state.success && state.eventId) {
       setOpen(false);
       router.push(
-        `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${state.eventId}`
+        `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${state.eventId}/configuracion`
       );
     }
   }, [state.success, state.eventId, router, userId, organizationId]);

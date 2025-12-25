@@ -1,15 +1,16 @@
 import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { EventStatusToggle } from "@/components/event-status-toggle";
 import { EventOptionsMenu } from "@/components/event-options-menu";
-import { EventSetupChecklist } from "@/components/event-setup-checklist";
 import { createClient } from "@/lib/supabase/server";
 import { orderItem, member } from "@/lib/schema";
 import { db } from "@/lib/drizzle";
 import { eq, and } from "drizzle-orm";
+import { Settings } from "lucide-react";
 
 interface EventPageProps {
   params: Promise<{
@@ -217,23 +218,19 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
 
   // Determine setup completion status
   const hasDate = !!event.date;
-  const hasFlyer = !!event.flyer;
   const hasTicketTypes = ticketTypes.length > 0;
-  const hasLocation = !!(event.city || event.venue_id);
-  const needsSetup = !hasDate || !hasFlyer || !hasTicketTypes || !hasLocation;
 
   // Event can only be published when required items are complete
   const canPublish = hasDate && hasTicketTypes;
 
-  // Build URLs for setup actions
+  // Configuration URL
   const configUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
-  const ticketsUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/entradas`;
 
-  // Empty state - no ticket types yet, show setup checklist
+  // Empty state - no ticket types yet, show setup message
   if (ticketTypes.length === 0) {
     return (
       <div className="min-h-screen">
-        <div className="space-y-4 p-6">
+        <div className="space-y-6 p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold sm:text-2xl">{event.name}</h1>
@@ -245,18 +242,29 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
               eventId={eventId}
               initialStatus={event.status ?? false}
               disabled={!canPublish}
-              disabledReason="Completa la fecha y crea al menos una entrada para publicar"
+              disabledReason="Completa la configuración para publicar"
             />
           </div>
 
-          <EventSetupChecklist
-            hasDate={hasDate}
-            hasFlyer={hasFlyer}
-            hasTicketTypes={hasTicketTypes}
-            hasLocation={hasLocation}
-            configUrl={configUrl}
-            ticketsUrl={ticketsUrl}
-          />
+          <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="h-12 w-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                <Settings className="h-6 w-6 text-zinc-500" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Configura tu evento</h2>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  Agrega los detalles de tu evento para poder publicarlo y comenzar a vender entradas.
+                </p>
+              </div>
+              <Link
+                href={configUrl}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Ir a configuración
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -294,16 +302,22 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         />
       </EventStickyHeader>
 
-      {/* Setup Checklist - shown if event still needs configuration */}
-      {needsSetup && (
-        <EventSetupChecklist
-          hasDate={hasDate}
-          hasFlyer={hasFlyer}
-          hasTicketTypes={hasTicketTypes}
-          hasLocation={hasLocation}
-          configUrl={configUrl}
-          ticketsUrl={ticketsUrl}
-        />
+      {/* Setup banner - shown if event can't be published yet */}
+      {!canPublish && (
+        <Link
+          href={configUrl}
+          className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Settings className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+            <span className="text-sm text-amber-800 dark:text-amber-200">
+              Completa la configuración para publicar tu evento
+            </span>
+          </div>
+          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+            Configurar →
+          </span>
+        </Link>
       )}
 
       {/* Content */}

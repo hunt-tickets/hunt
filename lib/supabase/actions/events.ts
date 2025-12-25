@@ -422,6 +422,7 @@ export async function createTicketType(
     maxPerOrder?: number;
     saleStart?: string;
     saleEnd?: string;
+    eventDayId?: string; // Link to specific day (undefined = all days)
   }
 ): Promise<TicketTypeFormState> {
   const supabase = await createClient();
@@ -454,6 +455,7 @@ export async function createTicketType(
   try {
     const { error } = await supabase.from("ticket_types").insert({
       event_id: eventId,
+      event_day_id: formData.eventDayId || null, // null = valid for all days
       name: formData.name.trim(),
       description: formData.description?.trim() || null,
       price: formData.price.toFixed(2),
@@ -524,6 +526,7 @@ export async function updateEventConfiguration(
     name?: string;
     description?: string;
     category?: (typeof EVENT_CATEGORIES)[number];
+    type?: "single" | "multi_day" | "recurring" | "slots";
     date?: string;
     end_date?: string;
     age?: number;
@@ -535,51 +538,114 @@ export async function updateEventConfiguration(
     faqs?: Array<{ id: string; question: string; answer: string }>;
   }
 ) {
-  const supabase = await createClient();
+  // Get session using Better Auth
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  if (!session || !session.user) {
     return { success: false, message: "No autenticado" };
   }
+
+  const supabase = await createClient();
 
   // Validate category if provided
   if (formData.category && !EVENT_CATEGORIES.includes(formData.category)) {
     return { success: false, message: "Categoría inválida" };
   }
 
+  // Validate event type constraints
+  if (formData.type) {
+    // Fetch current event data to check constraints
+    const { data: currentEvent, error: fetchError } = await supabase
+      .from("events")
+      .select("type")
+      .eq("id", eventId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching current event:", fetchError);
+      return { success: false, message: "Error al obtener el evento" };
+    }
+
+    // If changing to 'single', date fields are allowed but event_days should be cleared
+    if (formData.type === "single" && currentEvent?.type === "multi_day") {
+      // Clear all event_days when switching from multi_day to single
+      const { error: deleteError } = await supabase
+        .from("event_days")
+        .delete()
+        .eq("event_id", eventId);
+
+      if (deleteError) {
+        console.error("Error clearing event days:", deleteError);
+        return { success: false, message: "Error al limpiar los días del evento" };
+      }
+    }
+
+    // If changing to 'multi_day', clear direct date fields (they come from event_days)
+    if (formData.type === "multi_day" && currentEvent?.type !== "multi_day") {
+      // Clear date fields - they'll be set by syncEventDays
+      formData.date = undefined;
+      formData.end_date = undefined;
+    }
+  }
+
+  // Validate type-specific field constraints
+  if (formData.date !== undefined || formData.end_date !== undefined) {
+    // Check current event type
+    const { data: currentEvent } = await supabase
+      .from("events")
+      .select("type")
+      .eq("id", eventId)
+      .single();
+
+    const effectiveType = formData.type || currentEvent?.type;
+
+    // multi_day events should not have date set directly
+    if (effectiveType === "multi_day") {
+      return {
+        success: false,
+        message: "Los eventos multi-día no pueden tener fecha directa. Use los días del evento.",
+      };
+    }
+  }
+
   // Build update object with only provided fields
   const updateData: Partial<{
     name: string;
-    description: string;
+    description: string | null;
     category: string;
-    date: string;
-    end_date: string;
+    type: string;
+    date: string | null;
+    end_date: string | null;
     age: number;
     variable_fee: number;
     fixed_fee: number;
-    city: string;
-    country: string;
-    address: string;
+    city: string | null;
+    country: string | null;
+    address: string | null;
     faqs: Array<{ id: string; question: string; answer: string }>;
   }> = {};
 
   if (formData.name !== undefined) updateData.name = formData.name;
   if (formData.description !== undefined)
-    updateData.description = formData.description;
+    updateData.description = formData.description || null;
   if (formData.category !== undefined) updateData.category = formData.category;
-  if (formData.date !== undefined) updateData.date = formData.date;
-  if (formData.end_date !== undefined) updateData.end_date = formData.end_date;
+  if (formData.type !== undefined) updateData.type = formData.type;
+  // Convert empty strings to null for date fields (PostgreSQL doesn't accept "")
+  if (formData.date !== undefined)
+    updateData.date = formData.date || null;
+  if (formData.end_date !== undefined)
+    updateData.end_date = formData.end_date || null;
   if (formData.age !== undefined) updateData.age = formData.age;
   if (formData.variable_fee !== undefined)
     updateData.variable_fee = formData.variable_fee;
   if (formData.fixed_fee !== undefined)
     updateData.fixed_fee = formData.fixed_fee;
-  if (formData.city !== undefined) updateData.city = formData.city;
-  if (formData.country !== undefined) updateData.country = formData.country;
-  if (formData.address !== undefined) updateData.address = formData.address;
+  // Convert empty strings to null for optional text fields
+  if (formData.city !== undefined) updateData.city = formData.city || null;
+  if (formData.country !== undefined) updateData.country = formData.country || null;
+  if (formData.address !== undefined) updateData.address = formData.address || null;
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
 
   const { error } = await supabase
@@ -603,18 +669,23 @@ export async function updateEventConfiguration(
 /**
  * Toggle event status (active/inactive)
  * Only owners and administrators should be able to call this
+ * Validates requirements based on event type:
+ * - single: requires date + tickets
+ * - multi_day: requires event_days + tickets
  */
 export async function toggleEventStatus(eventId: string, status: boolean) {
   const supabase = await createClient();
 
-  // If activating the event, validate requirements are met
+  // If activating the event, validate requirements are met based on event type
   if (status === true) {
     const { data: event, error: fetchError } = await supabase
       .from("events")
       .select(`
         id,
+        type,
         date,
-        ticket_types (id)
+        ticket_types (id),
+        event_days (id)
       `)
       .eq("id", eventId)
       .single();
@@ -624,13 +695,42 @@ export async function toggleEventStatus(eventId: string, status: boolean) {
       return { success: false, message: "Error al validar el evento" };
     }
 
-    const hasDate = !!event.date;
+    const eventType = event.type || "single";
     const hasTicketTypes = (event.ticket_types?.length ?? 0) > 0;
+    const missing: string[] = [];
 
-    if (!hasDate || !hasTicketTypes) {
-      const missing = [];
-      if (!hasDate) missing.push("fecha");
-      if (!hasTicketTypes) missing.push("al menos una entrada");
+    // Validate based on event type
+    switch (eventType) {
+      case "single":
+        // Single events require a date
+        if (!event.date) {
+          missing.push("fecha");
+        }
+        break;
+
+      case "multi_day":
+        // Multi-day events require at least one event_day
+        const hasEventDays = (event.event_days?.length ?? 0) > 0;
+        if (!hasEventDays) {
+          missing.push("al menos un día configurado");
+        }
+        break;
+
+      case "recurring":
+      case "slots":
+        // Future: add specific validation for these types
+        if (!event.date) {
+          missing.push("fecha");
+        }
+        break;
+    }
+
+    // All event types require tickets
+    if (!hasTicketTypes) {
+      missing.push("al menos una entrada");
+    }
+
+    if (missing.length > 0) {
       return {
         success: false,
         message: `No se puede activar el evento. Falta: ${missing.join(", ")}`,

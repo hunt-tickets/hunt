@@ -3,17 +3,24 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ticket, HelpCircle, Map } from "lucide-react";
+import { Ticket, HelpCircle, Map, CalendarRange } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { CreateTicketTypeDialog } from "@/components/create-ticket-type-dialog";
 import { EditTicketSheet } from "@/components/edit-ticket-sheet";
 import { ChannelSalesChart, TicketRevenueDistributionChart } from "@/components/event-charts";
 import { updateTicketTypeActive } from "@/lib/supabase/actions/tickets";
+import { cn } from "@/lib/utils";
 
 interface TicketTypeFilter {
   id: string;
   name: string;
+}
+
+interface EventDay {
+  id: string;
+  name: string;
+  date: string;
 }
 
 interface TicketTypeData {
@@ -37,6 +44,7 @@ interface TicketTypeData {
     id: string;
     name: string;
   } | null;
+  event_day_id?: string | null; // Link to specific day
 }
 
 interface TicketTypeAnalytics {
@@ -53,6 +61,8 @@ interface EventTicketsContentProps {
   ticketsAnalytics?: Record<string, TicketTypeAnalytics>;
   ticketTypes: TicketTypeFilter[];
   variableFee: number;
+  eventType?: "single" | "multi_day" | "recurring" | "slots";
+  eventDays?: EventDay[];
 }
 
 export function EventTicketsContent({
@@ -61,14 +71,26 @@ export function EventTicketsContent({
   ticketsAnalytics,
   ticketTypes,
   variableFee,
+  eventType = "single",
+  eventDays = [],
 }: EventTicketsContentProps) {
   const router = useRouter();
   const params = useParams();
   const userId = params.userId as string;
 
   const [selectedTicketType, setSelectedTicketType] = useState<string>("all");
+  const [selectedDay, setSelectedDay] = useState<string>("all"); // "all" or day id
   const [selectedPriceTab, setSelectedPriceTab] = useState<Record<string, 'app' | 'cash'>>({});
   const [togglingTickets, setTogglingTickets] = useState<Record<string, boolean>>({});
+
+  const isMultiDay = eventType === "multi_day" && eventDays.length > 0;
+
+  // Filter tickets by selected day
+  const ticketsFilteredByDay = isMultiDay && selectedDay !== "all"
+    ? tickets.filter(t => t.event_day_id === selectedDay)
+    : selectedDay === "all_days_pass"
+    ? tickets.filter(t => !t.event_day_id)
+    : tickets;
 
   const handleToggleActive = async (ticketId: string, currentStatus: boolean) => {
     setTogglingTickets((prev) => ({ ...prev, [ticketId]: true }));
@@ -107,7 +129,12 @@ export function EventTicketsContent({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CreateTicketTypeDialog eventId={eventId} />
+          <CreateTicketTypeDialog
+            eventId={eventId}
+            eventType={eventType}
+            eventDays={eventDays}
+            selectedDayId={selectedDay !== "all" && selectedDay !== "all_days_pass" ? selectedDay : undefined}
+          />
           <Button
             size="sm"
             variant="outline"
@@ -120,11 +147,71 @@ export function EventTicketsContent({
         </div>
       </div>
 
+      {/* Day tabs for multi-day events */}
+      {isMultiDay && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CalendarRange className="h-4 w-4" />
+            <span>Días del evento</span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setSelectedDay("all")}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                selectedDay === "all"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-white/5 hover:bg-white/10 text-white/60"
+              )}
+            >
+              Todos ({tickets.length})
+            </button>
+            {eventDays.map((day, index) => {
+              const dayTicketCount = tickets.filter(t => t.event_day_id === day.id).length;
+              const dayDate = day.date ? new Date(day.date).toLocaleDateString("es-ES", { weekday: "short", day: "numeric" }) : "";
+              return (
+                <button
+                  key={day.id}
+                  onClick={() => setSelectedDay(day.id)}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5",
+                    selectedDay === day.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-white/5 hover:bg-white/10 text-white/60"
+                  )}
+                >
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-xs">
+                    {index + 1}
+                  </span>
+                  {day.name} {dayDate && <span className="opacity-70">({dayDate})</span>}
+                  {dayTicketCount > 0 && <span className="ml-1 opacity-70">{dayTicketCount}</span>}
+                </button>
+              );
+            })}
+            {/* Only show Pase General if there are tickets without a specific day */}
+            {tickets.some(t => !t.event_day_id) && (
+              <button
+                onClick={() => setSelectedDay("all_days_pass")}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5",
+                  selectedDay === "all_days_pass"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-white/5 hover:bg-white/10 text-white/60"
+                )}
+              >
+                <CalendarRange className="h-3.5 w-3.5" />
+                Pase General ({tickets.filter(t => !t.event_day_id).length})
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Filtros por tipo de ticket */}
       {(() => {
-        // Filtrar solo tipos que tengan al menos un ticket
+        // Filtrar solo tipos que tengan al menos un ticket (from day-filtered tickets)
         const typesWithTickets = ticketTypes.filter(type =>
-          tickets.some(t => t.ticket_type?.id === type.id)
+          ticketsFilteredByDay.some(t => t.ticket_type?.id === type.id)
         );
 
         if (typesWithTickets.length === 0) return null;
@@ -139,10 +226,10 @@ export function EventTicketsContent({
                   : "bg-white/5 hover:bg-white/10 text-white/60"
               }`}
             >
-              Todos ({tickets.length})
+              Todos ({ticketsFilteredByDay.length})
             </button>
             {typesWithTickets.map((type) => {
-              const count = tickets.filter(t => t.ticket_type?.id === type.id).length;
+              const count = ticketsFilteredByDay.filter(t => t.ticket_type?.id === type.id).length;
               return (
                 <button
                   key={type.id}
@@ -174,10 +261,10 @@ export function EventTicketsContent({
 
       {/* Analytics Overview */}
       {ticketsAnalytics && Object.keys(ticketsAnalytics).length > 0 && selectedTicketType !== "orphan_qrs" && (() => {
-        // Filtrar tickets según el tipo seleccionado
+        // Filtrar tickets según el tipo seleccionado (already filtered by day)
         const filteredTicketsForAnalytics = selectedTicketType === "all"
-          ? tickets
-          : tickets.filter(t => t.ticket_type?.id === selectedTicketType);
+          ? ticketsFilteredByDay
+          : ticketsFilteredByDay.filter(t => t.ticket_type?.id === selectedTicketType);
 
         // Calcular totales solo para los tickets filtrados
         const totals = filteredTicketsForAnalytics.reduce((acc, ticket) => {
@@ -275,21 +362,43 @@ export function EventTicketsContent({
           );
         }
 
-        // Filtrar tickets según el tipo seleccionado
+        // Filtrar tickets según el tipo seleccionado (already filtered by day)
         const filteredTickets = selectedTicketType === "all"
-          ? tickets
-          : tickets.filter(t => t.ticket_type?.id === selectedTicketType);
+          ? ticketsFilteredByDay
+          : ticketsFilteredByDay.filter(t => t.ticket_type?.id === selectedTicketType);
+
+        // Check if a specific day is selected and has no tickets
+        const selectedDayInfo = selectedDay !== "all" && selectedDay !== "all_days_pass"
+          ? eventDays.find(d => d.id === selectedDay)
+          : null;
 
         return filteredTickets.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Ticket className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-1">
-                {tickets.length === 0 ? "No hay entradas configuradas" : "No hay entradas de este tipo"}
+                {selectedDayInfo
+                  ? `No hay entradas para ${selectedDayInfo.name}`
+                  : ticketsFilteredByDay.length === 0
+                    ? "No hay entradas configuradas"
+                    : "No hay entradas de este tipo"}
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {tickets.length === 0 ? "Crea tipos de entrada para empezar a vender" : "Prueba con otro filtro"}
+              <p className="text-sm text-muted-foreground mb-4">
+                {selectedDayInfo
+                  ? "Crea un tipo de entrada para este día"
+                  : ticketsFilteredByDay.length === 0
+                    ? "Crea tipos de entrada para empezar a vender"
+                    : "Prueba con otro filtro"}
               </p>
+              {/* Quick create button when viewing a specific day with no tickets */}
+              {selectedDayInfo && (
+                <CreateTicketTypeDialog
+                  eventId={eventId}
+                  eventType={eventType}
+                  eventDays={eventDays}
+                  selectedDayId={selectedDay}
+                />
+              )}
             </CardContent>
           </Card>
         ) : (

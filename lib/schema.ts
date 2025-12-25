@@ -159,7 +159,12 @@ export const eventCategory = pgEnum("event_category", [
   "mercados",
   "otro",
 ]);
-
+export const eventType = pgEnum("event_type", [
+  "single",
+  "multi_day",
+  "recurring",
+  "slots",
+]);
 
 // Countries table
 export const countries = pgTable(
@@ -426,8 +431,6 @@ export const paymentProcessorAccount = pgTable("payment_processor_account", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Hunt-Tickets specific tables
-
 // Legacy Venues table - Archive of old venues with original schema
 export const legacyVenues = pgTable(
   "legacy_venues",
@@ -595,6 +598,15 @@ export const events = pgTable(
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     category: eventCategory("category"),
+    type: eventType("type").default("single"),
+    // recurrence: jsonb("recurrence").$type<{
+    //   pattern: "daily" | "weekly" | "biweekly" | "monthly";
+    //   daysOfWeek?: number[];
+    //   time: string;
+    //   endTime?: string;
+    //   until?: string;
+    //   count?: number;
+    // }>(),
     name: text("name"),
     description: text("description"),
     date: timestamp("date", { withTimezone: true }),
@@ -657,15 +669,13 @@ export const eventDays = pgTable(
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
     date: timestamp("date", { withTimezone: true }).notNull(),
+    endDate: timestamp("end_date", { withTimezone: true }),
     name: text("name"), // "Pre-Party", "Día 1", "Viernes"
     sortOrder: integer("sort_order").default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [index("idx_event_days_event").on(table.eventId)]
 );
-
-export type EventDay = InferSelectModel<typeof eventDays>;
-export type NewEventDay = InferInsertModel<typeof eventDays>;
 
 // Ticket Types (palcos, VIP, general, etc.)
 export const ticketTypes = pgTable(
@@ -675,7 +685,9 @@ export const ticketTypes = pgTable(
     eventId: uuid("event_id")
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
-    eventDayId: uuid("event_day_id").references(() => eventDays.id, { onDelete: "set null" }), // null = all days
+    eventDayId: uuid("event_day_id").references(() => eventDays.id, {
+      onDelete: "set null",
+    }), // null = all days
     name: text("name").notNull(),
     description: text("description"),
     price: decimal("price", { precision: 10, scale: 2 }).notNull(),
@@ -846,7 +858,9 @@ export const tickets = pgTable(
     ticketTypeId: uuid("ticket_type_id")
       .notNull()
       .references(() => ticketTypes.id, { onDelete: "cascade" }),
-    eventDayId: uuid("event_day_id").references(() => eventDays.id, { onDelete: "set null" }), // which day this ticket is for
+    eventDayId: uuid("event_day_id").references(() => eventDays.id, {
+      onDelete: "set null",
+    }), // which day this ticket is for
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -907,6 +921,7 @@ export const schema = {
   venues,
   legacyEvents,
   events,
+  eventDays,
   ticketTypes,
   reservations,
   reservationItems,
@@ -990,3 +1005,5 @@ export interface OrganizationData {
 
 // Keep backward compatibility
 export type orderItem = OrderItem;
+export type EventDay = InferSelectModel<typeof eventDays>;
+export type NewEventDay = InferInsertModel<typeof eventDays>;

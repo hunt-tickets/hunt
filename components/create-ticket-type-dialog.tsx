@@ -1,21 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, X, Ticket } from "lucide-react";
+import { Plus, X, Ticket, Calendar, CalendarRange } from "lucide-react";
 import { createTicketType } from "@/lib/supabase/actions/events";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+interface EventDay {
+  id: string;
+  name: string;
+  date: string;
+}
 
 interface CreateTicketTypeDialogProps {
   eventId: string;
+  eventType?: "single" | "multi_day" | "recurring" | "slots";
+  eventDays?: EventDay[];
+  selectedDayId?: string;
 }
 
-export function CreateTicketTypeDialog({ eventId }: CreateTicketTypeDialogProps) {
+export function CreateTicketTypeDialog({
+  eventId,
+  eventType = "single",
+  eventDays = [],
+  selectedDayId,
+}: CreateTicketTypeDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isMultiDay = eventType === "multi_day" && eventDays.length > 0;
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -29,7 +45,15 @@ export function CreateTicketTypeDialog({ eventId }: CreateTicketTypeDialogProps)
     maxPerOrder: "10",
     saleStart: "",
     saleEnd: "",
+    eventDayId: selectedDayId || "", // "" means all days (pase general)
   });
+
+  // Update eventDayId when selectedDayId changes
+  useEffect(() => {
+    if (selectedDayId) {
+      setFormData((prev) => ({ ...prev, eventDayId: selectedDayId }));
+    }
+  }, [selectedDayId]);
 
   const resetForm = () => {
     setFormData({
@@ -41,6 +65,7 @@ export function CreateTicketTypeDialog({ eventId }: CreateTicketTypeDialogProps)
       maxPerOrder: "10",
       saleStart: "",
       saleEnd: "",
+      eventDayId: selectedDayId || "",
     });
     setError(null);
   };
@@ -76,6 +101,7 @@ export function CreateTicketTypeDialog({ eventId }: CreateTicketTypeDialogProps)
         maxPerOrder: formData.maxPerOrder ? parseInt(formData.maxPerOrder) : 10,
         saleStart: formData.saleStart || undefined,
         saleEnd: formData.saleEnd || undefined,
+        eventDayId: formData.eventDayId || undefined, // undefined = all days
       });
 
       if (result.success) {
@@ -195,6 +221,70 @@ export function CreateTicketTypeDialog({ eventId }: CreateTicketTypeDialogProps)
                   />
                 </div>
               </div>
+
+              {/* Day Selection - Only for multi-day events */}
+              {isMultiDay && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+                    Día del Evento
+                  </h3>
+                  <p className="text-xs text-white/40 -mt-2">
+                    Selecciona para qué día es válida esta entrada
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* All Days (Pase General) option */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, eventDayId: "" })}
+                      className={cn(
+                        "p-3 rounded-xl border text-left transition-all",
+                        formData.eventDayId === ""
+                          ? "border-primary bg-primary/10 text-white"
+                          : "border-white/10 bg-white/5 hover:bg-white/10 text-white/70"
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <CalendarRange className="h-4 w-4" />
+                        <span className="font-medium">Pase General</span>
+                      </div>
+                      <p className="text-xs opacity-60 mt-1">Válido todos los días</p>
+                    </button>
+
+                    {/* Individual day options */}
+                    {eventDays.map((day) => {
+                      const dayDate = day.date
+                        ? new Date(day.date).toLocaleDateString("es-ES", {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                          })
+                        : "";
+                      return (
+                        <button
+                          type="button"
+                          key={day.id}
+                          onClick={() => setFormData({ ...formData, eventDayId: day.id })}
+                          className={cn(
+                            "p-3 rounded-xl border text-left transition-all",
+                            formData.eventDayId === day.id
+                              ? "border-primary bg-primary/10 text-white"
+                              : "border-white/10 bg-white/5 hover:bg-white/10 text-white/70"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span className="font-medium">{day.name}</span>
+                          </div>
+                          {dayDate && (
+                            <p className="text-xs opacity-60 mt-1">{dayDate}</p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Precio y Capacidad */}
               <div className="space-y-4">

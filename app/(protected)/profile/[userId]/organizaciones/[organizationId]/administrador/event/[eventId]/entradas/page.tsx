@@ -53,7 +53,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
 
   const supabase = await createClient();
 
-  // Fetch event with ticket_types and orders with order_items
+  // Fetch event with ticket_types, event_days, and orders with order_items
   const { data: event } = await supabase
     .from("events")
     .select(
@@ -61,6 +61,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
       id,
       name,
       status,
+      type,
       variable_fee,
       ticket_types (
         id,
@@ -75,7 +76,14 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
         sale_start,
         sale_end,
         created_at,
-        active
+        active,
+        event_day_id
+      ),
+      event_days (
+        id,
+        name,
+        date,
+        sort_order
       ),
       orders (
         id,
@@ -150,6 +158,15 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     });
   });
 
+  // Sort event days by sort_order
+  const eventDays = (event.event_days || [])
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    .map((day) => ({
+      id: day.id,
+      name: day.name || "",
+      date: day.date || "",
+    }));
+
   // Transform ticket types to match component interface
   // The component expects the legacy TicketData interface, so we map to it
   const ticketTypesForComponent = ticketTypes.map((tt) => ({
@@ -170,6 +187,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     hex: null,
     family: null,
     ticket_type: null, // Self-reference not needed for ticket types view
+    event_day_id: tt.event_day_id, // Link to specific day (null = all days)
   }));
 
   // Transform analytics to match component interface
@@ -213,6 +231,8 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
           ticketsAnalytics={ticketTypesAnalytics}
           ticketTypes={ticketTypesList}
           variableFee={parseFloat(event.variable_fee || "0")}
+          eventType={(event.type as "single" | "multi_day" | "recurring" | "slots") || "single"}
+          eventDays={eventDays}
         />
       </div>
     </>
