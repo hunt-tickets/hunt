@@ -2,6 +2,9 @@ import { PopularEvents } from "@/components/popular-events";
 import { Component } from "@/components/ui/gradient-bar-hero-section";
 import { FixedHeroWrapper } from "@/components/fixed-hero-wrapper";
 
+// ISR: Cache landing page, regenerate on request after 180 seconds
+export const revalidate = 180;
+
 export default function Page() {
   return (
     <div className="min-h-screen">
