@@ -6,20 +6,19 @@ import { IntegrationSearch } from "@/components/integrations/integration-search"
 import { IntegrationGrid } from "@/components/integrations/integration-grid";
 import { IntegrationEmptyState } from "@/components/integrations/integration-empty-state";
 import { INTEGRATIONS } from "@/lib/integrations/data";
-import { filterIntegrations, groupIntegrationsByCategory, hasGroupedResults } from "@/lib/integrations/utils";
+import { filterIntegrations } from "@/lib/integrations/utils";
 import { UI } from "@/constants/integrations";
 import type { Integration } from "@/lib/integrations/types";
 
 export default function IntegrationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter and group integrations
-  const groupedIntegrations = useMemo(() => {
-    const filtered = filterIntegrations(INTEGRATIONS, searchQuery);
-    return groupIntegrationsByCategory(filtered);
+  // Filter integrations
+  const filteredIntegrations = useMemo(() => {
+    return filterIntegrations(INTEGRATIONS, searchQuery);
   }, [searchQuery]);
 
-  const hasResults = hasGroupedResults(groupedIntegrations);
+  const hasResults = filteredIntegrations.length > 0;
 
   // Event handlers
   const handleSearchChange = useCallback((value: string) => {
@@ -50,7 +49,7 @@ export default function IntegrationsPage() {
       {/* Integrations Grid or Empty State */}
       {hasResults ? (
         <IntegrationGrid
-          groupedIntegrations={groupedIntegrations}
+          integrations={filteredIntegrations}
           onInstall={handleInstall}
           onConfigure={handleConfigure}
         />

@@ -4,20 +4,16 @@ import { useCallback } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { BUTTON_LABELS, ARIA_LABELS } from "@/constants/integrations";
-import { getStatusBadgeConfig } from "@/lib/integrations/utils";
 import type { IntegrationCardProps } from "@/lib/integrations/types";
 
 export function IntegrationCard({
   integration,
-  onDetails,
   onInstall,
   onConfigure,
 }: IntegrationCardProps) {
   const isComingSoon = integration.status === "coming-soon";
   const isConnected = integration.status === "connected";
-  const badgeConfig = getStatusBadgeConfig(integration.status);
 
   const handleConnect = useCallback(() => {
     if (isConnected) {
