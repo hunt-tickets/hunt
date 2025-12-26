@@ -9,9 +9,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { FormInput } from "@/components/ui/form-input";
 import {
   createEvent,
   type EventFormState,
@@ -74,7 +73,7 @@ export function CreateEventDialog({
         <span className="hidden sm:inline">Crear Evento</span>
       </HoverButton>
 
-      {/* Mobile: Bottom Sheet, Desktop: Right Side Sheet */}
+      {/* Mobile: Bottom Sheet */}
       <SheetContent
         side="bottom"
         className="sm:hidden w-full p-0 bg-white dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-white/10 overflow-y-auto max-h-[90vh] rounded-t-2xl"
@@ -100,7 +99,7 @@ export function CreateEventDialog({
             className="flex-1 flex flex-col"
           >
             {/* Form Content */}
-            <div className="flex-1 px-6 py-6 space-y-6 bg-gray-50 dark:bg-[#0a0a0a]">
+            <div className="flex-1 px-6 py-6 space-y-6 bg-white dark:bg-[#0a0a0a]">
               {/* Error message */}
               {state.message && !state.success && (
                 <Alert
@@ -113,25 +112,16 @@ export function CreateEventDialog({
               )}
 
               {/* Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-gray-900 dark:text-white">
-                  Nombre del evento
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Ej: Fiesta de Año Nuevo 2025"
-                  className="h-11 bg-white dark:bg-[#111] border-gray-200 dark:border-white/10 focus-visible:ring-primary/50"
-                  autoFocus
-                  disabled={isSubmitting}
-                />
-                {state.errors?.name && (
-                  <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {state.errors.name[0]}
-                  </p>
-                )}
-              </div>
+              <FormInput
+                id="name"
+                name="name"
+                label="Nombre del evento"
+                placeholder="Ej: Fiesta de Año Nuevo 2025"
+                autoFocus
+                disabled={isSubmitting}
+                error={state.errors?.name?.[0]}
+                required
+              />
 
               {/* Next steps info */}
               <div className="flex gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
@@ -148,14 +138,14 @@ export function CreateEventDialog({
               <div className="flex gap-3">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => setOpen(false)}
-                  className="flex-1 h-11 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5"
+                  className="flex-1"
                   disabled={isSubmitting}
                 >
                   Cancelar
                 </Button>
-                <CreateEventSubmitButton className="flex-1 h-11" />
+                <CreateEventSubmitButton className="flex-1" />
               </div>
             </div>
           </form>
@@ -188,7 +178,7 @@ export function CreateEventDialog({
             className="flex-1 flex flex-col"
           >
             {/* Form Content */}
-            <div className="flex-1 px-6 py-6 space-y-6 bg-gray-50 dark:bg-[#0a0a0a]">
+            <div className="flex-1 px-6 py-6 space-y-6 bg-white dark:bg-[#0a0a0a]">
               {/* Error message */}
               {state.message && !state.success && (
                 <Alert
@@ -201,25 +191,16 @@ export function CreateEventDialog({
               )}
 
               {/* Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-gray-900 dark:text-white">
-                  Nombre del evento
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Ej: Fiesta de Año Nuevo 2025"
-                  className="h-11 bg-white dark:bg-[#111] border-gray-200 dark:border-white/10 focus-visible:ring-primary/50"
-                  autoFocus
-                  disabled={isSubmitting}
-                />
-                {state.errors?.name && (
-                  <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {state.errors.name[0]}
-                  </p>
-                )}
-              </div>
+              <FormInput
+                id="name"
+                name="name"
+                label="Nombre del evento"
+                placeholder="Ej: Fiesta de Año Nuevo 2025"
+                autoFocus
+                disabled={isSubmitting}
+                error={state.errors?.name?.[0]}
+                required
+              />
 
               {/* Next steps info */}
               <div className="flex gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
@@ -236,14 +217,14 @@ export function CreateEventDialog({
               <div className="flex gap-3">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => setOpen(false)}
-                  className="flex-1 h-11 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5"
+                  className="flex-1"
                   disabled={isSubmitting}
                 >
                   Cancelar
                 </Button>
-                <CreateEventSubmitButton className="flex-1 h-11" />
+                <CreateEventSubmitButton className="flex-1" />
               </div>
             </div>
           </form>
