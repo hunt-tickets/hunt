@@ -64,7 +64,7 @@ export const Component: React.FC = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
-  const words = ["Experiences", "Events", "Adventures", "Moments", "Vibes"];
+  const words = ["Events", "Vibes", "Experiences", "Adventures", "Moments"];
 
   useEffect(() => {
     const currentWord = words[currentWordIndex];
