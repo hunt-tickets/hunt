@@ -42,7 +42,6 @@ export function AdminEventsList({
 
   // Efficient client-side filtering using useMemo
   const filteredEvents = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allEvents = [...events];
 
     if (!searchQuery.trim()) return allEvents;

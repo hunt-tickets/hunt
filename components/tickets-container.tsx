@@ -118,7 +118,7 @@ export function TicketsContainer({
           dayName: dayInfo?.name || (dayInfo ? dayInfo.date.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" }) : null),
         };
       }),
-    [tickets, ticketSelections, eventDays]
+    [tickets, ticketSelections, getDayInfo]
   );
 
   /**

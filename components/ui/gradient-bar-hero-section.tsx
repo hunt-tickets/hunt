@@ -99,7 +99,6 @@ export const Component: React.FC = () => {
         setIsTyping(true);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayedText, isTyping, currentWordIndex]);
 
   return (
