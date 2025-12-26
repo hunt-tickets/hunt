@@ -33,32 +33,26 @@ export function IntegrationCard({
       role="article"
       aria-label={`${ARIA_LABELS.CARD_PREFIX} ${integration.name}`}
     >
-      <CardContent className="p-4 sm:p-6 flex flex-col h-full">
-        <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4 flex-1">
+      <CardContent className="p-5 sm:p-6 flex flex-col h-full">
+        <div className="flex flex-col items-center text-center space-y-4 flex-1">
           {/* Logo */}
-          <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-white dark:bg-white/[0.08] ring-1 ring-gray-200 dark:ring-white/10 group-hover:scale-105 transition-transform flex items-center justify-center p-2.5 sm:p-3">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white dark:bg-white/[0.08] ring-1 ring-gray-200 dark:ring-white/10 group-hover:scale-105 transition-transform flex items-center justify-center p-4 sm:p-5">
             <Image
               src={integration.logo}
               alt={`${integration.name} logo`}
-              width={64}
-              height={64}
+              width={96}
+              height={96}
               className="object-contain"
               unoptimized
               loading="lazy"
             />
           </div>
 
-          {/* Name and Status */}
-          <div className="space-y-1.5 sm:space-y-2 flex-1 flex flex-col">
-            <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
+          {/* Name */}
+          <div className="flex-1 flex flex-col justify-center">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
               {integration.name}
             </h3>
-            <Badge
-              variant="outline"
-              className={`${badgeConfig.className} text-xs w-fit mx-auto`}
-            >
-              {badgeConfig.text}
-            </Badge>
           </div>
 
           {/* Description */}
@@ -66,19 +60,19 @@ export function IntegrationCard({
             {integration.description}
           </p>
 
-          {/* Actions */}
-          <div className="flex w-full pt-1 sm:pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleConnect}
-              className="w-full border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/[0.06] text-xs h-8 sm:h-9"
-              disabled={isComingSoon}
-              aria-label={`${isConnected ? ARIA_LABELS.CONNECTED_BUTTON : ARIA_LABELS.CONNECT_BUTTON} ${integration.name}`}
-            >
-              {isConnected ? BUTTON_LABELS.CONNECTED : BUTTON_LABELS.CONNECT}
-            </Button>
-          </div>
+          {/* Action Button */}
+          <Button
+            onClick={handleConnect}
+            disabled={isComingSoon}
+            className={`w-full h-10 sm:h-11 text-sm font-medium rounded-full transition-all ${
+              isConnected
+                ? "bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white"
+                : "bg-primary hover:bg-primary/90 text-primary-foreground"
+            }`}
+            aria-label={`${isConnected ? ARIA_LABELS.CONNECTED_BUTTON : ARIA_LABELS.CONNECT_BUTTON} ${integration.name}`}
+          >
+            {isConnected ? BUTTON_LABELS.CONNECTED : BUTTON_LABELS.CONNECT}
+          </Button>
         </div>
       </CardContent>
     </Card>
