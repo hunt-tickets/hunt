@@ -2,6 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/drizzle";
+import { events, venues } from "@/lib/schema";
+import { eq, and, gte, or, isNull, asc } from "drizzle-orm";
 import { z } from "zod";
 import type { EventFinancialReport } from "@/lib/supabase/types";
 import { auth } from "@/lib/auth";
@@ -779,71 +782,54 @@ export type PopularEventWithVenue = {
 /**
  * Fetches popular/active events from the database for the home page
  * Returns events that are active and haven't ended yet, ordered by priority and date
+ *
+ * Uses Drizzle (no cookies dependency) to allow ISR/static generation
  */
 export async function getPopularEvents(
-  limit: number = 12
+  limitCount: number = 12
 ): Promise<PopularEventWithVenue[]> {
-  const supabase = await createClient();
-
   try {
-    const now = new Date().toISOString();
+    const now = new Date();
 
-    const { data: events, error } = await supabase
-      .from("events")
-      .select(
-        `
-        id,
-        name,
-        description,
-        date,
-        end_date,
-        status,
-        flyer,
-        category,
-        venues (
-          name,
-          city
+    const results = await db
+      .select({
+        id: events.id,
+        name: events.name,
+        description: events.description,
+        date: events.date,
+        endDate: events.endDate,
+        status: events.status,
+        flyer: events.flyer,
+        category: events.category,
+        venue_name: venues.name,
+        venue_city: venues.city,
+      })
+      .from(events)
+      .leftJoin(venues, eq(events.venueId, venues.id))
+      .where(
+        and(
+          eq(events.status, true),
+          or(
+            gte(events.endDate, now),
+            isNull(events.endDate)
+          )
         )
-      `
       )
-      .eq("status", true)
-      .or(`end_date.gte.${now},end_date.is.null`)
-      .order("date", { ascending: true })
-      .limit(limit);
+      .orderBy(asc(events.date))
+      .limit(limitCount);
 
-    if (error) {
-      console.error("Error fetching popular events:", error);
-      return [];
-    }
-
-    // Transform the data to flatten venue info and match expected type
-    const eventsWithVenue: PopularEventWithVenue[] = (events || []).map(
-      (event) => {
-        // Handle venue data - Supabase returns object for single FK relation, array for many
-        // TypeScript infers array, but runtime is object for one-to-one (event.venueId -> venues.id)
-        const venueData = event.venues as unknown;
-        const venue = Array.isArray(venueData)
-          ? (venueData[0] as
-              | { name: string | null; city: string | null }
-              | undefined)
-          : (venueData as { name: string | null; city: string | null } | null);
-
-        return {
-          id: event.id,
-          name: event.name,
-          description: event.description,
-          date: event.date ? new Date(event.date) : null,
-          endDate: event.end_date ? new Date(event.end_date) : null,
-          status: event.status,
-          flyer: event.flyer,
-          category: event.category,
-          venue_name: venue?.name || "Venue",
-          venue_city: venue?.city || "Ciudad",
-        };
-      }
-    );
-
-    return eventsWithVenue;
+    return results.map((event) => ({
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      date: event.date,
+      endDate: event.endDate,
+      status: event.status,
+      flyer: event.flyer,
+      category: event.category,
+      venue_name: event.venue_name || "Venue",
+      venue_city: event.venue_city || "Ciudad",
+    }));
   } catch (error) {
     console.error("Unexpected error fetching popular events:", error);
     return [];
