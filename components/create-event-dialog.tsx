@@ -74,9 +74,98 @@ export function CreateEventDialog({
         <span className="hidden sm:inline">Crear Evento</span>
       </HoverButton>
 
+      {/* Mobile: Bottom Sheet, Desktop: Right Side Sheet */}
+      <SheetContent
+        side="bottom"
+        className="sm:hidden w-full p-0 bg-white dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-white/10 overflow-y-auto max-h-[90vh] rounded-t-2xl"
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <SheetHeader className="px-6 py-5 border-b border-gray-200 dark:border-white/10">
+            <SheetTitle className="text-xl font-bold text-gray-900 dark:text-white">
+              Nuevo Evento
+            </SheetTitle>
+            <p className="text-sm text-gray-600 dark:text-white/60">
+              Crea tu evento en segundos. Podrás configurar más detalles
+              después.
+            </p>
+          </SheetHeader>
+
+          <form
+            action={async (formData: FormData) => {
+              setIsSubmitting(true);
+              await formAction(formData);
+              setIsSubmitting(false);
+            }}
+            className="flex-1 flex flex-col"
+          >
+            {/* Form Content */}
+            <div className="flex-1 px-6 py-6 space-y-6 bg-gray-50 dark:bg-[#0a0a0a]">
+              {/* Error message */}
+              {state.message && !state.success && (
+                <Alert
+                  variant="destructive"
+                  className="border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-red-900 dark:text-red-400">{state.message}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Name */}
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium text-gray-900 dark:text-white">
+                  Nombre del evento
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Ej: Fiesta de Año Nuevo 2025"
+                  className="h-11 bg-white dark:bg-[#111] border-gray-200 dark:border-white/10 focus-visible:ring-primary/50"
+                  autoFocus
+                  disabled={isSubmitting}
+                />
+                {state.errors?.name && (
+                  <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {state.errors.name[0]}
+                  </p>
+                )}
+              </div>
+
+              {/* Next steps info */}
+              <div className="flex gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-900 dark:text-blue-300">
+                  Después de crear el evento podrás configurar fechas, flyer,
+                  boletos y más detalles.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0a0a0a]">
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  className="flex-1 h-11 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5"
+                  disabled={isSubmitting}
+                >
+                  Cancelar
+                </Button>
+                <CreateEventSubmitButton className="flex-1 h-11" />
+              </div>
+            </div>
+          </form>
+        </div>
+      </SheetContent>
+
+      {/* Desktop: Right Side Sheet */}
       <SheetContent
         side="right"
-        className="w-full sm:max-w-md p-0 bg-white dark:bg-[#0a0a0a] border-l border-gray-200 dark:border-white/10 overflow-y-auto"
+        className="hidden sm:block w-full sm:max-w-md p-0 bg-white dark:bg-[#0a0a0a] border-l border-gray-200 dark:border-white/10 overflow-y-auto"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
