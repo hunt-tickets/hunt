@@ -771,6 +771,7 @@ export type PopularEventWithVenue = {
   endDate: Date | null;
   status: boolean | null;
   flyer: string | null;
+  category: string | null;
   venue_name: string;
   venue_city: string;
 };
@@ -798,6 +799,7 @@ export async function getPopularEvents(
         end_date,
         status,
         flyer,
+        category,
         venues (
           name,
           city
@@ -834,6 +836,7 @@ export async function getPopularEvents(
           endDate: event.end_date ? new Date(event.end_date) : null,
           status: event.status,
           flyer: event.flyer,
+          category: event.category,
           venue_name: venue?.name || "Venue",
           venue_city: venue?.city || "Ciudad",
         };

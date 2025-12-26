@@ -2,91 +2,75 @@
 
 import { useRef } from "react";
 import {
-  Heart,
-  PartyPopper,
-  GraduationCap,
   Music2,
-  Tent,
+  Trophy,
+  UtensilsCrossed,
+  PartyPopper,
+  Users,
+  Palette,
+  TreePine,
+  Heart,
+  Briefcase,
+  GraduationCap,
   Store,
+  MoreHorizontal,
   ChevronLeft,
   ChevronRight,
   X,
+  LucideIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { EVENT_CATEGORIES as CATEGORIES, EVENT_CATEGORY_LABELS, EventCategory } from "@/constants/event-categories";
 
-// Definición de categorías y subcategorías con iconos de Lucide
-export const EVENT_CATEGORIES = {
-  wellness: {
-    label: "Wellness",
-    icon: Heart,
-    subcategories: ["Yoga", "Meditación", "Spa", "Retiros", "Bienestar Mental", "Fitness"],
-  },
-  parties: {
-    label: "Parties",
-    icon: PartyPopper,
-    subcategories: ["Electrónica", "Reggaeton", "Hip-Hop", "Techno", "House", "Latina"],
-  },
-  clases: {
-    label: "Clases",
-    icon: GraduationCap,
-    subcategories: ["Cocina", "Arte", "Música", "Baile", "Idiomas", "Fotografía"],
-  },
-  concerts: {
-    label: "Concerts",
-    icon: Music2,
-    subcategories: ["Rock", "Pop", "Jazz", "Clásica", "Indie", "Urbana"],
-  },
-  festivals: {
-    label: "Festivals",
-    icon: Tent,
-    subcategories: ["Música", "Gastronomía", "Cultura", "Cine", "Arte", "Cerveza"],
-  },
-  ferias: {
-    label: "Ferias",
-    icon: Store,
-    subcategories: ["Artesanía", "Emprendedores", "Gastronómica", "Navideña", "Vintage", "Libros"],
-  },
-} as const;
+// Mapeo de categorías a iconos
+const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
+  musica: Music2,
+  deportes: Trophy,
+  gastronomia: UtensilsCrossed,
+  rumba: PartyPopper,
+  familiar: Users,
+  arte: Palette,
+  aire_libre: TreePine,
+  bienestar: Heart,
+  negocios: Briefcase,
+  educacion: GraduationCap,
+  mercados: Store,
+  otro: MoreHorizontal,
+};
+
+// Construir EVENT_CATEGORIES con labels del archivo de constantes
+export const EVENT_CATEGORIES = Object.fromEntries(
+  CATEGORIES.map((key) => [
+    key,
+    {
+      label: EVENT_CATEGORY_LABELS[key],
+      icon: CATEGORY_ICONS[key],
+    },
+  ])
+) as Record<EventCategory, { label: string; icon: LucideIcon }>;
 
 export type CategoryKey = keyof typeof EVENT_CATEGORIES;
 
 interface EventCategoryFilterProps {
   selectedCategory: CategoryKey | null;
-  selectedSubcategory: string | null;
   onCategoryChange: (category: CategoryKey | null) => void;
-  onSubcategoryChange: (subcategory: string | null) => void;
 }
 
 export function EventCategoryFilter({
   selectedCategory,
-  selectedSubcategory,
   onCategoryChange,
-  onSubcategoryChange,
 }: EventCategoryFilterProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const subcategoryScrollRef = useRef<HTMLDivElement>(null);
 
   const handleCategoryClick = (categoryKey: CategoryKey) => {
     if (selectedCategory === categoryKey) {
       onCategoryChange(null);
-      onSubcategoryChange(null);
     } else {
       onCategoryChange(categoryKey);
-      onSubcategoryChange(null);
-    }
-  };
-
-  const handleSubcategoryClick = (subcategory: string) => {
-    if (selectedSubcategory === subcategory) {
-      onSubcategoryChange(null);
-    } else {
-      onSubcategoryChange(subcategory);
     }
   };
 
   const clearFilters = () => {
     onCategoryChange(null);
-    onSubcategoryChange(null);
   };
 
   const scroll = (ref: React.RefObject<HTMLDivElement | null>, direction: "left" | "right") => {
@@ -124,51 +108,6 @@ export function EventCategoryFilter({
         >
           <X className="h-4 w-4" />
         </button>
-
-        {/* Separador */}
-        <div className="w-px h-6 bg-gray-200 dark:bg-white/20 flex-shrink-0" />
-
-        {/* Subcategorías carousel */}
-        <div className="relative group/sub flex-1 min-w-0">
-          <button
-            onClick={() => scroll(subcategoryScrollRef, "left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/sub:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
-            aria-label="Scroll izquierda subcategorías"
-          >
-            <ChevronLeft className="h-3.5 w-3.5 text-gray-600 dark:text-white/70" />
-          </button>
-
-          <div
-            ref={subcategoryScrollRef}
-            className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0 sm:px-5"
-          >
-            {EVENT_CATEGORIES[selectedCategory].subcategories.map((subcategory) => {
-              const isActive = selectedSubcategory === subcategory;
-              return (
-                <button
-                  key={subcategory}
-                  onClick={() => handleSubcategoryClick(subcategory)}
-                  className={cn(
-                    "flex items-center px-3 sm:px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap",
-                    isActive
-                      ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
-                      : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10"
-                  )}
-                >
-                  {subcategory}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={() => scroll(subcategoryScrollRef, "right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/sub:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
-            aria-label="Scroll derecha subcategorías"
-          >
-            <ChevronRight className="h-3.5 w-3.5 text-gray-600 dark:text-white/70" />
-          </button>
-        </div>
       </div>
     );
   }

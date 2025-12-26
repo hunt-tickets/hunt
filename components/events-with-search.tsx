@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
-import { EventCategoryFilter, type CategoryKey } from "@/components/event-category-filter";
+import { EventCategoryFilter, EVENT_CATEGORIES, type CategoryKey } from "@/components/event-category-filter";
 import { Filter } from "lucide-react";
 import type { PopularEventWithVenue } from "@/lib/supabase/actions/events";
 
@@ -20,9 +20,8 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   // State for selected city filter
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  // State for selected category and subcategory
+  // State for selected category
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   /**
    * Extract unique cities from events using useMemo
@@ -86,6 +85,11 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
       filtered = filtered.filter((event) => event.venue_city === selectedCity);
     }
 
+    // Apply category filter
+    if (selectedCategory) {
+      filtered = filtered.filter((event) => event.category === selectedCategory);
+    }
+
     // Apply search filter
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase().trim();
@@ -103,7 +107,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
     }
 
     return filtered;
-  }, [events, selectedCity, searchQuery]);
+  }, [events, selectedCity, selectedCategory, searchQuery]);
 
   // Handle search query changes
   const handleSearch = (query: string) => {
@@ -120,17 +124,11 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
     setSelectedCategory(category);
   };
 
-  // Handle subcategory changes
-  const handleSubcategoryChange = (subcategory: string | null) => {
-    setSelectedSubcategory(subcategory);
-  };
-
   // Reset all filters
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCity(null);
     setSelectedCategory(null);
-    setSelectedSubcategory(null);
   };
 
   return (
@@ -155,9 +153,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
         {/* Category Filter */}
         <EventCategoryFilter
           selectedCategory={selectedCategory}
-          selectedSubcategory={selectedSubcategory}
           onCategoryChange={handleCategoryChange}
-          onSubcategoryChange={handleSubcategoryChange}
         />
       </div>
 
@@ -171,13 +167,16 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
             No se encontraron eventos
           </h3>
           <p className="text-sm sm:text-base text-gray-500 dark:text-white/60 mb-5 sm:mb-6 max-w-md mx-auto px-4">
-            {selectedCity && `No hay eventos disponibles en ${selectedCity}`}
-            {searchQuery &&
-              !selectedCity &&
+            {selectedCategory && !selectedCity && !searchQuery &&
+              `No hay eventos de ${EVENT_CATEGORIES[selectedCategory].label}`}
+            {selectedCity && !selectedCategory && !searchQuery &&
+              `No hay eventos disponibles en ${selectedCity}`}
+            {searchQuery && !selectedCity && !selectedCategory &&
               `No hay eventos que coincidan con "${searchQuery}"`}
-            {searchQuery &&
-              selectedCity &&
-              ` que coincidan con "${searchQuery}"`}
+            {(selectedCity || selectedCategory) && searchQuery &&
+              `No hay eventos que coincidan con los filtros seleccionados`}
+            {selectedCity && selectedCategory && !searchQuery &&
+              `No hay eventos de ${EVENT_CATEGORIES[selectedCategory].label} en ${selectedCity}`}
           </p>
           <button
             onClick={resetFilters}
