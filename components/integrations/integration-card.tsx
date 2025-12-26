@@ -38,7 +38,7 @@ export function IntegrationCard({
               alt={`${integration.name} logo`}
               width={96}
               height={96}
-              className="object-contain"
+              className="object-contain rounded-lg"
               unoptimized
               loading="lazy"
             />

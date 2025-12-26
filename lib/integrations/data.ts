@@ -40,7 +40,7 @@ export const INTEGRATIONS: Integration[] = [
     id: "webhooks",
     name: "WebHooks",
     description: "Recibe notificaciones en tiempo real sobre eventos importantes como ventas, check-ins y cancelaciones.",
-    logo: "/webhook-icon.svg",
+    logo: "https://cdn-icons-png.flaticon.com/512/2165/2165004.png",
     status: "available",
     category: INTEGRATION_CATEGORIES.WEBHOOKS,
     documentationUrl: "https://docs.hunt-tickets.com/webhooks",
