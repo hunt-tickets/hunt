@@ -8,25 +8,16 @@ import type { GroupedIntegrations, Integration } from "@/lib/integrations/types"
 
 interface IntegrationGridProps {
   groupedIntegrations: GroupedIntegrations;
-  onDetails?: (integration: Integration) => void;
   onInstall?: (integration: Integration) => void;
   onConfigure?: (integration: Integration) => void;
 }
 
 export function IntegrationGrid({
   groupedIntegrations,
-  onDetails,
   onInstall,
   onConfigure,
 }: IntegrationGridProps) {
   const categoryOrder = getCategoryOrder();
-
-  const handleDetails = useCallback(
-    (integration: Integration) => {
-      onDetails?.(integration);
-    },
-    [onDetails]
-  );
 
   const handleInstall = useCallback(
     (integration: Integration) => {
@@ -63,7 +54,6 @@ export function IntegrationGrid({
                 <IntegrationCard
                   key={integration.id}
                   integration={integration}
-                  onDetails={handleDetails}
                   onInstall={handleInstall}
                   onConfigure={handleConfigure}
                 />

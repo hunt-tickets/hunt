@@ -26,11 +26,6 @@ export default function IntegrationsPage() {
     setSearchQuery(value);
   }, []);
 
-  const handleDetails = useCallback((integration: Integration) => {
-    // TODO: Open details modal/dialog
-    console.log("View details:", integration);
-  }, []);
-
   const handleInstall = useCallback((integration: Integration) => {
     // TODO: Handle installation flow
     console.log("Install integration:", integration);
@@ -56,7 +51,6 @@ export default function IntegrationsPage() {
       {hasResults ? (
         <IntegrationGrid
           groupedIntegrations={groupedIntegrations}
-          onDetails={handleDetails}
           onInstall={handleInstall}
           onConfigure={handleConfigure}
         />

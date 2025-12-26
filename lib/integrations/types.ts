@@ -33,7 +33,6 @@ export interface CategoryConfig {
 // Integration card props
 export interface IntegrationCardProps {
   integration: Integration;
-  onDetails?: (integration: Integration) => void;
   onInstall?: (integration: Integration) => void;
   onConfigure?: (integration: Integration) => void;
 }

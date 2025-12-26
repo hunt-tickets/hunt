@@ -54,18 +54,14 @@ export const BADGE_CONFIG = {
 
 // Button Labels
 export const BUTTON_LABELS = {
-  DETAILS: "Detalles",
-  INSTALL: "Instalar",
-  CONFIGURE: "Configurar",
-  DISCONNECT: "Desconectar",
   CONNECT: "Conectar",
+  CONNECTED: "Conectado",
 } as const;
 
 // Accessibility Labels
 export const ARIA_LABELS = {
   SEARCH: "Buscar integraciones",
   CARD_PREFIX: "Integración de",
-  DETAILS_BUTTON: "Ver detalles de",
-  INSTALL_BUTTON: "Instalar",
-  CONFIGURE_BUTTON: "Configurar",
+  CONNECT_BUTTON: "Conectar integración de",
+  CONNECTED_BUTTON: "Ver configuración de",
 } as const;

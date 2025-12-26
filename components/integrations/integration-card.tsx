@@ -19,17 +19,13 @@ export function IntegrationCard({
   const isConnected = integration.status === "connected";
   const badgeConfig = getStatusBadgeConfig(integration.status);
 
-  const handleDetails = useCallback(() => {
-    onDetails?.(integration);
-  }, [integration, onDetails]);
-
-  const handleInstall = useCallback(() => {
-    onInstall?.(integration);
-  }, [integration, onInstall]);
-
-  const handleConfigure = useCallback(() => {
-    onConfigure?.(integration);
-  }, [integration, onConfigure]);
+  const handleConnect = useCallback(() => {
+    if (isConnected) {
+      onConfigure?.(integration);
+    } else {
+      onInstall?.(integration);
+    }
+  }, [integration, isConnected, onInstall, onConfigure]);
 
   return (
     <Card
@@ -71,39 +67,17 @@ export function IntegrationCard({
           </p>
 
           {/* Actions */}
-          <div className="flex gap-2 w-full pt-1 sm:pt-2">
+          <div className="flex w-full pt-1 sm:pt-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={handleDetails}
-              className="flex-1 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/[0.06] text-xs h-8 sm:h-9"
+              onClick={handleConnect}
+              className="w-full border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/[0.06] text-xs h-8 sm:h-9"
               disabled={isComingSoon}
-              aria-label={`${ARIA_LABELS.DETAILS_BUTTON} ${integration.name}`}
+              aria-label={`${isConnected ? ARIA_LABELS.CONNECTED_BUTTON : ARIA_LABELS.CONNECT_BUTTON} ${integration.name}`}
             >
-              {BUTTON_LABELS.DETAILS}
+              {isConnected ? BUTTON_LABELS.CONNECTED : BUTTON_LABELS.CONNECT}
             </Button>
-            {isConnected ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleConfigure}
-                className="flex-1 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/[0.06] text-xs h-8 sm:h-9"
-                aria-label={`${ARIA_LABELS.CONFIGURE_BUTTON} ${integration.name}`}
-              >
-                {BUTTON_LABELS.CONFIGURE}
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleInstall}
-                className="flex-1 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/[0.06] text-xs h-8 sm:h-9"
-                disabled={isComingSoon}
-                aria-label={`${ARIA_LABELS.INSTALL_BUTTON} ${integration.name}`}
-              >
-                {BUTTON_LABELS.INSTALL}
-              </Button>
-            )}
           </div>
         </div>
       </CardContent>
