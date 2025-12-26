@@ -91,13 +91,15 @@ export function AdminEventsList({
         </div>
       ) : (
         <div className="text-center py-16 sm:py-20">
-          <div className="inline-flex p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
-            <Filter className="h-12 w-12 text-white/60" />
+          <div className="mb-6 sm:mb-8">
+            <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto">
+              <Filter className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 dark:text-white/30" />
+            </div>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">
             No se encontraron eventos
           </h3>
-          <p className="text-white/60 mb-6 max-w-md mx-auto">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-white/60 max-w-md mx-auto px-4">
             {searchQuery
               ? `No hay eventos que coincidan con "${searchQuery}"`
               : "No hay eventos disponibles"}

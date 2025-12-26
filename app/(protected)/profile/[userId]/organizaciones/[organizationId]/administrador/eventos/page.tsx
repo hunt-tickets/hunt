@@ -53,13 +53,19 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
         {organizationEvents.length > 0 ? (
           <AdminEventsList events={organizationEvents} userId={userId} organizationId={organizationId} />
         ) : (
-          <Card className="bg-background/50 backdrop-blur-sm border-[#303030]">
+          <Card className="bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5">
             <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mb-4">
-                  Comienza creando tu primer evento para gestionar entradas y
-                  ventas
+              <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center">
+                <div className="mb-6 sm:mb-8">
+                  <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto">
+                    <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 dark:text-white/30" />
+                  </div>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  No hay eventos aún
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-white/60 mb-6 sm:mb-8 max-w-md px-4">
+                  Comienza creando tu primer evento para gestionar entradas y ventas
                 </p>
                 <CreateEventDialog organizationId={organizationId} userId={userId} />
               </div>
