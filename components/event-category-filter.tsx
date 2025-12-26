@@ -4,16 +4,12 @@ import { useRef } from "react";
 import {
   Music2,
   Trophy,
-  UtensilsCrossed,
   PartyPopper,
-  Users,
-  Palette,
-  TreePine,
   Heart,
-  Briefcase,
   GraduationCap,
   Store,
-  MoreHorizontal,
+  Tent,
+  Theater,
   ChevronLeft,
   ChevronRight,
   X,
@@ -23,18 +19,14 @@ import { EVENT_CATEGORIES as CATEGORIES, EVENT_CATEGORY_LABELS, EventCategory } 
 
 // Mapeo de categorías a iconos
 const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
-  musica: Music2,
-  deportes: Trophy,
-  gastronomia: UtensilsCrossed,
-  rumba: PartyPopper,
-  familiar: Users,
-  arte: Palette,
-  aire_libre: TreePine,
+  fiestas: PartyPopper,
+  conciertos: Music2,
+  festivales: Tent,
   bienestar: Heart,
-  negocios: Briefcase,
-  educacion: GraduationCap,
-  mercados: Store,
-  otro: MoreHorizontal,
+  clases: GraduationCap,
+  ferias: Store,
+  deportes: Trophy,
+  teatro: Theater,
 };
 
 // Construir EVENT_CATEGORIES con labels del archivo de constantes
