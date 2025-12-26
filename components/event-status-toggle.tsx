@@ -9,15 +9,23 @@ interface EventStatusToggleProps {
   eventId: string;
   initialStatus: boolean;
   className?: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
-export function EventStatusToggle({ eventId, initialStatus, className }: EventStatusToggleProps) {
+export function EventStatusToggle({
+  eventId,
+  initialStatus,
+  className,
+  disabled = false,
+  disabledReason,
+}: EventStatusToggleProps) {
   const [status, setStatus] = useState(initialStatus);
   const [isPending, startTransition] = useTransition();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const handleToggle = () => {
-    if (isPending) return;
+    if (isPending || disabled) return;
 
     const newStatus = !status;
     setIsAnimating(true);
@@ -41,35 +49,41 @@ export function EventStatusToggle({ eventId, initialStatus, className }: EventSt
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3" title={disabled ? disabledReason : undefined}>
       {/* Status Label */}
       <span className={cn(
         "text-sm font-medium transition-colors duration-300",
-        status
-          ? "text-zinc-900 dark:text-white"
-          : "text-zinc-500 dark:text-white/40"
+        disabled
+          ? "text-zinc-400 dark:text-white/30"
+          : status
+            ? "text-zinc-900 dark:text-white"
+            : "text-zinc-500 dark:text-white/40"
       )}>
         {status ? "Activo" : "Inactivo"}
       </span>
 
       <div
         className={cn(
-          "relative flex w-20 h-10 p-1 rounded-full cursor-pointer transition-all duration-300",
-          "bg-zinc-100 border border-zinc-300 hover:bg-zinc-200 dark:bg-zinc-900 dark:border-zinc-700 dark:hover:bg-zinc-800",
+          "relative flex w-20 h-10 p-1 rounded-full transition-all duration-300",
+          "bg-zinc-100 border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-700",
+          disabled
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800",
           isPending && "opacity-60 cursor-not-allowed",
           className
         )}
         onClick={handleToggle}
         role="button"
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             handleToggle();
           }
         }}
-        aria-label={`Cambiar evento a ${status ? "inactivo" : "activo"}`}
+        aria-label={disabled ? disabledReason : `Cambiar evento a ${status ? "inactivo" : "activo"}`}
         aria-pressed={status}
+        aria-disabled={disabled}
       >
         {/* Background icons - always visible */}
         <div className="absolute inset-0 flex items-center justify-between px-1.5 pointer-events-none">

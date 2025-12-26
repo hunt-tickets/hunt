@@ -15,6 +15,7 @@ interface EventCardProps {
   image: string;
   href?: string; // Optional custom URL (defaults to /eventos/{id})
   onClick?: () => void; // Optional callback when card is clicked
+  status?: boolean | null; // Event status: true = active, false = draft
 }
 
 export function EventCard({
@@ -25,6 +26,7 @@ export function EventCard({
   image,
   href,
   onClick,
+  status,
 }: EventCardProps) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -91,12 +93,25 @@ export function EventCard({
       <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden group cursor-pointer bg-white/8 border border-white/10 hover:border-white/20 backdrop-blur-sm">
         {/* Event image with hover effect */}
         <Image
-          src={image || "/placeholder.svg"}
+          src={image || "/event-placeholder.svg"}
           alt={title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
+
+        {/* Status badge in top left corner - only show when status is provided */}
+        {status !== undefined && (
+          <div className="absolute top-4 left-4 z-10">
+            <div className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
+              status
+                ? "bg-emerald-500/90 text-white"
+                : "bg-zinc-800/80 text-zinc-300 border border-zinc-600/50"
+            }`}>
+              {status ? "Activo" : "Borrador"}
+            </div>
+          </div>
+        )}
 
         {/* Date badge in top right corner */}
         <div className="absolute top-4 right-4 z-10">

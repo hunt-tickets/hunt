@@ -4,63 +4,27 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import type { EventFinancialReport } from "@/lib/supabase/types";
-import { toZonedTime } from "date-fns-tz";
-import { formatISO } from "date-fns";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import type { Event as EventSchema, TicketType } from "@/lib/schema";
 import { EVENT_CATEGORIES } from "@/constants/event-categories";
 
 const eventFormSchema = z.object({
-  organization_id: z.string().min(1, "El ID de la organización es requerido"),
-  category: z.enum(EVENT_CATEGORIES, {
-    message: "Selecciona una categoría válida",
-  }),
-  name: z.string().optional(),
-  description: z.string().optional(),
-  start_date: z.string().optional(),
-  start_time: z.string().optional(),
-  end_date: z.string().optional(),
-  end_time: z.string().optional(),
-  venue_id: z.string().optional(),
-  age: z.string().optional(),
-  cash_sales: z.string().optional(),
-  status: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  address: z.string().optional(),
-  extra_info: z.string().optional(),
-  variable_fee: z.string().optional(),
-  fixed_fee: z.string().optional(),
+  name: z.string().min(1, "El nombre del evento es requerido"),
 });
 
 export type EventFormState = {
   errors?: {
-    organization_id?: string[];
-    category?: string[];
     name?: string[];
-    description?: string[];
-    start_date?: string[];
-    start_time?: string[];
-    end_date?: string[];
-    end_time?: string[];
-    venue_id?: string[];
-    age?: string[];
-    cash_sales?: string[];
-    status?: string[];
-    city?: string[];
-    country?: string[];
-    address?: string[];
-    extra_info?: string[];
-    variable_fee?: string[];
-    fixed_fee?: string[];
   };
   message?: string;
   success?: boolean;
+  eventId?: string;
 };
 
 export async function createEvent(
-  prevState: EventFormState,
+  organizationId: string,
+  _prevState: EventFormState,
   formData: FormData
 ): Promise<EventFormState> {
   // Get session using Better Auth
@@ -78,71 +42,12 @@ export async function createEvent(
   const user = session.user;
   const supabase = await createClient();
 
-  // Extract form data
-  const rawFormData = {
-    organization_id: formData.get("organization_id"),
-    category: formData.get("category"),
+  // Validate form data
+  const validatedFields = eventFormSchema.safeParse({
     name: formData.get("name"),
-    description: formData.get("description"),
-    start_date: formData.get("start_date"),
-    start_time: formData.get("start_time"),
-    end_date: formData.get("end_date"),
-    end_time: formData.get("end_time"),
-    venue_id: formData.get("venue_id"),
-    age: formData.get("age"),
-    cash_sales: formData.get("cash_sales"),
-    status: formData.get("status"),
-    city: formData.get("city") || "",
-    country: formData.get("country") || "",
-    address: formData.get("address") || "",
-    extra_info: formData.get("extra_info") || "",
-    variable_fee: formData.get("variable_fee") || "",
-    fixed_fee: formData.get("fixed_fee") || "",
-  };
-
-  // Extract files for logging
-  const flyerFile = formData.get("flyer") as File;
-  const walletFile = formData.get("wallet") as File;
-  const flyerOverlayFile = formData.get("flyer_overlay") as File;
-  const flyerBackgroundFile = formData.get("flyer_background") as File;
-  const flyerBannerFile = formData.get("flyer_banner") as File;
-
-  console.log("📋 Raw FormData before validation:", rawFormData);
-  console.log("📁 Files received:", {
-    flyer: flyerFile
-      ? { name: flyerFile.name, size: flyerFile.size, type: flyerFile.type }
-      : null,
-    wallet: walletFile
-      ? { name: walletFile.name, size: walletFile.size, type: walletFile.type }
-      : null,
-    flyer_overlay: flyerOverlayFile
-      ? {
-          name: flyerOverlayFile.name,
-          size: flyerOverlayFile.size,
-          type: flyerOverlayFile.type,
-        }
-      : null,
-    flyer_background: flyerBackgroundFile
-      ? {
-          name: flyerBackgroundFile.name,
-          size: flyerBackgroundFile.size,
-          type: flyerBackgroundFile.type,
-        }
-      : null,
-    flyer_banner: flyerBannerFile
-      ? {
-          name: flyerBannerFile.name,
-          size: flyerBannerFile.size,
-          type: flyerBannerFile.type,
-        }
-      : null,
   });
 
-  // Validate form data
-  const validatedFields = eventFormSchema.safeParse(rawFormData);
-
   if (!validatedFields.success) {
-    // Format errors from issues (Zod v4 stable API)
     const fieldErrors: Record<string, string[]> = {};
 
     for (const issue of validatedFields.error.issues) {
@@ -155,11 +60,6 @@ export async function createEvent(
       }
     }
 
-    console.log("✅ Validation result:", {
-      success: false,
-      errors: fieldErrors,
-    });
-
     return {
       errors: fieldErrors as EventFormState["errors"],
       message: "Campos inválidos. Por favor revise el formulario.",
@@ -167,155 +67,20 @@ export async function createEvent(
     };
   }
 
-  console.log("✅ Validation result:", {
-    success: true,
-    errors: null,
-  });
-
   const { data: validData } = validatedFields;
-  console.log(validData);
 
   try {
-    // Convert dates from Bogota timezone to UTC (matching mobile app behavior)
-    const BOGOTA_TZ = "America/Bogota";
-
-    let startDateTime = null;
-    if (validData.start_date && validData.start_time) {
-      const startDateTimeBogota = toZonedTime(
-        `${validData.start_date}T${validData.start_time}`,
-        BOGOTA_TZ
-      );
-      startDateTime = formatISO(startDateTimeBogota);
-    }
-
-    let endDateTime = null;
-    if (validData.end_date && validData.end_time) {
-      const endDateTimeBogota = toZonedTime(
-        `${validData.end_date}T${validData.end_time}`,
-        BOGOTA_TZ
-      );
-      endDateTime = formatISO(endDateTimeBogota);
-    }
-
-    // File upload validation
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    const ALLOWED_TYPES = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-    ];
-
-    // Validate flyer file
-    if (flyerFile && flyerFile.size > 0) {
-      if (flyerFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen del flyer es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para flyer. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    // Validate wallet file
-    if (walletFile && walletFile.size > 0) {
-      if (walletFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de wallet es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(walletFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para wallet. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    // Validate additional flyer files
-    if (flyerOverlayFile && flyerOverlayFile.size > 0) {
-      if (flyerOverlayFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de overlay es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerOverlayFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para overlay. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    if (flyerBackgroundFile && flyerBackgroundFile.size > 0) {
-      if (flyerBackgroundFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de background es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerBackgroundFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para background. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    if (flyerBannerFile && flyerBannerFile.size > 0) {
-      if (flyerBannerFile.size > MAX_FILE_SIZE) {
-        return {
-          message: "La imagen de banner es muy grande. Máximo 5MB.",
-          success: false,
-        };
-      }
-      if (!ALLOWED_TYPES.includes(flyerBannerFile.type)) {
-        return {
-          message:
-            "Formato de imagen no válido para banner. Use JPG, PNG o WebP.",
-          success: false,
-        };
-      }
-    }
-
-    // Create event in database
+    // Create event in database with just name and organization
     const { data: eventData, error: eventError } = await supabase
       .from("events")
       .insert({
-        organization_id: validData.organization_id,
-        category: validData.category,
-        name: validData.name || null,
-        description: validData.description || null,
-        date: startDateTime,
-        end_date: endDateTime,
-        venue_id: validData.venue_id || null,
-        age: validData.age ? parseInt(validData.age) : null,
-        status: validData.status === "Activo",
-        cash: validData.cash_sales === "Activo",
-        city: validData.city || null,
-        country: validData.country || null,
-        address: validData.address || null,
-        extra_info: validData.extra_info || null,
-        variable_fee: validData.variable_fee
-          ? parseFloat(validData.variable_fee)
-          : null,
-        fixed_fee: validData.fixed_fee ? parseFloat(validData.fixed_fee) : null,
+        organization_id: organizationId,
+        name: validData.name,
       })
-      .select()
+      .select("id")
       .single();
 
-    if (eventError) {
+    if (eventError || !eventData) {
       console.error("Error creating event:", eventError);
       return {
         message: "Error al crear el evento. Por favor intente nuevamente.",
@@ -323,155 +88,15 @@ export async function createEvent(
       };
     }
 
-    let flyerUrl = null;
-    let walletUrl = null;
-    let flyerOverlayUrl = null;
-    let flyerBackgroundUrl = null;
-    let flyerBannerUrl = null;
-
-    // Upload flyer if provided (using event ID from created event)
-    if (flyerFile && flyerFile.size > 0) {
-      const flyerExt = flyerFile.name.split(".").pop();
-      const flyerPath = `flyers/${eventData.id}.${flyerExt}`;
-
-      const { error: flyerError } = await supabase.storage
-        .from("events")
-        .upload(flyerPath, flyerFile);
-
-      if (flyerError) {
-        console.error("Error uploading flyer:", flyerError);
-        return {
-          message: `Error al subir la imagen del flyer: ${flyerError.message}`,
-          success: false,
-        };
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("events").getPublicUrl(flyerPath);
-      flyerUrl = publicUrl;
-    }
-
-    // Upload wallet image if provided (to variants folder)
-    if (walletFile && walletFile.size > 0) {
-      const walletExt = walletFile.name.split(".").pop();
-      const walletPath = `variants/${eventData.id}.${walletExt}`;
-
-      const { error: walletError } = await supabase.storage
-        .from("events")
-        .upload(walletPath, walletFile);
-
-      if (walletError) {
-        console.error("Error uploading wallet:", walletError);
-        return {
-          message: `Error al subir la imagen de wallet: ${walletError.message}`,
-          success: false,
-        };
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("events").getPublicUrl(walletPath);
-      walletUrl = publicUrl;
-    }
-
-    // Upload flyer overlay if provided
-    if (flyerOverlayFile && flyerOverlayFile.size > 0) {
-      const ext = flyerOverlayFile.name.split(".").pop();
-      const path = `flyers/overlay_${eventData.id}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("events")
-        .upload(path, flyerOverlayFile);
-
-      if (error) {
-        console.error("Error uploading flyer overlay:", error);
-      } else {
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("events").getPublicUrl(path);
-        flyerOverlayUrl = publicUrl;
-      }
-    }
-
-    // Upload flyer background if provided
-    if (flyerBackgroundFile && flyerBackgroundFile.size > 0) {
-      const ext = flyerBackgroundFile.name.split(".").pop();
-      const path = `flyers/background_${eventData.id}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("events")
-        .upload(path, flyerBackgroundFile);
-
-      if (error) {
-        console.error("Error uploading flyer background:", error);
-      } else {
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("events").getPublicUrl(path);
-        flyerBackgroundUrl = publicUrl;
-      }
-    }
-
-    // Upload flyer banner if provided
-    if (flyerBannerFile && flyerBannerFile.size > 0) {
-      const ext = flyerBannerFile.name.split(".").pop();
-      const path = `flyers/banner_${eventData.id}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("events")
-        .upload(path, flyerBannerFile);
-
-      if (error) {
-        console.error("Error uploading flyer banner:", error);
-      } else {
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("events").getPublicUrl(path);
-        flyerBannerUrl = publicUrl;
-      }
-    }
-
-    // Update event with image URLs if uploaded
-    if (
-      flyerUrl ||
-      walletUrl ||
-      flyerOverlayUrl ||
-      flyerBackgroundUrl ||
-      flyerBannerUrl
-    ) {
-      const updateData: {
-        flyer?: string;
-        flyer_apple?: string;
-        flyer_overlay?: string;
-        flyer_background?: string;
-        flyer_banner?: string;
-      } = {};
-      if (flyerUrl) updateData.flyer = flyerUrl;
-      if (walletUrl) updateData.flyer_apple = walletUrl;
-      if (flyerOverlayUrl) updateData.flyer_overlay = flyerOverlayUrl;
-      if (flyerBackgroundUrl) updateData.flyer_background = flyerBackgroundUrl;
-      if (flyerBannerUrl) updateData.flyer_banner = flyerBannerUrl;
-
-      const { error: updateError } = await supabase
-        .from("events")
-        .update(updateData)
-        .eq("id", eventData.id);
-
-      if (updateError) {
-        console.error("Error updating event with image URLs:", updateError);
-        // Don't fail the whole operation, images are uploaded successfully
-      }
-    }
-
     // Revalidate the administrador page to show the new event
     revalidatePath(
-      `/profile/${user.id}/organizaciones/${validData.organization_id}/administrador/eventos`
+      `/profile/${user.id}/organizaciones/${organizationId}/administrador/eventos`
     );
 
     return {
       message: "Evento creado exitosamente",
       success: true,
+      eventId: eventData.id,
     };
   } catch (error) {
     console.error("Error creating event:", error);
@@ -797,6 +422,7 @@ export async function createTicketType(
     maxPerOrder?: number;
     saleStart?: string;
     saleEnd?: string;
+    eventDayId?: string; // Link to specific day (undefined = all days)
   }
 ): Promise<TicketTypeFormState> {
   const supabase = await createClient();
@@ -829,6 +455,7 @@ export async function createTicketType(
   try {
     const { error } = await supabase.from("ticket_types").insert({
       event_id: eventId,
+      event_day_id: formData.eventDayId || null, // null = valid for all days
       name: formData.name.trim(),
       description: formData.description?.trim() || null,
       price: formData.price.toFixed(2),
@@ -899,6 +526,7 @@ export async function updateEventConfiguration(
     name?: string;
     description?: string;
     category?: (typeof EVENT_CATEGORIES)[number];
+    type?: "single" | "multi_day" | "recurring" | "slots";
     date?: string;
     end_date?: string;
     age?: number;
@@ -910,51 +538,114 @@ export async function updateEventConfiguration(
     faqs?: Array<{ id: string; question: string; answer: string }>;
   }
 ) {
-  const supabase = await createClient();
+  // Get session using Better Auth
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  if (!session || !session.user) {
     return { success: false, message: "No autenticado" };
   }
+
+  const supabase = await createClient();
 
   // Validate category if provided
   if (formData.category && !EVENT_CATEGORIES.includes(formData.category)) {
     return { success: false, message: "Categoría inválida" };
   }
 
+  // Validate event type constraints
+  if (formData.type) {
+    // Fetch current event data to check constraints
+    const { data: currentEvent, error: fetchError } = await supabase
+      .from("events")
+      .select("type")
+      .eq("id", eventId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching current event:", fetchError);
+      return { success: false, message: "Error al obtener el evento" };
+    }
+
+    // If changing to 'single', date fields are allowed but event_days should be cleared
+    if (formData.type === "single" && currentEvent?.type === "multi_day") {
+      // Clear all event_days when switching from multi_day to single
+      const { error: deleteError } = await supabase
+        .from("event_days")
+        .delete()
+        .eq("event_id", eventId);
+
+      if (deleteError) {
+        console.error("Error clearing event days:", deleteError);
+        return { success: false, message: "Error al limpiar los días del evento" };
+      }
+    }
+
+    // If changing to 'multi_day', clear direct date fields (they come from event_days)
+    if (formData.type === "multi_day" && currentEvent?.type !== "multi_day") {
+      // Clear date fields - they'll be set by syncEventDays
+      formData.date = undefined;
+      formData.end_date = undefined;
+    }
+  }
+
+  // Validate type-specific field constraints
+  if (formData.date !== undefined || formData.end_date !== undefined) {
+    // Check current event type
+    const { data: currentEvent } = await supabase
+      .from("events")
+      .select("type")
+      .eq("id", eventId)
+      .single();
+
+    const effectiveType = formData.type || currentEvent?.type;
+
+    // multi_day events should not have date set directly
+    if (effectiveType === "multi_day") {
+      return {
+        success: false,
+        message: "Los eventos multi-día no pueden tener fecha directa. Use los días del evento.",
+      };
+    }
+  }
+
   // Build update object with only provided fields
   const updateData: Partial<{
     name: string;
-    description: string;
+    description: string | null;
     category: string;
-    date: string;
-    end_date: string;
+    type: string;
+    date: string | null;
+    end_date: string | null;
     age: number;
     variable_fee: number;
     fixed_fee: number;
-    city: string;
-    country: string;
-    address: string;
+    city: string | null;
+    country: string | null;
+    address: string | null;
     faqs: Array<{ id: string; question: string; answer: string }>;
   }> = {};
 
   if (formData.name !== undefined) updateData.name = formData.name;
   if (formData.description !== undefined)
-    updateData.description = formData.description;
+    updateData.description = formData.description || null;
   if (formData.category !== undefined) updateData.category = formData.category;
-  if (formData.date !== undefined) updateData.date = formData.date;
-  if (formData.end_date !== undefined) updateData.end_date = formData.end_date;
+  if (formData.type !== undefined) updateData.type = formData.type;
+  // Convert empty strings to null for date fields (PostgreSQL doesn't accept "")
+  if (formData.date !== undefined)
+    updateData.date = formData.date || null;
+  if (formData.end_date !== undefined)
+    updateData.end_date = formData.end_date || null;
   if (formData.age !== undefined) updateData.age = formData.age;
   if (formData.variable_fee !== undefined)
     updateData.variable_fee = formData.variable_fee;
   if (formData.fixed_fee !== undefined)
     updateData.fixed_fee = formData.fixed_fee;
-  if (formData.city !== undefined) updateData.city = formData.city;
-  if (formData.country !== undefined) updateData.country = formData.country;
-  if (formData.address !== undefined) updateData.address = formData.address;
+  // Convert empty strings to null for optional text fields
+  if (formData.city !== undefined) updateData.city = formData.city || null;
+  if (formData.country !== undefined) updateData.country = formData.country || null;
+  if (formData.address !== undefined) updateData.address = formData.address || null;
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
 
   const { error } = await supabase
@@ -978,9 +669,74 @@ export async function updateEventConfiguration(
 /**
  * Toggle event status (active/inactive)
  * Only owners and administrators should be able to call this
+ * Validates requirements based on event type:
+ * - single: requires date + tickets
+ * - multi_day: requires event_days + tickets
  */
 export async function toggleEventStatus(eventId: string, status: boolean) {
   const supabase = await createClient();
+
+  // If activating the event, validate requirements are met based on event type
+  if (status === true) {
+    const { data: event, error: fetchError } = await supabase
+      .from("events")
+      .select(`
+        id,
+        type,
+        date,
+        ticket_types (id),
+        event_days (id)
+      `)
+      .eq("id", eventId)
+      .single();
+
+    if (fetchError || !event) {
+      console.error("Error fetching event for validation:", fetchError);
+      return { success: false, message: "Error al validar el evento" };
+    }
+
+    const eventType = event.type || "single";
+    const hasTicketTypes = (event.ticket_types?.length ?? 0) > 0;
+    const missing: string[] = [];
+
+    // Validate based on event type
+    switch (eventType) {
+      case "single":
+        // Single events require a date
+        if (!event.date) {
+          missing.push("fecha");
+        }
+        break;
+
+      case "multi_day":
+        // Multi-day events require at least one event_day
+        const hasEventDays = (event.event_days?.length ?? 0) > 0;
+        if (!hasEventDays) {
+          missing.push("al menos un día configurado");
+        }
+        break;
+
+      case "recurring":
+      case "slots":
+        // Future: add specific validation for these types
+        if (!event.date) {
+          missing.push("fecha");
+        }
+        break;
+    }
+
+    // All event types require tickets
+    if (!hasTicketTypes) {
+      missing.push("al menos una entrada");
+    }
+
+    if (missing.length > 0) {
+      return {
+        success: false,
+        message: `No se puede activar el evento. Falta: ${missing.join(", ")}`,
+      };
+    }
+  }
 
   const { error } = await supabase
     .from("events")
@@ -1015,6 +771,7 @@ export type PopularEventWithVenue = {
   endDate: Date | null;
   status: boolean | null;
   flyer: string | null;
+  category: string | null;
   venue_name: string;
   venue_city: string;
 };
@@ -1042,6 +799,7 @@ export async function getPopularEvents(
         end_date,
         status,
         flyer,
+        category,
         venues (
           name,
           city
@@ -1078,6 +836,7 @@ export async function getPopularEvents(
           endDate: event.end_date ? new Date(event.end_date) : null,
           status: event.status,
           flyer: event.flyer,
+          category: event.category,
           venue_name: venue?.name || "Venue",
           venue_city: venue?.city || "Ciudad",
         };
@@ -1090,6 +849,24 @@ export async function getPopularEvents(
     return [];
   }
 }
+
+/**
+ * Event day type for multi-day events
+ */
+export type EventDayDetail = {
+  id: string;
+  name: string | null;
+  date: Date;
+  endDate: Date | null;
+  sortOrder: number;
+};
+
+/**
+ * Extended ticket type with day information
+ */
+export type TicketTypeWithDay = TicketType & {
+  eventDayId: string | null;
+};
 
 /**
  * Full event details type for the event detail page
@@ -1111,7 +888,10 @@ export type EventDetail = {
   venue_longitude: string | null;
   hour: string;
   end_hour: string;
-  tickets: TicketType[];
+  tickets: TicketTypeWithDay[];
+  // Multi-day event support
+  eventType: "single" | "multi_day" | "recurring" | "slots";
+  eventDays: EventDayDetail[];
 };
 
 /**
@@ -1124,7 +904,7 @@ export async function getEventById(
   const supabase = await createClient();
 
   try {
-    // Fetch event data and ticket availability in parallel
+    // Fetch event data (with nested event_days) and ticket availability in parallel
     const [eventResult, ticketResult] = await Promise.all([
       supabase
         .from("events")
@@ -1139,18 +919,26 @@ export async function getEventById(
           flyer,
           age,
           variable_fee,
+          type,
           venues (
             name,
             city,
             address,
             latitude,
             longitude
+          ),
+          event_days (
+            id,
+            name,
+            date,
+            end_date,
+            sort_order
           )
         `
         )
         .eq("id", eventId)
         .single(),
-      // Use RPC for accurate availability with lazy expiration
+      // Use RPC for accurate availability with lazy expiration (includes event_day_id)
       supabase.rpc("get_ticket_availability_v2", { p_event_id: eventId }),
     ]);
 
@@ -1192,6 +980,26 @@ export async function getEventById(
     // Handle ticket types from RPC result
     const ticketTypes = ticketResult.data || [];
 
+    // Handle event days from nested select
+    const eventDaysData = (event.event_days as unknown as Array<{
+      id: string;
+      name: string | null;
+      date: string;
+      end_date: string | null;
+      sort_order: number | null;
+    }>) || [];
+
+    // Sort event days by sort_order
+    const sortedDays: EventDayDetail[] = eventDaysData
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map(d => ({
+        id: d.id,
+        name: d.name,
+        date: new Date(d.date),
+        endDate: d.end_date ? new Date(d.end_date) : null,
+        sortOrder: d.sort_order || 0,
+      }));
+
     // Format hours from date
     const formatHour = (date: string | null): string => {
       if (!date) return "--:--";
@@ -1218,9 +1026,13 @@ export async function getEventById(
       venue_longitude: venue?.longitude || null,
       hour: formatHour(event.date),
       end_hour: formatHour(event.end_date),
+      // Multi-day event support
+      eventType: (event.type as EventDetail["eventType"]) || "single",
+      eventDays: sortedDays,
       tickets: ticketTypes.map((t: Record<string, unknown>) => ({
         id: t.ticket_type_id as string,
         eventId: event.id,
+        eventDayId: (t.event_day_id as string | null) || null,
         name: t.ticket_name as string,
         description: t.description as string | null,
         price: t.price as string,

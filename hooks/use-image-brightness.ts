@@ -34,6 +34,13 @@ export function useImageBrightness(
       return;
     }
 
+    // Skip analysis for known placeholder image - it's dark, so use light text
+    if (imageUrl === '/event-placeholder.svg' || imageUrl.endsWith('/event-placeholder.svg')) {
+      setIsDark(false);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
 
     const img = new Image();

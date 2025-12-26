@@ -43,7 +43,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
 
   const supabase = await createClient();
 
-  // Fetch event with ticket types
+  // Fetch event with ticket types and event days
   const { data: event } = await supabase
     .from("events")
     .select(
@@ -51,6 +51,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
       id,
       name,
       status,
+      type,
       ticket_types (
         id,
         name,
@@ -59,7 +60,14 @@ export default async function VenderPage({ params }: VenderPageProps) {
         sold_count,
         reserved_count,
         min_per_order,
-        max_per_order
+        max_per_order,
+        event_day_id
+      ),
+      event_days (
+        id,
+        name,
+        date,
+        sort_order
       )
     `
     )
@@ -72,6 +80,17 @@ export default async function VenderPage({ params }: VenderPageProps) {
     notFound();
   }
 
+  const isMultiDay = event.type === "multi_day" && (event.event_days || []).length > 0;
+
+  // Sort event days
+  const eventDays = (event.event_days || [])
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    .map((day) => ({
+      id: day.id,
+      name: day.name || "",
+      date: day.date || "",
+    }));
+
   // Transform ticket types for the form
   const ticketTypes = (event.ticket_types || []).map((tt) => ({
     id: tt.id,
@@ -80,6 +99,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
     available: tt.capacity - tt.sold_count - tt.reserved_count,
     minPerOrder: tt.min_per_order,
     maxPerOrder: tt.max_per_order,
+    eventDayId: tt.event_day_id || null,
   }));
 
   return (
@@ -90,7 +110,12 @@ export default async function VenderPage({ params }: VenderPageProps) {
       />
 
       <div className="px-3 py-3 sm:px-6 sm:py-4">
-        <CashSaleForm eventId={eventId} ticketTypes={ticketTypes} />
+        <CashSaleForm
+          eventId={eventId}
+          ticketTypes={ticketTypes}
+          eventDays={eventDays}
+          isMultiDay={isMultiDay}
+        />
       </div>
     </>
   );

@@ -66,6 +66,7 @@ export function AdminEventsList({
         <div className="flex items-center">
           <CreateEventDialog
             organizationId={organizationId}
+            userId={userId}
             className="sm:px-6 px-3 sm:rounded-full rounded-full"
           />
         </div>
@@ -79,11 +80,12 @@ export function AdminEventsList({
               key={event.id}
               id={event.id}
               title={event.name || "Sin nombre"}
-              date={event.date ? event.date.toISOString() : ""}
+              date={event.date ? (typeof event.date === "string" ? event.date : event.date.toISOString()) : ""}
               location={`${event.venue_name || "Sin venue"}, ${event.venue_city || "Sin ciudad"}`}
-              image={event.flyer || "/placeholder.svg"}
+              image={event.flyer || "/event-placeholder.svg"}
               href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${event.id}`}
               onClick={handleEventClick}
+              status={event.status}
             />
           ))}
         </div>

@@ -1,17 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { Instagram } from 'lucide-react';
-import { FaWhatsapp, FaGooglePlay, FaApple, FaLinkedin } from 'react-icons/fa';
-import { SiGmail } from 'react-icons/si';
-import { HoverButton } from '@/components/ui/hover-glow-button';
+import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { Instagram } from "lucide-react";
+import { FaWhatsapp, FaGooglePlay, FaApple, FaLinkedin } from "react-icons/fa";
+import { SiGmail } from "react-icons/si";
+import { HoverButton } from "@/components/ui/hover-glow-button";
+import { EVENT_CATEGORIES, EVENT_CATEGORY_LABELS } from "@/constants/event-categories";
 
 // Dynamically import GLSLHills to reduce initial bundle size
 // This defers Three.js loading until the component is actually rendered
 const GLSLHills = dynamic(
-  () => import('@/components/ui/glsl-hills').then((mod) => ({ default: mod.GLSLHills })),
+  () =>
+    import("@/components/ui/glsl-hills").then((mod) => ({
+      default: mod.GLSLHills,
+    })),
   { ssr: false }
 );
 
@@ -59,12 +63,12 @@ const AnimatedShaderBackground: React.FC = () => {
 
 export const Component: React.FC = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [displayedText, setDisplayedText] = useState('');
+  const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
-  const words = ['Experiences', 'Events', 'Adventures', 'Moments', 'Vibes'];
 
   useEffect(() => {
-    const currentWord = words[currentWordIndex];
+    const currentCategory = EVENT_CATEGORIES[currentWordIndex];
+    const currentWord = EVENT_CATEGORY_LABELS[currentCategory];
 
     if (isTyping) {
       // Typing effect
@@ -89,7 +93,9 @@ export const Component: React.FC = () => {
         return () => clearTimeout(timer);
       } else {
         // Deletion complete, move to next word
-        setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+        setCurrentWordIndex(
+          (prevIndex) => (prevIndex + 1) % EVENT_CATEGORIES.length
+        );
         setIsTyping(true);
       }
     }
@@ -102,8 +108,15 @@ export const Component: React.FC = () => {
 
       <div className="relative z-10 text-center w-full max-w-4xl mx-auto flex flex-col items-center justify-center h-full pb-8 px-6 sm:px-8 md:px-12">
         <h1 className="w-full text-foreground leading-tight tracking-tight mb-6 sm:mb-8 animate-fadeIn px-4 flex justify-center">
-          <span className="font-black text-[clamp(1.5rem,6vw,3.75rem)] whitespace-nowrap inline-flex items-center gap-2 sm:gap-3" style={{ fontFamily: 'LOT, sans-serif' }}>
-            HUNT YOUR <span className="text-primary inline-flex items-center min-w-[1ch]">{displayedText}<span className="animate-pulse">|</span></span>
+          <span
+            className="font-black text-[clamp(1.5rem,6vw,3.75rem)] whitespace-nowrap inline-flex items-center gap-2 sm:gap-3"
+            style={{ fontFamily: "LOT, sans-serif" }}
+          >
+            HUNT YOUR{" "}
+            <span className="text-primary inline-flex items-center min-w-[1ch]">
+              {displayedText}
+              <span className="animate-pulse">|</span>
+            </span>
           </span>
         </h1>
 
@@ -118,23 +131,50 @@ export const Component: React.FC = () => {
         </div>
 
         <div className="flex justify-center space-x-6">
-          <a href="https://www.instagram.com/hunt____tickets/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a
+            href="https://www.instagram.com/hunt____tickets/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
+          >
             <Instagram size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="https://www.linkedin.com/company/hunt-tickets-co/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a
+            href="https://www.linkedin.com/company/hunt-tickets-co/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
+          >
             <FaLinkedin size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="mailto:" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a
+            href="mailto:"
+            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
+          >
             <SiGmail size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="https://wa.me/573228597640" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a
+            href="https://wa.me/573228597640"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
+          >
             <FaWhatsapp size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="#" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
+          <a
+            href="#"
+            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
+          >
             <FaApple size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a href="#" className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300">
-            <FaGooglePlay size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
+          <a
+            href="#"
+            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
+          >
+            <FaGooglePlay
+              size={20}
+              className="w-5 h-5 sm:w-[22px] sm:h-[22px]"
+            />
           </a>
         </div>
       </div>

@@ -11,17 +11,20 @@ interface UserData {
   image?: string | null;
 }
 
+type EventType = "single" | "multi_day" | "recurring" | "slots";
+
 interface EventLayoutWrapperProps {
   children: ReactNode;
   userId: string;
   organizationId: string;
   eventId: string;
   eventName: string;
+  eventType?: EventType;
   role?: "owner" | "administrator" | "seller";
   user: UserData | null;
 }
 
-export function EventLayoutWrapper({ children, userId, organizationId, eventId, eventName, role = "seller", user }: EventLayoutWrapperProps) {
+export function EventLayoutWrapper({ children, userId, organizationId, eventId, eventName, eventType = "single", role = "seller", user }: EventLayoutWrapperProps) {
   return (
     <EventTabsProvider>
       <div className="min-h-screen bg-background">
@@ -30,6 +33,7 @@ export function EventLayoutWrapper({ children, userId, organizationId, eventId, 
           organizationId={organizationId}
           eventId={eventId}
           eventName={eventName}
+          eventType={eventType}
           role={role}
           user={user}
         />

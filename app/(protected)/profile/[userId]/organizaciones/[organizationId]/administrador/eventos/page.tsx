@@ -61,7 +61,7 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
                   Comienza creando tu primer evento para gestionar entradas y
                   ventas
                 </p>
-                <CreateEventDialog organizationId={organizationId} />
+                <CreateEventDialog organizationId={organizationId} userId={userId} />
               </div>
             </CardContent>
           </Card>

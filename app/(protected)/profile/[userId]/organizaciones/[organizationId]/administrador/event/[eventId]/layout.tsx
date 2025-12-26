@@ -18,14 +18,15 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
   const { userId, organizationId, eventId } = await params;
   const supabase = await createClient();
 
-  // Fetch event name
+  // Fetch event name and type
   const { data: event } = await supabase
     .from("events")
-    .select("name")
+    .select("name, type")
     .eq("id", eventId)
     .single();
 
   const eventName = event?.name || "Evento";
+  const eventType = (event?.type as "single" | "multi_day" | "recurring" | "slots") || "single";
 
   // Fetch user's role in the organization
   const memberRecord = await db.query.member.findFirst({
@@ -54,6 +55,7 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
       organizationId={organizationId}
       eventId={eventId}
       eventName={eventName}
+      eventType={eventType}
       role={role}
       user={userData || null}
     >

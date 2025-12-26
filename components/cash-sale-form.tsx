@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FormInput } from "@/components/ui/form-input";
-import { Minus, Plus, Loader2, CheckCircle, AlertCircle, Mail, Ticket, Info, CreditCard, UserCheck } from "lucide-react";
+import { Minus, Plus, Loader2, CheckCircle, AlertCircle, Mail, Ticket, Info, CreditCard, UserCheck, CalendarRange, Calendar } from "lucide-react";
 import { translateError } from "@/lib/error-messages";
+import { cn } from "@/lib/utils";
 
 interface TicketType {
   id: string;
@@ -14,17 +15,27 @@ interface TicketType {
   available: number;
   minPerOrder: number;
   maxPerOrder: number;
+  eventDayId: string | null;
+}
+
+interface EventDay {
+  id: string;
+  name: string;
+  date: string;
 }
 
 interface CashSaleFormProps {
   eventId: string;
   ticketTypes: TicketType[];
+  eventDays?: EventDay[];
+  isMultiDay?: boolean;
 }
 
-export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
+export function CashSaleForm({ eventId, ticketTypes, eventDays = [], isMultiDay = false }: CashSaleFormProps) {
   const [email, setEmail] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<string>("all"); // "all" or day id
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
@@ -174,18 +185,91 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
               <h3 className="text-base font-semibold">Seleccionar entradas</h3>
             </div>
 
+            {/* Day tabs for multi-day events */}
+            {isMultiDay && eventDays.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-3 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDay("all")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors",
+                    selectedDay === "all"
+                      ? "bg-gray-900 dark:bg-white/90 text-white dark:text-black"
+                      : "bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-600 dark:text-white/60"
+                  )}
+                >
+                  Todos ({ticketTypes.length})
+                </button>
+                {eventDays.map((day, index) => {
+                  const dayTickets = ticketTypes.filter(t => t.eventDayId === day.id);
+                  const dayDate = day.date ? new Date(day.date).toLocaleDateString("es-ES", { weekday: "short", day: "numeric" }) : "";
+                  return (
+                    <button
+                      type="button"
+                      key={day.id}
+                      onClick={() => setSelectedDay(day.id)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5",
+                        selectedDay === day.id
+                          ? "bg-gray-900 dark:bg-white/90 text-white dark:text-black"
+                          : "bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-600 dark:text-white/60"
+                      )}
+                    >
+                      <span className="flex items-center justify-center w-4 h-4 rounded-full bg-white/20 text-[10px]">
+                        {index + 1}
+                      </span>
+                      {day.name} {dayDate && <span className="opacity-70">({dayDate})</span>}
+                      {dayTickets.length > 0 && <span className="opacity-70">{dayTickets.length}</span>}
+                    </button>
+                  );
+                })}
+                {/* Pase General - tickets valid for all days */}
+                {ticketTypes.some(t => !t.eventDayId) && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDay("all_days_pass")}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5",
+                      selectedDay === "all_days_pass"
+                        ? "bg-gray-900 dark:bg-white/90 text-white dark:text-black"
+                        : "bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-600 dark:text-white/60"
+                    )}
+                  >
+                    <CalendarRange className="h-3 w-3" />
+                    Pase General ({ticketTypes.filter(t => !t.eventDayId).length})
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="space-y-3">
-              {ticketTypes.length === 0 ? (
-                <div className="text-center py-12 rounded-lg border border-dashed border-gray-300 dark:border-[#2a2a2a]">
-                  <Ticket className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-white/50">
-                    No hay tipos de tickets disponibles
-                  </p>
-                </div>
-              ) : (
-                ticketTypes.map((ticketType) => {
+              {(() => {
+                // Filter tickets based on selected day
+                const filteredTickets = isMultiDay && selectedDay !== "all"
+                  ? selectedDay === "all_days_pass"
+                    ? ticketTypes.filter(t => !t.eventDayId)
+                    : ticketTypes.filter(t => t.eventDayId === selectedDay)
+                  : ticketTypes;
+
+                if (filteredTickets.length === 0) {
+                  return (
+                    <div className="text-center py-12 rounded-lg border border-dashed border-gray-300 dark:border-[#2a2a2a]">
+                      <Ticket className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 dark:text-white/50">
+                        {ticketTypes.length === 0
+                          ? "No hay tipos de tickets disponibles"
+                          : "No hay entradas para este día"}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return filteredTickets.map((ticketType) => {
                   const quantity = quantities[ticketType.id] || 0;
                   const isAvailable = ticketType.available > 0;
+                  const dayInfo = isMultiDay && ticketType.eventDayId
+                    ? eventDays.find(d => d.id === ticketType.eventDayId)
+                    : null;
 
                   return (
                     <div
@@ -200,6 +284,16 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
                           {!isAvailable && (
                             <Badge variant="secondary" className="text-xs">
                               Agotado
+                            </Badge>
+                          )}
+                          {/* Show day badge for multi-day events when viewing "all" */}
+                          {isMultiDay && selectedDay === "all" && (
+                            <Badge variant="outline" className="text-[10px] font-normal">
+                              {dayInfo ? (
+                                <><Calendar className="h-2.5 w-2.5 mr-1" />{dayInfo.name}</>
+                              ) : (
+                                <><CalendarRange className="h-2.5 w-2.5 mr-1" />Pase General</>
+                              )}
                             </Badge>
                           )}
                         </div>
@@ -240,8 +334,8 @@ export function CashSaleForm({ eventId, ticketTypes }: CashSaleFormProps) {
                       </div>
                     </div>
                   );
-                })
-              )}
+                });
+              })()}
             </div>
           </div>
 

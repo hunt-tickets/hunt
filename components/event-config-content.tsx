@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useEventTabs } from "@/contexts/event-tabs-context";
-// TODO: Fix Google Maps types
-// import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
-import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
+import { toast } from "@/lib/toast";
 import { FormInput } from "@/components/ui/form-input";
 import { FormTextarea } from "@/components/ui/form-textarea";
 import { FormSelect } from "@/components/ui/form-select";
+import {
+  EventTypeSelector,
+  SingleDatePicker,
+  type EventType,
+  type EventDay,
+} from "@/components/event-config";
+import { updateEventConfiguration } from "@/lib/supabase/actions/events";
 import {
   Card,
   CardContent,
@@ -35,6 +42,8 @@ import {
   FileText,
   MapPinned,
   Info,
+  ChevronRight,
+  CalendarRange,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,11 +51,20 @@ import {
   EVENT_CATEGORY_LABELS,
 } from "@/constants/event-categories";
 
+interface EventDayData {
+  id: string;
+  name: string;
+  date: string;
+  endDate: string;
+  sortOrder: number;
+}
+
 interface EventData {
   id: string;
   name: string;
   description?: string;
   category?: string;
+  type?: "single" | "multi_day" | "recurring" | "slots";
   date?: string;
   end_date?: string;
   age?: number;
@@ -59,6 +77,7 @@ interface EventData {
   flyer_apple?: string;
   venue_id?: string;
   faqs?: Array<{ id: string; question: string; answer: string }>;
+  days?: EventDayData[];
 }
 
 interface EventConfigContentProps {
@@ -74,6 +93,10 @@ export function EventConfigContent({
   eventData,
   eventId,
 }: EventConfigContentProps = {}) {
+  const params = useParams();
+  const userId = params.userId as string;
+  const organizationId = params.organizationId as string;
+
   const { configTab: activeTab, setConfigTab: setActiveTab } = useEventTabs();
   const [formData, setFormData] = useState({
     eventName: "",
@@ -91,6 +114,8 @@ export function EventConfigContent({
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [eventType, setEventType] = useState<EventType>("single");
+  const [eventDays, setEventDays] = useState<EventDay[]>([]);
 
   // Initialize form data when eventData is loaded
   useEffect(() => {
@@ -147,6 +172,18 @@ export function EventConfigContent({
         costPerTicket: eventData.fixed_fee || 0,
         description: "Comisión de Hunt por venta de tickets",
       });
+
+      // Initialize event type and days
+      setEventType(eventData.type || "single");
+      if (eventData.days && eventData.days.length > 0) {
+        setEventDays(eventData.days.map((d) => ({
+          id: d.id,
+          name: d.name,
+          date: d.date ? formatDateForInput(d.date) : "",
+          endDate: d.endDate ? formatDateForInput(d.endDate) : "",
+          sortOrder: d.sortOrder,
+        })));
+      }
     }
   }, [eventData]);
 
@@ -277,16 +314,14 @@ export function EventConfigContent({
 
     try {
       if (section === "información") {
-        const { updateEventConfiguration } = await import(
-          "@/lib/supabase/actions/events"
-        );
-
+        // Save basic event info
         const result = await updateEventConfiguration(eventId, {
           name: formData.eventName,
           description: formData.description,
           category: formData.category || undefined,
-          date: formData.startDate,
-          end_date: formData.endDate,
+          type: eventType,
+          date: eventType === "single" ? formData.startDate : undefined,
+          end_date: eventType === "single" ? formData.endDate : undefined,
           age: formData.age,
           city: formData.city,
           country: formData.country,
@@ -295,15 +330,16 @@ export function EventConfigContent({
           fixed_fee: huntCosts.costPerTicket,
         });
 
-        if (result.success) {
-          alert("Configuración guardada exitosamente");
-        } else {
-          alert(result.message || "Error al guardar la configuración");
+        if (!result.success) {
+          toast.error({ title: result.message || "Error al guardar la configuración" });
+          return;
         }
+
+        toast.success({ title: "Configuración guardada exitosamente" });
       }
     } catch (error) {
       console.error("Error saving configuration:", error);
-      alert("Error al guardar la configuración");
+      toast.error({ title: "Error al guardar la configuración" });
     } finally {
       setIsSaving(false);
     }
@@ -547,50 +583,112 @@ export function EventConfigContent({
               </CardContent>
             </Card>
 
-            {/* Date & Time Configuration */}
+            {/* Event Type Selection */}
             <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
-                    <CardTitle>Fecha y Hora</CardTitle>
+                    <CardTitle>Tipo de Evento</CardTitle>
                     <CardDescription>
-                      Cuándo se realizará el evento
+                      Define la estructura de fechas de tu evento
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <EventTypeSelector
+                  value={eventType}
+                  onChange={setEventType}
+                  disabled={isSaving}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Date & Time Configuration - varies by event type */}
+            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                  <div>
+                    <CardTitle>
+                      {eventType === "single" && "Fecha y Hora"}
+                      {eventType === "multi_day" && "Días del Evento"}
+                      {eventType === "recurring" && "Patrón de Repetición"}
+                      {eventType === "slots" && "Horarios Disponibles"}
+                    </CardTitle>
+                    <CardDescription>
+                      {eventType === "single" && "Cuándo se realizará el evento"}
+                      {eventType === "multi_day" && "Configura cada día de tu evento"}
+                      {eventType === "recurring" && "Próximamente"}
+                      {eventType === "slots" && "Próximamente"}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-5">
-                {/* Dates */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <SimpleDateTimePicker
-                    name="startDate"
-                    label="Fecha y Hora de Inicio"
-                    value={formData.startDate}
-                    onChange={(value) =>
+                {/* Single Event */}
+                {eventType === "single" && (
+                  <SingleDatePicker
+                    startDate={formData.startDate}
+                    endDate={formData.endDate}
+                    onStartDateChange={(value) =>
                       setFormData((prev) => ({ ...prev, startDate: value }))
                     }
-                    placeholder="Selecciona fecha y hora de inicio"
-                    required
-                  />
-                  <SimpleDateTimePicker
-                    name="endDate"
-                    label="Fecha y Hora de Fin"
-                    value={formData.endDate}
-                    onChange={(value) =>
+                    onEndDateChange={(value) =>
                       setFormData((prev) => ({ ...prev, endDate: value }))
                     }
-                    placeholder="Selecciona fecha y hora de fin"
-                    minDate={
-                      formData.startDate
-                        ? new Date(formData.startDate)
-                        : undefined
-                    }
-                    required
                   />
-                </div>
+                )}
 
-                {/* Timezone */}
+                {/* Multi-Day Event - Link to dedicated page */}
+                {eventType === "multi_day" && eventId && (
+                  <Link
+                    href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion/dias`}
+                    className="block"
+                  >
+                    <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
+                          <CalendarRange className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">
+                            {eventDays.length > 0
+                              ? `${eventDays.length} día${eventDays.length !== 1 ? "s" : ""} configurado${eventDays.length !== 1 ? "s" : ""}`
+                              : "Configurar días del evento"}
+                          </p>
+                          <p className="text-sm text-zinc-500">
+                            {eventDays.length > 0
+                              ? eventDays.map((d) => d.name).join(", ")
+                              : "Agrega los días de tu festival"}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-zinc-400" />
+                    </div>
+                  </Link>
+                )}
+
+                {/* Recurring - Coming Soon */}
+                {eventType === "recurring" && (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <p className="text-sm text-zinc-500">
+                      La configuración de eventos recurrentes estará disponible próximamente.
+                    </p>
+                  </div>
+                )}
+
+                {/* Slots - Coming Soon */}
+                {eventType === "slots" && (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <p className="text-sm text-zinc-500">
+                      La configuración de horarios estará disponible próximamente.
+                    </p>
+                  </div>
+                )}
+
+                {/* Timezone - shown for all types */}
                 <FormSelect
                   id="timezone"
                   name="timezone"

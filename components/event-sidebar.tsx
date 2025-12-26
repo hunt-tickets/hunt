@@ -10,6 +10,10 @@ import {
   ScanLine,
   Banknote,
   ShoppingBag,
+  CalendarDays,
+  Calendar,
+  Repeat,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -23,11 +27,21 @@ interface UserData {
   image?: string | null;
 }
 
+type EventType = "single" | "multi_day" | "recurring" | "slots";
+
+const eventTypeConfig: Record<EventType, { label: string; icon: typeof Calendar }> = {
+  single: { label: "Evento único", icon: Calendar },
+  multi_day: { label: "Varios días", icon: CalendarDays },
+  recurring: { label: "Recurrente", icon: Repeat },
+  slots: { label: "Por horarios", icon: Clock },
+};
+
 interface EventSidebarProps {
   userId: string;
   organizationId: string;
   eventId: string;
   eventName: string;
+  eventType?: EventType;
   role?: "owner" | "administrator" | "seller";
   user: UserData | null;
 }
@@ -83,6 +97,7 @@ export function EventSidebar({
   organizationId,
   eventId,
   eventName,
+  eventType = "single",
   role = "seller",
   // user,
 }: EventSidebarProps) {
@@ -95,10 +110,32 @@ export function EventSidebar({
       ? `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
       : `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`;
 
+  // Get event type configuration
+  const typeConfig = eventTypeConfig[eventType];
+  const TypeIcon = typeConfig.icon;
+
   // Filter menu items based on role
   const visibleMenuItems = menuItems.filter((item) =>
     item.requiredRoles.includes(role)
   );
+
+  // Add "Días" menu item for multi-day events (insert after "Entradas")
+  const menuItemsWithDays = eventType === "multi_day"
+    ? visibleMenuItems.flatMap((item) =>
+        item.href === "/entradas"
+          ? [
+              item,
+              {
+                title: "Días",
+                icon: CalendarDays,
+                href: "/configuracion/dias",
+                description: "Gestiona los días del evento",
+                requiredRoles: ["owner", "administrator"] as const,
+              },
+            ]
+          : [item]
+      )
+    : visibleMenuItems;
 
   return (
     <>
@@ -138,13 +175,21 @@ export function EventSidebar({
             >
               {eventName}
             </div>
+            {/* Event Type Badge */}
+            <div className="mt-2 ml-8 flex items-center gap-1.5">
+              <TypeIcon className="h-3 w-3 text-gray-400 dark:text-white/40" />
+              <span className="text-[10px] font-medium text-gray-400 dark:text-white/40 uppercase tracking-wide">
+                {typeConfig.label}
+              </span>
+            </div>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1">
-            {visibleMenuItems.map((item) => {
+            {menuItemsWithDays.map((item) => {
               const Icon = item.icon;
               const fullHref = `${baseEventPath}${item.href}`;
+              // Use exact matching only - avoid false positives from nested routes
               const isActive = pathname === fullHref;
 
               return (

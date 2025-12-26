@@ -4,8 +4,8 @@ import { headers } from "next/headers";
 import { EventConfigContent } from "@/components/event-config-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { db } from "@/lib/drizzle";
-import { member, events } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { member, events, eventDays } from "@/lib/schema";
+import { eq, and, asc } from "drizzle-orm";
 
 interface ConfiguracionPageProps {
   params: Promise<{
@@ -62,12 +62,19 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     notFound();
   }
 
+  // Fetch event days for multi-day events
+  const days = await db.query.eventDays.findMany({
+    where: eq(eventDays.eventId, eventId),
+    orderBy: [asc(eventDays.sortOrder)],
+  });
+
   // Format event data for the config component
   const eventData = {
     id: event.id,
     name: event.name || "",
     description: event.description || "",
     category: event.category || undefined,
+    type: (event.type as "single" | "multi_day" | "recurring" | "slots") || "single",
     date: event.date?.toISOString(),
     end_date: event.endDate?.toISOString(),
     status: event.status ?? false,
@@ -81,6 +88,13 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     flyer_apple: event.flyerApple || undefined,
     venue_id: event.venueId || undefined,
     faqs: (event.faqs as Array<{ id: string; question: string; answer: string }>) || [],
+    days: days.map((d) => ({
+      id: d.id,
+      name: d.name || "",
+      date: d.date?.toISOString() || "",
+      endDate: d.endDate?.toISOString() || "",
+      sortOrder: d.sortOrder || 0,
+    })),
   };
 
   return (
