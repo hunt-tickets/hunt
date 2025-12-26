@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ticket, HelpCircle, Map, CalendarRange } from "lucide-react";
+import { Ticket, HelpCircle, Map, CalendarRange, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { CreateTicketTypeDialog } from "@/components/create-ticket-type-dialog";
@@ -147,12 +147,202 @@ export function EventTicketsContent({
         </div>
       </div>
 
+      {/* Multi-day Overview Card */}
+      {isMultiDay && (
+        <div className="mb-6 p-5 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <CalendarRange className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">Resumen por Día</h3>
+            </div>
+            <div className="text-xs text-white/40">
+              {eventDays.length} día{eventDays.length !== 1 ? 's' : ''} configurado{eventDays.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+
+          {/* Days Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {eventDays.map((day, index) => {
+              const dayTickets = tickets.filter(t => t.event_day_id === day.id);
+              const dayDate = day.date ? new Date(day.date) : null;
+
+              // Calculate day totals from analytics
+              const dayTotals = dayTickets.reduce((acc, ticket) => {
+                const analytics = ticketsAnalytics?.[ticket.id];
+                if (!analytics) return acc;
+                return {
+                  sold: acc.sold + analytics.total.quantity,
+                  revenue: acc.revenue + analytics.total.total,
+                  capacity: acc.capacity + ticket.quantity,
+                };
+              }, { sold: 0, revenue: 0, capacity: 0 });
+
+              const soldPercentage = dayTotals.capacity > 0
+                ? (dayTotals.sold / dayTotals.capacity) * 100
+                : 0;
+
+              return (
+                <button
+                  key={day.id}
+                  onClick={() => setSelectedDay(day.id)}
+                  className={cn(
+                    "p-4 rounded-xl border text-left transition-all hover:border-white/20",
+                    selectedDay === day.id
+                      ? "border-primary bg-primary/10"
+                      : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+                  )}
+                >
+                  {/* Day header */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/10 text-xs font-bold">
+                      {index + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{day.name}</div>
+                      {dayDate && (
+                        <div className="text-xs text-white/40">
+                          {dayDate.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tickets list */}
+                  <div className="space-y-1 mb-3">
+                    {dayTickets.length > 0 ? (
+                      dayTickets.slice(0, 3).map(ticket => (
+                        <div key={ticket.id} className="flex items-center gap-1.5 text-xs">
+                          {ticket.hex && (
+                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ticket.hex }} />
+                          )}
+                          <span className="truncate text-white/60">{ticket.name}</span>
+                          <span className="text-white/30 ml-auto flex-shrink-0">{formatCurrency(ticket.price)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-xs text-white/30 italic">Sin entradas</div>
+                    )}
+                    {dayTickets.length > 3 && (
+                      <div className="text-xs text-white/40">+{dayTickets.length - 3} más</div>
+                    )}
+                  </div>
+
+                  {/* Sales progress */}
+                  {dayTotals.capacity > 0 && (
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-white/40">{dayTotals.sold}/{dayTotals.capacity}</span>
+                        <span className="text-white/60 font-medium">{soldPercentage.toFixed(0)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all",
+                            soldPercentage >= 90 ? "bg-red-500" : soldPercentage >= 70 ? "bg-amber-500" : "bg-emerald-500"
+                          )}
+                          style={{ width: `${Math.min(soldPercentage, 100)}%` }}
+                        />
+                      </div>
+                      {dayTotals.revenue > 0 && (
+                        <div className="flex items-center gap-1 mt-2 text-xs text-white/50">
+                          <TrendingUp className="h-3 w-3" />
+                          {formatCurrency(dayTotals.revenue)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+
+            {/* General Pass Card */}
+            {tickets.some(t => !t.event_day_id) && (() => {
+              const passTickets = tickets.filter(t => !t.event_day_id);
+              const passTotals = passTickets.reduce((acc, ticket) => {
+                const analytics = ticketsAnalytics?.[ticket.id];
+                if (!analytics) return acc;
+                return {
+                  sold: acc.sold + analytics.total.quantity,
+                  revenue: acc.revenue + analytics.total.total,
+                  capacity: acc.capacity + ticket.quantity,
+                };
+              }, { sold: 0, revenue: 0, capacity: 0 });
+
+              const soldPercentage = passTotals.capacity > 0
+                ? (passTotals.sold / passTotals.capacity) * 100
+                : 0;
+
+              return (
+                <button
+                  onClick={() => setSelectedDay("all_days_pass")}
+                  className={cn(
+                    "p-4 rounded-xl border text-left transition-all hover:border-white/20",
+                    selectedDay === "all_days_pass"
+                      ? "border-primary bg-primary/10"
+                      : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+                  )}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary">
+                      <CalendarRange className="h-3.5 w-3.5" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium">Pase General</div>
+                      <div className="text-xs text-white/40">Todos los días</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 mb-3">
+                    {passTickets.slice(0, 3).map(ticket => (
+                      <div key={ticket.id} className="flex items-center gap-1.5 text-xs">
+                        {ticket.hex && (
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ticket.hex }} />
+                        )}
+                        <span className="truncate text-white/60">{ticket.name}</span>
+                        <span className="text-white/30 ml-auto flex-shrink-0">{formatCurrency(ticket.price)}</span>
+                      </div>
+                    ))}
+                    {passTickets.length > 3 && (
+                      <div className="text-xs text-white/40">+{passTickets.length - 3} más</div>
+                    )}
+                  </div>
+
+                  {passTotals.capacity > 0 && (
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-white/40">{passTotals.sold}/{passTotals.capacity}</span>
+                        <span className="text-white/60 font-medium">{soldPercentage.toFixed(0)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all",
+                            soldPercentage >= 90 ? "bg-red-500" : soldPercentage >= 70 ? "bg-amber-500" : "bg-emerald-500"
+                          )}
+                          style={{ width: `${Math.min(soldPercentage, 100)}%` }}
+                        />
+                      </div>
+                      {passTotals.revenue > 0 && (
+                        <div className="flex items-center gap-1 mt-2 text-xs text-white/50">
+                          <TrendingUp className="h-3 w-3" />
+                          {formatCurrency(passTotals.revenue)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </button>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
       {/* Day tabs for multi-day events */}
       {isMultiDay && (
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CalendarRange className="h-4 w-4" />
-            <span>Días del evento</span>
+            <span>Filtrar por día</span>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
             <button

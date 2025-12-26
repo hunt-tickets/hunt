@@ -99,26 +99,43 @@ export default async function EventPage({ params }: EventPageProps) {
 
           {/* Key Info Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            {/* Date */}
+            {/* Date - different display for multi-day events */}
             <div className="flex gap-3 p-4 rounded-xl bg-muted/50">
               <Calendar className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground mb-1">Fecha</p>
-                <p
-                  className="font-semibold text-sm sm:text-base"
-                  suppressHydrationWarning
-                >
-                  {event.date
-                    ? new Date(event.date).toLocaleDateString("es-ES", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : "Fecha por confirmar"}
+                <p className="text-xs text-muted-foreground mb-1">
+                  {event.eventType === "multi_day" && event.eventDays.length > 0 ? "Fechas" : "Fecha"}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {event.hour} - {event.end_hour}
-                </p>
+                {event.eventType === "multi_day" && event.eventDays.length > 0 ? (
+                  <>
+                    <p className="font-semibold text-sm sm:text-base" suppressHydrationWarning>
+                      {event.eventDays[0].date.toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
+                      {" - "}
+                      {event.eventDays[event.eventDays.length - 1].date.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {event.eventDays.length} días
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p
+                      className="font-semibold text-sm sm:text-base"
+                      suppressHydrationWarning
+                    >
+                      {event.date
+                        ? new Date(event.date).toLocaleDateString("es-ES", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "Fecha por confirmar"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {event.hour} - {event.end_hour}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             {/* Location */}
@@ -199,6 +216,8 @@ export default async function EventPage({ params }: EventPageProps) {
               <TicketsContainer
                 tickets={event.tickets}
                 eventId={event.id}
+                eventType={event.eventType}
+                eventDays={event.eventDays}
               />
             </div>
           </div>

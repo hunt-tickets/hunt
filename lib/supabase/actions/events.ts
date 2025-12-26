@@ -848,6 +848,24 @@ export async function getPopularEvents(
 }
 
 /**
+ * Event day type for multi-day events
+ */
+export type EventDayDetail = {
+  id: string;
+  name: string | null;
+  date: Date;
+  endDate: Date | null;
+  sortOrder: number;
+};
+
+/**
+ * Extended ticket type with day information
+ */
+export type TicketTypeWithDay = TicketType & {
+  eventDayId: string | null;
+};
+
+/**
  * Full event details type for the event detail page
  */
 export type EventDetail = {
@@ -867,7 +885,10 @@ export type EventDetail = {
   venue_longitude: string | null;
   hour: string;
   end_hour: string;
-  tickets: TicketType[];
+  tickets: TicketTypeWithDay[];
+  // Multi-day event support
+  eventType: "single" | "multi_day" | "recurring" | "slots";
+  eventDays: EventDayDetail[];
 };
 
 /**
@@ -880,7 +901,7 @@ export async function getEventById(
   const supabase = await createClient();
 
   try {
-    // Fetch event data and ticket availability in parallel
+    // Fetch event data (with nested event_days) and ticket availability in parallel
     const [eventResult, ticketResult] = await Promise.all([
       supabase
         .from("events")
@@ -895,18 +916,26 @@ export async function getEventById(
           flyer,
           age,
           variable_fee,
+          type,
           venues (
             name,
             city,
             address,
             latitude,
             longitude
+          ),
+          event_days (
+            id,
+            name,
+            date,
+            end_date,
+            sort_order
           )
         `
         )
         .eq("id", eventId)
         .single(),
-      // Use RPC for accurate availability with lazy expiration
+      // Use RPC for accurate availability with lazy expiration (includes event_day_id)
       supabase.rpc("get_ticket_availability_v2", { p_event_id: eventId }),
     ]);
 
@@ -948,6 +977,26 @@ export async function getEventById(
     // Handle ticket types from RPC result
     const ticketTypes = ticketResult.data || [];
 
+    // Handle event days from nested select
+    const eventDaysData = (event.event_days as unknown as Array<{
+      id: string;
+      name: string | null;
+      date: string;
+      end_date: string | null;
+      sort_order: number | null;
+    }>) || [];
+
+    // Sort event days by sort_order
+    const sortedDays: EventDayDetail[] = eventDaysData
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map(d => ({
+        id: d.id,
+        name: d.name,
+        date: new Date(d.date),
+        endDate: d.end_date ? new Date(d.end_date) : null,
+        sortOrder: d.sort_order || 0,
+      }));
+
     // Format hours from date
     const formatHour = (date: string | null): string => {
       if (!date) return "--:--";
@@ -974,9 +1023,13 @@ export async function getEventById(
       venue_longitude: venue?.longitude || null,
       hour: formatHour(event.date),
       end_hour: formatHour(event.end_date),
+      // Multi-day event support
+      eventType: (event.type as EventDetail["eventType"]) || "single",
+      eventDays: sortedDays,
       tickets: ticketTypes.map((t: Record<string, unknown>) => ({
         id: t.ticket_type_id as string,
         eventId: event.id,
+        eventDayId: (t.event_day_id as string | null) || null,
         name: t.ticket_name as string,
         description: t.description as string | null,
         price: t.price as string,
