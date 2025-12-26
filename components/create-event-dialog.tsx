@@ -76,15 +76,15 @@ export function CreateEventDialog({
 
       <SheetContent
         side="right"
-        className="w-full sm:max-w-md p-0 bg-[#0a0a0a] border-l border-[#1a1a1a] overflow-y-auto"
+        className="w-full sm:max-w-md p-0 bg-white dark:bg-[#0a0a0a] border-l border-gray-200 dark:border-white/10 overflow-y-auto"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <SheetHeader className="px-6 py-5 border-b border-[#1a1a1a]">
-            <SheetTitle className="text-xl font-semibold">
+          <SheetHeader className="px-6 py-5 border-b border-gray-200 dark:border-white/10">
+            <SheetTitle className="text-xl font-bold text-gray-900 dark:text-white">
               Nuevo Evento
             </SheetTitle>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600 dark:text-white/60">
               Crea tu evento en segundos. Podrás configurar más detalles
               después.
             </p>
@@ -99,33 +99,33 @@ export function CreateEventDialog({
             className="flex-1 flex flex-col"
           >
             {/* Form Content */}
-            <div className="flex-1 px-6 py-6 space-y-6">
+            <div className="flex-1 px-6 py-6 space-y-6 bg-gray-50 dark:bg-[#0a0a0a]">
               {/* Error message */}
               {state.message && !state.success && (
                 <Alert
                   variant="destructive"
-                  className="border-destructive/50 bg-destructive/10"
+                  className="border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10"
                 >
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{state.message}</AlertDescription>
+                  <AlertDescription className="text-red-900 dark:text-red-400">{state.message}</AlertDescription>
                 </Alert>
               )}
 
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
+                <Label htmlFor="name" className="text-sm font-medium text-gray-900 dark:text-white">
                   Nombre del evento
                 </Label>
                 <Input
                   id="name"
                   name="name"
                   placeholder="Ej: Fiesta de Año Nuevo 2025"
-                  className="h-11 bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
+                  className="h-11 bg-white dark:bg-[#111] border-gray-200 dark:border-white/10 focus-visible:ring-primary/50"
                   autoFocus
                   disabled={isSubmitting}
                 />
                 {state.errors?.name && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
+                  <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     {state.errors.name[0]}
                   </p>
@@ -133,9 +133,9 @@ export function CreateEventDialog({
               </div>
 
               {/* Next steps info */}
-              <div className="flex gap-3 p-3 rounded-lg bg-[#111] border border-[#2a2a2a]">
-                <Info className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-muted-foreground">
+              <div className="flex gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-900 dark:text-blue-300">
                   Después de crear el evento podrás configurar fechas, flyer,
                   boletos y más detalles.
                 </p>
@@ -143,13 +143,13 @@ export function CreateEventDialog({
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-[#1a1a1a] bg-[#0a0a0a]">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0a0a0a]">
               <div className="flex gap-3">
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => setOpen(false)}
-                  className="flex-1 h-11"
+                  className="flex-1 h-11 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5"
                   disabled={isSubmitting}
                 >
                   Cancelar
