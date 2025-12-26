@@ -297,7 +297,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           tickets={ticketsWithAnalytics}
           eventId={eventId}
           eventName={event.name}
-          eventFlyer={event.flyer || "/placeholder.svg"}
+          eventFlyer={event.flyer || "/event-placeholder.svg"}
           showTabsOnly
         />
       </EventStickyHeader>
@@ -327,7 +327,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         tickets={ticketsWithAnalytics}
         eventId={eventId}
         eventName={event.name}
-        eventFlyer={event.flyer || "/placeholder.svg"}
+        eventFlyer={event.flyer || "/event-placeholder.svg"}
         showContentOnly
       />
     </div>

@@ -153,7 +153,7 @@ export function EventWebAnalytics({
               {/* Website content preview */}
               <div className="aspect-[16/9] bg-black relative overflow-hidden">
                 <img
-                  src={eventFlyer || '/placeholder.svg'}
+                  src={eventFlyer || '/event-placeholder.svg'}
                   alt={eventName}
                   className="w-full h-full object-cover"
                 />

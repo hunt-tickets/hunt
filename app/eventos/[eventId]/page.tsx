@@ -37,7 +37,7 @@ export async function generateMetadata({
       description: event.description || `Evento en ${event.venue_city}`,
       images: [
         {
-          url: event.flyer || "/placeholder.svg",
+          url: event.flyer || "/event-placeholder.svg",
           width: 1200,
           height: 630,
           alt: event.name || "Evento",
@@ -49,7 +49,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: event.name || "Evento",
       description: event.description || `Evento en ${event.venue_city}`,
-      images: [event.flyer || "/placeholder.svg"],
+      images: [event.flyer || "/event-placeholder.svg"],
     },
   };
 }
@@ -71,7 +71,7 @@ export default async function EventPage({ params }: EventPageProps) {
       {/* Hero Image - Full width on mobile */}
       <div className="relative w-full aspect-[3/4] sm:aspect-[16/9] lg:aspect-[21/9] bg-muted">
         <Image
-          src={event.flyer || "/placeholder.svg"}
+          src={event.flyer || "/event-placeholder.svg"}
           alt={event.name || "Evento"}
           fill
           priority

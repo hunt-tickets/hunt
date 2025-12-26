@@ -1,0 +1,28 @@
+<svg width="300" height="400" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with subtle gradient -->
+  <rect width="300" height="400" fill="#18181B"/>
+  <rect width="300" height="400" fill="url(#gradient)" opacity="0.5"/>
+
+  <!-- Subtle pattern -->
+  <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+    <circle cx="2" cy="2" r="1" fill="white" opacity="0.03"/>
+  </pattern>
+  <rect width="300" height="400" fill="url(#dots)"/>
+
+  <!-- Ticket icon -->
+  <g transform="translate(100, 160)">
+    <path d="M90 20H10C4.5 20 0 24.5 0 30V42C5.5 42 10 46.5 10 52C10 57.5 5.5 62 0 62V74C0 79.5 4.5 84 10 84H90C95.5 84 100 79.5 100 74V62C94.5 62 90 57.5 90 52C90 46.5 94.5 42 100 42V30C100 24.5 95.5 20 90 20Z" stroke="white" stroke-width="2" stroke-opacity="0.2" fill="none"/>
+    <line x1="35" y1="20" x2="35" y2="84" stroke="white" stroke-opacity="0.1" stroke-width="2" stroke-dasharray="4 4"/>
+  </g>
+
+  <!-- HUNT text -->
+  <text x="150" y="290" text-anchor="middle" fill="white" fill-opacity="0.15" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" letter-spacing="4">HUNT</text>
+
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="300" y2="400">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+</svg>

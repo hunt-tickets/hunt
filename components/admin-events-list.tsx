@@ -82,9 +82,10 @@ export function AdminEventsList({
               title={event.name || "Sin nombre"}
               date={event.date ? (typeof event.date === "string" ? event.date : event.date.toISOString()) : ""}
               location={`${event.venue_name || "Sin venue"}, ${event.venue_city || "Sin ciudad"}`}
-              image={event.flyer || "/placeholder.svg"}
+              image={event.flyer || "/event-placeholder.svg"}
               href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${event.id}`}
               onClick={handleEventClick}
+              status={event.status}
             />
           ))}
         </div>
