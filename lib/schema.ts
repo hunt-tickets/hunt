@@ -672,6 +672,11 @@ export const eventDays = pgTable(
     endDate: timestamp("end_date", { withTimezone: true }),
     name: text("name"), // "Pre-Party", "Día 1", "Viernes"
     sortOrder: integer("sort_order").default(0),
+    // NEW: Festival essentials
+    description: text("description"), // Lineup, what's happening
+    flyer: text("flyer"), // Day-specific artwork
+    doorsOpen: timestamp("doors_open", { withTimezone: true }),
+    showStart: timestamp("show_start", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [index("idx_event_days_event").on(table.eventId)]

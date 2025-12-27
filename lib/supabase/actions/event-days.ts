@@ -9,6 +9,11 @@ export interface EventDayInput {
   date: string;
   endDate?: string;
   sortOrder: number;
+  // Festival essentials
+  description?: string;
+  flyer?: string;
+  doorsOpen?: string;
+  showStart?: string;
 }
 
 export type EventDaysResult = {
@@ -84,6 +89,11 @@ export async function syncEventDays(
       date: day.date,
       end_date: day.endDate || null,
       sort_order: day.sortOrder,
+      // Festival essentials
+      description: day.description || null,
+      flyer: day.flyer || null,
+      doors_open: day.doorsOpen || null,
+      show_start: day.showStart || null,
     }));
 
     if (upsertData.length > 0) {
@@ -156,5 +166,10 @@ export async function getEventDays(eventId: string) {
     date: day.date,
     endDate: day.end_date || "",
     sortOrder: day.sort_order || 0,
+    // Festival essentials
+    description: day.description || "",
+    flyer: day.flyer || "",
+    doorsOpen: day.doors_open || "",
+    showStart: day.show_start || "",
   }));
 }

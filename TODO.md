@@ -1,0 +1,5 @@
+- Acceso a creacion de Organizaciones tiene que ser restringido
+- Terminar event_days y Events
+- Programa de referidos
+- Webhook para facturacion
+- Scanner
