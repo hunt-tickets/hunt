@@ -122,14 +122,20 @@ export function EventCard({
                 ? "bg-white/80 backdrop-blur-sm border border-gray-300/50 rounded-xl px-4 py-3 text-center"
                 : "bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center"
           }>
-            <div className={`text-2xl font-bold leading-none ${
-              isThemeDark ? "text-white" : (isImageLight ? "text-zinc-900" : "text-white")
-            }`}>
+            <div
+              className={`text-2xl font-bold leading-none ${
+                isThemeDark ? "text-white" : (isImageLight ? "text-zinc-900" : "text-white")
+              }`}
+              suppressHydrationWarning
+            >
               {day}
             </div>
-            <div className={`text-sm uppercase leading-none mt-1 ${
-              isThemeDark ? "text-white/90" : (isImageLight ? "text-zinc-700" : "text-white/90")
-            }`}>
+            <div
+              className={`text-sm uppercase leading-none mt-1 ${
+                isThemeDark ? "text-white/90" : (isImageLight ? "text-zinc-700" : "text-white/90")
+              }`}
+              suppressHydrationWarning
+            >
               {month}
             </div>
           </div>
