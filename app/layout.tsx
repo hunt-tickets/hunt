@@ -62,7 +62,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster
-            position="bottom-right"
+            position="top-center"
             expand={false}
             toastOptions={{
               className: "!z-[9999]",
