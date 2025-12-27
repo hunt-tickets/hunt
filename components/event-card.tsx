@@ -6,6 +6,37 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 import { useImageBrightness } from "@/hooks/use-image-brightness";
+import { EVENT_CATEGORY_LABELS, type EventCategory } from "@/constants/event-categories";
+import {
+  Music2,
+  Trophy,
+  UtensilsCrossed,
+  PartyPopper,
+  Users,
+  Palette,
+  TreePine,
+  Heart,
+  Briefcase,
+  GraduationCap,
+  Store,
+  MoreHorizontal,
+  type LucideIcon,
+} from "lucide-react";
+
+const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
+  musica: Music2,
+  deportes: Trophy,
+  gastronomia: UtensilsCrossed,
+  rumba: PartyPopper,
+  familiar: Users,
+  arte: Palette,
+  aire_libre: TreePine,
+  bienestar: Heart,
+  negocios: Briefcase,
+  educacion: GraduationCap,
+  mercados: Store,
+  otro: MoreHorizontal,
+};
 
 interface EventCardProps {
   id: string; // Event ID for navigation
@@ -16,6 +47,7 @@ interface EventCardProps {
   href?: string; // Optional custom URL (defaults to /eventos/{id})
   onClick?: () => void; // Optional callback when card is clicked
   status?: boolean | null; // Event status: true = active, false = draft
+  category?: string | null; // Event category
 }
 
 export function EventCard({
@@ -27,6 +59,7 @@ export function EventCard({
   href,
   onClick,
   status,
+  category,
 }: EventCardProps) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -100,7 +133,7 @@ export function EventCard({
           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
 
-        {/* Status badge in top left corner - only show when status is provided */}
+        {/* Status badge in top left corner - only show when status is provided (admin view) */}
         {status !== undefined && (
           <div className="absolute top-4 left-4 z-10">
             <div className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
@@ -112,6 +145,22 @@ export function EventCard({
             </div>
           </div>
         )}
+
+        {/* Category icon in top left corner - only show on public view (no status) */}
+        {status === undefined && category && CATEGORY_ICONS[category as EventCategory] && (() => {
+          const CategoryIcon = CATEGORY_ICONS[category as EventCategory];
+          const categoryLabel = EVENT_CATEGORY_LABELS[category as EventCategory] || category;
+          return (
+            <div
+              className="absolute top-4 left-4 z-10"
+              title={categoryLabel}
+            >
+              <div className="p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
+                <CategoryIcon className="h-4 w-4 text-white" />
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Date badge in top right corner */}
         <div className="absolute top-4 right-4 z-10">

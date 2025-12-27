@@ -196,6 +196,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
               date={event.date ? event.date.toISOString() : ""}
               location={`${event.venue_name}, ${event.venue_city}`}
               image={event.flyer || "/event-placeholder.svg"}
+              category={event.category}
             />
           ))}
         </div>
