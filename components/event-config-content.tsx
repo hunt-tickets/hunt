@@ -478,7 +478,7 @@ export function EventConfigContent({
                         .value as (typeof EVENT_CATEGORIES)[number],
                     }))
                   }
-                  hint="Selecciona la categoría que mejor describe tu evento"
+                  hint="La categoría ayuda a que tu evento aparezca en búsquedas y filtros, aumentando su visibilidad"
                   required
                 >
                   <option value="">Selecciona una categoría</option>
