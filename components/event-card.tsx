@@ -46,9 +46,9 @@ type EventType = "single" | "multi_day" | "recurring" | "slots";
 
 const EVENT_TYPE_CONFIG: Record<EventType, { icon: LucideIcon; label: string }> = {
   single: { icon: Calendar, label: "Único" },
-  multi_day: { icon: CalendarDays, label: "Multi-día" },
+  multi_day: { icon: CalendarDays, label: "Varios días" },
   recurring: { icon: Repeat, label: "Recurrente" },
-  slots: { icon: Clock, label: "Horarios" },
+  slots: { icon: Clock, label: "Por horarios" },
 };
 
 interface EventCardProps {

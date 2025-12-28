@@ -613,9 +613,9 @@ export function EventConfigContent({
                       </svg>
                       <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
                         {eventType === "single" && "Evento único"}
-                        {eventType === "multi_day" && "Varios días"}
-                        {eventType === "recurring" && "Recurrente"}
-                        {eventType === "slots" && "Por horarios"}
+                        {eventType === "multi_day" && "Evento de varios días"}
+                        {eventType === "recurring" && "Evento recurrente"}
+                        {eventType === "slots" && "Evento por horarios"}
                       </span>
                     </div>
                   </div>

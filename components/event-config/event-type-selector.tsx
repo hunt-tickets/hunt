@@ -20,19 +20,19 @@ const eventTypes = [
   },
   {
     id: "multi_day" as const,
-    label: "Varios días",
+    label: "Evento de varios días",
     description: "Festival, convención",
     icon: CalendarDays,
   },
   {
     id: "recurring" as const,
-    label: "Recurrente",
+    label: "Evento recurrente",
     description: "Clases, reuniones semanales",
     icon: Repeat,
   },
   {
     id: "slots" as const,
-    label: "Por horarios",
+    label: "Evento por horarios",
     description: "Tours, escape rooms, citas",
     icon: Clock,
   },

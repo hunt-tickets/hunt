@@ -31,9 +31,9 @@ type EventType = "single" | "multi_day" | "recurring" | "slots";
 
 const eventTypeConfig: Record<EventType, { label: string; icon: typeof Calendar }> = {
   single: { label: "Evento único", icon: Calendar },
-  multi_day: { label: "Varios días", icon: CalendarDays },
-  recurring: { label: "Recurrente", icon: Repeat },
-  slots: { label: "Por horarios", icon: Clock },
+  multi_day: { label: "Evento de varios días", icon: CalendarDays },
+  recurring: { label: "Evento recurrente", icon: Repeat },
+  slots: { label: "Evento por horarios", icon: Clock },
 };
 
 interface EventSidebarProps {
