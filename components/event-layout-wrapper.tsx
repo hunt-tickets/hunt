@@ -27,7 +27,12 @@ interface EventLayoutWrapperProps {
 export function EventLayoutWrapper({ children, userId, organizationId, eventId, eventName, eventType = "single", role = "seller", user }: EventLayoutWrapperProps) {
   return (
     <EventTabsProvider>
-      <div className="min-h-screen bg-background">
+      {/*
+        Parent /administrador/layout.tsx provides lg:ml-64 and padding.
+        We use negative margins to reset the parent's padding, then apply our own layout.
+        AdminSidebar hides itself when pathname includes /event/, so only EventSidebar shows.
+      */}
+      <div className="min-h-screen bg-background -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 lg:-ml-64">
         <EventSidebar
           userId={userId}
           organizationId={organizationId}

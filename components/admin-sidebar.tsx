@@ -142,6 +142,12 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
     fetchMembers();
   }, [organizationId]);
 
+  // Hide AdminSidebar when on event-specific pages (EventSidebar is used there)
+  // This check must come AFTER all hooks to comply with Rules of Hooks
+  if (pathname.includes("/administrador/event/")) {
+    return null;
+  }
+
   // Find current user's role from members list
   const currentUserMember = members?.find((m: Member) => m.userId === userId);
   const role: Role = (currentUserMember?.role as Role) || "seller";
