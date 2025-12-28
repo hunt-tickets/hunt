@@ -84,6 +84,7 @@ export function AdminEventsList({
               href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${event.id}`}
               onClick={handleEventClick}
               status={event.status}
+              eventType={event.type}
             />
           ))}
         </div>

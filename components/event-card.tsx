@@ -20,6 +20,10 @@ import {
   GraduationCap,
   Store,
   MoreHorizontal,
+  Calendar,
+  CalendarDays,
+  Repeat,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -38,6 +42,15 @@ const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
   otro: MoreHorizontal,
 };
 
+type EventType = "single" | "multi_day" | "recurring" | "slots";
+
+const EVENT_TYPE_CONFIG: Record<EventType, { icon: LucideIcon; label: string }> = {
+  single: { icon: Calendar, label: "Único" },
+  multi_day: { icon: CalendarDays, label: "Multi-día" },
+  recurring: { icon: Repeat, label: "Recurrente" },
+  slots: { icon: Clock, label: "Horarios" },
+};
+
 interface EventCardProps {
   id: string; // Event ID for navigation
   title: string;
@@ -48,6 +61,7 @@ interface EventCardProps {
   onClick?: () => void; // Optional callback when card is clicked
   status?: boolean | null; // Event status: true = active, false = draft
   category?: string | null; // Event category
+  eventType?: EventType | null; // Event type: single, multi_day, recurring, slots
 }
 
 export function EventCard({
@@ -60,6 +74,7 @@ export function EventCard({
   onClick,
   status,
   category,
+  eventType,
 }: EventCardProps) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -133,9 +148,9 @@ export function EventCard({
           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
 
-        {/* Status badge in top left corner - only show when status is provided (admin view) */}
+        {/* Status and Event Type badges in top left corner - only show when status is provided (admin view) */}
         {status !== undefined && (
-          <div className="absolute top-4 left-4 z-10">
+          <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
             <div className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
               status
                 ? "bg-emerald-500/90 text-white"
@@ -143,6 +158,16 @@ export function EventCard({
             }`}>
               {status ? "Activo" : "Borrador"}
             </div>
+            {eventType && EVENT_TYPE_CONFIG[eventType] && (() => {
+              const TypeIcon = EVENT_TYPE_CONFIG[eventType].icon;
+              const typeLabel = EVENT_TYPE_CONFIG[eventType].label;
+              return (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-zinc-900/80 text-zinc-200 border border-zinc-700/50 backdrop-blur-sm">
+                  <TypeIcon className="h-3 w-3" />
+                  <span>{typeLabel}</span>
+                </div>
+              );
+            })()}
           </div>
         )}
 
