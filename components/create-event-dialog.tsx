@@ -124,6 +124,10 @@ export function CreateEventDialog({
                   onChange={setEventType}
                   disabled={pending}
                 />
+                <p className="text-xs text-amber-500/90 flex items-center gap-1.5">
+                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                  El tipo de evento no se puede cambiar después de crearlo.
+                </p>
                 {state.errors?.type && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />

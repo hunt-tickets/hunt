@@ -513,7 +513,7 @@ export async function updateEventConfiguration(
     name?: string;
     description?: string;
     category?: (typeof EVENT_CATEGORIES)[number];
-    type?: "single" | "multi_day" | "recurring" | "slots";
+    // Note: type is intentionally not editable after creation
     date?: string;
     end_date?: string;
     age?: number;
@@ -541,46 +541,7 @@ export async function updateEventConfiguration(
     return { success: false, message: "Categoría inválida" };
   }
 
-  // Validate event type constraints
-  if (formData.type) {
-    // Fetch current event data to check constraints
-    const { data: currentEvent, error: fetchError } = await supabase
-      .from("events")
-      .select("type")
-      .eq("id", eventId)
-      .single();
-
-    if (fetchError) {
-      console.error("Error fetching current event:", fetchError);
-      return { success: false, message: "Error al obtener el evento" };
-    }
-
-    // If changing to 'single', date fields are allowed but event_days should be cleared
-    if (formData.type === "single" && currentEvent?.type === "multi_day") {
-      // Clear all event_days when switching from multi_day to single
-      const { error: deleteError } = await supabase
-        .from("event_days")
-        .delete()
-        .eq("event_id", eventId);
-
-      if (deleteError) {
-        console.error("Error clearing event days:", deleteError);
-        return {
-          success: false,
-          message: "Error al limpiar los días del evento",
-        };
-      }
-    }
-
-    // If changing to 'multi_day', clear direct date fields (they come from event_days)
-    if (formData.type === "multi_day" && currentEvent?.type !== "multi_day") {
-      // Clear date fields - they'll be set by syncEventDays
-      formData.date = undefined;
-      formData.end_date = undefined;
-    }
-  }
-
-  // Validate type-specific field constraints
+  // Validate type-specific field constraints for date fields
   if (formData.date !== undefined || formData.end_date !== undefined) {
     // Check current event type
     const { data: currentEvent } = await supabase
@@ -589,10 +550,8 @@ export async function updateEventConfiguration(
       .eq("id", eventId)
       .single();
 
-    const effectiveType = formData.type || currentEvent?.type;
-
     // multi_day events should not have date set directly
-    if (effectiveType === "multi_day") {
+    if (currentEvent?.type === "multi_day") {
       return {
         success: false,
         message:
@@ -606,7 +565,6 @@ export async function updateEventConfiguration(
     name: string;
     description: string | null;
     category: string;
-    type: string;
     date: string | null;
     end_date: string | null;
     age: number;
@@ -622,7 +580,6 @@ export async function updateEventConfiguration(
   if (formData.description !== undefined)
     updateData.description = formData.description || null;
   if (formData.category !== undefined) updateData.category = formData.category;
-  if (formData.type !== undefined) updateData.type = formData.type;
   // Convert empty strings to null for date fields (PostgreSQL doesn't accept "")
   if (formData.date !== undefined) updateData.date = formData.date || null;
   if (formData.end_date !== undefined)

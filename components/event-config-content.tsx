@@ -319,7 +319,7 @@ export function EventConfigContent({
           name: formData.eventName,
           description: formData.description,
           category: formData.category || undefined,
-          type: eventType,
+          // Note: type is not editable after creation
           date: eventType === "single" ? formData.startDate : undefined,
           end_date: eventType === "single" ? formData.endDate : undefined,
           age: formData.age,
@@ -583,25 +583,43 @@ export function EventConfigContent({
               </CardContent>
             </Card>
 
-            {/* Event Type Selection */}
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+            {/* Event Type Selection - Read Only */}
+            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] relative overflow-hidden">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle>Tipo de Evento</CardTitle>
                     <CardDescription>
-                      Define la estructura de fechas de tu evento
+                      El tipo de evento no se puede modificar después de crearlo
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <EventTypeSelector
-                  value={eventType}
-                  onChange={setEventType}
-                  disabled={isSaving}
-                />
+              <CardContent className="space-y-3">
+                <div className="relative">
+                  <div className="opacity-60 pointer-events-none select-none blur-[1px]">
+                    <EventTypeSelector
+                      value={eventType}
+                      onChange={() => {}}
+                      disabled={true}
+                    />
+                  </div>
+                  {/* Lock overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/5 dark:bg-white/5 rounded-lg">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                      <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                        {eventType === "single" && "Evento único"}
+                        {eventType === "multi_day" && "Varios días"}
+                        {eventType === "recurring" && "Recurrente"}
+                        {eventType === "slots" && "Por horarios"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
