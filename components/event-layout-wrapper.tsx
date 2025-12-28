@@ -42,7 +42,7 @@ export function EventLayoutWrapper({ children, userId, organizationId, eventId, 
           role={role}
           user={user}
         />
-        <main className="lg:ml-64 min-h-screen">{children}</main>
+        <main className="lg:ml-64 min-h-screen pt-4 px-4 sm:pt-6 sm:px-6 lg:pt-8 lg:px-8">{children}</main>
       </div>
     </EventTabsProvider>
   );
