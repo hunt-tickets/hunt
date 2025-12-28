@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
@@ -14,15 +15,15 @@ import { EVENT_CATEGORIES } from "@/constants/event-categories";
 
 const eventFormSchema = z.object({
   name: z.string().min(1, "El nombre del evento es requerido"),
+  type: z.enum(["single", "multi_day", "recurring", "slots"]).default("single"),
 });
 
 export type EventFormState = {
   errors?: {
     name?: string[];
+    type?: string[];
   };
   message?: string;
-  success?: boolean;
-  eventId?: string;
 };
 
 export async function createEvent(
@@ -36,10 +37,7 @@ export async function createEvent(
   });
 
   if (!session || !session.user) {
-    return {
-      message: "No autenticado",
-      success: false,
-    };
+    return { message: "No autenticado" };
   }
 
   const user = session.user;
@@ -48,6 +46,7 @@ export async function createEvent(
   // Validate form data
   const validatedFields = eventFormSchema.safeParse({
     name: formData.get("name"),
+    type: formData.get("type") || "single",
   });
 
   if (!validatedFields.success) {
@@ -66,48 +65,33 @@ export async function createEvent(
     return {
       errors: fieldErrors as EventFormState["errors"],
       message: "Campos inválidos. Por favor revise el formulario.",
-      success: false,
     };
   }
 
   const { data: validData } = validatedFields;
 
-  try {
-    // Create event in database with just name and organization
-    const { data: eventData, error: eventError } = await supabase
-      .from("events")
-      .insert({
-        organization_id: organizationId,
-        name: validData.name,
-      })
-      .select("id")
-      .single();
+  // Create event in database with name, type, and organization
+  const { data: eventData, error: eventError } = await supabase
+    .from("events")
+    .insert({
+      organization_id: organizationId,
+      name: validData.name,
+      type: validData.type,
+    })
+    .select("id")
+    .single();
 
-    if (eventError || !eventData) {
-      console.error("Error creating event:", eventError);
-      return {
-        message: "Error al crear el evento. Por favor intente nuevamente.",
-        success: false,
-      };
-    }
-
-    // Revalidate the administrador page to show the new event
-    revalidatePath(
-      `/profile/${user.id}/organizaciones/${organizationId}/administrador/eventos`
-    );
-
+  if (eventError || !eventData) {
+    console.error("Error creating event:", eventError);
     return {
-      message: "Evento creado exitosamente",
-      success: true,
-      eventId: eventData.id,
-    };
-  } catch (error) {
-    console.error("Error creating event:", error);
-    return {
-      message: "Error inesperado al crear el evento",
-      success: false,
+      message: "Error al crear el evento. Por favor intente nuevamente.",
     };
   }
+
+  // Redirect to the event configuration page
+  redirect(
+    `/profile/${user.id}/organizaciones/${organizationId}/administrador/event/${eventData.id}/configuracion`
+  );
 }
 
 /**
@@ -581,7 +565,10 @@ export async function updateEventConfiguration(
 
       if (deleteError) {
         console.error("Error clearing event days:", deleteError);
-        return { success: false, message: "Error al limpiar los días del evento" };
+        return {
+          success: false,
+          message: "Error al limpiar los días del evento",
+        };
       }
     }
 
@@ -608,7 +595,8 @@ export async function updateEventConfiguration(
     if (effectiveType === "multi_day") {
       return {
         success: false,
-        message: "Los eventos multi-día no pueden tener fecha directa. Use los días del evento.",
+        message:
+          "Los eventos multi-día no pueden tener fecha directa. Use los días del evento.",
       };
     }
   }
@@ -636,8 +624,7 @@ export async function updateEventConfiguration(
   if (formData.category !== undefined) updateData.category = formData.category;
   if (formData.type !== undefined) updateData.type = formData.type;
   // Convert empty strings to null for date fields (PostgreSQL doesn't accept "")
-  if (formData.date !== undefined)
-    updateData.date = formData.date || null;
+  if (formData.date !== undefined) updateData.date = formData.date || null;
   if (formData.end_date !== undefined)
     updateData.end_date = formData.end_date || null;
   if (formData.age !== undefined) updateData.age = formData.age;
@@ -647,8 +634,10 @@ export async function updateEventConfiguration(
     updateData.fixed_fee = formData.fixed_fee;
   // Convert empty strings to null for optional text fields
   if (formData.city !== undefined) updateData.city = formData.city || null;
-  if (formData.country !== undefined) updateData.country = formData.country || null;
-  if (formData.address !== undefined) updateData.address = formData.address || null;
+  if (formData.country !== undefined)
+    updateData.country = formData.country || null;
+  if (formData.address !== undefined)
+    updateData.address = formData.address || null;
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
 
   const { error } = await supabase
@@ -683,13 +672,15 @@ export async function toggleEventStatus(eventId: string, status: boolean) {
   if (status === true) {
     const { data: event, error: fetchError } = await supabase
       .from("events")
-      .select(`
+      .select(
+        `
         id,
         type,
         date,
         ticket_types (id),
         event_days (id)
-      `)
+      `
+      )
       .eq("id", eventId)
       .single();
 
@@ -809,10 +800,7 @@ export async function getPopularEvents(
       .where(
         and(
           eq(events.status, true),
-          or(
-            gte(events.endDate, now),
-            isNull(events.endDate)
-          )
+          or(gte(events.endDate, now), isNull(events.endDate))
         )
       )
       .orderBy(asc(events.date))
@@ -967,18 +955,19 @@ export async function getEventById(
     const ticketTypes = ticketResult.data || [];
 
     // Handle event days from nested select
-    const eventDaysData = (event.event_days as unknown as Array<{
-      id: string;
-      name: string | null;
-      date: string;
-      end_date: string | null;
-      sort_order: number | null;
-    }>) || [];
+    const eventDaysData =
+      (event.event_days as unknown as Array<{
+        id: string;
+        name: string | null;
+        date: string;
+        end_date: string | null;
+        sort_order: number | null;
+      }>) || [];
 
     // Sort event days by sort_order
     const sortedDays: EventDayDetail[] = eventDaysData
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-      .map(d => ({
+      .map((d) => ({
         id: d.id,
         name: d.name,
         date: new Date(d.date),

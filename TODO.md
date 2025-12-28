@@ -3,3 +3,5 @@
 - Programa de referidos
 - Webhook para facturacion
 - Scanner
+- Analytics de ruta de eventos (organizaciones)
+- Apple wallet y email de confirmacion con PDF (ver implementacion Hunt viejo)

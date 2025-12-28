@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useActionState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useActionState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -16,47 +14,39 @@ import {
   createEvent,
   type EventFormState,
 } from "@/lib/supabase/actions/events";
-import { CreateEventSubmitButton } from "@/components/create-event-submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Plus, Info } from "lucide-react";
+import { AlertCircle, Plus, Info, Loader2 } from "lucide-react";
 import { HoverButton } from "@/components/ui/hover-glow-button";
+import {
+  EventTypeSelector,
+  type EventType,
+} from "@/components/event-config/event-type-selector";
 
 interface CreateEventDialogProps {
   className?: string;
   organizationId: string;
-  userId: string;
 }
 
-const initialState: EventFormState = {
-  message: undefined,
-  errors: {},
-  success: false,
-};
+const initialState: EventFormState = {};
 
 export function CreateEventDialog({
   className,
   organizationId,
-  userId,
 }: CreateEventDialogProps) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const [eventType, setEventType] = useState<EventType>("single");
+
+  // Bind organizationId to the action, useActionState returns [state, action, pending]
   const createEventWithOrg = createEvent.bind(null, organizationId);
-  const [state, formAction] = useActionState(createEventWithOrg, initialState);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [state, formAction, pending] = useActionState(
+    createEventWithOrg,
+    initialState
+  );
 
-  // Redirect to configuration page on success
-  useEffect(() => {
-    if (state.success && state.eventId) {
-      setOpen(false);
-      router.push(
-        `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${state.eventId}/configuracion`
-      );
-    }
-  }, [state.success, state.eventId, router, userId, organizationId]);
-
+  // Reset eventType when dialog closes
   useEffect(() => {
     if (!open) {
-      setIsSubmitting(false);
+      setEventType("single");
     }
   }, [open]);
 
@@ -90,18 +80,11 @@ export function CreateEventDialog({
             </p>
           </SheetHeader>
 
-          <form
-            action={async (formData: FormData) => {
-              setIsSubmitting(true);
-              await formAction(formData);
-              setIsSubmitting(false);
-            }}
-            className="flex-1 flex flex-col"
-          >
+          <form action={formAction} className="flex-1 flex flex-col">
             {/* Form Content */}
             <div className="flex-1 px-6 py-6 space-y-6">
               {/* Error message */}
-              {state.message && !state.success && (
+              {state.message && (
                 <Alert
                   variant="destructive"
                   className="border-destructive/50 bg-destructive/10"
@@ -122,12 +105,29 @@ export function CreateEventDialog({
                   placeholder="Ej: Fiesta de Año Nuevo 2025"
                   className="h-11 bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
                   autoFocus
-                  disabled={isSubmitting}
+                  disabled={pending}
                 />
                 {state.errors?.name && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     {state.errors.name[0]}
+                  </p>
+                )}
+              </div>
+
+              {/* Event Type */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Tipo de evento</Label>
+                <input type="hidden" name="type" value={eventType} />
+                <EventTypeSelector
+                  value={eventType}
+                  onChange={setEventType}
+                  disabled={pending}
+                />
+                {state.errors?.type && (
+                  <p className="text-sm text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {state.errors.type[0]}
                   </p>
                 )}
               </div>
@@ -150,11 +150,24 @@ export function CreateEventDialog({
                   variant="ghost"
                   onClick={() => setOpen(false)}
                   className="flex-1 h-11"
-                  disabled={isSubmitting}
+                  disabled={pending}
                 >
                   Cancelar
                 </Button>
-                <CreateEventSubmitButton className="flex-1 h-11" />
+                <Button
+                  type="submit"
+                  className="flex-1 h-11"
+                  disabled={pending}
+                >
+                  {pending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creando...
+                    </>
+                  ) : (
+                    "Crear evento"
+                  )}
+                </Button>
               </div>
             </div>
           </form>
