@@ -32,6 +32,8 @@ interface TicketTypeData {
   max_date: string | null; // Maps to saleEnd (legacy)
   sale_start?: string | null; // Start of sale window
   sale_end?: string | null; // End of sale window
+  min_per_order?: number; // Minimum tickets per order
+  max_per_order?: number; // Maximum tickets per order
   quantity: number; // Maps to capacity
   reference: string | null;
   status: boolean;

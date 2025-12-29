@@ -178,6 +178,8 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     max_date: tt.sale_end, // Map sale_end to max_date for display
     sale_start: tt.sale_start, // Include sale_start for edit form
     sale_end: tt.sale_end, // Include sale_end for edit form
+    min_per_order: tt.min_per_order,
+    max_per_order: tt.max_per_order,
     quantity: tt.capacity, // Map capacity to quantity (available tickets)
     reference: null,
     status: tt.active, // Map active to status

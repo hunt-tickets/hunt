@@ -29,6 +29,8 @@ interface Ticket {
   max_date: string | null;
   sale_start?: string | null;
   sale_end?: string | null;
+  min_per_order?: number;
+  max_per_order?: number;
   status: boolean;
   section: string | null;
   row: string | null;
@@ -56,17 +58,11 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
     price: ticket.price.toString(),
     quantity: ticket.quantity.toString(),
     capacity: ticket.capacity?.toString() || "",
-    max_date: ticket.max_date || "",
+    min_per_order: (ticket.min_per_order || 1).toString(),
+    max_per_order: (ticket.max_per_order || 10).toString(),
     sale_start: ticket.sale_start || "",
     sale_end: ticket.sale_end || "",
     status: ticket.status,
-    section: ticket.section || "",
-    row: ticket.row || "",
-    seat: ticket.seat || "",
-    palco: ticket.palco || "",
-    hex: ticket.hex || "",
-    family: ticket.family || "",
-    reference: ticket.reference || "",
   });
 
   // Reset form when ticket changes or sheet opens
@@ -78,17 +74,11 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
         price: ticket.price.toString(),
         quantity: ticket.quantity.toString(),
         capacity: ticket.capacity?.toString() || "",
-        max_date: ticket.max_date || "",
+        min_per_order: (ticket.min_per_order || 1).toString(),
+        max_per_order: (ticket.max_per_order || 10).toString(),
         sale_start: ticket.sale_start || "",
         sale_end: ticket.sale_end || "",
         status: ticket.status,
-        section: ticket.section || "",
-        row: ticket.row || "",
-        seat: ticket.seat || "",
-        palco: ticket.palco || "",
-        hex: ticket.hex || "",
-        family: ticket.family || "",
-        reference: ticket.reference || "",
       });
       setError(null);
     }
@@ -97,8 +87,8 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.price || !formData.quantity) {
-      setError("Nombre, precio y cantidad son requeridos");
+    if (!formData.name || !formData.price || !formData.capacity) {
+      setError("Nombre, precio y capacidad son requeridos");
       return;
     }
 
@@ -110,7 +100,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
         name: formData.name,
         description: formData.description || undefined,
         price: parseFloat(formData.price),
-        capacity: formData.capacity ? parseInt(formData.capacity) : parseInt(formData.quantity),
+        capacity: parseInt(formData.capacity),
+        min_per_order: parseInt(formData.min_per_order),
+        max_per_order: parseInt(formData.max_per_order),
         sale_start: formData.sale_start || null,
         sale_end: formData.sale_end || null,
       });
@@ -211,60 +203,67 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="capacity" className="text-sm font-medium">
-                  Capacidad
-                </Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  value={formData.capacity}
-                  onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                  placeholder="100"
-                  className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="max_date" className="text-sm font-medium">
-                  Fecha Máxima
-                </Label>
-                <Input
-                  id="max_date"
-                  type="datetime-local"
-                  value={formData.max_date}
-                  onChange={(e) => setFormData({ ...formData, max_date: e.target.value })}
-                  className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="capacity" className="text-sm font-medium">
+                Capacidad <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="capacity"
+                type="number"
+                value={formData.capacity}
+                onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                placeholder="100"
+                className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                required
+              />
+              <p className="text-xs text-white/40">
+                Número total de entradas disponibles
+              </p>
             </div>
+          </div>
+
+          {/* Restricciones de Compra */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Restricciones de Compra</h3>
+            <p className="text-sm text-white/50">
+              Define los límites de compra por orden
+            </p>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="hex" className="text-sm font-medium">
-                  Color (Hex)
+                <Label htmlFor="min_per_order" className="text-sm font-medium">
+                  Mínimo por Orden
                 </Label>
                 <Input
-                  id="hex"
-                  type="color"
-                  value={formData.hex}
-                  onChange={(e) => setFormData({ ...formData, hex: e.target.value })}
+                  id="min_per_order"
+                  type="number"
+                  min="1"
+                  value={formData.min_per_order}
+                  onChange={(e) => setFormData({ ...formData, min_per_order: e.target.value })}
+                  placeholder="1"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
+                <p className="text-xs text-white/40">
+                  Cantidad mínima por compra
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="family" className="text-sm font-medium">
-                  Familia
+                <Label htmlFor="max_per_order" className="text-sm font-medium">
+                  Máximo por Orden
                 </Label>
                 <Input
-                  id="family"
-                  value={formData.family}
-                  onChange={(e) => setFormData({ ...formData, family: e.target.value })}
-                  placeholder="Ej: Platino, Premium..."
+                  id="max_per_order"
+                  type="number"
+                  min="1"
+                  value={formData.max_per_order}
+                  onChange={(e) => setFormData({ ...formData, max_per_order: e.target.value })}
+                  placeholder="10"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
+                <p className="text-xs text-white/40">
+                  Cantidad máxima por compra
+                </p>
               </div>
             </div>
           </div>
@@ -312,91 +311,17 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
             </div>
           </div>
 
-          {/* Ubicación */}
+          {/* Estado */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Ubicación</h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="section" className="text-sm font-medium">
-                  Sección
-                </Label>
-                <Input
-                  id="section"
-                  value={formData.section}
-                  onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                  placeholder="A, B, C..."
-                  className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="palco" className="text-sm font-medium">
-                  Palco
-                </Label>
-                <Input
-                  id="palco"
-                  value={formData.palco}
-                  onChange={(e) => setFormData({ ...formData, palco: e.target.value })}
-                  placeholder="1, 2, 3..."
-                  className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="row" className="text-sm font-medium">
-                  Fila
-                </Label>
-                <Input
-                  id="row"
-                  value={formData.row}
-                  onChange={(e) => setFormData({ ...formData, row: e.target.value })}
-                  placeholder="1, 2, 3..."
-                  className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="seat" className="text-sm font-medium">
-                  Asiento
-                </Label>
-                <Input
-                  id="seat"
-                  value={formData.seat}
-                  onChange={(e) => setFormData({ ...formData, seat: e.target.value })}
-                  placeholder="1, 2, 3..."
-                  className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Otros */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Otros</h3>
-
-            <div className="space-y-2">
-              <Label htmlFor="reference" className="text-sm font-medium">
-                Referencia
-              </Label>
-              <Input
-                id="reference"
-                value={formData.reference}
-                onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
-                placeholder="REF-001"
-                className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-              />
-            </div>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Estado</h3>
 
             <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/5">
               <div className="space-y-0.5">
                 <Label htmlFor="status" className="text-sm font-medium">
-                  Estado
+                  Entrada Activa
                 </Label>
                 <p className="text-sm text-white/60">
-                  Activar o desactivar la entrada
+                  Activar o desactivar la entrada para la venta
                 </p>
               </div>
               <Switch

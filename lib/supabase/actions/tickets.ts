@@ -306,7 +306,9 @@ export async function updateTicketType(
   const supabase = await createClient();
 
   // Build update object with only provided fields
-  const updateData: Record<string, unknown> = {};
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
   if (ticketTypeData.name !== undefined) updateData.name = ticketTypeData.name;
   if (ticketTypeData.description !== undefined) updateData.description = ticketTypeData.description || null;
   if (ticketTypeData.price !== undefined) updateData.price = ticketTypeData.price.toFixed(2);
