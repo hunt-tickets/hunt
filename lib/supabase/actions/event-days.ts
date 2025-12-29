@@ -16,6 +16,18 @@ export interface EventDayInput {
   showStart?: string;
 }
 
+export type EventDayOutput = {
+  id: string;
+  name: string;
+  date: string;
+  endDate: string;
+  sortOrder: number;
+  description: string;
+  flyer: string;
+  doorsOpen: string;
+  showStart: string;
+};
+
 export type EventDaysResult = {
   success: boolean;
   message?: string;
@@ -144,9 +156,267 @@ export async function syncEventDays(
 }
 
 /**
+ * Add a single event day to the database
+ */
+export async function addEventDay(
+  eventId: string,
+  dayData: Omit<EventDayInput, "id">
+): Promise<EventDaysResult & { day?: EventDayOutput }> {
+  const supabase = await createClient();
+
+  try {
+    // Validate event type
+    const { data: event, error: eventError } = await supabase
+      .from("events")
+      .select("type")
+      .eq("id", eventId)
+      .single();
+
+    if (eventError || !event) {
+      return { success: false, message: "Error al obtener el tipo de evento" };
+    }
+
+    if (event.type !== "multi_day") {
+      return {
+        success: false,
+        message: "Solo los eventos multi-día pueden tener días configurados",
+      };
+    }
+
+    // Insert the new day
+    const { data: insertedDay, error: insertError } = await supabase
+      .from("event_days")
+      .insert({
+        event_id: eventId,
+        name: dayData.name,
+        date: dayData.date || null,
+        end_date: dayData.endDate || null,
+        sort_order: dayData.sortOrder,
+        description: dayData.description || null,
+        flyer: dayData.flyer || null,
+        doors_open: dayData.doorsOpen || null,
+        show_start: dayData.showStart || null,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("Error inserting day:", insertError);
+      return { success: false, message: "Error al crear el día" };
+    }
+
+    revalidatePath(
+      `/profile/[userId]/organizaciones/[organizationId]/administrador/event/${eventId}`,
+      "page"
+    );
+
+    return {
+      success: true,
+      day: {
+        id: insertedDay.id,
+        name: insertedDay.name || "",
+        date: insertedDay.date || "",
+        endDate: insertedDay.end_date || "",
+        sortOrder: insertedDay.sort_order || 0,
+        description: insertedDay.description || "",
+        flyer: insertedDay.flyer || "",
+        doorsOpen: insertedDay.doors_open || "",
+        showStart: insertedDay.show_start || "",
+      },
+    };
+  } catch (error) {
+    console.error("Error adding event day:", error);
+    return { success: false, message: "Error inesperado al crear el día" };
+  }
+}
+
+/**
+ * Bulk add multiple event days (for auto-generate feature)
+ */
+export async function bulkAddEventDays(
+  eventId: string,
+  daysData: Omit<EventDayInput, "id">[]
+): Promise<EventDaysResult & { days?: EventDayOutput[] }> {
+  const supabase = await createClient();
+
+  try {
+    // Validate event type
+    const { data: event, error: eventError } = await supabase
+      .from("events")
+      .select("type")
+      .eq("id", eventId)
+      .single();
+
+    if (eventError || !event) {
+      return { success: false, message: "Error al obtener el tipo de evento" };
+    }
+
+    if (event.type !== "multi_day") {
+      return {
+        success: false,
+        message: "Solo los eventos multi-día pueden tener días configurados",
+      };
+    }
+
+    // Insert all days
+    const insertData = daysData.map((day) => ({
+      event_id: eventId,
+      name: day.name,
+      date: day.date || null,
+      end_date: day.endDate || null,
+      sort_order: day.sortOrder,
+      description: day.description || null,
+      flyer: day.flyer || null,
+      doors_open: day.doorsOpen || null,
+      show_start: day.showStart || null,
+    }));
+
+    const { data: insertedDays, error: insertError } = await supabase
+      .from("event_days")
+      .insert(insertData)
+      .select();
+
+    if (insertError) {
+      console.error("Error inserting days:", insertError);
+      return { success: false, message: "Error al crear los días" };
+    }
+
+    revalidatePath(
+      `/profile/[userId]/organizaciones/[organizationId]/administrador/event/${eventId}`,
+      "page"
+    );
+
+    return {
+      success: true,
+      days: insertedDays.map((day) => ({
+        id: day.id,
+        name: day.name || "",
+        date: day.date || "",
+        endDate: day.end_date || "",
+        sortOrder: day.sort_order || 0,
+        description: day.description || "",
+        flyer: day.flyer || "",
+        doorsOpen: day.doors_open || "",
+        showStart: day.show_start || "",
+      })),
+    };
+  } catch (error) {
+    console.error("Error bulk adding event days:", error);
+    return { success: false, message: "Error inesperado al crear los días" };
+  }
+}
+
+/**
+ * Update a single event day
+ */
+export async function updateEventDay(
+  dayId: string,
+  dayData: EventDayInput
+): Promise<EventDaysResult> {
+  const supabase = await createClient();
+
+  try {
+    const { error: updateError } = await supabase
+      .from("event_days")
+      .update({
+        name: dayData.name,
+        date: dayData.date || null,
+        end_date: dayData.endDate || null,
+        sort_order: dayData.sortOrder,
+        description: dayData.description || null,
+        flyer: dayData.flyer || null,
+        doors_open: dayData.doorsOpen || null,
+        show_start: dayData.showStart || null,
+      })
+      .eq("id", dayId);
+
+    if (updateError) {
+      console.error("Error updating day:", updateError);
+      return { success: false, message: "Error al actualizar el día" };
+    }
+
+    revalidatePath(
+      `/profile/[userId]/organizaciones/[organizationId]/administrador/event`,
+      "page"
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating event day:", error);
+    return { success: false, message: "Error inesperado al actualizar el día" };
+  }
+}
+
+/**
+ * Delete a single event day
+ */
+export async function deleteEventDay(dayId: string): Promise<EventDaysResult> {
+  const supabase = await createClient();
+
+  try {
+    const { error: deleteError } = await supabase
+      .from("event_days")
+      .delete()
+      .eq("id", dayId);
+
+    if (deleteError) {
+      console.error("Error deleting day:", deleteError);
+      return { success: false, message: "Error al eliminar el día" };
+    }
+
+    revalidatePath(
+      `/profile/[userId]/organizaciones/[organizationId]/administrador/event`,
+      "page"
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting event day:", error);
+    return { success: false, message: "Error inesperado al eliminar el día" };
+  }
+}
+
+/**
+ * Update sort order for multiple event days (for drag and drop)
+ */
+export async function updateEventDaysOrder(
+  updates: Array<{ id: string; sortOrder: number }>
+): Promise<EventDaysResult> {
+  const supabase = await createClient();
+
+  try {
+    // Update each day's sort order
+    const updatePromises = updates.map((update) =>
+      supabase
+        .from("event_days")
+        .update({ sort_order: update.sortOrder })
+        .eq("id", update.id)
+    );
+
+    const results = await Promise.all(updatePromises);
+
+    const hasError = results.some((result) => result.error);
+    if (hasError) {
+      console.error("Error updating sort orders");
+      return { success: false, message: "Error al reordenar los días" };
+    }
+
+    revalidatePath(
+      `/profile/[userId]/organizaciones/[organizationId]/administrador/event`,
+      "page"
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating event days order:", error);
+    return { success: false, message: "Error inesperado al reordenar los días" };
+  }
+}
+
+/**
  * Get event days for an event
  */
-export async function getEventDays(eventId: string) {
+export async function getEventDays(eventId: string): Promise<EventDayOutput[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -163,7 +433,7 @@ export async function getEventDays(eventId: string) {
   return data.map((day) => ({
     id: day.id,
     name: day.name || "",
-    date: day.date,
+    date: day.date || "",
     endDate: day.end_date || "",
     sortOrder: day.sort_order || 0,
     // Festival essentials

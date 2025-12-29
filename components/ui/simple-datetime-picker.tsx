@@ -324,6 +324,7 @@ export const SimpleDateTimePicker = ({
       {mounted && isOpen && calendarPosition && createPortal(
         <div
           ref={calendarRef}
+          data-date-picker-calendar
           className="fixed w-full max-w-sm rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] shadow-2xl p-4 z-[99999] max-h-[90vh] overflow-y-auto"
           style={{
             top: `${calendarPosition.top}px`,

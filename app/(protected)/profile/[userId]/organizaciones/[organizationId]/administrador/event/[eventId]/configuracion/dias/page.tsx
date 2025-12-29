@@ -79,6 +79,10 @@ export default async function DiasPage({ params }: DiasPageProps) {
     date: d.date?.toISOString() || "",
     endDate: d.endDate?.toISOString() || "",
     sortOrder: d.sortOrder || 0,
+    description: d.description || "",
+    flyer: d.flyer || "",
+    doorsOpen: d.doorsOpen?.toISOString() || "",
+    showStart: d.showStart?.toISOString() || "",
   }));
 
   return (
