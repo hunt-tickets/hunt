@@ -19,14 +19,11 @@ import {
   Calendar,
   Copy,
   AlertCircle,
-  ArrowLeft,
   CalendarRange,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { syncEventDays } from "@/lib/supabase/actions/event-days";
-import Link from "next/link";
-import { useParams } from "next/navigation";
 
 interface EventDay {
   id: string;
@@ -45,9 +42,7 @@ export function EventDaysContent({
   eventId,
   initialDays,
 }: EventDaysContentProps) {
-  const params = useParams();
-  const userId = params.userId as string;
-  const organizationId = params.organizationId as string;
+  // const params = useParams();
 
   const [days, setDays] = useState<EventDay[]>(initialDays);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -244,8 +239,6 @@ export function EventDaysContent({
       setIsSaving(false);
     }
   };
-
-  const backUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
 
   return (
     <div className="space-y-6 max-w-4xl">
