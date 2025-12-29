@@ -56,8 +56,7 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
     name: ticket.name,
     description: ticket.description || "",
     price: ticket.price.toString(),
-    quantity: ticket.quantity.toString(),
-    capacity: ticket.capacity?.toString() || "",
+    capacity: (ticket.capacity || ticket.quantity).toString(),
     min_per_order: (ticket.min_per_order || 1).toString(),
     max_per_order: (ticket.max_per_order || 10).toString(),
     sale_start: ticket.sale_start || "",
@@ -72,8 +71,7 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
         name: ticket.name,
         description: ticket.description || "",
         price: ticket.price.toString(),
-        quantity: ticket.quantity.toString(),
-        capacity: ticket.capacity?.toString() || "",
+        capacity: (ticket.capacity || ticket.quantity).toString(),
         min_per_order: (ticket.min_per_order || 1).toString(),
         max_per_order: (ticket.max_per_order || 10).toString(),
         sale_start: ticket.sale_start || "",
@@ -188,37 +186,23 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="quantity" className="text-sm font-medium">
-                  Cantidad <span className="text-red-500">*</span>
+                <Label htmlFor="capacity" className="text-sm font-medium">
+                  Capacidad <span className="text-red-500">*</span>
                 </Label>
                 <Input
-                  id="quantity"
+                  id="capacity"
                   type="number"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                  min="1"
+                  value={formData.capacity}
+                  onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
                   placeholder="100"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                   required
                 />
+                <p className="text-xs text-white/40">
+                  Número total de entradas disponibles
+                </p>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="capacity" className="text-sm font-medium">
-                Capacidad <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="capacity"
-                type="number"
-                value={formData.capacity}
-                onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                placeholder="100"
-                className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                required
-              />
-              <p className="text-xs text-white/40">
-                Número total de entradas disponibles
-              </p>
             </div>
           </div>
 
