@@ -253,13 +253,22 @@ export function TicketsContainer({
             const maxPerOrder = ticket.maxPerOrder ?? 10;
             const minPerOrder = ticket.minPerOrder ?? 1;
             const effectiveMax = Math.min(maxPerOrder, available);
+
+            // Check if ticket is within sale window
+            const now = new Date();
+            const isBeforeSaleStart = ticket.saleStart && now < new Date(ticket.saleStart);
+            const isAfterSaleEnd = ticket.saleEnd && now > new Date(ticket.saleEnd);
+            const isOutsideSaleWindow = isBeforeSaleStart || isAfterSaleEnd;
+
+            // Ticket is not available if sold out OR outside sale window
             const isSoldOut = available <= 0;
+            const isNotAvailable = isSoldOut || isOutsideSaleWindow;
 
             return (
               <div
                 key={ticket.id}
                 className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-colors ${
-                  isSoldOut
+                  isNotAvailable
                     ? "border-border/50 opacity-60"
                     : "border-border hover:border-primary/50"
                 }`}
@@ -294,6 +303,16 @@ export function TicketsContainer({
                         Agotado
                       </span>
                     )}
+                    {!isSoldOut && isBeforeSaleStart && (
+                      <span className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-full">
+                        Próximamente
+                      </span>
+                    )}
+                    {!isSoldOut && isAfterSaleEnd && (
+                      <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
+                        Ventas cerradas
+                      </span>
+                    )}
                   </div>
                   {ticket.description && (
                     <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
@@ -301,7 +320,7 @@ export function TicketsContainer({
                     </p>
                   )}
                   {/* Show constraints */}
-                  {!isSoldOut && (
+                  {!isNotAvailable && (
                     <div className="flex flex-wrap gap-2 mt-1">
                       {maxPerOrder < 10 && (
                         <span className="text-xs text-muted-foreground">
@@ -321,6 +340,21 @@ export function TicketsContainer({
                       )}
                     </div>
                   )}
+                  {/* Show sale window info */}
+                  {!isSoldOut && isBeforeSaleStart && ticket.saleStart && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="text-xs text-blue-600 dark:text-blue-400">
+                        Disponible desde {new Date(ticket.saleStart).toLocaleDateString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                  )}
+                  {!isSoldOut && isAfterSaleEnd && ticket.saleEnd && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="text-xs text-muted-foreground">
+                        Ventas cerradas el {new Date(ticket.saleEnd).toLocaleDateString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Price and quantity selector - responsive layout */}
@@ -335,7 +369,7 @@ export function TicketsContainer({
                   </div>
 
                   {/* Client island: Quantity selector with local state */}
-                  {!isSoldOut ? (
+                  {!isNotAvailable ? (
                     <TicketQuantitySelector
                       ticketId={ticket.id}
                       price={parseFloat(ticket.price)}
