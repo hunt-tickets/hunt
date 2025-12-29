@@ -15,7 +15,12 @@ import { EVENT_CATEGORIES } from "@/constants/event-categories";
 
 const eventFormSchema = z.object({
   name: z.string().min(1, "El nombre del evento es requerido"),
-  type: z.enum(["single", "multi_day", "recurring", "slots"]).default("single"),
+  type: z
+    .enum(["single", "multi_day", "recurring", "slots"])
+    .default("single")
+    .refine((val) => val === "single", {
+      message: "Solo eventos de tipo 'único' están disponibles en esta versión de la plataforma",
+    }),
 });
 
 export type EventFormState = {
