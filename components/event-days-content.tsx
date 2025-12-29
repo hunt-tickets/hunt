@@ -76,9 +76,10 @@ export function EventDaysContent({
       });
     };
 
-    const daysDiff = Math.ceil(
-      (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
+    const daysDiff =
+      Math.ceil(
+        (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
 
     return {
       start: formatDate(firstDate),
@@ -248,15 +249,6 @@ export function EventDaysContent({
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* Back link */}
-      <Link
-        href={backUrl}
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Volver a configuración
-      </Link>
-
       {/* Duration Summary Card */}
       {durationSummary && (
         <Card className="bg-gradient-to-r from-zinc-900 to-zinc-800 border-zinc-700">
@@ -403,7 +395,9 @@ export function EventDaysContent({
                                 updateDay(index, { endDate: value })
                               }
                               placeholder="Fecha y hora"
-                              minDate={day.date ? new Date(day.date) : undefined}
+                              minDate={
+                                day.date ? new Date(day.date) : undefined
+                              }
                             />
                           </div>
                         </div>
