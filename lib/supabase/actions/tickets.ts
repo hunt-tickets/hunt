@@ -286,6 +286,51 @@ export async function updateTicket(
   return { success: true, message: "Entrada actualizada exitosamente" };
 }
 
+/**
+ * Update ticket_type (from ticket_types table)
+ * Used for updating modern ticket types with sale windows
+ */
+export async function updateTicketType(
+  ticketTypeId: string,
+  ticketTypeData: {
+    name?: string;
+    description?: string;
+    price?: number;
+    capacity?: number;
+    sale_start?: string | null;
+    sale_end?: string | null;
+    min_per_order?: number;
+    max_per_order?: number;
+  }
+) {
+  const supabase = await createClient();
+
+  // Build update object with only provided fields
+  const updateData: Record<string, unknown> = {};
+  if (ticketTypeData.name !== undefined) updateData.name = ticketTypeData.name;
+  if (ticketTypeData.description !== undefined) updateData.description = ticketTypeData.description || null;
+  if (ticketTypeData.price !== undefined) updateData.price = ticketTypeData.price.toFixed(2);
+  if (ticketTypeData.capacity !== undefined) updateData.capacity = ticketTypeData.capacity;
+  if (ticketTypeData.sale_start !== undefined) updateData.sale_start = ticketTypeData.sale_start || null;
+  if (ticketTypeData.sale_end !== undefined) updateData.sale_end = ticketTypeData.sale_end || null;
+  if (ticketTypeData.min_per_order !== undefined) updateData.min_per_order = ticketTypeData.min_per_order;
+  if (ticketTypeData.max_per_order !== undefined) updateData.max_per_order = ticketTypeData.max_per_order;
+
+  const { error } = await supabase
+    .from("ticket_types")
+    .update(updateData)
+    .eq("id", ticketTypeId);
+
+  if (error) {
+    console.error("Error updating ticket type:", error);
+    return { success: false, message: "Error al actualizar el tipo de entrada" };
+  }
+
+  revalidatePath(`/profile/[userId]/administrador/event`, "page");
+
+  return { success: true, message: "Tipo de entrada actualizado exitosamente" };
+}
+
 export async function getEventArtists(eventId: string) {
   const supabase = await createClient();
 

@@ -176,6 +176,8 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     description: tt.description,
     price: parseFloat(tt.price),
     max_date: tt.sale_end, // Map sale_end to max_date for display
+    sale_start: tt.sale_start, // Include sale_start for edit form
+    sale_end: tt.sale_end, // Include sale_end for edit form
     quantity: tt.capacity, // Map capacity to quantity (available tickets)
     reference: null,
     status: tt.active, // Map active to status

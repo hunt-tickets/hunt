@@ -29,7 +29,9 @@ interface TicketTypeData {
   name: string;
   description: string | null;
   price: number;
-  max_date: string | null; // Maps to saleEnd
+  max_date: string | null; // Maps to saleEnd (legacy)
+  sale_start?: string | null; // Start of sale window
+  sale_end?: string | null; // End of sale window
   quantity: number; // Maps to capacity
   reference: string | null;
   status: boolean;

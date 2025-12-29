@@ -14,9 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Pencil } from "lucide-react";
-import { updateTicket } from "@/lib/supabase/actions/tickets";
+import { Pencil, Calendar, Clock } from "lucide-react";
+import { updateTicketType } from "@/lib/supabase/actions/tickets";
 import { useRouter } from "next/navigation";
+import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
 
 interface Ticket {
   id: string;
@@ -26,6 +27,8 @@ interface Ticket {
   quantity: number;
   capacity: number | null;
   max_date: string | null;
+  sale_start?: string | null;
+  sale_end?: string | null;
   status: boolean;
   section: string | null;
   row: string | null;
@@ -54,6 +57,8 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
     quantity: ticket.quantity.toString(),
     capacity: ticket.capacity?.toString() || "",
     max_date: ticket.max_date || "",
+    sale_start: ticket.sale_start || "",
+    sale_end: ticket.sale_end || "",
     status: ticket.status,
     section: ticket.section || "",
     row: ticket.row || "",
@@ -74,6 +79,8 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
         quantity: ticket.quantity.toString(),
         capacity: ticket.capacity?.toString() || "",
         max_date: ticket.max_date || "",
+        sale_start: ticket.sale_start || "",
+        sale_end: ticket.sale_end || "",
         status: ticket.status,
         section: ticket.section || "",
         row: ticket.row || "",
@@ -99,21 +106,13 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
     setError(null);
 
     try {
-      const result = await updateTicket(ticket.id, {
+      const result = await updateTicketType(ticket.id, {
         name: formData.name,
         description: formData.description || undefined,
         price: parseFloat(formData.price),
-        quantity: parseInt(formData.quantity),
-        capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
-        max_date: formData.max_date || undefined,
-        status: formData.status,
-        section: formData.section || undefined,
-        row: formData.row || undefined,
-        seat: formData.seat || undefined,
-        palco: formData.palco || undefined,
-        hex: formData.hex || undefined,
-        family: formData.family || undefined,
-        reference: formData.reference || undefined,
+        capacity: formData.capacity ? parseInt(formData.capacity) : parseInt(formData.quantity),
+        sale_start: formData.sale_start || null,
+        sale_end: formData.sale_end || null,
       });
 
       if (result.success) {
@@ -266,6 +265,49 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   placeholder="Ej: Platino, Premium..."
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Ventana de Venta */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-white/60" />
+              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Ventana de Venta</h3>
+            </div>
+            <p className="text-sm text-white/50">
+              Define cuándo estarán disponibles estas entradas para la venta
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="sale_start" className="text-sm font-medium">
+                  Inicio de Venta
+                </Label>
+                <SimpleDateTimePicker
+                  name="sale_start"
+                  value={formData.sale_start}
+                  onChange={(value) => setFormData({ ...formData, sale_start: value })}
+                  placeholder="Selecciona fecha y hora"
+                />
+                <p className="text-xs text-white/40">
+                  Deja vacío para ventas inmediatas
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sale_end" className="text-sm font-medium">
+                  Fin de Venta
+                </Label>
+                <SimpleDateTimePicker
+                  name="sale_end"
+                  value={formData.sale_end}
+                  onChange={(value) => setFormData({ ...formData, sale_end: value })}
+                  placeholder="Selecciona fecha y hora"
+                />
+                <p className="text-xs text-white/40">
+                  Deja vacío para ventas continuas
+                </p>
               </div>
             </div>
           </div>
