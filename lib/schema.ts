@@ -146,18 +146,14 @@ export const ticketStatus = pgEnum("ticket_status", [
   "transferred",
 ]);
 export const eventCategory = pgEnum("event_category", [
-  "musica",
-  "deportes",
-  "gastronomia",
-  "rumba",
-  "familiar",
-  "arte",
-  "aire_libre",
+  "fiestas",
+  "conciertos",
+  "festivales",
   "bienestar",
-  "negocios",
-  "educacion",
-  "mercados",
-  "otro",
+  "clases",
+  "ferias",
+  "deportes",
+  "teatro",
 ]);
 export const eventType = pgEnum("event_type", [
   "single",
