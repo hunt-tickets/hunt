@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Calendar, Clock } from "lucide-react";
+import { Pencil, Clock } from "lucide-react";
 import { updateTicketType } from "@/lib/supabase/actions/tickets";
 import { useRouter } from "next/navigation";
 import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
