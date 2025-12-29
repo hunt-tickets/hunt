@@ -42,7 +42,7 @@ const primaryMenuItems: MenuItem[] = [
     href: "/administrador/eventos",
     description: "Crea y gestiona eventos",
     exact: false,
-    roles: ["owner", "administrator", "seller"], // Everyone can see events
+    roles: ["owner", "administrator"], // Only admins and owners
   },
   {
     title: "Mis Ventas",
