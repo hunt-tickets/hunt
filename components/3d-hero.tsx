@@ -50,9 +50,6 @@ const ThreeDHero = () => {
               <Button asChild className="text-sm px-8 py-3 rounded-xl bg-white text-black border border-white/10 shadow-none hover:bg-white/90 transition-none">
                 <Link href="/eventos">Explorar Eventos</Link>
               </Button>
-              <Button asChild className="text-sm px-8 py-3 rounded-xl bg-transparent text-white border border-white/20 shadow-none hover:bg-white/10 transition-none">
-                <Link href="/sobre-nosotros">Conocer Más</Link>
-              </Button>
             </div>
           </div>
         </div>

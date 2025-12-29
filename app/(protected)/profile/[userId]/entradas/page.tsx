@@ -2,16 +2,9 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Ticket } from "lucide-react";
-import { QRCode } from "@/components/ui/qr-code";
+import { Card, CardContent } from "@/components/ui/card";
+import { Ticket } from "lucide-react";
+import { TicketsList } from "@/components/tickets-list";
 
 interface EntradasPageProps {
   params: Promise<{
@@ -97,30 +90,17 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
 
   const hasTickets = tickets && tickets.length > 0;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "valid":
-        return <Badge className="bg-green-600">Válido</Badge>;
-      case "used":
-        return <Badge variant="secondary">Usado</Badge>;
-      case "cancelled":
-        return <Badge variant="destructive">Cancelado</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Mis Entradas</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Mis Entradas</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
           Tus tickets para próximos eventos
         </p>
       </div>
 
       {!hasTickets ? (
-        <Card>
+        <Card className="border-gray-200 dark:border-[#2a2a2a]">
           <CardContent className="py-12">
             <div className="text-center space-y-4">
               <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -136,106 +116,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-8">
-          {Object.entries(ticketsByEvent).map(
-            ([eventId, { event, tickets: eventTickets }]) => (
-              <div key={eventId} className="space-y-4">
-                <div className="border-b pb-4">
-                  <h2 className="text-xl font-semibold">
-                    {event?.name || "Evento"}
-                  </h2>
-                  <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-                    {event?.date && (
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(event.date).toLocaleDateString("es-MX", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </div>
-                    )}
-                    {event?.venues && (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="h-4 w-4" />
-                        {event.venues.name}, {event.venues.city}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {eventTickets.map((ticket, index) => (
-                    <Card key={ticket.id} className="overflow-hidden">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-base">
-                              {ticket.ticket_types?.name || "Entrada"}
-                            </CardTitle>
-                            <CardDescription className="mt-1">
-                              Entrada #{index + 1}
-                            </CardDescription>
-                          </div>
-                          {getStatusBadge(ticket.status)}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex justify-center">
-                          <div className="bg-white p-3 rounded-lg">
-                            <QRCode
-                              value={ticket.qr_code}
-                              size={180}
-                              className="rounded"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Orden</span>
-                            <span className="font-mono text-xs">
-                              {ticket.orders?.id?.slice(0, 8).toUpperCase() ||
-                                "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">
-                              Precio
-                            </span>
-                            <span>
-                              $
-                              {parseFloat(
-                                ticket.ticket_types?.price || "0"
-                              ).toLocaleString()}{" "}
-                              {ticket.orders?.currency || "COP"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">
-                              Comprado
-                            </span>
-                            <span>
-                              {new Date(ticket.created_at).toLocaleDateString(
-                                "es-MX",
-                                {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                }
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )
-          )}
-        </div>
+        <TicketsList ticketsByEvent={ticketsByEvent} />
       )}
     </div>
   );

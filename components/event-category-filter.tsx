@@ -4,16 +4,12 @@ import { useRef } from "react";
 import {
   Music2,
   Trophy,
-  UtensilsCrossed,
   PartyPopper,
-  Users,
-  Palette,
-  TreePine,
   Heart,
-  Briefcase,
   GraduationCap,
   Store,
-  MoreHorizontal,
+  Tent,
+  Theater,
   ChevronLeft,
   ChevronRight,
   X,
@@ -23,18 +19,14 @@ import { EVENT_CATEGORIES as CATEGORIES, EVENT_CATEGORY_LABELS, EventCategory } 
 
 // Mapeo de categorías a iconos
 const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
-  musica: Music2,
-  deportes: Trophy,
-  gastronomia: UtensilsCrossed,
-  rumba: PartyPopper,
-  familiar: Users,
-  arte: Palette,
-  aire_libre: TreePine,
+  fiestas: PartyPopper,
+  conciertos: Music2,
+  festivales: Tent,
   bienestar: Heart,
-  negocios: Briefcase,
-  educacion: GraduationCap,
-  mercados: Store,
-  otro: MoreHorizontal,
+  clases: GraduationCap,
+  ferias: Store,
+  deportes: Trophy,
+  teatro: Theater,
 };
 
 // Construir EVENT_CATEGORIES con labels del archivo de constantes
@@ -118,7 +110,7 @@ export function EventCategoryFilter({
       <div className="relative group/scroll flex-1 min-w-0">
         <button
           onClick={() => scroll(scrollContainerRef, "left")}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex lg:hidden items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
           aria-label="Scroll izquierda"
         >
           <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-white/70" />
@@ -149,7 +141,7 @@ export function EventCategoryFilter({
 
         <button
           onClick={() => scroll(scrollContainerRef, "right")}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/20 shadow-md opacity-0 group-hover/scroll:opacity-100 transition-opacity hidden sm:flex lg:hidden items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700"
           aria-label="Scroll derecha"
         >
           <ChevronRight className="h-4 w-4 text-gray-600 dark:text-white/70" />

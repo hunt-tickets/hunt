@@ -7,7 +7,6 @@ import { Instagram } from "lucide-react";
 import { FaWhatsapp, FaGooglePlay, FaApple, FaLinkedin } from "react-icons/fa";
 import { SiGmail } from "react-icons/si";
 import { HoverButton } from "@/components/ui/hover-glow-button";
-import { EVENT_CATEGORIES, EVENT_CATEGORY_LABELS } from "@/constants/event-categories";
 
 // Dynamically import GLSLHills to reduce initial bundle size
 // This defers Three.js loading until the component is actually rendered
@@ -65,10 +64,10 @@ export const Component: React.FC = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const words = ["Events", "Vibes", "Experiences", "Adventures", "Moments"];
 
   useEffect(() => {
-    const currentCategory = EVENT_CATEGORIES[currentWordIndex];
-    const currentWord = EVENT_CATEGORY_LABELS[currentCategory];
+    const currentWord = words[currentWordIndex];
 
     if (isTyping) {
       // Typing effect
@@ -93,9 +92,7 @@ export const Component: React.FC = () => {
         return () => clearTimeout(timer);
       } else {
         // Deletion complete, move to next word
-        setCurrentWordIndex(
-          (prevIndex) => (prevIndex + 1) % EVENT_CATEGORIES.length
-        );
+        setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
         setIsTyping(true);
       }
     }

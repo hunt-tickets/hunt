@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
  */
 const Footer = () => {
   return (
-    <footer className="w-full border-t dark:border-t-[#303030] bg-white dark:bg-[#101010] pb-[68px] md:pb-0 relative z-10">
+    <footer className="w-full border-t dark:border-t-[#303030] bg-white dark:bg-[#101010] pb-[72px] md:pb-0 relative z-10">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Logo & Brand Column */}
@@ -32,14 +32,6 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-sm font-semibold">HUNT</h3>
             <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/sobre-nosotros"
-                  className="text-sm text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors"
-                >
-                  Sobre nosotros
-                </Link>
-              </li>
               <li>
                 <Link
                   href="/eventos"

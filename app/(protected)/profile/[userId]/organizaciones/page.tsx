@@ -16,25 +16,28 @@ export default async function OrganizacionesPage({
   });
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <div className="space-y-4 sm:space-y-6 overflow-x-hidden">
       {/* Page Header */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex flex-row items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold leading-tight">
-              Mis organizaciones
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl sm:text-3xl font-bold leading-tight">
+                Mis organizaciones
+              </h1>
+              {/* Mobile: Icon-only button next to title */}
+              <div className="flex sm:hidden">
+                <CreateOrganizationDialog variant="icon-only" />
+              </div>
+            </div>
             <p className="text-gray-500 mt-1 text-sm sm:text-base">
               Gestiona tus organizaciones y sus miembros
             </p>
           </div>
+          {/* Desktop: Full button */}
           <div className="hidden sm:flex gap-2">
             <CreateOrganizationDialog />
           </div>
-        </div>
-        {/* Mobile button */}
-        <div className="flex sm:hidden flex-col gap-2">
-          <CreateOrganizationDialog />
         </div>
       </div>
 

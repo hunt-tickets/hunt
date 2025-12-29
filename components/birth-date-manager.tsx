@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { CalendarIcon, Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -20,10 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface BirthDateManagerProps {
-  birthDate?: Date | string | null;
-}
+import { MONTHS_ES, VALIDATION } from "@/constants/profile";
+import type { BirthDateManagerProps } from "@/lib/profile/types";
 
 export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
   const existingDate = birthDate ? (birthDate instanceof Date ? birthDate : new Date(birthDate)) : null;
@@ -33,58 +31,71 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
   const [month, setMonth] = useState<Date>(selected || new Date(2000, 0, 1));
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const formatDisplayDate = (date: Date) => {
+  const formatDisplayDate = useCallback((date: Date) => {
     return format(date, "d 'de' MMMM, yyyy", { locale: es });
-  };
+  }, []);
 
-  const monthNames = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
+  // Generate years (1900 to current year - minimum age)
+  const years = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const maxYear = currentYear - VALIDATION.MIN_AGE;
+    return Array.from({ length: maxYear - 1900 + 1 }, (_, i) => maxYear - i);
+  }, []);
 
-  // Generate years (1900 to current year - 13 for minimum age)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 1900 + 1 - 13 }, (_, i) => 1900 + i);
-
-  const handleSelect = (date: Date | undefined) => {
+  const handleSelect = useCallback((date: Date | undefined) => {
     setSelected(date);
     setOpen(false);
-    // Aquí puedes agregar la lógica para guardar en la BD
-  };
+    // TODO: Implement save functionality with Better Auth
+    // await authClient.updateBirthDate({ birthDate: date });
+    // toast.success(SUCCESS_MESSAGES.BIRTH_DATE_SAVED);
+  }, []);
 
-  const handleYearChange = (year: string) => {
-    const newYear = parseInt(year);
+  const handleYearChange = useCallback((year: string) => {
+    const newYear = parseInt(year, 10);
     const newDate = new Date(month);
     newDate.setFullYear(newYear);
     setMonth(newDate);
-  };
+  }, [month]);
 
-  const handleMonthChange = (monthIndex: string) => {
-    const newMonthIndex = parseInt(monthIndex);
+  const handleMonthChange = useCallback((monthIndex: string) => {
+    const newMonthIndex = parseInt(monthIndex, 10);
     const newDate = new Date(month);
     newDate.setMonth(newMonthIndex);
     setMonth(newDate);
-  };
+  }, [month]);
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     setMenuOpen(false);
     setOpen(true);
-  };
+  }, []);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     setSelected(undefined);
     setMenuOpen(false);
-    // Aquí puedes agregar la lógica para eliminar de la BD
-  };
+    // TODO: Implement delete functionality with Better Auth
+    // await authClient.deleteBirthDate();
+    // toast.success(SUCCESS_MESSAGES.BIRTH_DATE_DELETED);
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+        <div
+          className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
+          role="button"
+          aria-label={selected ? `Fecha de nacimiento: ${formatDisplayDate(selected)}` : "Seleccionar fecha de nacimiento"}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setOpen(true);
+            }
+          }}
+        >
           <div className="flex items-center gap-3 flex-1">
-            <CalendarIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
-            <span className={cn("text-sm font-medium", !selected && "text-gray-500")}>
-              {selected ? formatDisplayDate(selected) : "Agregar fecha de nacimiento"}
+            <CalendarIcon className="h-5 w-5 text-gray-400 flex-shrink-0" aria-hidden="true" />
+            <span className={cn("text-sm font-medium", !selected && "text-gray-500 dark:text-gray-400")}>
+              {selected ? formatDisplayDate(selected) : "Fecha de nacimiento (Opcional)"}
             </span>
           </div>
           {selected && (
@@ -94,9 +105,10 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
+                  aria-label="Opciones de fecha de nacimiento"
                   className="text-gray-600 hover:text-gray-900 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
                 >
-                  <span className="text-xl">⋯</span>
+                  <span className="text-xl" aria-hidden="true">⋯</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -109,14 +121,14 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                     onClick={handleEdit}
                     className="rounded-xl cursor-pointer flex items-center px-3 py-2"
                   >
-                    <Edit2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    <Edit2 className="mr-2 h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                     <span>Editar</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleDelete}
                     className="rounded-xl cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 px-3 py-2"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    <Trash2 className="mr-2 h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                     <span>Eliminar</span>
                   </DropdownMenuItem>
                 </div>
@@ -157,11 +169,14 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   value={String(month.getMonth())}
                   onValueChange={handleMonthChange}
                 >
-                  <SelectTrigger className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
+                  <SelectTrigger
+                    className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none"
+                    aria-label="Seleccionar mes"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="max-h-48 bg-white border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a]">
-                    {monthNames.map((monthName, idx) => (
+                    {MONTHS_ES.map((monthName, idx) => (
                       <SelectItem key={idx} value={String(idx)}>
                         {monthName}
                       </SelectItem>
@@ -172,11 +187,14 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   value={String(month.getFullYear())}
                   onValueChange={handleYearChange}
                 >
-                  <SelectTrigger className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none">
+                  <SelectTrigger
+                    className="h-8 flex-1 text-xs bg-gray-100 border-gray-200 hover:border-gray-300 focus-visible:border-gray-200 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:hover:border-[#3a3a3a] dark:focus-visible:border-[#2a2a2a] focus-visible:ring-0 focus:ring-0 focus:outline-none"
+                    aria-label="Seleccionar año"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="max-h-48 bg-white border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a]">
-                    {years.reverse().map((year) => (
+                    {years.map((year) => (
                       <SelectItem key={year} value={String(year)}>
                         {year}
                       </SelectItem>
