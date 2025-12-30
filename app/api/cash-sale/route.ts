@@ -94,12 +94,13 @@ export async function POST(request: NextRequest) {
 
     // 6. Find or create buyer by email
     const normalizedEmail = buyerEmail.toLowerCase().trim();
-    let { data: buyer, error: buyerError } = await supabase
+    const { data: buyerData, error: buyerError } = await supabase
       .from("user")
       .select("id, email, name")
       .eq("email", normalizedEmail)
       .single();
 
+    let buyer = buyerData;
     let isNewUser = false;
 
     // If buyer doesn't exist, create passwordless account
