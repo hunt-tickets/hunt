@@ -104,9 +104,16 @@ export function CashSaleForm({ eventId, ticketTypes, eventDays = [], isMultiDay 
       const data = await response.json();
 
       if (data.success) {
+        const isNewUser = data.buyer?.isNewUser;
+        const buyerDisplay = data.buyer?.name || data.buyer?.email;
+
+        const successMessage = isNewUser
+          ? `¡Venta exitosa! ${data.tickets_count} ticket(s) asignados a ${buyerDisplay}. Se creó una cuenta nueva y se enviará un email con instrucciones.`
+          : `¡Venta exitosa! ${data.tickets_count} ticket(s) asignados a ${buyerDisplay}`;
+
         setResult({
           success: true,
-          message: `¡Venta exitosa! ${data.tickets_count} ticket(s) asignados a ${data.buyer.email}`,
+          message: successMessage,
           orderId: data.order_id,
         });
         // Reset form
@@ -173,7 +180,7 @@ export function CashSaleForm({ eventId, ticketTypes, eventDays = [], isMultiDay 
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               icon={<Mail className="h-4 w-4" />}
-              hint="El usuario debe tener una cuenta registrada"
+              hint="Si no tiene cuenta, se creará automáticamente"
               required
             />
           </div>
@@ -393,9 +400,9 @@ export function CashSaleForm({ eventId, ticketTypes, eventDays = [], isMultiDay 
                     1
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Verifica el email</p>
+                    <p className="text-sm font-medium">Ingresa el email del comprador</p>
                     <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
-                      Asegúrate que el comprador tenga una cuenta registrada en la plataforma
+                      Si no tiene cuenta, se creará automáticamente con este email
                     </p>
                   </div>
                 </div>
@@ -454,7 +461,7 @@ export function CashSaleForm({ eventId, ticketTypes, eventDays = [], isMultiDay 
                   Importante
                 </p>
                 <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">
-                  El comprador recibirá las entradas en su cuenta y podrá verlas en su perfil inmediatamente.
+                  El comprador recibirá las entradas en su cuenta inmediatamente. Si es un usuario nuevo, recibirá un email con instrucciones para acceder a su cuenta.
                 </p>
               </div>
             </div>
