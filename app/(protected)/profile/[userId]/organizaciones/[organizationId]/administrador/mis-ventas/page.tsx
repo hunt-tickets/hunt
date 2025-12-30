@@ -267,6 +267,9 @@ export default async function MisVentasPage({ params }: MisVentasPageProps) {
                     <div>
                       <p className="font-medium">{sale.buyer.name || sale.buyer.email}</p>
                       <p className="text-sm text-muted-foreground">
+                        {sale.buyer.email}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
                         {sale.event.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
