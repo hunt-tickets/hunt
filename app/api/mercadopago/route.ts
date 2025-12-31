@@ -21,7 +21,6 @@ import {
  * - ✅ Validates timestamp to prevent replay attacks
  * - Idempotent: safe to call multiple times for same payment
  */
-
 export async function POST(request: Request) {
   try {
     console.log("[Webhook] ===== NEW WEBHOOK RECEIVED =====");
@@ -99,7 +98,9 @@ export async function POST(request: Request) {
 
     // Only process approved payments
     if (payment.status !== "approved") {
-      console.log(`[Webhook] ⏭️  Payment status is '${payment.status}' (not approved), skipping`);
+      console.log(
+        `[Webhook] ⏭️  Payment status is '${payment.status}' (not approved), skipping`
+      );
       return new Response(null, { status: 200 });
     }
 
@@ -141,6 +142,23 @@ export async function POST(request: Request) {
     console.log(
       `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`
     );
+
+    // Trigger PDF generation (fire-and-forget - don't await!)
+    // This runs in the background and won't block the webhook response
+    // fetch("https://your-supabase-url.supabase.co/functions/v1/generate-pdf", {
+    //   method: "POST",
+    //   headers: {
+    //     Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ order_id: order.order_id }),
+    // }).catch((error) => {
+    //   // Log but don't throw - this is non-blocking background work
+    //   console.error(
+    //     "[Webhook] ⚠️ PDF generation failed (non-blocking):",
+    //     error
+    //   );
+    // });
 
     // Revalidate relevant pages
     revalidatePath("/");
