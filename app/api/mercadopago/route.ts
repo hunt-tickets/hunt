@@ -24,6 +24,8 @@ import {
 
 export async function POST(request: Request) {
   try {
+    console.log("[Webhook] ===== NEW WEBHOOK RECEIVED =====");
+
     // STEP 1: SECURITY - Validate webhook signature
     // This ensures the webhook is actually from MercadoPago and not an attacker
     const headers = request.headers;
@@ -34,6 +36,13 @@ export async function POST(request: Request) {
     const xRequestId = headers.get("x-request-id");
     const dataId = url.searchParams.get("data.id");
 
+    console.log("[Webhook] Params received:", {
+      hasSignature: !!xSignature,
+      hasRequestId: !!xRequestId,
+      hasDataIdInQuery: !!dataId,
+      url: url.toString(),
+    });
+
     // Validate the signature
     const isValidSignature = validateMercadoPagoSignature(
       xSignature,
@@ -43,7 +52,7 @@ export async function POST(request: Request) {
     );
 
     if (!isValidSignature) {
-      console.error("[Webhook] Invalid signature - rejecting webhook");
+      console.error("[Webhook] ❌ Signature validation FAILED - rejecting");
       return new Response("Unauthorized - Invalid signature", {
         status: 401,
       });
@@ -54,22 +63,22 @@ export async function POST(request: Request) {
     const isValidTimestamp = validateMercadoPagoTimestamp(xSignature, 300);
 
     if (!isValidTimestamp) {
-      console.warn("[Webhook] Webhook timestamp too old - rejecting");
+      console.error("[Webhook] ❌ Timestamp validation FAILED - too old");
       return new Response("Unauthorized - Timestamp too old", {
         status: 401,
       });
     }
 
-    console.log("[Webhook] Signature validation passed ✅");
+    console.log("[Webhook] ✅ Security validation passed");
 
     // STEP 2: Parse webhook notification
     const body: { data: { id: string }; type: string } = await request.json();
 
-    console.log("[Webhook] Received notification:", body);
+    console.log(`[Webhook] Type: ${body.type}, Payment ID: ${body.data?.id}`);
 
     // Only process payment notifications
     if (body.type !== "payment") {
-      console.log("[Webhook] Skipping non-payment notification");
+      console.log("[Webhook] ⏭️  Skipping non-payment notification");
       return new Response(null, { status: 200 });
     }
 
@@ -84,21 +93,13 @@ export async function POST(request: Request) {
       id: body.data.id,
     });
 
-    console.log("[Webhook] Payment status:", payment.status);
-    console.log("[Webhook] Payment metadata:", payment.metadata);
     console.log(
-      "[Webhook] Payment fee_details:",
-      JSON.stringify(payment.fee_details, null, 2)
+      `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`
     );
-    console.log(
-      "[Webhook] Payment transaction_amount:",
-      payment.transaction_amount
-    );
-    console.log("[Webhook] Payment net_amount:", payment.net_amount);
 
     // Only process approved payments
     if (payment.status !== "approved") {
-      console.log("[Webhook] Payment not approved, skipping");
+      console.log(`[Webhook] ⏭️  Payment status is '${payment.status}' (not approved), skipping`);
       return new Response(null, { status: 200 });
     }
 
@@ -118,14 +119,15 @@ export async function POST(request: Request) {
       feeDetails.find((f) => f.type === "application_fee")?.amount || 0;
 
     if (!reservationId) {
-      console.error("[Webhook] No reservation_id in payment metadata");
+      console.error("[Webhook] ❌ No reservation_id in payment metadata");
       return new Response("Missing reservation_id in metadata", {
         status: 400,
       });
     }
 
-    // Convert reservation to order (idempotent)
-    console.log("[Webhook] Converting reservation to order:", reservationId);
+    console.log(
+      `[Webhook] Processing reservation ${reservationId} (platform: ${platform})`
+    );
 
     const order = await convertReservationToOrder(
       reservationId,
@@ -136,8 +138,9 @@ export async function POST(request: Request) {
       processorFee
     );
 
-    console.log("[Webhook] Order created:", order.order_id);
-    console.log("[Webhook] Tickets generated:", order.ticket_ids.length);
+    console.log(
+      `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`
+    );
 
     // Revalidate relevant pages
     revalidatePath("/");
@@ -153,7 +156,7 @@ export async function POST(request: Request) {
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("[Webhook] Error processing payment:", error);
+    console.error("[Webhook] ❌ ERROR:", error);
 
     // Return 200 to prevent MP from retrying
     // (We log the error for debugging)

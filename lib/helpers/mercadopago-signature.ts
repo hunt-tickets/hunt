@@ -111,7 +111,7 @@ export function validateMercadoPagoSignature(
 
     // If we couldn't extract both values, the x-signature format is invalid
     if (!ts || !hash) {
-      console.error("[MP Signature] Failed to extract ts or hash from x-signature");
+      console.error("[MP Signature] Invalid x-signature format");
       return false;
     }
 
@@ -127,8 +127,6 @@ export function validateMercadoPagoSignature(
     // IMPORTANT: The semicolons and colons MUST be in the exact positions!
     // Even one character difference will make the signature invalid
     const manifest = `id:${normalizedDataId};request-id:${xRequestId};ts:${ts};`;
-
-    console.log("[MP Signature] Validating with manifest:", manifest);
 
     // STEP 5: Generate OUR OWN signature using the same method MP used
     // We use HMAC-SHA256 algorithm:
@@ -153,13 +151,7 @@ export function validateMercadoPagoSignature(
     const isValid = computedHash === hash;
 
     if (!isValid) {
-      console.error("[MP Signature] Validation failed:", {
-        computed: computedHash,
-        received: hash,
-        manifest: manifest,
-      });
-    } else {
-      console.log("[MP Signature] Validation successful ✅");
+      console.error("[MP Signature] Hash mismatch - check webhook secret");
     }
 
     return isValid;
@@ -210,7 +202,7 @@ export function validateMercadoPagoTimestamp(
     }
 
     if (!ts) {
-      console.error("[MP Timestamp] No timestamp found in x-signature");
+      console.error("[MP Timestamp] No timestamp in x-signature");
       return false;
     }
 
@@ -225,10 +217,9 @@ export function validateMercadoPagoTimestamp(
     const isValid = age <= toleranceSeconds;
 
     if (!isValid) {
-      console.warn("[MP Timestamp] Notification too old:", {
-        age: `${age}s`,
-        tolerance: `${toleranceSeconds}s`,
-      });
+      console.warn(
+        `[MP Timestamp] Too old: ${Math.round(age)}s (max: ${toleranceSeconds}s)`
+      );
     }
 
     return isValid;
