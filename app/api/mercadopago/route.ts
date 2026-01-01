@@ -145,20 +145,23 @@ export async function POST(request: Request) {
 
     // Trigger PDF generation (fire-and-forget - don't await!)
     // This runs in the background and won't block the webhook response
-    // fetch("https://your-supabase-url.supabase.co/functions/v1/generate-pdf", {
-    //   method: "POST",
-    //   headers: {
-    //     Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ order_id: order.order_id }),
-    // }).catch((error) => {
-    //   // Log but don't throw - this is non-blocking background work
-    //   console.error(
-    //     "[Webhook] ⚠️ PDF generation failed (non-blocking):",
-    //     error
-    //   );
-    // });
+    fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/generate-pdf`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ order_id: order.order_id }),
+      }
+    ).catch((error) => {
+      // Log but don't throw - this is non-blocking background work
+      console.error(
+        "[Webhook] ⚠️ PDF generation failed (non-blocking):",
+        error
+      );
+    });
 
     // Revalidate relevant pages
     revalidatePath("/");
