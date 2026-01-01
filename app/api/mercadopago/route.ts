@@ -146,11 +146,12 @@ export async function POST(request: Request) {
     // Trigger PDF generation (fire-and-forget - don't await!)
     // This runs in the background and won't block the webhook response
     fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/generate-pdf`,
+      `https://db.hunt-tickets.com/functions/v1/payment-pdf-gen`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY}`,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ order_id: order.order_id }),
