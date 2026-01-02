@@ -150,8 +150,7 @@ export async function POST(request: Request) {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY}`,
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ order_id: order.order_id }),

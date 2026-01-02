@@ -95,7 +95,8 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="https://forms.hunt-tickets.com/feedbacks"
+                  // href="https://forms.hunt-tickets.com/feedbacks"
+                  href={""}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors"
