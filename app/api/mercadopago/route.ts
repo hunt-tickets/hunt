@@ -5,6 +5,7 @@ import {
   validateMercadoPagoSignature,
   validateMercadoPagoTimestamp,
 } from "@/lib/helpers/mercadopago-signature";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Mercado Pago Webhook Handler
@@ -145,24 +146,19 @@ export async function POST(request: Request) {
 
     // Trigger PDF generation (fire-and-forget - don't await!)
     // This runs in the background and won't block the webhook response
-    fetch(
-      `https://db.hunt-tickets.com/functions/v1/payment-pdf-gen`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY}`,
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ order_id: order.order_id }),
-      }
-    ).catch((error) => {
-      // Log but don't throw - this is non-blocking background work
-      console.error(
-        "[Webhook] ⚠️ PDF generation failed (non-blocking):",
-        error
-      );
-    });
+    createClient()
+      .then((supabase) =>
+        supabase.functions.invoke("payment-pdf-gen", {
+          body: { order_id: order.order_id },
+        })
+      )
+      .catch((error) => {
+        // Log but don't throw - this is non-blocking background work
+        console.error(
+          "[Webhook] ⚠️ PDF generation failed (non-blocking):",
+          error
+        );
+      });
 
     // Revalidate relevant pages
     revalidatePath("/");
