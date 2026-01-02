@@ -1,7 +1,7 @@
 // import { serve } from "https://deno.land/std@0.200.0/http/server.ts";
 // import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
-// import { encode as encodeQR } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
+// import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
 
 // // ==========================================
 // // CONFIGURATION
@@ -13,20 +13,24 @@
 //   RETRY_DELAY: 500,
 
 //   // URLs de recursos
-//   DEFAULT_LOGO_URL: "https://jtfcfsnksywotlbsddqb.supabase.co/storage/v1/object/public/default/logos/hunt_logo.png",
-
+//   DEFAULT_LOGO_URL: "https://db.hunt-tickets.com/storage/v1/object/public/default/logos/white_logo.png",
 //   MAX_TICKETS_PER_PDF: 50,
-//   MAX_IMAGE_SIZE: 5 * 1024 * 1024,
+//   MAX_IMAGE_SIZE: 5 * 1024 * 1024, // Maximum of 5MBs
 //   MAX_PDF_SIZE: 50 * 1024 * 1024,
-//   IMAGE_DOWNLOAD_TIMEOUT: 10000,
+//   IMAGE_DOWNLOAD_TIMEOUT: 10000, 
 // };
 
 // // Environment variables
 // const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 // const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+// const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 // if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 //   throw new Error("Missing required environment variables");
+// }
+
+// if (!RESEND_API_KEY) {
+//   console.warn("WARNING: RESEND_API_KEY not set. Email functionality will be disabled.");
 // }
 
 // const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -163,6 +167,14 @@
 //   return lines;
 // }
 
+// function sanitizeForPath(text: string): string {
+//     return text
+//       .toLowerCase()
+//       .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric with hyphens
+//       .replace(/^-+|-+$/g, '')      // Remove leading/trailing hyphens
+//       .substring(0, 100);            // Limit length
+// }
+
 // // ==========================================
 // // DATA FETCHING - ADAPTED FOR DRIZZLE SCHEMA
 // // ==========================================
@@ -174,7 +186,7 @@
 //     .from("orders")
 //     .select(`
 //       *,
-//       event:eventId(*)
+//       event:event_id(*)
 //     `)
 //     .eq("id", orderId)
 //     .single();
@@ -183,10 +195,10 @@
 //     throw new Error(`Order ${orderId} not found: ${error?.message}`);
 //   }
 
-//   logger("info", "Order data fetched successfully", {
+//    logger("info", "Order data fetched successfully", {
 //     order_id: orderId,
-//     event_id: order.eventId,
-//     user_id: order.userId
+//     event_id: order.event_id,  // ✅ Correct
+//     user_id: order.user_id     // ✅ Correct
 //   });
 
 //   return order;
@@ -199,7 +211,7 @@
 //     .from("events")
 //     .select(`
 //       *,
-//       venue:venueId(*)
+//       venue:venue_id(*)
 //     `)
 //     .eq("id", eventId)
 //     .single();
@@ -210,12 +222,12 @@
 
 //   logger("info", "Event and venue fetched successfully", {
 //     event_id: eventId,
-//     venue_id: event.venueId
+//     venue_id: event.venue_id || 'none'  // ✅ Correct
 //   });
 
 //   return {
 //     event,
-//     venue: event.venue
+//     venue: event.venue || null  // Ensure we return null if no venue  
 //   };
 // }
 
@@ -244,9 +256,9 @@
 //     .from("tickets")
 //     .select(`
 //       *,
-//       ticketType:ticketTypeId(*)
-//     `)
-//     .eq("orderId", orderId);
+//       ticketType:ticket_type_id(*)
+//       `)
+//     .eq("order_id", orderId);
 
 //   if (error) {
 //     throw new Error(`Failed to fetch tickets: ${error.message}`);
@@ -367,29 +379,52 @@
 // // ==========================================
 // // QR CODE GENERATION
 // // ==========================================
+// function drawQRCode(page: any, data: string, x: number, y: number, size: number) {
+//     try {
+//       const qr = qrcode(0, 'H');
+//       qr.addData(data);
+//       qr.make();
 
-// async function generateQRCode(data: string): Promise<Uint8Array> {
-//   try {
-//     // Generate QR code as PNG
-//     const qrImage = await encodeQR(data, {
-//       type: "png",
-//       size: 300,
-//       errorCorrectionLevel: "H"
-//     });
+//       const moduleCount = qr.getModuleCount();
+//       const moduleSize = size / moduleCount;
 
-//     return qrImage;
-//   } catch (error) {
-//     logger("error", `Failed to generate QR code: ${error.message}`);
-//     throw error;
+//       // Draw white background
+//       page.drawRectangle({
+//         x: x,
+//         y: y,
+//         width: size,
+//         height: size,
+//         color: rgb(1, 1, 1)
+//       });
+
+//       // Draw each black module as a rectangle
+//       for (let row = 0; row < moduleCount; row++) {
+//         for (let col = 0; col < moduleCount; col++) {
+//           if (qr.isDark(row, col)) {
+//             page.drawRectangle({
+//               x: x + (col * moduleSize),
+//               y: y + ((moduleCount - row - 1) * moduleSize),
+//               width: moduleSize,
+//               height: moduleSize,
+//               color: rgb(0, 0, 0)
+//             });
+//           }
+//         }
+//       }
+//     } catch (error) {
+//       logger("error", `Failed to draw QR code: ${error.message}`);
+//       throw error;
+//     }
 //   }
-// }
+
+
 
 // // ==========================================
 // // PRE-CALCULATION
 // // ==========================================
 
 // function preCalculateCommonElements(order: any, event: any, venue: any, user: any, ticketType: any, fonts: any) {
-//   const timezone = venue.timezoneId || "America/Bogota";
+//   const timezone = venue?.timezone_id || "America/Bogota";
 //   const eventDate = new Date(event.date);
 //   const eventDateLocal = getLocalEventTime(eventDate, timezone);
 
@@ -424,8 +459,8 @@
 //     orderId,
 //     legalTextJustified,
 //     eventName: event.name,
-//     venueName: venue.name,
-//     venueAddress: venue.address || venue.city || "",
+//     venueName: venue?.name || "Ubicación por confirmar",
+//     venueAddress: venue?.address || venue?.city || "",
 //     ticketName: ticketType.name,
 //     userEmail: user.email,
 //     userName: user.name,
@@ -450,572 +485,516 @@
 // // ==========================================
 
 // async function generatePDFPage(
-//   pdfDoc: PDFDocument,
-//   pageIndex: number,
-//   ticket: any,
-//   qrImage: any,
-//   order: any,
-//   event: any,
-//   venue: any,
-//   user: any,
-//   resources: any,
-//   fonts: any,
-//   totalPages: number,
-//   commonElements: any
-// ) {
-//   const page = pdfDoc.addPage([595, 842]); // A4
-//   const { width, height } = page.getSize();
-//   const { margin, contentWidth, halfWidth, standardSpacing, headerHeight, qrCodeWidth, colors } = commonElements;
-//   const { helvetica, helveticaBold, helveticaLight } = fonts;
+//     pdfDoc: PDFDocument,
+//     pageIndex: number,
+//     ticket: any,
+//     qrImage: any,
+//     order: any,
+//     event: any,
+//     venue: any,
+//     user: any,
+//     resources: any,
+//     fonts: any,
+//     totalPages: number,
+//     commonElements: any
+//   ) {
+//     const page = pdfDoc.addPage([595, 842]); // A4
+//     const { width, height } = page.getSize();
+//     const { margin, contentWidth, halfWidth, standardSpacing, headerHeight, qrCodeWidth, colors } = commonElements;
+//     const { helvetica, helveticaBold, helveticaLight } = fonts;
 
-//   // HEADER
-//   page.drawRectangle({
-//     x: 0,
-//     y: height - headerHeight,
-//     width: width,
-//     height: headerHeight,
-//     color: colors.black
-//   });
-
-//   // Logo
-//   if (resources.logo) {
-//     const logoWidth = 75;
-//     const logoHeight = logoWidth * (resources.logo.height / resources.logo.width);
-//     page.drawImage(resources.logo, {
-//       x: margin,
-//       y: height - headerHeight / 2 - logoHeight / 2,
-//       width: logoWidth,
-//       height: logoHeight
+//     // HEADER
+//     page.drawRectangle({
+//       x: 0,
+//       y: height - headerHeight,
+//       width: width,
+//       height: headerHeight,
+//       color: colors.black
 //     });
-//   } else {
-//     page.drawText("HUNT TICKETS", {
-//       x: margin,
-//       y: height - headerHeight / 2 - 10,
-//       size: 21,
-//       font: helveticaBold,
-//       color: colors.white
+
+//     // Logo
+//     if (resources.logo) {
+//       const logoWidth = 75;
+//       const logoHeight = logoWidth * (resources.logo.height / resources.logo.width);
+//       page.drawImage(resources.logo, {
+//         x: margin,
+//         y: height - headerHeight / 2 - logoHeight / 2,
+//         width: logoWidth,
+//         height: logoHeight
+//       });
+//     } else {
+//       page.drawText("HUNT TICKETS", {
+//         x: margin,
+//         y: height - headerHeight / 2 - 10,
+//         size: 21,
+//         font: helveticaBold,
+//         color: colors.white
+//       });
+//     }
+
+//     // Order ID
+//     const orderText = `#${commonElements.orderId}`;
+//     const orderTextWidth = helvetica.widthOfTextAtSize(orderText, 10);
+//     page.drawText(orderText, {
+//       x: width - margin - orderTextWidth,
+//       y: height - headerHeight / 2 - 5,
+//       size: 10,
+//       font: helvetica,
+//       color: rgb(0.8, 0.8, 0.8)
 //     });
-//   }
 
-//   // Order ID
-//   const orderText = `#${commonElements.orderId}`;
-//   const orderTextWidth = helvetica.widthOfTextAtSize(orderText, 10);
-//   page.drawText(orderText, {
-//     x: width - margin - orderTextWidth,
-//     y: height - headerHeight / 2 - 5,
-//     size: 10,
-//     font: helvetica,
-//     color: rgb(0.8, 0.8, 0.8)
-//   });
+//     // CONTENT - 2 columns
+//     const topSectionY = height - headerHeight;
+//     const startY = topSectionY - standardSpacing;
 
-//   // CONTENT - 2 columns
-//   const topSectionY = height - headerHeight;
-//   const startY = topSectionY - standardSpacing;
+//     // Flyer
+//     const flyerWidth = halfWidth - 15;
+//     let flyerHeight = flyerWidth * (1350 / 1080);
 
-//   // Flyer
-//   const flyerWidth = halfWidth - 15;
-//   let flyerHeight = flyerWidth * (1350 / 1080);
+//     if (resources.flyer) {
+//       const imageAspectRatio = resources.flyer.height / resources.flyer.width;
+//       flyerHeight = flyerWidth * imageAspectRatio;
 
-//   if (resources.flyer) {
-//     const imageAspectRatio = resources.flyer.height / resources.flyer.width;
-//     flyerHeight = flyerWidth * imageAspectRatio;
-
-//     try {
-//       page.drawImage(resources.flyer, {
+//       try {
+//         page.drawImage(resources.flyer, {
+//           x: margin,
+//           y: startY - flyerHeight,
+//           width: flyerWidth,
+//           height: flyerHeight
+//         });
+//       } catch (drawError) {
+//         logger("error", `Error drawing flyer: ${drawError.message}`);
+//       }
+//     } else {
+//       page.drawRectangle({
 //         x: margin,
 //         y: startY - flyerHeight,
 //         width: flyerWidth,
-//         height: flyerHeight
+//         height: flyerHeight,
+//         borderWidth: 1,
+//         borderColor: rgb(0.7, 0.7, 0.7),
+//         color: rgb(0.95, 0.95, 0.95)
 //       });
-//     } catch (drawError) {
-//       logger("error", `Error drawing flyer: ${drawError.message}`);
+
+//       const noImageText = "Imagen no disponible";
+//       const textWidth = helvetica.widthOfTextAtSize(noImageText, 12);
+//       page.drawText(noImageText, {
+//         x: margin + (flyerWidth - textWidth) / 2,
+//         y: startY - flyerHeight / 2,
+//         size: 12,
+//         font: helvetica,
+//         color: colors.gray
+//       });
 //     }
-//   } else {
-//     page.drawRectangle({
-//       x: margin,
-//       y: startY - flyerHeight,
-//       width: flyerWidth,
-//       height: flyerHeight,
-//       borderWidth: 1,
-//       borderColor: rgb(0.7, 0.7, 0.7),
-//       color: rgb(0.95, 0.95, 0.95)
-//     });
 
-//     const noImageText = "Imagen no disponible";
-//     const textWidth = helvetica.widthOfTextAtSize(noImageText, 12);
-//     page.drawText(noImageText, {
-//       x: margin + (flyerWidth - textWidth) / 2,
-//       y: startY - flyerHeight / 2,
-//       size: 12,
-//       font: helvetica,
-//       color: colors.gray
-//     });
-//   }
+//     // Event info (right column)
+//     const rightColumnX = margin + halfWidth + 15;
+//     const eventNameY = startY - 40;
 
-//   // Event info (right column)
-//   const rightColumnX = margin + halfWidth + 15;
-//   const eventNameY = startY - 40;
-
-//   page.drawText(commonElements.eventName, {
-//     x: rightColumnX,
-//     y: eventNameY,
-//     size: 14,
-//     font: helveticaBold,
-//     color: colors.black
-//   });
-
-//   page.drawText(
-//     `${commonElements.formattedDate} ${commonElements.formattedTime} ${commonElements.timeZoneAbbr}`,
-//     {
+//     page.drawText(commonElements.eventName, {
 //       x: rightColumnX,
-//       y: eventNameY - 20,
-//       size: 10,
-//       font: helvetica,
-//       color: colors.black
-//     }
-//   );
-
-//   // VENUE
-//   const lugarY = eventNameY - 50;
-//   page.drawText("LUGAR", {
-//     x: rightColumnX,
-//     y: lugarY,
-//     size: 10,
-//     font: helvetica,
-//     color: colors.gray
-//   });
-
-//   page.drawText(commonElements.venueName, {
-//     x: rightColumnX,
-//     y: lugarY - 20,
-//     size: 12,
-//     font: helveticaBold,
-//     color: colors.black
-//   });
-
-//   page.drawText(commonElements.venueAddress, {
-//     x: rightColumnX,
-//     y: lugarY - 35,
-//     size: 10,
-//     font: helvetica,
-//     color: colors.black
-//   });
-
-//   // TICKET TYPE
-//   const entradaY = lugarY - 65;
-//   page.drawText("ENTRADA", {
-//     x: rightColumnX,
-//     y: entradaY,
-//     size: 10,
-//     font: helvetica,
-//     color: colors.gray
-//   });
-
-//   page.drawText(commonElements.ticketName, {
-//     x: rightColumnX,
-//     y: entradaY - 20,
-//     size: 12,
-//     font: helveticaBold,
-//     color: colors.black
-//   });
-
-//   page.drawText(`Orden: #${commonElements.orderId}`, {
-//     x: rightColumnX,
-//     y: entradaY - 35,
-//     size: 10,
-//     font: helvetica,
-//     color: colors.black
-//   });
-
-//   // BUYER EMAIL
-//   const titularY = entradaY - 65;
-//   page.drawText("CORREO COMPRADOR", {
-//     x: rightColumnX,
-//     y: titularY,
-//     size: 10,
-//     font: helvetica,
-//     color: colors.gray
-//   });
-
-//   page.drawText(commonElements.userEmail, {
-//     x: rightColumnX,
-//     y: titularY - 20,
-//     size: 12,
-//     font: helveticaBold,
-//     color: colors.black
-//   });
-
-//   // DIVIDER LINE
-//   const middleY = startY - flyerHeight - standardSpacing;
-//   page.drawLine({
-//     start: { x: margin, y: middleY },
-//     end: { x: width - margin, y: middleY },
-//     thickness: 1,
-//     color: colors.lightGray
-//   });
-
-//   // BOTTOM SECTION
-//   const bottomSectionY = middleY - standardSpacing;
-//   const infoSectionX = margin;
-//   const infoSectionWidth = halfWidth - 15;
-//   const sectionSpacing = 15;
-
-//   // Title
-//   page.drawText("Información del ticket", {
-//     x: infoSectionX,
-//     y: bottomSectionY,
-//     size: 12,
-//     font: helveticaBold,
-//     color: colors.black
-//   });
-
-//   // Ecosystem text
-//   const ecosistemaText = "Con Hunt Tickets, tus entradas están disponibles en tu correo electrónico como archivo PDF. Presenta este código QR al ingresar al evento.";
-//   const ecosistemaLines = wrapText(ecosistemaText, helvetica, 9, infoSectionWidth);
-
-//   let currentY = bottomSectionY - 25;
-//   ecosistemaLines.forEach(line => {
-//     page.drawText(line, {
-//       x: infoSectionX,
-//       y: currentY,
-//       size: 9,
-//       font: helvetica,
-//       color: colors.black
-//     });
-//     currentY -= 15;
-//   });
-
-//   // Legal text
-//   currentY -= sectionSpacing + 5;
-//   const legalSize = 5.5;
-
-//   commonElements.legalTextJustified.forEach((item: any) => {
-//     if (item.wordSpacing > 0) {
-//       const words = item.line.split(' ');
-//       let xPos = infoSectionX;
-
-//       words.forEach((word: string, index: number) => {
-//         page.drawText(word, {
-//           x: xPos,
-//           y: currentY,
-//           size: legalSize,
-//           font: helveticaLight,
-//           color: colors.darkGray
-//         });
-
-//         if (index < words.length - 1) {
-//           const wordWidth = helveticaLight.widthOfTextAtSize(word, legalSize);
-//           const spaceWidth = helveticaLight.widthOfTextAtSize(' ', legalSize);
-//           xPos += wordWidth + spaceWidth + item.wordSpacing;
-//         }
-//       });
-//     } else {
-//       page.drawText(item.line, {
-//         x: infoSectionX,
-//         y: currentY,
-//         size: legalSize,
-//         font: helveticaLight,
-//         color: colors.darkGray
-//       });
-//     }
-//     currentY -= 8;
-//   });
-
-//   // QR CODE
-//   const qrRightX = width - margin;
-//   const qrLeftX = qrRightX - qrCodeWidth;
-//   const qrCenterX = qrLeftX + qrCodeWidth / 2;
-
-//   // Scanner text
-//   const scannerText = "ESTE CÓDIGO SERÁ ESCANEADO AL MOMENTO DE INGRESAR AL EVENTO";
-//   const scannerFontSize = 8;
-//   const scannerY = bottomSectionY - 5;
-//   const wrappedScannerText = wrapText(scannerText, helvetica, scannerFontSize, qrCodeWidth);
-//   const scannerTextHeight = wrappedScannerText.length * 12;
-
-//   wrappedScannerText.forEach((line, index) => {
-//     const lineWidth = helvetica.widthOfTextAtSize(line, scannerFontSize);
-//     page.drawText(line, {
-//       x: qrCenterX - lineWidth / 2,
-//       y: scannerY - index * 12,
-//       size: scannerFontSize,
-//       font: helvetica,
-//       color: colors.gray
-//     });
-//   });
-
-//   // QR Image
-//   const qrY = scannerY - scannerTextHeight - 10;
-
-//   if (qrImage) {
-//     page.drawImage(qrImage, {
-//       x: qrLeftX,
-//       y: qrY - qrCodeWidth,
-//       width: qrCodeWidth,
-//       height: qrCodeWidth
-//     });
-//   } else {
-//     // Placeholder
-//     page.drawRectangle({
-//       x: qrLeftX,
-//       y: qrY - qrCodeWidth,
-//       width: qrCodeWidth,
-//       height: qrCodeWidth,
-//       borderWidth: 2,
-//       borderColor: colors.black,
-//       color: colors.white
-//     });
-
-//     const infoText = "Código de verificación";
-//     const infoTextWidth = helvetica.widthOfTextAtSize(infoText, 14);
-//     page.drawText(infoText, {
-//       x: qrCenterX - infoTextWidth / 2,
-//       y: qrY - qrCodeWidth / 2 + 10,
+//       y: eventNameY,
 //       size: 14,
 //       font: helveticaBold,
 //       color: colors.black
 //     });
 
-//     const idText = ticket.id;
-//     const idTextWidth = helvetica.widthOfTextAtSize(idText, 12);
-//     page.drawText(idText, {
-//       x: qrCenterX - idTextWidth / 2,
-//       y: qrY - qrCodeWidth / 2 - 10,
+//     page.drawText(
+//       `${commonElements.formattedDate} ${commonElements.formattedTime} ${commonElements.timeZoneAbbr}`,
+//       {
+//         x: rightColumnX,
+//         y: eventNameY - 20,
+//         size: 10,
+//         font: helvetica,
+//         color: colors.black
+//       }
+//     );
+
+//     // VENUE
+//     const lugarY = eventNameY - 50;
+//     page.drawText("LUGAR", {
+//       x: rightColumnX,
+//       y: lugarY,
+//       size: 10,
+//       font: helvetica,
+//       color: colors.gray
+//     });
+
+//     page.drawText(commonElements.venueName, {
+//       x: rightColumnX,
+//       y: lugarY - 20,
 //       size: 12,
+//       font: helveticaBold,
+//       color: colors.black
+//     });
+
+//     page.drawText(commonElements.venueAddress, {
+//       x: rightColumnX,
+//       y: lugarY - 35,
+//       size: 10,
 //       font: helvetica,
 //       color: colors.black
 //     });
-//   }
 
-//   // QR ID
-//   const qrIdText = `ID: ${ticket.id}`;
-//   const qrIdWidth = helvetica.widthOfTextAtSize(qrIdText, 8);
-//   page.drawText(qrIdText, {
-//     x: qrCenterX - qrIdWidth / 2,
-//     y: qrY - qrCodeWidth - 20,
-//     size: 8,
-//     font: helvetica,
-//     color: colors.gray
-//   });
+//     // TICKET TYPE
+//     const entradaY = lugarY - 65;
+//     page.drawText("ENTRADA", {
+//       x: rightColumnX,
+//       y: entradaY,
+//       size: 10,
+//       font: helvetica,
+//       color: colors.gray
+//     });
 
-//   // FOOTER
-//   const footerY = 80;
-//   const minSpaceAfterContent = 20;
-//   const contentEndY = Math.min(currentY, qrY - qrCodeWidth - 20);
-//   const lineY = Math.min(contentEndY - minSpaceAfterContent, footerY + standardSpacing);
+//     page.drawText(commonElements.ticketName, {
+//       x: rightColumnX,
+//       y: entradaY - 20,
+//       size: 12,
+//       font: helveticaBold,
+//       color: colors.black
+//     });
 
-//   // Footer line
-//   page.drawLine({
-//     start: { x: margin, y: lineY },
-//     end: { x: width - margin, y: lineY },
-//     thickness: 1,
-//     color: colors.lightGray
-//   });
+//     page.drawText(`Orden: #${commonElements.orderId}`, {
+//       x: rightColumnX,
+//       y: entradaY - 35,
+//       size: 10,
+//       font: helvetica,
+//       color: colors.black
+//     });
 
-//   // Contact info
-//   page.drawText("info@hunt-tickets.com", {
-//     x: margin,
-//     y: footerY,
-//     size: 8,
-//     font: helvetica,
-//     color: colors.black
-//   });
+//     // BUYER EMAIL
+//     const titularY = entradaY - 65;
+//     page.drawText("CORREO COMPRADOR", {
+//       x: rightColumnX,
+//       y: titularY,
+//       size: 10,
+//       font: helvetica,
+//       color: colors.gray
+//     });
 
-//   page.drawText("WhatsApp: +573228597640", {
-//     x: margin,
-//     y: footerY - 12,
-//     size: 8,
-//     font: helvetica,
-//     color: colors.black
-//   });
+//     page.drawText(commonElements.userEmail, {
+//       x: rightColumnX,
+//       y: titularY - 20,
+//       size: 12,
+//       font: helveticaBold,
+//       color: colors.black
+//     });
 
-//   page.drawText("www.hunt-tickets.com", {
-//     x: margin,
-//     y: footerY - 24,
-//     size: 8,
-//     font: helvetica,
-//     color: colors.black
-//   });
+//     // DIVIDER LINE
+//     const middleY = startY - flyerHeight - standardSpacing;
+//     page.drawLine({
+//       start: { x: margin, y: middleY },
+//       end: { x: width - margin, y: middleY },
+//       thickness: 1,
+//       color: colors.lightGray
+//     });
 
-//   // Right info
-//   const entradaText = `Entrada ${pageIndex + 1} de ${totalPages}`;
-//   const entradaTextWidth = helvetica.widthOfTextAtSize(entradaText, 8);
-//   page.drawText(entradaText, {
-//     x: width - margin - entradaTextWidth,
-//     y: footerY,
-//     size: 8,
-//     font: helvetica,
-//     color: colors.black
-//   });
+//     // BOTTOM SECTION
+//     const bottomSectionY = middleY - standardSpacing;
+//     const infoSectionX = margin;
+//     const infoSectionWidth = halfWidth - 15;
+//     const sectionSpacing = 15;
 
-//   const noDevolucionesText = "No se aceptan devoluciones";
-//   const noDevolucionesWidth = helvetica.widthOfTextAtSize(noDevolucionesText, 8);
-//   page.drawText(noDevolucionesText, {
-//     x: width - margin - noDevolucionesWidth,
-//     y: footerY - 12,
-//     size: 8,
-//     font: helvetica,
-//     color: colors.black
-//   });
+//     // Title
+//     page.drawText("Información del ticket", {
+//       x: infoSectionX,
+//       y: bottomSectionY,
+//       size: 12,
+//       font: helveticaBold,
+//       color: colors.black
+//     });
 
-//   const empresaText = "Hunt Tickets S.A.S. NIT 901881747-0";
-//   const empresaWidth = helvetica.widthOfTextAtSize(empresaText, 8);
-//   page.drawText(empresaText, {
-//     x: width - margin - empresaWidth,
-//     y: footerY - 24,
-//     size: 8,
-//     font: helveticaLight,
-//     color: colors.black
-//   });
+//     // Ecosystem text
+//     const ecosistemaText = "Con Hunt Tickets, tus entradas están disponibles en tu correo electrónico como archivo PDF. Presenta este código QR al ingresar al evento.";
+//     const ecosistemaLines = wrapText(ecosistemaText, helvetica, 9, infoSectionWidth);
+
+//     let currentY = bottomSectionY - 25;
+//     ecosistemaLines.forEach(line => {
+//       page.drawText(line, {
+//         x: infoSectionX,
+//         y: currentY,
+//         size: 9,
+//         font: helvetica,
+//         color: colors.black
+//       });
+//       currentY -= 15;
+//     });
+
+//     // Legal text
+//     currentY -= sectionSpacing + 5;
+//     const legalSize = 5.5;
+
+//     commonElements.legalTextJustified.forEach((item: any) => {
+//       if (item.wordSpacing > 0) {
+//         const words = item.line.split(' ');
+//         let xPos = infoSectionX;
+
+//         words.forEach((word: string, index: number) => {
+//           page.drawText(word, {
+//             x: xPos,
+//             y: currentY,
+//             size: legalSize,
+//             font: helveticaLight,
+//             color: colors.darkGray
+//           });
+
+//           if (index < words.length - 1) {
+//             const wordWidth = helveticaLight.widthOfTextAtSize(word, legalSize);
+//             const spaceWidth = helveticaLight.widthOfTextAtSize(' ', legalSize);
+//             xPos += wordWidth + spaceWidth + item.wordSpacing;
+//           }
+//         });
+//       } else {
+//         page.drawText(item.line, {
+//           x: infoSectionX,
+//           y: currentY,
+//           size: legalSize,
+//           font: helveticaLight,
+//           color: colors.darkGray
+//         });
+//       }
+//       currentY -= 8;
+//     });
+
+//     // QR CODE
+//     const qrRightX = width - margin;
+//     const qrLeftX = qrRightX - qrCodeWidth;
+//     const qrCenterX = qrLeftX + qrCodeWidth / 2;
+
+//     // Scanner text
+//     const scannerText = "ESTE CÓDIGO SERÁ ESCANEADO AL MOMENTO DE INGRESAR AL EVENTO";
+//     const scannerFontSize = 8;
+//     const scannerY = bottomSectionY - 5;
+//     const wrappedScannerText = wrapText(scannerText, helvetica, scannerFontSize, qrCodeWidth);
+//     const scannerTextHeight = wrappedScannerText.length * 12;
+
+//     wrappedScannerText.forEach((line, index) => {
+//       const lineWidth = helvetica.widthOfTextAtSize(line, scannerFontSize);
+//       page.drawText(line, {
+//         x: qrCenterX - lineWidth / 2,
+//         y: scannerY - index * 12,
+//         size: scannerFontSize,
+//         font: helvetica,
+//         color: colors.gray
+//       });
+//     });
+
+//     // QR Code - Draw it directly using rectangles
+//     const qrY = scannerY - scannerTextHeight - 10;
+
+//     drawQRCode(page, ticket.qr_code, qrLeftX, qrY - qrCodeWidth, qrCodeWidth);
+
+//     // QR ID
+//     const qrIdText = `ID: ${ticket.id}`;
+//     const qrIdWidth = helvetica.widthOfTextAtSize(qrIdText, 8);
+//     page.drawText(qrIdText, {
+//       x: qrCenterX - qrIdWidth / 2,
+//       y: qrY - qrCodeWidth - 20,
+//       size: 8,
+//       font: helvetica,
+//       color: colors.gray
+//     });
+
+//     // FOOTER
+//     const footerY = 80;
+//     const minSpaceAfterContent = 20;
+//     const contentEndY = Math.min(currentY, qrY - qrCodeWidth - 20);
+//     const lineY = Math.min(contentEndY - minSpaceAfterContent, footerY + standardSpacing);
+
+//     // Footer line
+//     page.drawLine({
+//       start: { x: margin, y: lineY },
+//       end: { x: width - margin, y: lineY },
+//       thickness: 1,
+//       color: colors.lightGray
+//     });
+
+//     // Contact info
+//     page.drawText("info@hunt-tickets.com", {
+//       x: margin,
+//       y: footerY,
+//       size: 8,
+//       font: helvetica,
+//       color: colors.black
+//     });
+
+//     page.drawText("WhatsApp: +573228597640", {
+//       x: margin,
+//       y: footerY - 12,
+//       size: 8,
+//       font: helvetica,
+//       color: colors.black
+//     });
+
+//     page.drawText("www.hunt-tickets.com", {
+//       x: margin,
+//       y: footerY - 24,
+//       size: 8,
+//       font: helvetica,
+//       color: colors.black
+//     });
+
+//     // Right info
+//     const entradaText = `Entrada ${pageIndex + 1} de ${totalPages}`;
+//     const entradaTextWidth = helvetica.widthOfTextAtSize(entradaText, 8);
+//     page.drawText(entradaText, {
+//       x: width - margin - entradaTextWidth,
+//       y: footerY,
+//       size: 8,
+//       font: helvetica,
+//       color: colors.black
+//     });
+
+//     const noDevolucionesText = "No se aceptan devoluciones";
+//     const noDevolucionesWidth = helvetica.widthOfTextAtSize(noDevolucionesText, 8);
+//     page.drawText(noDevolucionesText, {
+//       x: width - margin - noDevolucionesWidth,
+//       y: footerY - 12,
+//       size: 8,
+//       font: helvetica,
+//       color: colors.black
+//     });
+
+//     const empresaText = "Hunt Tickets S.A.S. NIT 901881747-0";
+//     const empresaWidth = helvetica.widthOfTextAtSize(empresaText, 8);
+//     page.drawText(empresaText, {
+//       x: width - margin - empresaWidth,
+//       y: footerY - 24,
+//       size: 8,
+//       font: helveticaLight,
+//       color: colors.black
+//     });
 // }
 
 // // ==========================================
 // // MAIN PDF GENERATION
 // // ==========================================
-
 // async function generatePDF(
-//   order: any,
-//   event: any,
-//   venue: any,
-//   user: any,
-//   tickets: any[],
-//   correlationId: string
-// ) {
-//   const startTime = Date.now();
+//     order: any,
+//     event: any,
+//     venue: any,
+//     user: any,
+//     tickets: any[],
+//     correlationId: string
+//   ) {
+//     const startTime = Date.now();
 
-//   if (tickets.length > CONFIG.MAX_TICKETS_PER_PDF) {
-//     throw new Error(`Ticket count (${tickets.length}) exceeds maximum allowed (${CONFIG.MAX_TICKETS_PER_PDF})`);
-//   }
+//     if (tickets.length > CONFIG.MAX_TICKETS_PER_PDF) {
+//       throw new Error(`Ticket count (${tickets.length}) exceeds maximum allowed (${CONFIG.MAX_TICKETS_PER_PDF})`);
+//     }
 
-//   const pdfDoc = await PDFDocument.create();
+//     const pdfDoc = await PDFDocument.create();
 
-//   // Load fonts
-//   const fonts = {
-//     helvetica: await pdfDoc.embedFont(StandardFonts.Helvetica),
-//     helveticaBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-//     helveticaLight: await pdfDoc.embedFont(StandardFonts.Helvetica)
-//   };
+//     // Load fonts
+//     const fonts = {
+//       helvetica: await pdfDoc.embedFont(StandardFonts.Helvetica),
+//       helveticaBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+//       helveticaLight: await pdfDoc.embedFont(StandardFonts.Helvetica)
+//     };
 
-//   logger("info", "Starting PDF generation", {
-//     order_id: order.id,
-//     pages_count: tickets.length,
-//     correlation_id: correlationId
-//   });
+//     logger("info", "Starting PDF generation", {
+//       order_id: order.id,
+//       pages_count: tickets.length,
+//       correlation_id: correlationId
+//     });
 
-//   // Load resources
-//   const resources = await loadResources(event, pdfDoc);
+//     // Load resources
+//     const resources = await loadResources(event, pdfDoc);
 
-//   // Get ticket type from first ticket
-//   const ticketType = tickets[0].ticketType;
+//     // Get ticket type from first ticket
+//     const ticketType = tickets[0].ticketType;
 
-//   // Pre-calculate common elements
-//   const commonElements = preCalculateCommonElements(
-//     order,
-//     event,
-//     venue,
-//     user,
-//     ticketType,
-//     fonts
-//   );
-
-//   // Generate QR codes for all tickets
-//   const qrImages = await Promise.all(
-//     tickets.map(async (ticket) => {
-//       try {
-//         const qrData = await generateQRCode(ticket.qrCode);
-//         const qrImage = await pdfDoc.embedPng(qrData);
-//         return { ticket, qrImage };
-//       } catch (error) {
-//         logger("error", `Failed to generate QR for ticket ${ticket.id}: ${error.message}`);
-//         return { ticket, qrImage: null };
-//       }
-//     })
-//   );
-
-//   logger("info", "QR codes generated", {
-//     total: qrImages.length,
-//     successful: qrImages.filter(qi => qi.qrImage !== null).length
-//   });
-
-//   // Generate pages
-//   for (let i = 0; i < tickets.length; i++) {
-//     const { ticket, qrImage } = qrImages[i];
-
-//     await generatePDFPage(
-//       pdfDoc,
-//       i,
-//       ticket,
-//       qrImage,
+//     // Pre-calculate common elements
+//     const commonElements = preCalculateCommonElements(
 //       order,
 //       event,
 //       venue,
 //       user,
-//       resources,
-//       fonts,
-//       tickets.length,
-//       commonElements
+//       ticketType,
+//       fonts
 //     );
-//   }
 
-//   // Save PDF
-//   const pdfBytes = await pdfDoc.save({
-//     useObjectStreams: false,
-//     addDefaultPage: false,
-//     objectsPerTick: 50,
-//     updateFieldAppearances: false
-//   });
+//     // Generate pages - QR codes will be drawn directly on each page
+//     for (let i = 0; i < tickets.length; i++) {
+//       const ticket = tickets[i];
 
-//   if (pdfBytes.byteLength > CONFIG.MAX_PDF_SIZE) {
-//     throw new Error(`PDF too large: ${pdfBytes.byteLength} bytes`);
-//   }
+//       await generatePDFPage(
+//         pdfDoc,
+//         i,
+//         ticket,
+//         null,  // No qrImage needed - we'll draw it directly
+//         order,
+//         event,
+//         venue,
+//         user,
+//         resources,
+//         fonts,
+//         tickets.length,
+//         commonElements
+//       );
+//     }
 
-//   const totalTime = Date.now() - startTime;
-//   const pdfSizeMB = (pdfBytes.byteLength / 1024 / 1024).toFixed(2);
+//     // Save PDF
+//     const pdfBytes = await pdfDoc.save({
+//       useObjectStreams: false,
+//       addDefaultPage: false,
+//       objectsPerTick: 50,
+//       updateFieldAppearances: false
+//     });
 
-//   logger("info", "PDF generated successfully", {
-//     pdf_size_mb: pdfSizeMB,
-//     total_time: totalTime,
-//     pages_generated: tickets.length,
-//     correlation_id: correlationId
-//   });
+//     if (pdfBytes.byteLength > CONFIG.MAX_PDF_SIZE) {
+//       throw new Error(`PDF too large: ${pdfBytes.byteLength} bytes`);
+//     }
 
-//   return pdfBytes;
+//     const totalTime = Date.now() - startTime;
+//     const pdfSizeMB = (pdfBytes.byteLength / 1024 / 1024).toFixed(2);
+
+//     logger("info", "PDF generated successfully", {
+//       pdf_size_mb: pdfSizeMB,
+//       total_time: totalTime,
+//       pages_generated: tickets.length,
+//       correlation_id: correlationId
+//     });
+
+//     return pdfBytes;
 // }
 
 // // ==========================================
 // // STORAGE
 // // ==========================================
+// async function storePDF(orderId: string, event: any, pdfBytes: Uint8Array): Promise<string> {
+//     try {
+//       const eventFolder = `${event.id}-${sanitizeForPath(event.name)}`;
+//       const filePath = `${eventFolder}/${orderId}/tickets.pdf`;
 
-// async function storePDF(orderId: string, pdfBytes: Uint8Array): Promise<string> {
-//   try {
-//     const filePath = `${orderId}/tickets.pdf`;
+//       const { error } = await supabase.storage
+//         .from(CONFIG.PDF_BUCKET)
+//         .upload(filePath, pdfBytes, {
+//           contentType: "application/pdf",
+//           upsert: true
+//         });
 
-//     const { error } = await supabase.storage
-//       .from(CONFIG.PDF_BUCKET)
-//       .upload(filePath, pdfBytes, {
-//         contentType: "application/pdf",
-//         upsert: true
+//       if (error) {
+//         throw error;
+//       }
+
+//       logger("info", "PDF stored successfully", {
+//         order_id: orderId,
+//         event_id: event.id,
+//         event_name: event.name,
+//         bucket: CONFIG.PDF_BUCKET,
+//         file_path: filePath,
+//         size: pdfBytes.byteLength
 //       });
 
-//     if (error) {
+//       return filePath;
+//     } catch (error) {
+//       logger("error", "Failed to store PDF", {
+//         order_id: orderId,
+//         error: error.message
+//       });
 //       throw error;
 //     }
-
-//     logger("info", "PDF stored successfully", {
-//       order_id: orderId,
-//       bucket: CONFIG.PDF_BUCKET,
-//       file_path: filePath,
-//       size: pdfBytes.byteLength
-//     });
-
-//     return filePath;
-//   } catch (error) {
-//     logger("error", "Failed to store PDF", {
-//       order_id: orderId,
-//       error: error.message
-//     });
-//     throw error;
-//   }
 // }
 
 // async function createSignedURL(filePath: string, eventEndDate?: string) {
@@ -1111,18 +1090,21 @@
 
 //     // Check if PDF already exists
 //     if (!force_regenerate) {
-//       const filePath = `${order_id}/tickets.pdf`;
+//       // Get order and event first to construct the path
+//       const order = await getOrderData(order_id);
+//       const { event } = await getEventAndVenue(order.event_id);
+
+//       const eventFolder = `${event.id}-${sanitizeForPath(event.name)}`;
+//       const filePath = `${eventFolder}/${order_id}/tickets.pdf`;
+
 //       const { data } = await supabase.storage
-//         .from(CONFIG.PDF_BUCKET)
-//         .list(order_id, { search: 'tickets.pdf' });
+//       .from(CONFIG.PDF_BUCKET)
+//       .list(`${eventFolder}/${order_id}`, { search: 'tickets.pdf' });
 
 //       if (data && data.length > 0) {
 //         logger("info", "PDF already exists", { order_id });
 
-//         // Get order to fetch event end date
-//         const order = await getOrderData(order_id);
-//         const { event } = await getEventAndVenue(order.eventId);
-
+//         // ✅ Use already-fetched order and event
 //         const { url, expiresAt } = await createSignedURL(filePath, event.endDate);
 
 //         return new Response(JSON.stringify({
@@ -1153,9 +1135,9 @@
 //     ]);
 
 //     const [{ event, venue }, user] = await Promise.all([
-//       getEventAndVenue(order.eventId),
-//       getUserProfile(order.userId)
-//     ]);
+//     getEventAndVenue(order.event_id),  // ✅ Correct
+//     getUserProfile(order.user_id)      // ✅ Correct
+//   ]);
 
 //     // Generate PDF
 //     const pdfBytes = await generatePDF(
@@ -1168,7 +1150,7 @@
 //     );
 
 //     // Store PDF
-//     const filePath = await storePDF(order_id, pdfBytes);
+//     const filePath = await storePDF(order_id, event, pdfBytes);
 
 //     // Create signed URL
 //     const { url, expiresAt } = await createSignedURL(filePath, event.endDate);

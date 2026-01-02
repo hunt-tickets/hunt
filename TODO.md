@@ -1,13 +1,16 @@
 - Acceso a creacion de Organizaciones tiene que ser restringido (Book a demo)
 - Webhook para facturacion
 - Scanner
-- email de confirmacion con PDF (ver implementacion Hunt viejo)
 
 - Terminar event_days y Events 
 - Palcos, silla enum. 
 - Programa de referidos 
 - apple wallet 
 - Analytics de ruta de eventos (organizaciones)
+
+DONE: 
+- email de confirmacion con PDF (ver implementacion Hunt viejo)
+
 
 
 ├ ƒ /profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId] 13.6 kB 571 kB
