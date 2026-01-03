@@ -76,7 +76,8 @@ export function EventDashboardTabs({
   showTabsOnly = false,
   showContentOnly = false,
 }: EventDashboardTabsProps) {
-  const { dashboardTab: activeTab, setDashboardTab: setActiveTab } = useEventTabs();
+  const { dashboardTab: activeTab, setDashboardTab: setActiveTab } =
+    useEventTabs();
 
   // Mock sellers data - In production, fetch from database
   const mockSellers = [
@@ -135,17 +136,7 @@ export function EventDashboardTabs({
         <BarChart3 className="h-4 w-4" />
         Dashboard
       </button>
-      <button
-        onClick={() => setActiveTab("borderaux")}
-        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
-          activeTab === "borderaux"
-            ? "bg-white/10 text-white border border-white/20"
-            : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
-        }`}
-      >
-        <FileSpreadsheet className="h-4 w-4" />
-        Cierre
-      </button>
+
       <button
         onClick={() => setActiveTab("web")}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
@@ -199,9 +190,7 @@ export function EventDashboardTabs({
         />
       )}
 
-      {activeTab === "vendedores" && (
-        <SellersTable sellers={mockSellers} />
-      )}
+      {activeTab === "vendedores" && <SellersTable sellers={mockSellers} />}
     </>
   );
 

@@ -29,7 +29,10 @@ interface UserData {
 
 type EventType = "single" | "multi_day" | "recurring" | "slots";
 
-const eventTypeConfig: Record<EventType, { label: string; icon: typeof Calendar }> = {
+const eventTypeConfig: Record<
+  EventType,
+  { label: string; icon: typeof Calendar }
+> = {
   single: { label: "Evento único", icon: Calendar },
   multi_day: { label: "Evento de varios días", icon: CalendarDays },
   recurring: { label: "Evento recurrente", icon: Repeat },
@@ -43,7 +46,7 @@ interface EventSidebarProps {
   eventName: string;
   eventType?: EventType;
   role?: "owner" | "administrator" | "seller";
-  user: UserData | null;
+  user?: UserData | null;
 }
 
 // Menu items with role requirements
@@ -120,22 +123,23 @@ export function EventSidebar({
   );
 
   // Add "Días" menu item for multi-day events (insert after "Entradas")
-  const menuItemsWithDays = eventType === "multi_day"
-    ? visibleMenuItems.flatMap((item) =>
-        item.href === "/entradas"
-          ? [
-              item,
-              {
-                title: "Días",
-                icon: CalendarDays,
-                href: "/configuracion/dias",
-                description: "Gestiona los días del evento",
-                requiredRoles: ["owner", "administrator"] as const,
-              },
-            ]
-          : [item]
-      )
-    : visibleMenuItems;
+  const menuItemsWithDays =
+    eventType === "multi_day"
+      ? visibleMenuItems.flatMap((item) =>
+          item.href === "/entradas"
+            ? [
+                item,
+                {
+                  title: "Días",
+                  icon: CalendarDays,
+                  href: "/configuracion/dias",
+                  description: "Gestiona los días del evento",
+                  requiredRoles: ["owner", "administrator"] as const,
+                },
+              ]
+            : [item]
+        )
+      : visibleMenuItems;
 
   return (
     <>

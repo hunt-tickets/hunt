@@ -21,10 +21,17 @@ interface EventLayoutWrapperProps {
   eventName: string;
   eventType?: EventType;
   role?: "owner" | "administrator" | "seller";
-  user: UserData | null;
+  user?: UserData | null;
 }
 
-export function EventLayoutWrapper({ children, userId, organizationId, eventId, eventName, eventType = "single", role = "seller", user }: EventLayoutWrapperProps) {
+export function EventLayoutWrapper({
+  children,
+  userId,
+  organizationId,
+  eventId,
+  eventName,
+  eventType = "single",
+}: EventLayoutWrapperProps) {
   return (
     <EventTabsProvider>
       {/*
@@ -39,10 +46,12 @@ export function EventLayoutWrapper({ children, userId, organizationId, eventId, 
           eventId={eventId}
           eventName={eventName}
           eventType={eventType}
-          role={role}
-          user={user}
+          // role={role}
+          // user={user}
         />
-        <main className="lg:ml-64 min-h-screen pt-4 px-4 sm:pt-6 sm:px-6 lg:pt-8 lg:px-8">{children}</main>
+        <main className="lg:ml-64 min-h-screen pt-4 px-4 sm:pt-6 sm:px-6 lg:pt-8 lg:px-8">
+          {children}
+        </main>
       </div>
     </EventTabsProvider>
   );

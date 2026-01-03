@@ -1,9 +1,9 @@
 import React, { ReactNode } from "react";
 import { EventLayoutWrapper } from "@/components/event-layout-wrapper";
 import { createClient } from "@/lib/supabase/server";
-import { db } from "@/lib/drizzle";
-import { member, user } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+// import { db } from "@/lib/drizzle";
+// import { member, user } from "@/lib/schema";
+// import { eq, and } from "drizzle-orm";
 
 interface EventLayoutProps {
   children: ReactNode;
@@ -26,28 +26,29 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
     .single();
 
   const eventName = event?.name || "Evento";
-  const eventType = (event?.type as "single" | "multi_day" | "recurring" | "slots") || "single";
+  const eventType =
+    (event?.type as "single" | "multi_day" | "recurring" | "slots") || "single";
 
-  // Fetch user's role in the organization
-  const memberRecord = await db.query.member.findFirst({
-    where: and(
-      eq(member.userId, userId),
-      eq(member.organizationId, organizationId)
-    ),
-  });
+  // // Fetch user's role in the organization
+  // const memberRecord = await db.query.member.findFirst({
+  //   where: and(
+  //     eq(member.userId, userId),
+  //     eq(member.organizationId, organizationId)
+  //   ),
+  // });
 
-  const role = (memberRecord?.role as "owner" | "administrator" | "seller") || "seller";
+  // const role = (memberRecord?.role as "owner" | "administrator" | "seller") || "seller";
 
-  // Fetch user data
-  const userData = await db.query.user.findFirst({
-    where: eq(user.id, userId),
-    columns: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
-    },
-  });
+  // // Fetch user data
+  // const userData = await db.query.user.findFirst({
+  //   where: eq(user.id, userId),
+  //   columns: {
+  //     id: true,
+  //     name: true,
+  //     email: true,
+  //     image: true,
+  //   },
+  // });
 
   return (
     <EventLayoutWrapper
@@ -56,8 +57,8 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
       eventId={eventId}
       eventName={eventName}
       eventType={eventType}
-      role={role}
-      user={userData || null}
+      // role={role}
+      // user={userData || null}
     >
       {children}
     </EventLayoutWrapper>

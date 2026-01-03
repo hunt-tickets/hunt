@@ -4,8 +4,8 @@ import { headers } from "next/headers";
 import { AdminConfigTabs } from "@/components/admin-config-tabs";
 import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
-import { paymentProcessorAccount, member } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { paymentProcessorAccount } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import { getMercadopagoAuthorizationUrl } from "@/lib/mercadopago";
 
 interface ConfiguracionPageProps {
@@ -20,25 +20,25 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   const reqHeaders = await headers();
 
   // Auth check using Better Auth
-  const session = await auth.api.getSession({
-    headers: reqHeaders,
-  });
+  // const session = await auth.api.getSession({
+  //   headers: reqHeaders,
+  // });
 
-  if (!session || session.user.id !== userId) {
-    redirect("/sign-in");
-  }
+  // if (!session || session.user.id !== userId) {
+  //   redirect("/sign-in");
+  // }
 
-  // Verify user is a member of the organization
-  const memberRecord = await db.query.member.findFirst({
-    where: and(
-      eq(member.userId, userId),
-      eq(member.organizationId, organizationId)
-    ),
-  });
+  // // Verify user is a member of the organization
+  // const memberRecord = await db.query.member.findFirst({
+  //   where: and(
+  //     eq(member.userId, userId),
+  //     eq(member.organizationId, organizationId)
+  //   ),
+  // });
 
-  if (!memberRecord) {
-    notFound();
-  }
+  // if (!memberRecord) {
+  //   notFound();
+  // }
 
   // Check if user can view dashboard (sellers cannot access configuration)
   const canViewDashboard = await auth.api.hasPermission({
