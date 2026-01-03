@@ -84,6 +84,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     city: event.city || undefined,
     country: event.country || undefined,
     address: event.address || undefined,
+    venue_name: event.venueName || undefined,
     flyer: event.flyer || undefined,
     flyer_apple: event.flyerApple || undefined,
     venue_id: event.venueId || undefined,

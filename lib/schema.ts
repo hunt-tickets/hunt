@@ -613,6 +613,7 @@ export const events = pgTable(
     address: text("address"),
     flyer: text("flyer"),
     venueId: uuid("venue_id").references(() => venues.id),
+    venueName: text("venue_name"),
     variableFee: decimal("variable_fee"),
     fixedFee: decimal("fixed_fee"),
     minAge: decimal("age"),

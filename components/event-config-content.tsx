@@ -73,6 +73,7 @@ interface EventData {
   city?: string;
   country?: string;
   address?: string;
+  venue_name?: string;
   flyer?: string;
   flyer_apple?: string;
   venue_id?: string;
@@ -137,7 +138,7 @@ export function EventConfigContent({
         description: eventData.description || "",
         category:
           (eventData.category as (typeof EVENT_CATEGORIES)[number]) || "",
-        venueName: "",
+        venueName: eventData.venue_name || "",
         city: eventData.city || "",
         country: eventData.country || "",
         address: eventData.address || "",
@@ -326,6 +327,7 @@ export function EventConfigContent({
           city: formData.city,
           country: formData.country,
           address: formData.address,
+          venue_name: formData.venueName,
           variable_fee: huntCosts.commissionPercentage / 100,
           fixed_fee: huntCosts.costPerTicket,
         });

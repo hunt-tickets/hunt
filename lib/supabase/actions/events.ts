@@ -527,6 +527,7 @@ export async function updateEventConfiguration(
     city?: string;
     country?: string;
     address?: string;
+    venue_name?: string;
     faqs?: Array<{ id: string; question: string; answer: string }>;
   }
 ) {
@@ -578,6 +579,7 @@ export async function updateEventConfiguration(
     city: string | null;
     country: string | null;
     address: string | null;
+    venue_name: string | null;
     faqs: Array<{ id: string; question: string; answer: string }>;
   }> = {};
 
@@ -600,6 +602,8 @@ export async function updateEventConfiguration(
     updateData.country = formData.country || null;
   if (formData.address !== undefined)
     updateData.address = formData.address || null;
+  if (formData.venue_name !== undefined)
+    updateData.venue_name = formData.venue_name || null;
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
 
   const { error } = await supabase
