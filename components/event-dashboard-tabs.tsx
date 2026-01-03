@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, FileSpreadsheet, Globe, Users } from "lucide-react";
+import { BarChart3, Globe, Users } from "lucide-react";
 import { EventDashboard } from "@/components/event-dashboard";
 import { EventBorderaux } from "@/components/event-borderaux";
 import { EventWebAnalytics } from "@/components/event-web-analytics";
