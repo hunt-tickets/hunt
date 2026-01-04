@@ -1,10 +1,11 @@
 import { EventsWithSearch } from "@/components/events-with-search";
-import { getPopularEvents, type PopularEventWithVenue } from "@/lib/supabase/actions/events";
+import {
+  getEventsWithVenue,
+  type PublicEventWithVenue,
+} from "@/lib/supabase/actions/events";
 
-interface PopularEventsProps {
-  // City ID to fetch popular events for
+interface DisplayEventsProps {
   cityId?: string;
-  // Number of events to display in the grid
   limit?: number;
 }
 
@@ -12,9 +13,9 @@ interface PopularEventsProps {
  * PopularEvents Server Component
  * Fetches events from Supabase and passes them to the client component for filtering
  */
-export async function PopularEvents({ limit = 6 }: PopularEventsProps) {
+export async function DisplayEvents({ limit = 6 }: DisplayEventsProps) {
   // Fetch popular events directly from Supabase
-  const events: PopularEventWithVenue[] = await getPopularEvents(limit * 2);
+  const events: PublicEventWithVenue[] = await getEventsWithVenue(limit * 2);
 
   // Show message if no events found
   if (!events || events.length === 0) {

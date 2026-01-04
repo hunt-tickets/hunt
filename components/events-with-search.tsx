@@ -6,11 +6,11 @@ import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
 import { EventCategoryFilter, EVENT_CATEGORIES, type CategoryKey } from "@/components/event-category-filter";
 import { Filter } from "lucide-react";
-import type { PopularEventWithVenue } from "@/lib/supabase/actions/events";
+import type { PublicEventWithVenue } from "@/lib/supabase/actions/events";
 
 interface EventsWithSearchProps {
   // All events from server
-  events: PopularEventWithVenue[];
+  events: PublicEventWithVenue[];
   // Number of events to display in grid
   limit?: number;
 }

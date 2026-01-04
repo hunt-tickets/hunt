@@ -21,8 +21,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Hunt Tickets",
-  description: "Hunt for your next experience",
+  title: "Elio",
+  description: "Elevate your day.",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -68,9 +68,9 @@ export default function RootLayout({
               className: "!z-[9999]",
               unstyled: true,
               classNames: {
-                toast: 'w-full max-w-md',
-                title: 'text-sm font-medium',
-                description: 'text-sm',
+                toast: "w-full max-w-md",
+                title: "text-sm font-medium",
+                description: "text-sm",
               },
             }}
           />

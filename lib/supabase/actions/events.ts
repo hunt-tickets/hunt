@@ -19,7 +19,8 @@ const eventFormSchema = z.object({
     .enum(["single", "multi_day", "recurring", "slots"])
     .default("single")
     .refine((val) => val === "single", {
-      message: "Solo eventos de tipo 'único' están disponibles en esta versión de la plataforma",
+      message:
+        "Solo eventos de tipo 'único' están disponibles en esta versión de la plataforma",
     }),
 });
 
@@ -721,9 +722,9 @@ export async function toggleEventStatus(eventId: string, status: boolean) {
 }
 
 /**
- * Event with venue information for the popular events display
+ * Public event with venue information for display on home page
  */
-export type PopularEventWithVenue = {
+export type PublicEventWithVenue = {
   id: string;
   name: string | null;
   description: string | null;
@@ -731,7 +732,7 @@ export type PopularEventWithVenue = {
   endDate: Date | null;
   status: boolean | null;
   flyer: string | null;
-  category: string | null;
+  category: "fiestas" | "conciertos" | "festivales" | "bienestar" | "clases" | "ferias" | "deportes" | "teatro" | null;
   venue_name: string;
   venue_city: string;
 };
@@ -742,9 +743,9 @@ export type PopularEventWithVenue = {
  *
  * Uses Drizzle (no cookies dependency) to allow ISR/static generation
  */
-export async function getPopularEvents(
+export async function getEventsWithVenue(
   limitCount: number = 12
-): Promise<PopularEventWithVenue[]> {
+): Promise<PublicEventWithVenue[]> {
   try {
     const now = new Date();
 

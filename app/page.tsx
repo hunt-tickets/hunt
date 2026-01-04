@@ -1,4 +1,4 @@
-import { PopularEvents } from "@/components/popular-events";
+import { DisplayEvents } from "@/components/display-events";
 import { Component } from "@/components/ui/gradient-bar-hero-section";
 import { FixedHeroWrapper } from "@/components/fixed-hero-wrapper";
 
@@ -23,13 +23,12 @@ export default function Page() {
               className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
               style={{ fontFamily: "LOT, sans-serif" }}
             >
-              Eventos Populares
+              Eventos
             </h2>
           </div>
 
           {/* Popular Events component handles all event display logic */}
-          <PopularEvents
-            // Optionally pass a cityId to filter events by city
+          <DisplayEvents
             // cityId="some-city-id"
             limit={6} // Display 6 events in the grid
           />
