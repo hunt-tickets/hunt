@@ -20,13 +20,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminMenu } from "@/contexts/admin-menu-context";
 import { SidebarUserMenu } from "@/components/sidebar-user-menu";
 
-interface UserData {
-  id: string;
-  name: string | null;
-  email: string;
-  image?: string | null;
-}
-
 type EventType = "single" | "multi_day" | "recurring" | "slots";
 
 const eventTypeConfig: Record<
@@ -46,7 +39,6 @@ interface EventSidebarProps {
   eventName: string;
   eventType?: EventType;
   role?: "owner" | "administrator" | "seller";
-  user?: UserData | null;
 }
 
 // Menu items with role requirements

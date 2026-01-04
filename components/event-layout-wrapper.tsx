@@ -4,13 +4,6 @@ import { ReactNode } from "react";
 import { EventTabsProvider } from "@/contexts/event-tabs-context";
 import { EventSidebar } from "@/components/event-sidebar";
 
-interface UserData {
-  id: string;
-  name: string | null;
-  email: string;
-  image?: string | null;
-}
-
 type EventType = "single" | "multi_day" | "recurring" | "slots";
 
 interface EventLayoutWrapperProps {
@@ -21,7 +14,6 @@ interface EventLayoutWrapperProps {
   eventName: string;
   eventType?: EventType;
   role?: "owner" | "administrator" | "seller";
-  user?: UserData | null;
 }
 
 export function EventLayoutWrapper({
@@ -31,6 +23,7 @@ export function EventLayoutWrapper({
   eventId,
   eventName,
   eventType = "single",
+  role,
 }: EventLayoutWrapperProps) {
   return (
     <EventTabsProvider>
@@ -46,8 +39,7 @@ export function EventLayoutWrapper({
           eventId={eventId}
           eventName={eventName}
           eventType={eventType}
-          // role={role}
-          // user={user}
+          role={role}
         />
         <main className="lg:ml-64 min-h-screen pt-4 px-4 sm:pt-6 sm:px-6 lg:pt-8 lg:px-8">
           {children}
