@@ -1,4 +1,4 @@
-import { getPopularEvents } from "@/lib/supabase/actions/events";
+import { getEventsWithVenue } from "@/lib/supabase/actions/events";
 import { EventsWithSearch } from "@/components/events-with-search";
 
 /**
@@ -7,7 +7,7 @@ import { EventsWithSearch } from "@/components/events-with-search";
  */
 export default async function EventosPage() {
   // Fetch all active events from Supabase (status=true and end_date >= now)
-  const events = await getPopularEvents(100);
+  const events = await getEventsWithVenue(100);
 
   // Show message if no events found
   if (!events || events.length === 0) {
