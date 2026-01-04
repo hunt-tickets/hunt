@@ -6,7 +6,6 @@ import { db } from "@/lib/drizzle";
 import { schema } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { DUMMY_PROFILES } from "@/lib/dummy-data";
 
 export async function updateProfile(
   _prevState: any,
@@ -154,10 +153,6 @@ export async function changePassword(
           : "Error al cambiar la contraseña",
     };
   }
-}
-
-export async function getAllUsers() {
-  return DUMMY_PROFILES;
 }
 
 export async function getUsersWithPurchasesStats() {
