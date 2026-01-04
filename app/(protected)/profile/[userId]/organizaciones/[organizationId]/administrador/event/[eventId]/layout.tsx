@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import { EventLayoutWrapper } from "@/components/event-layout-wrapper";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
-import { member, user } from "@/lib/schema";
+import { member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 
 interface EventLayoutProps {
