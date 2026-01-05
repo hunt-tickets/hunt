@@ -37,6 +37,8 @@ export default async function ProfilePage() {
     headers: await headers(),
   });
 
+  console.log("📋 Accounts from Better Auth:", JSON.stringify(oauthAccounts, null, 2));
+
   // Helper to decode JWT and extract user info
   const decodeIdToken = (idToken: string | null) => {
     if (!idToken) return null;
@@ -236,7 +238,7 @@ export default async function ProfilePage() {
                     {account.providerId !== "credential" && (
                       <UnlinkAccountButton
                         accountId={account.id}
-                        providerId={"google"}
+                        providerId={account.providerId}
                         providerName={formatProviderName(account.providerId)}
                       />
                     )}
