@@ -23,12 +23,9 @@ export function LinkAccountButton({ providerId }: LinkAccountButtonProps) {
 
       // The above will redirect to the OAuth provider
       // After successful linking, user will be redirected back to /profile
-    } catch (error) {
+    } catch {
       setIsLoading(false);
       toast.error({ title: ERROR_MESSAGES.LINK_ACCOUNT_FAILED });
-      // if (process.env.NODE_ENV === "development") {
-      //   console.error("Error linking account:", error);
-      // }
     }
   }, [providerId]);
 
