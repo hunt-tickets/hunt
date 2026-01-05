@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { SimpleDatePicker } from './simple-date-picker';
-import { PhoneInput } from './phone-input';
 
 // Sanitization helpers
 const sanitizeText = (text: string): string => {
@@ -46,7 +45,6 @@ export interface SignUpFormData {
   email: string;
   nombre: string;
   apellido: string;
-  phoneNumber: string;
   birthday: string;
   tipoDocumento: string;
   numeroDocumento: string;
@@ -90,9 +88,8 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [birthday, setBirthday] = useState("");
-  const [tipoDocumento, setTipoDocumento] = useState("CC");
+  const [tipoDocumento, setTipoDocumento] = useState("Cédula de Ciudadanía");
   const [numeroDocumento, setNumeroDocumento] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -125,7 +122,6 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
       email,
       nombre,
       apellido,
-      phoneNumber,
       birthday,
       tipoDocumento,
       numeroDocumento,
@@ -228,15 +224,6 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               </div>
 
               <div className="animate-element animate-delay-300 space-y-2">
-                <label className="text-sm font-medium text-gray-400">Número de celular</label>
-                <PhoneInput
-                  value={phoneNumber}
-                  onChange={(val) => setPhoneNumber(val || '')}
-                  placeholder="+57 300 123 4567"
-                />
-              </div>
-
-              <div className="animate-element animate-delay-300 space-y-2">
                 <label className="text-sm font-medium text-gray-400">
                   Fecha de nacimiento <span className="text-gray-500 font-normal">(opcional)</span>
                 </label>
@@ -261,11 +248,11 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       value={tipoDocumento}
                       onChange={(e) => setTipoDocumento(e.target.value)}
                     >
-                      <option value="CC">Cédula de Ciudadanía</option>
-                      <option value="CE">Cédula de Extranjería</option>
-                      <option value="TI">Tarjeta de Identidad</option>
-                      <option value="PAS">Pasaporte</option>
-                      <option value="NIT">NIT</option>
+                      <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                      <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                      <option value="Pasaporte">Pasaporte</option>
+                      <option value="PEP">PEP</option>
+                      <option value="PPT">PPT</option>
                     </select>
                   </GlassInputWrapper>
                 </div>

@@ -42,7 +42,6 @@ export const AuthSignUp = () => {
   const [userData, setUserData] = useState<{
     nombre: string;
     apellido: string;
-    phoneNumber: string;
     birthday: string;
     tipoDocumento: string;
     numeroDocumento: string;
@@ -94,7 +93,6 @@ export const AuthSignUp = () => {
     email: string;
     nombre: string;
     apellido: string;
-    phoneNumber: string;
     birthday: string;
     tipoDocumento: string;
     numeroDocumento: string;
@@ -146,13 +144,15 @@ export const AuthSignUp = () => {
                   name: `${userData.nombre} ${userData.apellido}`,
                   nombres: userData.nombre,
                   apellidos: userData.apellido,
-                  phoneNumber: userData.phoneNumber,
                   birthdate: userData.birthday ? new Date(userData.birthday) : undefined,
                   documentId: userData.numeroDocumento || undefined,
                   documentTypeId: userData.tipoDocumento
                     ? documentTypeMapping[userData.tipoDocumento]
                     : undefined,
                 });
+
+                // Phone number requires separate verification flow
+                // User can add/verify it later from their profile page
               } catch (updateError) {
                 console.error("Failed to update user profile:", updateError);
               }
