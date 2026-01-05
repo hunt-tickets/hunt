@@ -129,7 +129,9 @@ export default async function ProfilePage() {
           {/* Name and Email */}
           <div className="flex-1 min-w-0">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight truncate">
-              {user.name || "Usuario sin nombre"}
+              {user.nombres && user.apellidos
+                ? `${user.nombres} ${user.apellidos}`
+                : user.nombres || user.apellidos || user.name || "Usuario sin nombre"}
             </h1>
             {user.role === "admin" && (
               <Badge
