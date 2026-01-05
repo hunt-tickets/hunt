@@ -30,11 +30,15 @@ import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 
 export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
-  const existingDate = birthDate
-    ? birthDate instanceof Date
-      ? birthDate
-      : new Date(birthDate)
-    : null;
+  const existingDate = useMemo(
+    () =>
+      birthDate
+        ? birthDate instanceof Date
+          ? birthDate
+          : new Date(birthDate)
+        : null,
+    [birthDate]
+  );
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Date | undefined>(
@@ -75,7 +79,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
         } else {
           toast.success("Fecha de nacimiento guardada");
         }
-      } catch (err) {
+      } catch {
         toast.error("Error al guardar la fecha de nacimiento");
         setSelected(existingDate || undefined);
       }
@@ -122,7 +126,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
           setSelected(undefined);
           toast.success("Fecha de nacimiento eliminada");
         }
-      } catch (err) {
+      } catch {
         toast.error("Error al eliminar la fecha de nacimiento");
       }
     });
