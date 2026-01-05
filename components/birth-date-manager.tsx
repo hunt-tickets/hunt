@@ -60,31 +60,36 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
   }, []);
 
   // React memoizes the function itself in memory, to avoid rerenders
-  const handleSelect = useCallback((date: Date | undefined) => {
-    if (!date) return;
+  const handleSelect = useCallback(
+    (date: Date | undefined) => {
+      if (!date) return;
 
-    setSelected(date);
-    setOpen(false);
+      setSelected(date);
+      setOpen(false);
 
-    startTransition(async () => {
-      try {
-        const { error } = await authClient.updateUser({
-          birthdate: date,
-        });
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.updateUser({
+            birthdate: date,
+          });
 
-        if (error) {
-          toast.error(error.message || "Error al guardar la fecha de nacimiento");
-          // Revert on error
+          if (error) {
+            toast.error(
+              error.message || "Error al guardar la fecha de nacimiento"
+            );
+            // Revert on error
+            setSelected(existingDate || undefined);
+          } else {
+            toast.success("Fecha de nacimiento guardada");
+          }
+        } catch {
+          toast.error("Error al guardar la fecha de nacimiento");
           setSelected(existingDate || undefined);
-        } else {
-          toast.success("Fecha de nacimiento guardada");
         }
-      } catch {
-        toast.error("Error al guardar la fecha de nacimiento");
-        setSelected(existingDate || undefined);
-      }
-    });
-  }, [existingDate]);
+      });
+    },
+    [existingDate]
+  );
 
   const handleYearChange = useCallback(
     (year: string) => {
@@ -121,7 +126,9 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
         });
 
         if (error) {
-          toast.error(error.message || "Error al eliminar la fecha de nacimiento");
+          toast.error(
+            error.message || "Error al eliminar la fecha de nacimiento"
+          );
         } else {
           setSelected(undefined);
           toast.success("Fecha de nacimiento eliminada");
@@ -166,8 +173,8 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
               {isPending
                 ? "Guardando..."
                 : selected
-                ? formatDisplayDate(selected)
-                : "Fecha de nacimiento (Opcional)"}
+                  ? formatDisplayDate(selected)
+                  : "Fecha de nacimiento (Opcional)"}
             </span>
           </div>
           {selected && (
@@ -191,17 +198,6 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                 sideOffset={8}
               >
                 <div className="p-1">
-                  <DropdownMenuItem
-                    onClick={handleEdit}
-                    className="rounded-xl cursor-pointer flex items-center px-3 py-2"
-                  >
-                    <Edit2
-                      className="mr-2 h-4 w-4"
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
-                    <span>Editar</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleDelete}
                     className="rounded-xl cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 px-3 py-2"
