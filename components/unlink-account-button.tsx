@@ -30,6 +30,7 @@ export function UnlinkAccountButton({
 
   const handleUnlink = useCallback(async () => {
     setIsLoading(true);
+    console.log(accountId, providerId);
 
     try {
       await authClient.unlinkAccount({
