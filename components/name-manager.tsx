@@ -85,11 +85,13 @@ export function NameManager({ nombres, apellidos }: NameManagerProps) {
         <div className="flex items-center gap-3">
           <User className="h-5 w-5 text-gray-400" aria-hidden="true" />
           <div>
-            <p className="text-sm font-medium">Nombre completo</p>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+            <p className="text-sm font-medium">
               {nombres && apellidos
                 ? `${nombres} ${apellidos}`
                 : nombres || apellidos || "No configurado"}
+            </p>
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+              Nombre completo
             </p>
           </div>
         </div>
