@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useTransition } from "react";
 import { CalendarIcon, Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
@@ -22,14 +26,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MONTHS_ES, VALIDATION } from "@/constants/profile";
 import type { BirthDateManagerProps } from "@/lib/profile/types";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
-  const existingDate = birthDate ? (birthDate instanceof Date ? birthDate : new Date(birthDate)) : null;
+  const existingDate = birthDate
+    ? birthDate instanceof Date
+      ? birthDate
+      : new Date(birthDate)
+    : null;
 
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<Date | undefined>(existingDate || undefined);
+  const [selected, setSelected] = useState<Date | undefined>(
+    existingDate || undefined
+  );
   const [month, setMonth] = useState<Date>(selected || new Date(2000, 0, 1));
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const formatDisplayDate = useCallback((date: Date) => {
     return format(date, "d 'de' MMMM, yyyy", { locale: es });
@@ -42,27 +55,52 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
     return Array.from({ length: maxYear - 1900 + 1 }, (_, i) => maxYear - i);
   }, []);
 
+  // React memoizes the function itself in memory, to avoid rerenders
   const handleSelect = useCallback((date: Date | undefined) => {
+    if (!date) return;
+
     setSelected(date);
     setOpen(false);
-    // TODO: Implement save functionality with Better Auth
-    // await authClient.updateBirthDate({ birthDate: date });
-    // toast.success(SUCCESS_MESSAGES.BIRTH_DATE_SAVED);
-  }, []);
 
-  const handleYearChange = useCallback((year: string) => {
-    const newYear = parseInt(year, 10);
-    const newDate = new Date(month);
-    newDate.setFullYear(newYear);
-    setMonth(newDate);
-  }, [month]);
+    startTransition(async () => {
+      try {
+        const { error } = await authClient.updateUser({
+          birthdate: date,
+        });
 
-  const handleMonthChange = useCallback((monthIndex: string) => {
-    const newMonthIndex = parseInt(monthIndex, 10);
-    const newDate = new Date(month);
-    newDate.setMonth(newMonthIndex);
-    setMonth(newDate);
-  }, [month]);
+        if (error) {
+          toast.error(error.message || "Error al guardar la fecha de nacimiento");
+          // Revert on error
+          setSelected(existingDate || undefined);
+        } else {
+          toast.success("Fecha de nacimiento guardada");
+        }
+      } catch (err) {
+        toast.error("Error al guardar la fecha de nacimiento");
+        setSelected(existingDate || undefined);
+      }
+    });
+  }, [existingDate]);
+
+  const handleYearChange = useCallback(
+    (year: string) => {
+      const newYear = parseInt(year, 10);
+      const newDate = new Date(month);
+      newDate.setFullYear(newYear);
+      setMonth(newDate);
+    },
+    [month]
+  );
+
+  const handleMonthChange = useCallback(
+    (monthIndex: string) => {
+      const newMonthIndex = parseInt(monthIndex, 10);
+      const newDate = new Date(month);
+      newDate.setMonth(newMonthIndex);
+      setMonth(newDate);
+    },
+    [month]
+  );
 
   const handleEdit = useCallback(() => {
     setMenuOpen(false);
@@ -70,11 +108,24 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
   }, []);
 
   const handleDelete = useCallback(() => {
-    setSelected(undefined);
     setMenuOpen(false);
-    // TODO: Implement delete functionality with Better Auth
-    // await authClient.deleteBirthDate();
-    // toast.success(SUCCESS_MESSAGES.BIRTH_DATE_DELETED);
+
+    startTransition(async () => {
+      try {
+        const { error } = await authClient.updateUser({
+          birthdate: null,
+        });
+
+        if (error) {
+          toast.error(error.message || "Error al eliminar la fecha de nacimiento");
+        } else {
+          setSelected(undefined);
+          toast.success("Fecha de nacimiento eliminada");
+        }
+      } catch (err) {
+        toast.error("Error al eliminar la fecha de nacimiento");
+      }
+    });
   }, []);
 
   return (
@@ -83,7 +134,11 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
         <div
           className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
           role="button"
-          aria-label={selected ? `Fecha de nacimiento: ${formatDisplayDate(selected)}` : "Seleccionar fecha de nacimiento"}
+          aria-label={
+            selected
+              ? `Fecha de nacimiento: ${formatDisplayDate(selected)}`
+              : "Seleccionar fecha de nacimiento"
+          }
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -93,9 +148,22 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
           }}
         >
           <div className="flex items-center gap-3 flex-1">
-            <CalendarIcon className="h-5 w-5 text-gray-400 flex-shrink-0" aria-hidden="true" />
-            <span className={cn("text-sm font-medium", !selected && "text-gray-500 dark:text-gray-400")}>
-              {selected ? formatDisplayDate(selected) : "Fecha de nacimiento (Opcional)"}
+            <CalendarIcon
+              className="h-5 w-5 text-gray-400 flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span
+              className={cn(
+                "text-sm font-medium",
+                !selected && "text-gray-500 dark:text-gray-400",
+                isPending && "opacity-50"
+              )}
+            >
+              {isPending
+                ? "Guardando..."
+                : selected
+                ? formatDisplayDate(selected)
+                : "Fecha de nacimiento (Opcional)"}
             </span>
           </div>
           {selected && (
@@ -108,7 +176,9 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   aria-label="Opciones de fecha de nacimiento"
                   className="text-gray-600 hover:text-gray-900 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-[#2a2a2a] invisible group-hover:visible transition-all rounded-lg h-8 w-8 flex items-center justify-center"
                 >
-                  <span className="text-xl" aria-hidden="true">⋯</span>
+                  <span className="text-xl" aria-hidden="true">
+                    ⋯
+                  </span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -121,14 +191,22 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                     onClick={handleEdit}
                     className="rounded-xl cursor-pointer flex items-center px-3 py-2"
                   >
-                    <Edit2 className="mr-2 h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    <Edit2
+                      className="mr-2 h-4 w-4"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
                     <span>Editar</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleDelete}
                     className="rounded-xl cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 px-3 py-2"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    <Trash2
+                      className="mr-2 h-4 w-4"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
                     <span>Eliminar</span>
                   </DropdownMenuItem>
                 </div>
@@ -137,7 +215,10 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent align="start" className="p-4 w-auto bg-white border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a] rounded-2xl">
+      <PopoverContent
+        align="start"
+        className="p-4 w-auto bg-white border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a] rounded-2xl"
+      >
         <Calendar
           mode="single"
           selected={selected}

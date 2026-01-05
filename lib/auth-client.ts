@@ -9,6 +9,7 @@ import {
   adminClient,
   organizationClient,
   inferOrgAdditionalFields,
+  inferAdditionalFields,
 } from "better-auth/client/plugins";
 import { ac, owner, administrator, seller } from "@/lib/auth-permissions";
 import type { auth } from "@/lib/auth";
@@ -16,6 +17,7 @@ import type { auth } from "@/lib/auth";
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
   plugins: [
+    inferAdditionalFields<typeof auth>(),
     magicLinkClient(),
     emailOTPClient(),
     phoneNumberClient(),
