@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useMemo, useTransition } from "react";
-import { CalendarIcon, Edit2, Trash2 } from "lucide-react";
+import { CalendarIcon, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -110,11 +110,6 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
     },
     [month]
   );
-
-  const handleEdit = useCallback(() => {
-    setMenuOpen(false);
-    setOpen(true);
-  }, []);
 
   const handleDelete = useCallback(() => {
     setMenuOpen(false);
