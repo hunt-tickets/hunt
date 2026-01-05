@@ -7,14 +7,20 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 const translateError = (errorMessage: string): string => {
   // Rate limiting error
-  if (errorMessage.includes("For security purposes") || errorMessage.includes("Email rate limit exceeded")) {
+  if (
+    errorMessage.includes("For security purposes") ||
+    errorMessage.includes("Email rate limit exceeded")
+  ) {
     const match = errorMessage.match(/after (\d+) seconds/);
     const seconds = match ? match[1] : "unos";
     return `Por seguridad, puedes solicitar esto después de ${seconds} segundos.`;
   }
 
   // Other common errors
-  if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("Invalid OTP")) {
+  if (
+    errorMessage.includes("Invalid login credentials") ||
+    errorMessage.includes("Invalid OTP")
+  ) {
     return "Código de verificación inválido";
   }
   if (errorMessage.includes("Email not confirmed")) {
@@ -106,7 +112,8 @@ export const AuthSignUp = () => {
       });
       setIsOtpSent(true);
     } catch (error: unknown) {
-      const errorMsg = error instanceof Error ? error.message : "Ocurrió un error";
+      const errorMsg =
+        error instanceof Error ? error.message : "Ocurrió un error";
 
       setError(translateError(errorMsg));
     } finally {
@@ -126,10 +133,25 @@ export const AuthSignUp = () => {
             // Update user profile with additional data
             if (userData) {
               try {
+                // Map document type names to their database UUIDs (Colombia)
+                const documentTypeMapping: Record<string, string> = {
+                  "Cédula de Ciudadanía": "f87aaaf0-53d1-4e63-90d5-afe3c8784e31",
+                  "Cédula de Extranjería": "0b548efa-0689-4935-8c42-5c219e7ffd60",
+                  "Pasaporte": "ca2f187a-7fac-491f-a9b7-36fa5975855c",
+                  "PEP": "76201a7e-fd86-4ba3-aba6-eabceabb983e",
+                  "PPT": "bb7988e4-ee61-4776-9ef1-921fd6cd94f3",
+                };
+
                 await authClient.updateUser({
                   name: `${userData.nombre} ${userData.apellido}`,
+                  nombres: userData.nombre,
+                  apellidos: userData.apellido,
                   phoneNumber: userData.phoneNumber,
-                  // Store additional fields in metadata if needed
+                  birthdate: userData.birthday ? new Date(userData.birthday) : undefined,
+                  documentId: userData.numeroDocumento || undefined,
+                  documentTypeId: userData.tipoDocumento
+                    ? documentTypeMapping[userData.tipoDocumento]
+                    : undefined,
                 });
               } catch (updateError) {
                 console.error("Failed to update user profile:", updateError);
@@ -138,14 +160,16 @@ export const AuthSignUp = () => {
             handleRedirect(getRedirectUrl());
           },
           onError: (error: unknown) => {
-            const errorMsg = error instanceof Error ? error.message : "Código inválido";
+            const errorMsg =
+              error instanceof Error ? error.message : "Código inválido";
 
             setError(translateError(errorMsg));
           },
         }
       );
     } catch (error: unknown) {
-      const errorMsg = error instanceof Error ? error.message : "Código inválido";
+      const errorMsg =
+        error instanceof Error ? error.message : "Código inválido";
       setError(translateError(errorMsg));
     } finally {
       setIsLoading(false);
@@ -164,7 +188,8 @@ export const AuthSignUp = () => {
       });
       setMessage("Código reenviado exitosamente");
     } catch (error: unknown) {
-      const errorMsg = error instanceof Error ? error.message : "Ocurrió un error";
+      const errorMsg =
+        error instanceof Error ? error.message : "Ocurrió un error";
 
       setError(translateError(errorMsg));
     } finally {
@@ -184,8 +209,11 @@ export const AuthSignUp = () => {
   return (
     <SignUpPage
       title={
-        <span className="font-semibold text-foreground tracking-tight" style={{ fontFamily: 'LOT, sans-serif' }}>
-          Join the Hunt
+        <span
+          className="font-semibold text-foreground tracking-tight"
+          style={{ fontFamily: "LOT, sans-serif" }}
+        >
+          Join Elio
         </span>
       }
       description={

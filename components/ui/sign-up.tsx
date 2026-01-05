@@ -351,7 +351,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                   <input
                     name="email"
                     type="email"
-                    className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none bg-muted/50"
+                    className="w-full text-sm p-4 rounded-2xl focus:outline-none bg-muted/50"
                     value={email}
                     maxLength={100}
                     disabled

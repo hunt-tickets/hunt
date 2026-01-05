@@ -128,11 +128,23 @@ export default async function ProfilePage() {
 
           {/* Name and Email */}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight truncate">
-              {user.nombres && user.apellidos
-                ? `${user.nombres} ${user.apellidos}`
-                : user.nombres || user.apellidos || user.name || "Usuario sin nombre"}
-            </h1>
+            {user.nombres && user.apellidos ? (
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight truncate">
+                {user.nombres} {user.apellidos}
+              </h1>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight text-gray-400 dark:text-gray-600">
+                  {user.nombres || user.apellidos || "Nombre no configurado"}
+                </h1>
+                <Badge
+                  variant="outline"
+                  className="border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-xs"
+                >
+                  Incompleto
+                </Badge>
+              </div>
+            )}
             {user.role === "admin" && (
               <Badge
                 variant="default"
