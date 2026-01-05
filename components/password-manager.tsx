@@ -13,6 +13,7 @@ import {
 } from "@/constants/profile";
 import { validatePasswordStrength } from "@/lib/profile/utils";
 import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
 
 export function PasswordManager() {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
@@ -148,8 +149,14 @@ export function PasswordManager() {
           </p>
           <p className="text-xs text-gray-400">
             <strong>Para agregar autenticación por contraseña:</strong> Usa la
-            opción &quot;Olvidé mi contraseña&quot; en la página de inicio de
-            sesión.
+            opción{" "}
+            <Link
+              href="/forgot-password"
+              className="text-primary hover:underline font-medium"
+            >
+              &quot;Olvidé mi contraseña&quot;
+            </Link>{" "}
+            en la página de inicio de sesión.
           </p>
         </div>
       </div>

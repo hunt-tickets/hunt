@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 
 export function UnlinkAccountButton({
   accountId,
+  providerId,
   providerName,
 }: UnlinkAccountButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +33,7 @@ export function UnlinkAccountButton({
 
     try {
       await authClient.unlinkAccount({
-        providerId: providerName.toLowerCase(),
+        providerId: providerId,
         accountId: accountId,
       });
 
@@ -46,7 +47,7 @@ export function UnlinkAccountButton({
     } finally {
       setIsLoading(false);
     }
-  }, [accountId, providerName, router]);
+  }, [accountId, providerId, router]);
 
   return (
     <AlertDialog>

@@ -8,9 +8,7 @@ import { toast } from "@/lib/toast";
 import { ERROR_MESSAGES } from "@/constants/profile";
 import type { LinkAccountButtonProps } from "@/lib/profile/types";
 
-export function LinkAccountButton({
-  providerId,
-}: LinkAccountButtonProps) {
+export function LinkAccountButton({ providerId }: LinkAccountButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLinkAccount = useCallback(async () => {
@@ -28,9 +26,9 @@ export function LinkAccountButton({
     } catch (error) {
       setIsLoading(false);
       toast.error({ title: ERROR_MESSAGES.LINK_ACCOUNT_FAILED });
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error linking account:", error);
-      }
+      // if (process.env.NODE_ENV === "development") {
+      //   console.error("Error linking account:", error);
+      // }
     }
   }, [providerId]);
 
@@ -43,7 +41,10 @@ export function LinkAccountButton({
     >
       {isLoading ? (
         <>
-          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2" aria-hidden="true" />
+          <Loader2
+            className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2"
+            aria-hidden="true"
+          />
           <span className="hidden sm:inline">Conectando...</span>
           <span className="sm:hidden">...</span>
         </>

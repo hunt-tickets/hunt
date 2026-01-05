@@ -236,6 +236,7 @@ export default async function ProfilePage() {
                     {account.providerId !== "credential" && (
                       <UnlinkAccountButton
                         accountId={account.id}
+                        providerId={account.providerId}
                         providerName={formatProviderName(account.providerId)}
                       />
                     )}

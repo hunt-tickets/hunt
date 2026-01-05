@@ -151,6 +151,7 @@ export interface LinkAccountButtonProps {
 
 export interface UnlinkAccountButtonProps {
   accountId: string;
+  providerId: string;
   providerName: string;
 }
 
