@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Shield, Link2, LogOut } from "lucide-react";
+import { Shield, Link2, LogOut, User } from "lucide-react";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
 import { PasswordManager } from "@/components/password-manager";
@@ -19,6 +19,7 @@ import { BirthDateManager } from "@/components/birth-date-manager";
 import { EmailManager } from "@/components/email-manager";
 import { DocumentManager } from "@/components/document-manager";
 import { SignOutButton } from "@/components/sign-out-button";
+import { NameManager } from "@/components/name-manager";
 // import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 
 export default async function ProfilePage() {
@@ -149,34 +150,12 @@ export default async function ProfilePage() {
           Datos de usuario
         </h2>
         <div className="space-y-3">
-          {/* Name and Last Name - Two columns on desktop, stacked on mobile */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* First Name */}
-            <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-                <input
-                  type="text"
-                  defaultValue={user.name?.split(" ")[0] || ""}
-                  placeholder="Nombre/s Completo"
-                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500"
-                />
-              </div>
-            </div>
+          {/* Name and Last Name */}
+          <NameManager
+            nombres={user.nombres ?? null}
+            apellidos={user.apellidos ?? null}
+          />
 
-            {/* Last Name */}
-            <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-                <input
-                  type="text"
-                  defaultValue={user.name?.split(" ").slice(1).join(" ") || ""}
-                  placeholder="Apellidos Completos"
-                  className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full placeholder:text-gray-500"
-                />
-              </div>
-            </div>
-          </div>
           {/* Email */}
           <EmailManager email={user.email} />
 

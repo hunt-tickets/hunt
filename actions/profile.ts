@@ -64,3 +64,41 @@ export async function updateProfile(
     return { error: "Error al actualizar el perfil" };
   }
 }
+
+export async function updateUserName(
+  _prevState: any,
+  formData: FormData
+): Promise<{ success?: boolean; error?: string }> {
+  try {
+    // Get authenticated user
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { error: "No autenticado" };
+    }
+
+    // Extract form data
+    const nombres = formData.get("nombres") as string;
+    const apellidos = formData.get("apellidos") as string;
+
+    // Update user nombres and apellidos fields
+    await db
+      .update(schema.user)
+      .set({
+        nombres: nombres.trim() || null,
+        apellidos: apellidos.trim() || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.user.id, session.user.id));
+
+    // Revalidate the profile page
+    revalidatePath("/profile");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user name:", error);
+    return { error: "Error al actualizar el nombre" };
+  }
+}
