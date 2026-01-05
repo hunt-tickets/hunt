@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { EventDayDetail, TicketTypeWithDay } from "@/lib/supabase/actions/events";
+import type { EventDayDetail, TicketTypeWithDay } from "@/actions/events";
 
 interface TicketsContainerProps {
   tickets: TicketTypeWithDay[];
@@ -50,7 +50,7 @@ export function TicketsContainer({
   const isMultiDay = eventType === "multi_day" && eventDays.length > 0;
 
   // Check if there are general passes (tickets without a specific day)
-  const hasGeneralPasses = tickets.some(t => !t.eventDayId);
+  const hasGeneralPasses = tickets.some((t) => !t.eventDayId);
 
   // Filter tickets based on selected day
   const filteredTickets = useMemo(() => {
@@ -58,17 +58,20 @@ export function TicketsContainer({
       return tickets;
     }
     if (selectedDay === "pass") {
-      return tickets.filter(t => !t.eventDayId);
+      return tickets.filter((t) => !t.eventDayId);
     }
     // Show tickets for specific day + general passes
-    return tickets.filter(t => t.eventDayId === selectedDay || !t.eventDayId);
+    return tickets.filter((t) => t.eventDayId === selectedDay || !t.eventDayId);
   }, [tickets, selectedDay, isMultiDay]);
 
   // Get day info for a ticket
-  const getDayInfo = useCallback((eventDayId: string | null) => {
-    if (!eventDayId) return null;
-    return eventDays.find(d => d.id === eventDayId);
-  }, [eventDays]);
+  const getDayInfo = useCallback(
+    (eventDayId: string | null) => {
+      if (!eventDayId) return null;
+      return eventDays.find((d) => d.id === eventDayId);
+    },
+    [eventDays]
+  );
 
   const handleQuantityChange = (ticketId: string, quantity: number) => {
     setTicketSelections((prev) => ({
@@ -115,7 +118,15 @@ export function TicketsContainer({
           ...ticket, // All original ticket fields (id, name, price, description)
           count: ticketSelections[ticket.id] || 0, // ADD count field
           // Add day name for display in summary
-          dayName: dayInfo?.name || (dayInfo ? dayInfo.date.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" }) : null),
+          dayName:
+            dayInfo?.name ||
+            (dayInfo
+              ? dayInfo.date.toLocaleDateString("es-ES", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                })
+              : null),
         };
       }),
     [tickets, ticketSelections, getDayInfo]
@@ -189,10 +200,13 @@ export function TicketsContainer({
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
               {eventDays.map((day, index) => {
-                const dayTickets = tickets.filter(t => t.eventDayId === day.id);
-                const minPrice = dayTickets.length > 0
-                  ? Math.min(...dayTickets.map(t => parseFloat(t.price)))
-                  : 0;
+                const dayTickets = tickets.filter(
+                  (t) => t.eventDayId === day.id
+                );
+                const minPrice =
+                  dayTickets.length > 0
+                    ? Math.min(...dayTickets.map((t) => parseFloat(t.price)))
+                    : 0;
 
                 return (
                   <button
@@ -209,10 +223,16 @@ export function TicketsContainer({
                       <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-xs font-bold">
                         {index + 1}
                       </span>
-                      <span className="font-medium text-sm">{day.name || `Día ${index + 1}`}</span>
+                      <span className="font-medium text-sm">
+                        {day.name || `Día ${index + 1}`}
+                      </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {day.date.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}
+                      {day.date.toLocaleDateString("es-ES", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                      })}
                     </div>
                     {minPrice > 0 && (
                       <div className="text-xs text-muted-foreground mt-1">
@@ -249,15 +269,18 @@ export function TicketsContainer({
         {/* Tickets list */}
         <div className="space-y-3">
           {filteredTickets.map((ticket) => {
-            const available = ticket.capacity - ticket.soldCount - ticket.reservedCount;
+            const available =
+              ticket.capacity - ticket.soldCount - ticket.reservedCount;
             const maxPerOrder = ticket.maxPerOrder ?? 10;
             const minPerOrder = ticket.minPerOrder ?? 1;
             const effectiveMax = Math.min(maxPerOrder, available);
 
             // Check if ticket is within sale window
             const now = new Date();
-            const isBeforeSaleStart = ticket.saleStart && now < new Date(ticket.saleStart);
-            const isAfterSaleEnd = ticket.saleEnd && now > new Date(ticket.saleEnd);
+            const isBeforeSaleStart =
+              ticket.saleStart && now < new Date(ticket.saleStart);
+            const isAfterSaleEnd =
+              ticket.saleEnd && now > new Date(ticket.saleEnd);
             const isOutsideSaleWindow = isBeforeSaleStart || isAfterSaleEnd;
 
             // Ticket is not available if sold out OR outside sale window
@@ -280,24 +303,30 @@ export function TicketsContainer({
                       {ticket.name}
                     </h3>
                     {/* Day badge for multi-day events */}
-                    {isMultiDay && selectedDay === "all" && (() => {
-                      const dayInfo = getDayInfo(ticket.eventDayId);
-                      if (dayInfo) {
-                        return (
-                          <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-                            {dayInfo.name || dayInfo.date.toLocaleDateString("es-ES", { weekday: "short", day: "numeric" })}
-                          </span>
-                        );
-                      } else if (!ticket.eventDayId) {
-                        return (
-                          <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full flex items-center gap-1">
-                            <CalendarDays className="h-3 w-3" />
-                            Todos los días
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
+                    {isMultiDay &&
+                      selectedDay === "all" &&
+                      (() => {
+                        const dayInfo = getDayInfo(ticket.eventDayId);
+                        if (dayInfo) {
+                          return (
+                            <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
+                              {dayInfo.name ||
+                                dayInfo.date.toLocaleDateString("es-ES", {
+                                  weekday: "short",
+                                  day: "numeric",
+                                })}
+                            </span>
+                          );
+                        } else if (!ticket.eventDayId) {
+                          return (
+                            <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full flex items-center gap-1">
+                              <CalendarDays className="h-3 w-3" />
+                              Todos los días
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     {isSoldOut && (
                       <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
                         Agotado
@@ -335,7 +364,8 @@ export function TicketsContainer({
                       {available <= 10 && available > 0 && (
                         <span className="text-xs text-amber-600 dark:text-amber-400">
                           {maxPerOrder < 10 || minPerOrder > 1 ? "• " : ""}
-                          ¡Solo {available} disponible{available !== 1 ? "s" : ""}!
+                          ¡Solo {available} disponible
+                          {available !== 1 ? "s" : ""}!
                         </span>
                       )}
                     </div>
@@ -344,14 +374,29 @@ export function TicketsContainer({
                   {!isSoldOut && isBeforeSaleStart && ticket.saleStart && (
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="text-xs text-blue-600 dark:text-blue-400">
-                        Disponible desde {new Date(ticket.saleStart).toLocaleDateString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        Disponible desde{" "}
+                        {new Date(ticket.saleStart).toLocaleDateString(
+                          "es-ES",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </span>
                     </div>
                   )}
                   {!isSoldOut && isAfterSaleEnd && ticket.saleEnd && (
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="text-xs text-muted-foreground">
-                        Ventas cerradas el {new Date(ticket.saleEnd).toLocaleDateString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        Ventas cerradas el{" "}
+                        {new Date(ticket.saleEnd).toLocaleDateString("es-ES", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </span>
                     </div>
                   )}

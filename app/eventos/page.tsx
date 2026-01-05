@@ -1,4 +1,4 @@
-import { getEventsWithVenue } from "@/lib/supabase/actions/events";
+import { getEventsWithVenue } from "@/actions/events";
 import { EventsWithSearch } from "@/components/events-with-search";
 
 /**

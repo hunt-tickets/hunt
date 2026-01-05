@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserPlus, Users } from "lucide-react";
-import { addProducerToEvent } from "@/lib/supabase/actions/events";
+import { addProducerToEvent } from "@/actions/events";
 import { useRouter } from "next/navigation";
 
 interface Producer {

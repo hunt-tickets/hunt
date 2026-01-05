@@ -14,7 +14,7 @@ import {
   type EventType,
   type EventDay,
 } from "@/components/event-config";
-import { updateEventConfiguration } from "@/lib/supabase/actions/events";
+import { updateEventConfiguration } from "@/actions/events";
 import {
   Card,
   CardContent,
@@ -177,13 +177,15 @@ export function EventConfigContent({
       // Initialize event type and days
       setEventType(eventData.type || "single");
       if (eventData.days && eventData.days.length > 0) {
-        setEventDays(eventData.days.map((d) => ({
-          id: d.id,
-          name: d.name,
-          date: d.date ? formatDateForInput(d.date) : "",
-          endDate: d.endDate ? formatDateForInput(d.endDate) : "",
-          sortOrder: d.sortOrder,
-        })));
+        setEventDays(
+          eventData.days.map((d) => ({
+            id: d.id,
+            name: d.name,
+            date: d.date ? formatDateForInput(d.date) : "",
+            endDate: d.endDate ? formatDateForInput(d.endDate) : "",
+            sortOrder: d.sortOrder,
+          }))
+        );
       }
     }
   }, [eventData]);
@@ -292,9 +294,7 @@ export function EventConfigContent({
     if (!eventId) return;
 
     try {
-      const { updateEventConfiguration } = await import(
-        "@/lib/supabase/actions/events"
-      );
+      const { updateEventConfiguration } = await import("@/actions/events");
 
       const result = await updateEventConfiguration(eventId, {
         faqs: updatedFaqs,
@@ -333,7 +333,9 @@ export function EventConfigContent({
         });
 
         if (!result.success) {
-          toast.error({ title: result.message || "Error al guardar la configuración" });
+          toast.error({
+            title: result.message || "Error al guardar la configuración",
+          });
           return;
         }
 
@@ -610,8 +612,18 @@ export function EventConfigContent({
                   {/* Lock overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/5 dark:bg-white/5 rounded-lg">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-                      <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      <svg
+                        className="w-4 h-4 text-zinc-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
                       </svg>
                       <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
                         {eventType === "single" && "Evento único"}
@@ -638,8 +650,10 @@ export function EventConfigContent({
                       {eventType === "slots" && "Horarios Disponibles"}
                     </CardTitle>
                     <CardDescription>
-                      {eventType === "single" && "Cuándo se realizará el evento"}
-                      {eventType === "multi_day" && "Configura cada día de tu evento"}
+                      {eventType === "single" &&
+                        "Cuándo se realizará el evento"}
+                      {eventType === "multi_day" &&
+                        "Configura cada día de tu evento"}
                       {eventType === "recurring" && "Próximamente"}
                       {eventType === "slots" && "Próximamente"}
                     </CardDescription>
@@ -694,7 +708,8 @@ export function EventConfigContent({
                 {eventType === "recurring" && (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <p className="text-sm text-zinc-500">
-                      La configuración de eventos recurrentes estará disponible próximamente.
+                      La configuración de eventos recurrentes estará disponible
+                      próximamente.
                     </p>
                   </div>
                 )}
@@ -703,7 +718,8 @@ export function EventConfigContent({
                 {eventType === "slots" && (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <p className="text-sm text-zinc-500">
-                      La configuración de horarios estará disponible próximamente.
+                      La configuración de horarios estará disponible
+                      próximamente.
                     </p>
                   </div>
                 )}

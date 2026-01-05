@@ -21,7 +21,7 @@ import {
   updateEventDay,
   updateEventDaysOrder,
   type EventDayOutput,
-} from "@/lib/supabase/actions/event-days";
+} from "@/actions/event-days";
 import { DayCard } from "@/components/event-days/day-card";
 import { DayDetailSheet } from "@/components/event-days/day-detail-sheet";
 import { DayTimelineHeader } from "@/components/event-days/day-timeline-header";

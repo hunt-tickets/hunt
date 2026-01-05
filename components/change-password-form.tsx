@@ -81,13 +81,16 @@ export function ChangePasswordForm() {
       <div className="space-y-4">
         <Alert className="border-blue-500/50 bg-blue-500/10 dark:bg-blue-500/20">
           <AlertDescription className="text-xs sm:text-sm">
-            Has iniciado sesión únicamente con OAuth (Google, etc.). No tienes una contraseña configurada.
+            Has iniciado sesión únicamente con OAuth (Google, etc.). No tienes
+            una contraseña configurada.
           </AlertDescription>
         </Alert>
         <Alert className="border-amber-500/50 bg-amber-500/10 dark:bg-amber-500/20">
           <AlertDescription className="text-xs sm:text-sm">
-            <strong>Para agregar autenticación por contraseña:</strong><br />
-            Usa la opción &quot;Olvidé mi contraseña&quot; en la página de inicio de sesión para configurar una contraseña de forma segura.
+            <strong>Para agregar autenticación por contraseña:</strong>
+            <br />
+            Usa la opción &quot;Olvidé mi contraseña&quot; en la página de
+            inicio de sesión para configurar una contraseña de forma segura.
           </AlertDescription>
         </Alert>
       </div>
@@ -165,9 +168,7 @@ export function ChangePasswordForm() {
               )}
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Mínimo 8 caracteres
-          </p>
+          <p className="text-xs text-muted-foreground">Mínimo 8 caracteres</p>
         </div>
 
         <div className="space-y-2">
@@ -175,7 +176,8 @@ export function ChangePasswordForm() {
             htmlFor="confirmPassword"
             className="text-xs sm:text-sm font-medium"
           >
-            Confirmar nueva contraseña <span className="text-destructive">*</span>
+            Confirmar nueva contraseña{" "}
+            <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
             <Input
@@ -244,10 +246,7 @@ export function ChangePasswordForm() {
         <Button
           type="submit"
           disabled={
-            isPending ||
-            !currentPassword ||
-            !newPassword ||
-            !confirmPassword
+            isPending || !currentPassword || !newPassword || !confirmPassword
           }
           className="w-full h-9 sm:h-10 font-medium"
         >

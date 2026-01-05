@@ -3,13 +3,22 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ticket, HelpCircle, Map, CalendarRange, TrendingUp } from "lucide-react";
+import {
+  Ticket,
+  HelpCircle,
+  Map,
+  CalendarRange,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { CreateTicketTypeDialog } from "@/components/create-ticket-type-dialog";
 import { EditTicketSheet } from "@/components/edit-ticket-sheet";
-import { ChannelSalesChart, TicketRevenueDistributionChart } from "@/components/event-charts";
-import { updateTicketTypeActive } from "@/lib/supabase/actions/tickets";
+import {
+  ChannelSalesChart,
+  TicketRevenueDistributionChart,
+} from "@/components/event-charts";
+import { updateTicketTypeActive } from "@/actions/tickets";
 import { cn } from "@/lib/utils";
 
 interface TicketTypeFilter {
@@ -84,19 +93,27 @@ export function EventTicketsContent({
 
   const [selectedTicketType, setSelectedTicketType] = useState<string>("all");
   const [selectedDay, setSelectedDay] = useState<string>("all"); // "all" or day id
-  const [selectedPriceTab, setSelectedPriceTab] = useState<Record<string, 'app' | 'cash'>>({});
-  const [togglingTickets, setTogglingTickets] = useState<Record<string, boolean>>({});
+  const [selectedPriceTab, setSelectedPriceTab] = useState<
+    Record<string, "app" | "cash">
+  >({});
+  const [togglingTickets, setTogglingTickets] = useState<
+    Record<string, boolean>
+  >({});
 
   const isMultiDay = eventType === "multi_day" && eventDays.length > 0;
 
   // Filter tickets by selected day
-  const ticketsFilteredByDay = isMultiDay && selectedDay !== "all"
-    ? tickets.filter(t => t.event_day_id === selectedDay)
-    : selectedDay === "all_days_pass"
-    ? tickets.filter(t => !t.event_day_id)
-    : tickets;
+  const ticketsFilteredByDay =
+    isMultiDay && selectedDay !== "all"
+      ? tickets.filter((t) => t.event_day_id === selectedDay)
+      : selectedDay === "all_days_pass"
+        ? tickets.filter((t) => !t.event_day_id)
+        : tickets;
 
-  const handleToggleActive = async (ticketId: string, currentStatus: boolean) => {
+  const handleToggleActive = async (
+    ticketId: string,
+    currentStatus: boolean
+  ) => {
     setTogglingTickets((prev) => ({ ...prev, [ticketId]: true }));
     const result = await updateTicketTypeActive(ticketId, !currentStatus);
     setTogglingTickets((prev) => ({ ...prev, [ticketId]: false }));
@@ -123,13 +140,17 @@ export function EventTicketsContent({
               <HelpCircle className="h-4 w-4 text-white/40 hover:text-white/60 cursor-help transition-colors" />
               <div className="absolute left-0 top-6 w-64 p-3 bg-zinc-900 border border-white/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <p className="text-xs text-white/80 leading-relaxed">
-                  Los <strong>Tipos de Entrada</strong> permiten organizar tus boletas por categorías (VIP, General, Palco, etc.). Cada tipo puede tener múltiples tickets con diferentes precios y ubicaciones.
+                  Los <strong>Tipos de Entrada</strong> permiten organizar tus
+                  boletas por categorías (VIP, General, Palco, etc.). Cada tipo
+                  puede tener múltiples tickets con diferentes precios y
+                  ubicaciones.
                 </p>
               </div>
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            {tickets.length} tipo{tickets.length !== 1 ? 's' : ''} de entrada configurado{tickets.length !== 1 ? 's' : ''}
+            {tickets.length} tipo{tickets.length !== 1 ? "s" : ""} de entrada
+            configurado{tickets.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -137,13 +158,21 @@ export function EventTicketsContent({
             eventId={eventId}
             eventType={eventType}
             eventDays={eventDays}
-            selectedDayId={selectedDay !== "all" && selectedDay !== "all_days_pass" ? selectedDay : undefined}
+            selectedDayId={
+              selectedDay !== "all" && selectedDay !== "all_days_pass"
+                ? selectedDay
+                : undefined
+            }
           />
           <Button
             size="sm"
             variant="outline"
             className="rounded-lg"
-            onClick={() => router.push(`/profile/${userId}/administrador/event/${eventId}/mapa`)}
+            onClick={() =>
+              router.push(
+                `/profile/${userId}/administrador/event/${eventId}/mapa`
+              )
+            }
           >
             <Map className="h-4 w-4 mr-2" />
             Mapa
@@ -160,30 +189,37 @@ export function EventTicketsContent({
               <h3 className="font-semibold">Resumen por Día</h3>
             </div>
             <div className="text-xs text-white/40">
-              {eventDays.length} día{eventDays.length !== 1 ? 's' : ''} configurado{eventDays.length !== 1 ? 's' : ''}
+              {eventDays.length} día{eventDays.length !== 1 ? "s" : ""}{" "}
+              configurado{eventDays.length !== 1 ? "s" : ""}
             </div>
           </div>
 
           {/* Days Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {eventDays.map((day, index) => {
-              const dayTickets = tickets.filter(t => t.event_day_id === day.id);
+              const dayTickets = tickets.filter(
+                (t) => t.event_day_id === day.id
+              );
               const dayDate = day.date ? new Date(day.date) : null;
 
               // Calculate day totals from analytics
-              const dayTotals = dayTickets.reduce((acc, ticket) => {
-                const analytics = ticketsAnalytics?.[ticket.id];
-                if (!analytics) return acc;
-                return {
-                  sold: acc.sold + analytics.total.quantity,
-                  revenue: acc.revenue + analytics.total.total,
-                  capacity: acc.capacity + ticket.quantity,
-                };
-              }, { sold: 0, revenue: 0, capacity: 0 });
+              const dayTotals = dayTickets.reduce(
+                (acc, ticket) => {
+                  const analytics = ticketsAnalytics?.[ticket.id];
+                  if (!analytics) return acc;
+                  return {
+                    sold: acc.sold + analytics.total.quantity,
+                    revenue: acc.revenue + analytics.total.total,
+                    capacity: acc.capacity + ticket.quantity,
+                  };
+                },
+                { sold: 0, revenue: 0, capacity: 0 }
+              );
 
-              const soldPercentage = dayTotals.capacity > 0
-                ? (dayTotals.sold / dayTotals.capacity) * 100
-                : 0;
+              const soldPercentage =
+                dayTotals.capacity > 0
+                  ? (dayTotals.sold / dayTotals.capacity) * 100
+                  : 0;
 
               return (
                 <button
@@ -205,7 +241,11 @@ export function EventTicketsContent({
                       <div className="font-medium truncate">{day.name}</div>
                       {dayDate && (
                         <div className="text-xs text-white/40">
-                          {dayDate.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}
+                          {dayDate.toLocaleDateString("es-ES", {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                          })}
                         </div>
                       )}
                     </div>
@@ -214,20 +254,34 @@ export function EventTicketsContent({
                   {/* Tickets list */}
                   <div className="space-y-1 mb-3">
                     {dayTickets.length > 0 ? (
-                      dayTickets.slice(0, 3).map(ticket => (
-                        <div key={ticket.id} className="flex items-center gap-1.5 text-xs">
+                      dayTickets.slice(0, 3).map((ticket) => (
+                        <div
+                          key={ticket.id}
+                          className="flex items-center gap-1.5 text-xs"
+                        >
                           {ticket.hex && (
-                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ticket.hex }} />
+                            <div
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: ticket.hex }}
+                            />
                           )}
-                          <span className="truncate text-white/60">{ticket.name}</span>
-                          <span className="text-white/30 ml-auto flex-shrink-0">{formatCurrency(ticket.price)}</span>
+                          <span className="truncate text-white/60">
+                            {ticket.name}
+                          </span>
+                          <span className="text-white/30 ml-auto flex-shrink-0">
+                            {formatCurrency(ticket.price)}
+                          </span>
                         </div>
                       ))
                     ) : (
-                      <div className="text-xs text-white/30 italic">Sin entradas</div>
+                      <div className="text-xs text-white/30 italic">
+                        Sin entradas
+                      </div>
                     )}
                     {dayTickets.length > 3 && (
-                      <div className="text-xs text-white/40">+{dayTickets.length - 3} más</div>
+                      <div className="text-xs text-white/40">
+                        +{dayTickets.length - 3} más
+                      </div>
                     )}
                   </div>
 
@@ -235,14 +289,22 @@ export function EventTicketsContent({
                   {dayTotals.capacity > 0 && (
                     <div>
                       <div className="flex justify-between text-xs mb-1">
-                        <span className="text-white/40">{dayTotals.sold}/{dayTotals.capacity}</span>
-                        <span className="text-white/60 font-medium">{soldPercentage.toFixed(0)}%</span>
+                        <span className="text-white/40">
+                          {dayTotals.sold}/{dayTotals.capacity}
+                        </span>
+                        <span className="text-white/60 font-medium">
+                          {soldPercentage.toFixed(0)}%
+                        </span>
                       </div>
                       <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all",
-                            soldPercentage >= 90 ? "bg-red-500" : soldPercentage >= 70 ? "bg-amber-500" : "bg-emerald-500"
+                            soldPercentage >= 90
+                              ? "bg-red-500"
+                              : soldPercentage >= 70
+                                ? "bg-amber-500"
+                                : "bg-emerald-500"
                           )}
                           style={{ width: `${Math.min(soldPercentage, 100)}%` }}
                         />
@@ -260,83 +322,112 @@ export function EventTicketsContent({
             })}
 
             {/* General Pass Card */}
-            {tickets.some(t => !t.event_day_id) && (() => {
-              const passTickets = tickets.filter(t => !t.event_day_id);
-              const passTotals = passTickets.reduce((acc, ticket) => {
-                const analytics = ticketsAnalytics?.[ticket.id];
-                if (!analytics) return acc;
-                return {
-                  sold: acc.sold + analytics.total.quantity,
-                  revenue: acc.revenue + analytics.total.total,
-                  capacity: acc.capacity + ticket.quantity,
-                };
-              }, { sold: 0, revenue: 0, capacity: 0 });
+            {tickets.some((t) => !t.event_day_id) &&
+              (() => {
+                const passTickets = tickets.filter((t) => !t.event_day_id);
+                const passTotals = passTickets.reduce(
+                  (acc, ticket) => {
+                    const analytics = ticketsAnalytics?.[ticket.id];
+                    if (!analytics) return acc;
+                    return {
+                      sold: acc.sold + analytics.total.quantity,
+                      revenue: acc.revenue + analytics.total.total,
+                      capacity: acc.capacity + ticket.quantity,
+                    };
+                  },
+                  { sold: 0, revenue: 0, capacity: 0 }
+                );
 
-              const soldPercentage = passTotals.capacity > 0
-                ? (passTotals.sold / passTotals.capacity) * 100
-                : 0;
+                const soldPercentage =
+                  passTotals.capacity > 0
+                    ? (passTotals.sold / passTotals.capacity) * 100
+                    : 0;
 
-              return (
-                <button
-                  onClick={() => setSelectedDay("all_days_pass")}
-                  className={cn(
-                    "p-4 rounded-xl border text-left transition-all hover:border-white/20",
-                    selectedDay === "all_days_pass"
-                      ? "border-primary bg-primary/10"
-                      : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
-                  )}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary">
-                      <CalendarRange className="h-3.5 w-3.5" />
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium">Pase General</div>
-                      <div className="text-xs text-white/40">Todos los días</div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 mb-3">
-                    {passTickets.slice(0, 3).map(ticket => (
-                      <div key={ticket.id} className="flex items-center gap-1.5 text-xs">
-                        {ticket.hex && (
-                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ticket.hex }} />
-                        )}
-                        <span className="truncate text-white/60">{ticket.name}</span>
-                        <span className="text-white/30 ml-auto flex-shrink-0">{formatCurrency(ticket.price)}</span>
-                      </div>
-                    ))}
-                    {passTickets.length > 3 && (
-                      <div className="text-xs text-white/40">+{passTickets.length - 3} más</div>
+                return (
+                  <button
+                    onClick={() => setSelectedDay("all_days_pass")}
+                    className={cn(
+                      "p-4 rounded-xl border text-left transition-all hover:border-white/20",
+                      selectedDay === "all_days_pass"
+                        ? "border-primary bg-primary/10"
+                        : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
                     )}
-                  </div>
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary">
+                        <CalendarRange className="h-3.5 w-3.5" />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium">Pase General</div>
+                        <div className="text-xs text-white/40">
+                          Todos los días
+                        </div>
+                      </div>
+                    </div>
 
-                  {passTotals.capacity > 0 && (
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-white/40">{passTotals.sold}/{passTotals.capacity}</span>
-                        <span className="text-white/60 font-medium">{soldPercentage.toFixed(0)}%</span>
-                      </div>
-                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className="space-y-1 mb-3">
+                      {passTickets.slice(0, 3).map((ticket) => (
                         <div
-                          className={cn(
-                            "h-full rounded-full transition-all",
-                            soldPercentage >= 90 ? "bg-red-500" : soldPercentage >= 70 ? "bg-amber-500" : "bg-emerald-500"
+                          key={ticket.id}
+                          className="flex items-center gap-1.5 text-xs"
+                        >
+                          {ticket.hex && (
+                            <div
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: ticket.hex }}
+                            />
                           )}
-                          style={{ width: `${Math.min(soldPercentage, 100)}%` }}
-                        />
-                      </div>
-                      {passTotals.revenue > 0 && (
-                        <div className="flex items-center gap-1 mt-2 text-xs text-white/50">
-                          <TrendingUp className="h-3 w-3" />
-                          {formatCurrency(passTotals.revenue)}
+                          <span className="truncate text-white/60">
+                            {ticket.name}
+                          </span>
+                          <span className="text-white/30 ml-auto flex-shrink-0">
+                            {formatCurrency(ticket.price)}
+                          </span>
+                        </div>
+                      ))}
+                      {passTickets.length > 3 && (
+                        <div className="text-xs text-white/40">
+                          +{passTickets.length - 3} más
                         </div>
                       )}
                     </div>
-                  )}
-                </button>
-              );
-            })()}
+
+                    {passTotals.capacity > 0 && (
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-white/40">
+                            {passTotals.sold}/{passTotals.capacity}
+                          </span>
+                          <span className="text-white/60 font-medium">
+                            {soldPercentage.toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all",
+                              soldPercentage >= 90
+                                ? "bg-red-500"
+                                : soldPercentage >= 70
+                                  ? "bg-amber-500"
+                                  : "bg-emerald-500"
+                            )}
+                            style={{
+                              width: `${Math.min(soldPercentage, 100)}%`,
+                            }}
+                          />
+                        </div>
+                        {passTotals.revenue > 0 && (
+                          <div className="flex items-center gap-1 mt-2 text-xs text-white/50">
+                            <TrendingUp className="h-3 w-3" />
+                            {formatCurrency(passTotals.revenue)}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })()}
           </div>
         </div>
       )}
@@ -361,8 +452,15 @@ export function EventTicketsContent({
               Todos ({tickets.length})
             </button>
             {eventDays.map((day, index) => {
-              const dayTicketCount = tickets.filter(t => t.event_day_id === day.id).length;
-              const dayDate = day.date ? new Date(day.date).toLocaleDateString("es-ES", { weekday: "short", day: "numeric" }) : "";
+              const dayTicketCount = tickets.filter(
+                (t) => t.event_day_id === day.id
+              ).length;
+              const dayDate = day.date
+                ? new Date(day.date).toLocaleDateString("es-ES", {
+                    weekday: "short",
+                    day: "numeric",
+                  })
+                : "";
               return (
                 <button
                   key={day.id}
@@ -377,13 +475,16 @@ export function EventTicketsContent({
                   <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-xs">
                     {index + 1}
                   </span>
-                  {day.name} {dayDate && <span className="opacity-70">({dayDate})</span>}
-                  {dayTicketCount > 0 && <span className="ml-1 opacity-70">{dayTicketCount}</span>}
+                  {day.name}{" "}
+                  {dayDate && <span className="opacity-70">({dayDate})</span>}
+                  {dayTicketCount > 0 && (
+                    <span className="ml-1 opacity-70">{dayTicketCount}</span>
+                  )}
                 </button>
               );
             })}
             {/* Only show Pase General if there are tickets without a specific day */}
-            {tickets.some(t => !t.event_day_id) && (
+            {tickets.some((t) => !t.event_day_id) && (
               <button
                 onClick={() => setSelectedDay("all_days_pass")}
                 className={cn(
@@ -394,7 +495,7 @@ export function EventTicketsContent({
                 )}
               >
                 <CalendarRange className="h-3.5 w-3.5" />
-                Pase General ({tickets.filter(t => !t.event_day_id).length})
+                Pase General ({tickets.filter((t) => !t.event_day_id).length})
               </button>
             )}
           </div>
@@ -404,8 +505,8 @@ export function EventTicketsContent({
       {/* Filtros por tipo de ticket */}
       {(() => {
         // Filtrar solo tipos que tengan al menos un ticket (from day-filtered tickets)
-        const typesWithTickets = ticketTypes.filter(type =>
-          ticketsFilteredByDay.some(t => t.ticket_type?.id === type.id)
+        const typesWithTickets = ticketTypes.filter((type) =>
+          ticketsFilteredByDay.some((t) => t.ticket_type?.id === type.id)
         );
 
         if (typesWithTickets.length === 0) return null;
@@ -423,7 +524,9 @@ export function EventTicketsContent({
               Todos ({ticketsFilteredByDay.length})
             </button>
             {typesWithTickets.map((type) => {
-              const count = ticketsFilteredByDay.filter(t => t.ticket_type?.id === type.id).length;
+              const count = ticketsFilteredByDay.filter(
+                (t) => t.ticket_type?.id === type.id
+              ).length;
               return (
                 <button
                   key={type.id}
@@ -454,89 +557,113 @@ export function EventTicketsContent({
       })()}
 
       {/* Analytics Overview */}
-      {ticketsAnalytics && Object.keys(ticketsAnalytics).length > 0 && selectedTicketType !== "orphan_qrs" && (() => {
-        // Filtrar tickets según el tipo seleccionado (already filtered by day)
-        const filteredTicketsForAnalytics = selectedTicketType === "all"
-          ? ticketsFilteredByDay
-          : ticketsFilteredByDay.filter(t => t.ticket_type?.id === selectedTicketType);
+      {ticketsAnalytics &&
+        Object.keys(ticketsAnalytics).length > 0 &&
+        selectedTicketType !== "orphan_qrs" &&
+        (() => {
+          // Filtrar tickets según el tipo seleccionado (already filtered by day)
+          const filteredTicketsForAnalytics =
+            selectedTicketType === "all"
+              ? ticketsFilteredByDay
+              : ticketsFilteredByDay.filter(
+                  (t) => t.ticket_type?.id === selectedTicketType
+                );
 
-        // Calcular totales solo para los tickets filtrados
-        const totals = filteredTicketsForAnalytics.reduce((acc, ticket) => {
-          const analytics = ticketsAnalytics[ticket.id];
-          if (!analytics) return acc;
-          return {
-            total: acc.total + analytics.total.quantity,
-            revenue: acc.revenue + analytics.total.total,
-            app: acc.app + analytics.app.quantity,
-            web: acc.web + analytics.web.quantity,
-            cash: acc.cash + analytics.cash.quantity,
-          };
-        }, { total: 0, revenue: 0, app: 0, web: 0, cash: 0 });
+          // Calcular totales solo para los tickets filtrados
+          const totals = filteredTicketsForAnalytics.reduce(
+            (acc, ticket) => {
+              const analytics = ticketsAnalytics[ticket.id];
+              if (!analytics) return acc;
+              return {
+                total: acc.total + analytics.total.quantity,
+                revenue: acc.revenue + analytics.total.total,
+                app: acc.app + analytics.app.quantity,
+                web: acc.web + analytics.web.quantity,
+                cash: acc.cash + analytics.cash.quantity,
+              };
+            },
+            { total: 0, revenue: 0, app: 0, web: 0, cash: 0 }
+          );
 
-        // Distribución de ingresos por ticket (ordenado por recaudo) - Solo tickets filtrados
-        const revenueTickets = filteredTicketsForAnalytics
-          .map(ticket => ({
-            ...ticket,
-            analytics: ticketsAnalytics[ticket.id]
-          }))
-          .filter(t => t.analytics)
-          .sort((a, b) => b.analytics.total.total - a.analytics.total.total);
+          // Distribución de ingresos por ticket (ordenado por recaudo) - Solo tickets filtrados
+          const revenueTickets = filteredTicketsForAnalytics
+            .map((ticket) => ({
+              ...ticket,
+              analytics: ticketsAnalytics[ticket.id],
+            }))
+            .filter((t) => t.analytics)
+            .sort((a, b) => b.analytics.total.total - a.analytics.total.total);
 
-        // Si no hay datos para mostrar, no renderizar analytics
-        if (totals.total === 0) return null;
+          // Si no hay datos para mostrar, no renderizar analytics
+          if (totals.total === 0) return null;
 
-        return (
-          <div className="mb-6 space-y-4">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-                <div className="text-xs text-white/40 mb-1">Total Vendidos</div>
-                <div className="text-2xl font-bold">{totals.total}</div>
+          return (
+            <div className="mb-6 space-y-4">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
+                  <div className="text-xs text-white/40 mb-1">
+                    Total Vendidos
+                  </div>
+                  <div className="text-2xl font-bold">{totals.total}</div>
+                </div>
+                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
+                  <div className="text-xs text-white/40 mb-1">
+                    Recaudo Total
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(totals.revenue)}
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
+                  <div className="text-xs text-white/40 mb-1">
+                    Ticket Promedio
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(
+                      totals.total > 0 ? totals.revenue / totals.total : 0
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-                <div className="text-xs text-white/40 mb-1">Recaudo Total</div>
-                <div className="text-2xl font-bold">{formatCurrency(totals.revenue)}</div>
-              </div>
-              <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-                <div className="text-xs text-white/40 mb-1">Ticket Promedio</div>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(totals.total > 0 ? totals.revenue / totals.total : 0)}
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Ventas por Canal */}
+                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.01]">
+                  <h4 className="text-sm font-semibold mb-4">
+                    Ventas por Canal
+                  </h4>
+                  <div className="h-[350px]">
+                    <ChannelSalesChart
+                      app={totals.app}
+                      web={totals.web}
+                      cash={totals.cash}
+                    />
+                  </div>
+                </div>
+
+                {/* Distribución de Ingresos */}
+                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.01]">
+                  <h4 className="text-sm font-semibold mb-4">
+                    Distribución de Ingresos por Ticket
+                  </h4>
+                  <div className="h-[350px]">
+                    <TicketRevenueDistributionChart
+                      tickets={revenueTickets.map((ticket) => ({
+                        name: ticket.name,
+                        revenue: ticket.analytics.total.total,
+                        quantity: ticket.analytics.total.quantity,
+                        percentage:
+                          (ticket.analytics.total.total / totals.revenue) * 100,
+                        color: ticket.hex || undefined,
+                      }))}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Ventas por Canal */}
-              <div className="p-5 rounded-xl border border-white/5 bg-white/[0.01]">
-                <h4 className="text-sm font-semibold mb-4">Ventas por Canal</h4>
-                <div className="h-[350px]">
-                  <ChannelSalesChart
-                    app={totals.app}
-                    web={totals.web}
-                    cash={totals.cash}
-                  />
-                </div>
-              </div>
-
-              {/* Distribución de Ingresos */}
-              <div className="p-5 rounded-xl border border-white/5 bg-white/[0.01]">
-                <h4 className="text-sm font-semibold mb-4">Distribución de Ingresos por Ticket</h4>
-                <div className="h-[350px]">
-                  <TicketRevenueDistributionChart
-                    tickets={revenueTickets.map((ticket) => ({
-                      name: ticket.name,
-                      revenue: ticket.analytics.total.total,
-                      quantity: ticket.analytics.total.quantity,
-                      percentage: (ticket.analytics.total.total / totals.revenue) * 100,
-                      color: ticket.hex || undefined
-                    }))}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
       {(() => {
         // Handle QR Huérfanos tab
@@ -545,9 +672,7 @@ export function EventTicketsContent({
             <Card>
               <CardContent className="py-12 text-center">
                 <Ticket className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-1">
-                  QR Huérfanos
-                </h3>
+                <h3 className="text-lg font-semibold mb-1">QR Huérfanos</h3>
                 <p className="text-sm text-muted-foreground">
                   Aquí aparecerán los códigos QR sin ticket asociado
                 </p>
@@ -557,14 +682,18 @@ export function EventTicketsContent({
         }
 
         // Filtrar tickets según el tipo seleccionado (already filtered by day)
-        const filteredTickets = selectedTicketType === "all"
-          ? ticketsFilteredByDay
-          : ticketsFilteredByDay.filter(t => t.ticket_type?.id === selectedTicketType);
+        const filteredTickets =
+          selectedTicketType === "all"
+            ? ticketsFilteredByDay
+            : ticketsFilteredByDay.filter(
+                (t) => t.ticket_type?.id === selectedTicketType
+              );
 
         // Check if a specific day is selected and has no tickets
-        const selectedDayInfo = selectedDay !== "all" && selectedDay !== "all_days_pass"
-          ? eventDays.find(d => d.id === selectedDay)
-          : null;
+        const selectedDayInfo =
+          selectedDay !== "all" && selectedDay !== "all_days_pass"
+            ? eventDays.find((d) => d.id === selectedDay)
+            : null;
 
         return filteredTickets.length === 0 ? (
           <Card>
@@ -604,7 +733,10 @@ export function EventTicketsContent({
               const analytics = ticketsAnalytics?.[ticket.id];
 
               return (
-                <Card key={ticket.id} className="bg-white/[0.02] border-white/5 hover:border-white/10 transition-all duration-300 group">
+                <Card
+                  key={ticket.id}
+                  className="bg-white/[0.02] border-white/5 hover:border-white/10 transition-all duration-300 group"
+                >
                   <CardContent className="p-5">
                     {/* Header con nombre y estado */}
                     <div className="flex items-center justify-between mb-4">
@@ -621,7 +753,9 @@ export function EventTicketsContent({
                         <Switch
                           checked={ticket.status}
                           disabled={togglingTickets[ticket.id]}
-                          onCheckedChange={() => handleToggleActive(ticket.id, ticket.status)}
+                          onCheckedChange={() =>
+                            handleToggleActive(ticket.id, ticket.status)
+                          }
                         />
                         <EditTicketSheet ticket={ticket} />
                       </div>
@@ -632,27 +766,41 @@ export function EventTicketsContent({
                       <div className="mb-4 p-4 rounded-lg bg-white/[0.03] border border-white/5">
                         <div className="grid grid-cols-2 gap-4 mb-3">
                           <div>
-                            <p className="text-xs text-white/40 mb-1">Vendidos</p>
-                            <p className="text-2xl font-bold">{analytics.total.quantity}</p>
+                            <p className="text-xs text-white/40 mb-1">
+                              Vendidos
+                            </p>
+                            <p className="text-2xl font-bold">
+                              {analytics.total.quantity}
+                            </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs text-white/40 mb-1">Recaudo</p>
-                            <p className="text-xl font-bold">{formatCurrency(analytics.total.total)}</p>
+                            <p className="text-xs text-white/40 mb-1">
+                              Recaudo
+                            </p>
+                            <p className="text-xl font-bold">
+                              {formatCurrency(analytics.total.total)}
+                            </p>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/5">
                           <div className="text-center">
                             <p className="text-xs text-white/30 mb-1">App</p>
-                            <p className="text-sm font-semibold text-white/80">{analytics.app.quantity}</p>
+                            <p className="text-sm font-semibold text-white/80">
+                              {analytics.app.quantity}
+                            </p>
                           </div>
                           <div className="text-center">
                             <p className="text-xs text-white/30 mb-1">Web</p>
-                            <p className="text-sm font-semibold text-white/80">{analytics.web.quantity}</p>
+                            <p className="text-sm font-semibold text-white/80">
+                              {analytics.web.quantity}
+                            </p>
                           </div>
                           <div className="text-center">
                             <p className="text-xs text-white/30 mb-1">Cash</p>
-                            <p className="text-sm font-semibold text-white/80">{analytics.cash.quantity}</p>
+                            <p className="text-sm font-semibold text-white/80">
+                              {analytics.cash.quantity}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -664,76 +812,110 @@ export function EventTicketsContent({
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex-1">
                           <p className="text-xs text-white/40 mb-1">
-                            {(selectedPriceTab[ticket.id] || 'app') === 'app' ? 'Precio App/Web' : 'Precio Efectivo'}
+                            {(selectedPriceTab[ticket.id] || "app") === "app"
+                              ? "Precio App/Web"
+                              : "Precio Efectivo"}
                           </p>
                           <p className="text-xl font-bold">
-                            {(selectedPriceTab[ticket.id] || 'app') === 'app'
+                            {(selectedPriceTab[ticket.id] || "app") === "app"
                               ? formatCurrency(totalPrice)
-                              : formatCurrency(ticket.price)
-                            }
+                              : formatCurrency(ticket.price)}
                           </p>
                         </div>
                         {/* Switch con labels */}
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-medium transition-colors ${
-                            (selectedPriceTab[ticket.id] || 'app') === 'app'
-                              ? 'text-white/80'
-                              : 'text-white/30'
-                          }`}>
+                          <span
+                            className={`text-[10px] font-medium transition-colors ${
+                              (selectedPriceTab[ticket.id] || "app") === "app"
+                                ? "text-white/80"
+                                : "text-white/30"
+                            }`}
+                          >
                             App
                           </span>
                           <button
-                            onClick={() => setSelectedPriceTab({
-                              ...selectedPriceTab,
-                              [ticket.id]: selectedPriceTab[ticket.id] === 'cash' ? 'app' : 'cash'
-                            })}
+                            onClick={() =>
+                              setSelectedPriceTab({
+                                ...selectedPriceTab,
+                                [ticket.id]:
+                                  selectedPriceTab[ticket.id] === "cash"
+                                    ? "app"
+                                    : "cash",
+                              })
+                            }
                             className="relative inline-flex h-5 w-9 items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
                           >
                             <span
                               className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                                selectedPriceTab[ticket.id] === 'cash' ? 'translate-x-[1.4rem]' : 'translate-x-0.5'
+                                selectedPriceTab[ticket.id] === "cash"
+                                  ? "translate-x-[1.4rem]"
+                                  : "translate-x-0.5"
                               }`}
                             />
                           </button>
-                          <span className={`text-[10px] font-medium transition-colors ${
-                            selectedPriceTab[ticket.id] === 'cash'
-                              ? 'text-white/80'
-                              : 'text-white/30'
-                          }`}>
+                          <span
+                            className={`text-[10px] font-medium transition-colors ${
+                              selectedPriceTab[ticket.id] === "cash"
+                                ? "text-white/80"
+                                : "text-white/30"
+                            }`}
+                          >
                             Cash
                           </span>
                         </div>
                       </div>
 
                       {/* Desglose solo para App/Web */}
-                      {(selectedPriceTab[ticket.id] || 'app') === 'app' ? (
+                      {(selectedPriceTab[ticket.id] || "app") === "app" ? (
                         <div>
                           <details className="group/details">
                             <summary className="text-xs text-white/40 cursor-pointer hover:text-white/60 list-none flex items-center gap-1 pt-3 border-t border-white/5">
                               <span>Ver desglose</span>
-                              <svg className="w-3 h-3 transition-transform group-open/details:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              <svg
+                                className="w-3 h-3 transition-transform group-open/details:rotate-180"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
                               </svg>
                             </summary>
                             <div className="mt-3 space-y-2 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-white/40">Precio base</span>
-                                <span className="font-medium">{formatCurrency(ticket.price)}</span>
+                                <span className="text-white/40">
+                                  Precio base
+                                </span>
+                                <span className="font-medium">
+                                  {formatCurrency(ticket.price)}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-white/40">Fee ({(variableFee * 100).toFixed(0)}%)</span>
-                                <span className="font-medium">{formatCurrency(variableFeeAmount)}</span>
+                                <span className="text-white/40">
+                                  Fee ({(variableFee * 100).toFixed(0)}%)
+                                </span>
+                                <span className="font-medium">
+                                  {formatCurrency(variableFeeAmount)}
+                                </span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-white/40">IVA (19%)</span>
-                                <span className="font-medium">{formatCurrency(taxAmount)}</span>
+                                <span className="font-medium">
+                                  {formatCurrency(taxAmount)}
+                                </span>
                               </div>
                             </div>
                           </details>
                         </div>
                       ) : (
                         <div>
-                          <p className="text-xs text-white/30 pt-3 border-t border-white/5">Sin fee adicional</p>
+                          <p className="text-xs text-white/30 pt-3 border-t border-white/5">
+                            Sin fee adicional
+                          </p>
                         </div>
                       )}
                     </div>
@@ -750,12 +932,19 @@ export function EventTicketsContent({
                         <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-white rounded-full transition-all duration-500"
-                            style={{ width: `${((analytics.total.quantity / ticket.quantity) * 100).toFixed(1)}%` }}
+                            style={{
+                              width: `${((analytics.total.quantity / ticket.quantity) * 100).toFixed(1)}%`,
+                            }}
                           />
                         </div>
                         <div className="flex justify-between mt-1">
-                          <span className="text-xs text-white/30">Vendidos: {analytics.total.quantity}</span>
-                          <span className="text-xs text-white/30">Disponibles: {ticket.quantity - analytics.total.quantity}</span>
+                          <span className="text-xs text-white/30">
+                            Vendidos: {analytics.total.quantity}
+                          </span>
+                          <span className="text-xs text-white/30">
+                            Disponibles:{" "}
+                            {ticket.quantity - analytics.total.quantity}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -775,7 +964,9 @@ export function EventTicketsContent({
                         {ticket.capacity && (
                           <div className="flex justify-between">
                             <span className="text-white/40">Capacidad</span>
-                            <span className="font-medium">{ticket.capacity}</span>
+                            <span className="font-medium">
+                              {ticket.capacity}
+                            </span>
                           </div>
                         )}
                         {ticket.family && (
@@ -788,7 +979,11 @@ export function EventTicketsContent({
                     )}
 
                     {/* Metadata (ubicación, fecha, etc) */}
-                    {(ticket.section || ticket.row || ticket.seat || ticket.palco || ticket.max_date) && (
+                    {(ticket.section ||
+                      ticket.row ||
+                      ticket.seat ||
+                      ticket.palco ||
+                      ticket.max_date) && (
                       <div className="pt-4 mt-4 border-t border-white/5">
                         <div className="flex flex-wrap gap-2">
                           {ticket.section && (
@@ -813,7 +1008,15 @@ export function EventTicketsContent({
                           )}
                           {ticket.max_date && (
                             <span className="px-2 py-1 rounded text-xs text-white/50 bg-white/[0.02] border border-white/5">
-                              Hasta {new Date(ticket.max_date).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })} {new Date(ticket.max_date).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
+                              Hasta{" "}
+                              {new Date(ticket.max_date).toLocaleDateString(
+                                "es-CO",
+                                { month: "short", day: "numeric" }
+                              )}{" "}
+                              {new Date(ticket.max_date).toLocaleTimeString(
+                                "es-CO",
+                                { hour: "2-digit", minute: "2-digit" }
+                              )}
                             </span>
                           )}
                         </div>

@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { changePassword, checkHasPassword } from "@/actions/profile";
 import { toast } from "@/lib/toast";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, VALIDATION } from "@/constants/profile";
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  VALIDATION,
+} from "@/constants/profile";
 import { validatePasswordStrength } from "@/lib/profile/utils";
 
 export function PasswordManager() {
@@ -24,11 +28,13 @@ export function PasswordManager() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
-    checkHasPassword().then(setHasPassword).catch((error) => {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error checking password:", error);
-      }
-    });
+    checkHasPassword()
+      .then(setHasPassword)
+      .catch((error) => {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Error checking password:", error);
+        }
+      });
   }, []);
 
   // Real-time password validation
@@ -56,7 +62,9 @@ export function PasswordManager() {
     // Additional validation using utility function
     const validation = validatePasswordStrength(newPassword);
     if (!validation.isValid) {
-      toast.error({ title: validation.error || ERROR_MESSAGES.PASSWORD_INVALID });
+      toast.error({
+        title: validation.error || ERROR_MESSAGES.PASSWORD_INVALID,
+      });
       return;
     }
 
@@ -75,7 +83,7 @@ export function PasswordManager() {
         toast.success({
           title: revokeOtherSessions
             ? SUCCESS_MESSAGES.PASSWORD_CHANGED_WITH_REVOKE
-            : SUCCESS_MESSAGES.PASSWORD_CHANGED
+            : SUCCESS_MESSAGES.PASSWORD_CHANGED,
         });
         setCurrentPassword("");
         setNewPassword("");
@@ -127,10 +135,13 @@ export function PasswordManager() {
         </div>
         <div className="pl-8 space-y-2">
           <p className="text-xs text-gray-400">
-            Has iniciado sesión únicamente con OAuth (Google, etc.). No tienes una contraseña configurada.
+            Has iniciado sesión únicamente con OAuth (Google, etc.). No tienes
+            una contraseña configurada.
           </p>
           <p className="text-xs text-gray-400">
-            <strong>Para agregar autenticación por contraseña:</strong> Usa la opción &quot;Olvidé mi contraseña&quot; en la página de inicio de sesión.
+            <strong>Para agregar autenticación por contraseña:</strong> Usa la
+            opción &quot;Olvidé mi contraseña&quot; en la página de inicio de
+            sesión.
           </p>
         </div>
       </div>
@@ -164,7 +175,11 @@ export function PasswordManager() {
               type="button"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-              aria-label={showCurrentPassword ? "Ocultar contraseña actual" : "Mostrar contraseña actual"}
+              aria-label={
+                showCurrentPassword
+                  ? "Ocultar contraseña actual"
+                  : "Mostrar contraseña actual"
+              }
               disabled={isPending}
             >
               {showCurrentPassword ? (
@@ -192,7 +207,11 @@ export function PasswordManager() {
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-              aria-label={showNewPassword ? "Ocultar nueva contraseña" : "Mostrar nueva contraseña"}
+              aria-label={
+                showNewPassword
+                  ? "Ocultar nueva contraseña"
+                  : "Mostrar nueva contraseña"
+              }
               disabled={isPending}
             >
               {showNewPassword ? (
@@ -219,7 +238,11 @@ export function PasswordManager() {
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-              aria-label={showConfirmPassword ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
+              aria-label={
+                showConfirmPassword
+                  ? "Ocultar confirmación de contraseña"
+                  : "Mostrar confirmación de contraseña"
+              }
               disabled={isPending}
             >
               {showConfirmPassword ? (
@@ -233,7 +256,11 @@ export function PasswordManager() {
 
         {/* Password validation feedback */}
         {passwordError && (
-          <div id="password-error" className="mt-2 text-xs text-red-500" role="alert">
+          <div
+            id="password-error"
+            className="mt-2 text-xs text-red-500"
+            role="alert"
+          >
             {passwordError}
           </div>
         )}
@@ -243,7 +270,9 @@ export function PasswordManager() {
             <Checkbox
               id="revokeOtherSessions"
               checked={revokeOtherSessions}
-              onCheckedChange={(checked) => setRevokeOtherSessions(checked as boolean)}
+              onCheckedChange={(checked) =>
+                setRevokeOtherSessions(checked as boolean)
+              }
             />
             <label
               htmlFor="revokeOtherSessions"
@@ -266,7 +295,13 @@ export function PasswordManager() {
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={isPending || !currentPassword || !newPassword || !confirmPassword || !!passwordError}
+              disabled={
+                isPending ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword ||
+                !!passwordError
+              }
               size="sm"
               className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Guardar nueva contraseña"
@@ -289,7 +324,10 @@ export function PasswordManager() {
         <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
         <div>
           <p className="text-sm font-medium">Contraseña</p>
-          <p className="text-xs text-gray-500 mt-1 leading-relaxed" aria-label="Contraseña oculta">
+          <p
+            className="text-xs text-gray-500 mt-1 leading-relaxed"
+            aria-label="Contraseña oculta"
+          >
             ••••••••••
           </p>
         </div>

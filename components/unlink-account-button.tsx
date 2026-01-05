@@ -64,7 +64,9 @@ export function UnlinkAccountButton({
       </AlertDialogTrigger>
       <AlertDialogContent className="rounded-2xl border dark:border-[#2a2a2a]">
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Desvincular cuenta de {providerName}?</AlertDialogTitle>
+          <AlertDialogTitle>
+            ¿Desvincular cuenta de {providerName}?
+          </AlertDialogTitle>
           <AlertDialogDescription>
             Esta acción no se puede deshacer. Ya no podrás iniciar sesión con
             esta cuenta de {providerName}.
@@ -81,7 +83,10 @@ export function UnlinkAccountButton({
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
                 Desvinculando...
               </>
             ) : (

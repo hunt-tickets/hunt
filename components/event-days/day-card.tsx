@@ -3,7 +3,7 @@
 import { GripVertical, Trash2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { EventDayOutput } from "@/lib/supabase/actions/event-days";
+import type { EventDayOutput } from "@/actions/event-days";
 
 type EventDay = EventDayOutput;
 

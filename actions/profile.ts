@@ -7,6 +7,20 @@ import { schema } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+// Type definitions for analytics data
+export interface AgeGroupData {
+  ageGroup: string;
+  users: number;
+  tickets: number;
+  averagePrice?: number;
+}
+
+export interface GenderData {
+  gender: string;
+  users: number;
+  tickets: number;
+}
+
 export async function updateProfile(
   _prevState: any,
   formData: FormData

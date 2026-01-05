@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
 import { Calendar, Clock, FileImage } from "lucide-react";
-import type { EventDayOutput } from "@/lib/supabase/actions/event-days";
+import type { EventDayOutput } from "@/actions/event-days";
 
 type EventDay = EventDayOutput;
 
@@ -166,14 +166,15 @@ export function DayDetailSheet({
                   formData.doorsOpen
                     ? new Date(formData.doorsOpen)
                     : formData.date
-                    ? new Date(formData.date)
-                    : undefined
+                      ? new Date(formData.date)
+                      : undefined
                 }
               />
             </div>
 
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Estos horarios son opcionales y ayudan a informar a los asistentes sobre cuándo llegar.
+              Estos horarios son opcionales y ayudan a informar a los asistentes
+              sobre cuándo llegar.
             </p>
           </div>
 

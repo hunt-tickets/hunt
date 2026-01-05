@@ -82,21 +82,46 @@ export function EditOrganizationForm({
     publicPhone: organization.numeroTelefono || "",
     publicEmail: organization.correoElectronico || "",
     // Billing data
-    personType: (organization.tipoOrganizacion as "natural" | "juridica") || "natural",
+    personType:
+      (organization.tipoOrganizacion as "natural" | "juridica") || "natural",
     // Natural person fields
-    fullName: organization.tipoOrganizacion === "natural" ? (organization.nombres || "") : "",
+    fullName:
+      organization.tipoOrganizacion === "natural"
+        ? organization.nombres || ""
+        : "",
     documentType: organization.tipoDocumento || "",
     documentNumber: organization.numeroDocumento || "",
-    address: organization.tipoOrganizacion === "natural" ? (organization.direccion || "") : "",
-    email: organization.tipoOrganizacion === "natural" ? (organization.correoElectronico || "") : "",
-    rut: organization.tipoOrganizacion === "natural" ? (organization.rutUrl || "") : "",
+    address:
+      organization.tipoOrganizacion === "natural"
+        ? organization.direccion || ""
+        : "",
+    email:
+      organization.tipoOrganizacion === "natural"
+        ? organization.correoElectronico || ""
+        : "",
+    rut:
+      organization.tipoOrganizacion === "natural"
+        ? organization.rutUrl || ""
+        : "",
     // Legal entity fields
-    legalName: organization.tipoOrganizacion === "juridica" ? (organization.nombres || "") : "",
+    legalName:
+      organization.tipoOrganizacion === "juridica"
+        ? organization.nombres || ""
+        : "",
     nit: parsedNit.nit,
     nitVerification: parsedNit.verification,
-    legalAddress: organization.tipoOrganizacion === "juridica" ? (organization.direccion || "") : "",
-    legalEmail: organization.tipoOrganizacion === "juridica" ? (organization.correoElectronico || "") : "",
-    legalRut: organization.tipoOrganizacion === "juridica" ? (organization.rutUrl || "") : "",
+    legalAddress:
+      organization.tipoOrganizacion === "juridica"
+        ? organization.direccion || ""
+        : "",
+    legalEmail:
+      organization.tipoOrganizacion === "juridica"
+        ? organization.correoElectronico || ""
+        : "",
+    legalRut:
+      organization.tipoOrganizacion === "juridica"
+        ? organization.rutUrl || ""
+        : "",
     cerl: organization.cerlUrl || "",
   });
   const [logoPreview, setLogoPreview] = useState<string>(
@@ -118,19 +143,44 @@ export function EditOrganizationForm({
       brebKey: "",
       publicPhone: organization.numeroTelefono || "",
       publicEmail: organization.correoElectronico || "",
-      personType: (organization.tipoOrganizacion as "natural" | "juridica") || "natural",
-      fullName: organization.tipoOrganizacion === "natural" ? (organization.nombres || "") : "",
+      personType:
+        (organization.tipoOrganizacion as "natural" | "juridica") || "natural",
+      fullName:
+        organization.tipoOrganizacion === "natural"
+          ? organization.nombres || ""
+          : "",
       documentType: organization.tipoDocumento || "",
       documentNumber: organization.numeroDocumento || "",
-      address: organization.tipoOrganizacion === "natural" ? (organization.direccion || "") : "",
-      email: organization.tipoOrganizacion === "natural" ? (organization.correoElectronico || "") : "",
-      rut: organization.tipoOrganizacion === "natural" ? (organization.rutUrl || "") : "",
-      legalName: organization.tipoOrganizacion === "juridica" ? (organization.nombres || "") : "",
+      address:
+        organization.tipoOrganizacion === "natural"
+          ? organization.direccion || ""
+          : "",
+      email:
+        organization.tipoOrganizacion === "natural"
+          ? organization.correoElectronico || ""
+          : "",
+      rut:
+        organization.tipoOrganizacion === "natural"
+          ? organization.rutUrl || ""
+          : "",
+      legalName:
+        organization.tipoOrganizacion === "juridica"
+          ? organization.nombres || ""
+          : "",
       nit: originalParsedNit.nit,
       nitVerification: originalParsedNit.verification,
-      legalAddress: organization.tipoOrganizacion === "juridica" ? (organization.direccion || "") : "",
-      legalEmail: organization.tipoOrganizacion === "juridica" ? (organization.correoElectronico || "") : "",
-      legalRut: organization.tipoOrganizacion === "juridica" ? (organization.rutUrl || "") : "",
+      legalAddress:
+        organization.tipoOrganizacion === "juridica"
+          ? organization.direccion || ""
+          : "",
+      legalEmail:
+        organization.tipoOrganizacion === "juridica"
+          ? organization.correoElectronico || ""
+          : "",
+      legalRut:
+        organization.tipoOrganizacion === "juridica"
+          ? organization.rutUrl || ""
+          : "",
       cerl: organization.cerlUrl || "",
     };
   };
@@ -291,9 +341,10 @@ export function EditOrganizationForm({
 
       // Prepare data for server action based on person type
       const isNatural = formData.personType === "natural";
-      const nitWithVerification = formData.nit && formData.nitVerification
-        ? `${formData.nit}-${formData.nitVerification}`
-        : formData.nit || undefined;
+      const nitWithVerification =
+        formData.nit && formData.nitVerification
+          ? `${formData.nit}-${formData.nitVerification}`
+          : formData.nit || undefined;
 
       const result = await updateOrganization(organization.id, {
         name: formData.name,

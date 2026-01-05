@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Pencil, Clock } from "lucide-react";
-import { updateTicketType } from "@/lib/supabase/actions/tickets";
+import { updateTicketType } from "@/actions/tickets";
 import { useRouter } from "next/navigation";
 import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
 
@@ -140,7 +140,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
         <form onSubmit={handleSubmit} className="space-y-6 pr-2">
           {/* Información Básica */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Información Básica</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Información Básica
+            </h3>
 
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">
@@ -149,7 +151,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Ej: VIP, General, Palco..."
                 className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 required
@@ -163,7 +167,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Descripción de la entrada..."
                 className="min-h-[80px] rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors resize-none"
               />
@@ -178,7 +184,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   id="price"
                   type="number"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
                   placeholder="50000"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                   required
@@ -194,7 +202,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   type="number"
                   min="1"
                   value={formData.capacity}
-                  onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, capacity: e.target.value })
+                  }
                   placeholder="100"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                   required
@@ -208,7 +218,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
 
           {/* Restricciones de Compra */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Restricciones de Compra</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Restricciones de Compra
+            </h3>
             <p className="text-sm text-white/50">
               Define los límites de compra por orden
             </p>
@@ -223,7 +235,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   type="number"
                   min="1"
                   value={formData.min_per_order}
-                  onChange={(e) => setFormData({ ...formData, min_per_order: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, min_per_order: e.target.value })
+                  }
                   placeholder="1"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -241,7 +255,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                   type="number"
                   min="1"
                   value={formData.max_per_order}
-                  onChange={(e) => setFormData({ ...formData, max_per_order: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, max_per_order: e.target.value })
+                  }
                   placeholder="10"
                   className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 />
@@ -256,7 +272,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-white/60" />
-              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Ventana de Venta</h3>
+              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+                Ventana de Venta
+              </h3>
             </div>
             <p className="text-sm text-white/50">
               Define cuándo estarán disponibles estas entradas para la venta
@@ -270,7 +288,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                 <SimpleDateTimePicker
                   name="sale_start"
                   value={formData.sale_start}
-                  onChange={(value) => setFormData({ ...formData, sale_start: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, sale_start: value })
+                  }
                   placeholder="Selecciona fecha y hora"
                 />
                 <p className="text-xs text-white/40">
@@ -285,7 +305,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
                 <SimpleDateTimePicker
                   name="sale_end"
                   value={formData.sale_end}
-                  onChange={(value) => setFormData({ ...formData, sale_end: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, sale_end: value })
+                  }
                   placeholder="Selecciona fecha y hora"
                 />
                 <p className="text-xs text-white/40">
@@ -297,7 +319,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
 
           {/* Estado */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Estado</h3>
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              Estado
+            </h3>
 
             <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/5">
               <div className="space-y-0.5">
@@ -311,7 +335,9 @@ export function EditTicketSheet({ ticket }: EditTicketSheetProps) {
               <Switch
                 id="status"
                 checked={formData.status}
-                onCheckedChange={(checked) => setFormData({ ...formData, status: checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, status: checked })
+                }
               />
             </div>
           </div>

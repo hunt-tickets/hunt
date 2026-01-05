@@ -5,7 +5,7 @@ import { Filter } from "lucide-react";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EventCard } from "@/components/event-card";
 import { CreateEventDialog } from "@/components/create-event-dialog";
-import type { EventWithVenue } from "@/lib/supabase/actions/events";
+import type { EventWithVenue } from "@/actions/events";
 
 interface AdminEventsListProps {
   events: EventWithVenue[];
@@ -78,7 +78,13 @@ export function AdminEventsList({
               key={event.id}
               id={event.id}
               title={event.name || "Sin nombre"}
-              date={event.date ? (typeof event.date === "string" ? event.date : event.date.toISOString()) : ""}
+              date={
+                event.date
+                  ? typeof event.date === "string"
+                    ? event.date
+                    : event.date.toISOString()
+                  : ""
+              }
               location={`${event.venue_name || "Sin venue"}, ${event.venue_city || "Sin ciudad"}`}
               image={event.flyer || "/event-placeholder.svg"}
               href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${event.id}`}

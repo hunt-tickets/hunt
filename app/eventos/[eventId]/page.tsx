@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getEventById } from "@/lib/supabase/actions/events";
+import { getEventById } from "@/actions/events";
 import { ShareButton } from "@/components/share-button";
 import { TicketsContainer } from "@/components/tickets-container";
 
@@ -104,14 +104,29 @@ export default async function EventPage({ params }: EventPageProps) {
               <Calendar className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {event.eventType === "multi_day" && event.eventDays.length > 0 ? "Fechas" : "Fecha"}
+                  {event.eventType === "multi_day" && event.eventDays.length > 0
+                    ? "Fechas"
+                    : "Fecha"}
                 </p>
-                {event.eventType === "multi_day" && event.eventDays.length > 0 ? (
+                {event.eventType === "multi_day" &&
+                event.eventDays.length > 0 ? (
                   <>
-                    <p className="font-semibold text-sm sm:text-base" suppressHydrationWarning>
-                      {event.eventDays[0].date.toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
+                    <p
+                      className="font-semibold text-sm sm:text-base"
+                      suppressHydrationWarning
+                    >
+                      {event.eventDays[0].date.toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "short",
+                      })}
                       {" - "}
-                      {event.eventDays[event.eventDays.length - 1].date.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
+                      {event.eventDays[
+                        event.eventDays.length - 1
+                      ].date.toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {event.eventDays.length} días
@@ -223,7 +238,6 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
         </section>
       )}
-
 
       {/* Venue location section */}
       {event.venue_latitude && event.venue_longitude && (

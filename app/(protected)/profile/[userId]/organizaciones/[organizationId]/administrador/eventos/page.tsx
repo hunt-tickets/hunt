@@ -1,15 +1,12 @@
 import { headers } from "next/headers";
 import { verifyMembershipAndPermission } from "@/lib/auth/utils";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { AdminEventsList } from "@/components/admin-events-list";
 import { CreateEventDialog } from "@/components/create-event-dialog";
 import { AdminHeader } from "@/components/admin-header";
 import { Metadata } from "next";
-import { getOrganizationEvents } from "@/lib/supabase/actions/events";
+import { getOrganizationEvents } from "@/actions/events";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -43,15 +40,16 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
       {/* Page Header */}
-      <AdminHeader
-        title="Mis Eventos"
-        subtitle="Crea y gestiona tus eventos"
-      />
+      <AdminHeader title="Mis Eventos" subtitle="Crea y gestiona tus eventos" />
 
       {/* Organization Events */}
       <div className="space-y-4">
         {organizationEvents.length > 0 ? (
-          <AdminEventsList events={organizationEvents} userId={userId} organizationId={organizationId} />
+          <AdminEventsList
+            events={organizationEvents}
+            userId={userId}
+            organizationId={organizationId}
+          />
         ) : (
           <Card className="bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5">
             <CardContent className="pt-6">
@@ -65,7 +63,8 @@ const AdministradorPage = async ({ params }: AdministradorPageProps) => {
                   No hay eventos aún
                 </h3>
                 <p className="text-sm sm:text-base text-gray-600 dark:text-white/60 mb-6 sm:mb-8 max-w-md px-4">
-                  Comienza creando tu primer evento para gestionar entradas y ventas
+                  Comienza creando tu primer evento para gestionar entradas y
+                  ventas
                 </p>
                 <CreateEventDialog organizationId={organizationId} />
               </div>

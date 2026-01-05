@@ -4,9 +4,13 @@ import { useState, useMemo } from "react";
 import { EventCard } from "@/components/event-card";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EnhancedCityFilter } from "@/components/enhanced-city-filter";
-import { EventCategoryFilter, EVENT_CATEGORIES, type CategoryKey } from "@/components/event-category-filter";
+import {
+  EventCategoryFilter,
+  EVENT_CATEGORIES,
+  type CategoryKey,
+} from "@/components/event-category-filter";
 import { Filter } from "lucide-react";
-import type { PublicEventWithVenue } from "@/lib/supabase/actions/events";
+import type { PublicEventWithVenue } from "@/actions/events";
 
 interface EventsWithSearchProps {
   // All events from server
@@ -21,7 +25,9 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
   // State for selected city filter
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   // State for selected category
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(
+    null
+  );
 
   /**
    * Extract unique cities from events using useMemo
@@ -87,7 +93,9 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
 
     // Apply category filter
     if (selectedCategory) {
-      filtered = filtered.filter((event) => event.category === selectedCategory);
+      filtered = filtered.filter(
+        (event) => event.category === selectedCategory
+      );
     }
 
     // Apply search filter
@@ -167,15 +175,24 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
             No se encontraron eventos
           </h3>
           <p className="text-sm sm:text-base text-gray-500 dark:text-white/60 mb-5 sm:mb-6 max-w-md mx-auto px-4">
-            {selectedCategory && !selectedCity && !searchQuery &&
+            {selectedCategory &&
+              !selectedCity &&
+              !searchQuery &&
               `No hay eventos de ${EVENT_CATEGORIES[selectedCategory].label}`}
-            {selectedCity && !selectedCategory && !searchQuery &&
+            {selectedCity &&
+              !selectedCategory &&
+              !searchQuery &&
               `No hay eventos disponibles en ${selectedCity}`}
-            {searchQuery && !selectedCity && !selectedCategory &&
+            {searchQuery &&
+              !selectedCity &&
+              !selectedCategory &&
               `No hay eventos que coincidan con "${searchQuery}"`}
-            {(selectedCity || selectedCategory) && searchQuery &&
+            {(selectedCity || selectedCategory) &&
+              searchQuery &&
               `No hay eventos que coincidan con los filtros seleccionados`}
-            {selectedCity && selectedCategory && !searchQuery &&
+            {selectedCity &&
+              selectedCategory &&
+              !searchQuery &&
               `No hay eventos de ${EVENT_CATEGORIES[selectedCategory].label} en ${selectedCity}`}
           </p>
           <button

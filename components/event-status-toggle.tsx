@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toggleEventStatus } from "@/lib/supabase/actions/events";
+import { toggleEventStatus } from "@/actions/events";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -43,22 +43,29 @@ export function EventStatusToggle({
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin text-gray-400 dark:text-white/40" />
-        <span className="text-sm text-gray-400 dark:text-white/40">Cargando...</span>
+        <span className="text-sm text-gray-400 dark:text-white/40">
+          Cargando...
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-3" title={disabled ? disabledReason : undefined}>
+    <div
+      className="flex items-center gap-3"
+      title={disabled ? disabledReason : undefined}
+    >
       {/* Status Label */}
-      <span className={cn(
-        "text-sm font-medium transition-colors duration-300",
-        disabled
-          ? "text-zinc-400 dark:text-white/30"
-          : status
-            ? "text-zinc-900 dark:text-white"
-            : "text-zinc-500 dark:text-white/40"
-      )}>
+      <span
+        className={cn(
+          "text-sm font-medium transition-colors duration-300",
+          disabled
+            ? "text-zinc-400 dark:text-white/30"
+            : status
+              ? "text-zinc-900 dark:text-white"
+              : "text-zinc-500 dark:text-white/40"
+        )}
+      >
         {status ? "Activo" : "Inactivo"}
       </span>
 
@@ -81,7 +88,11 @@ export function EventStatusToggle({
             handleToggle();
           }
         }}
-        aria-label={disabled ? disabledReason : `Cambiar evento a ${status ? "inactivo" : "activo"}`}
+        aria-label={
+          disabled
+            ? disabledReason
+            : `Cambiar evento a ${status ? "inactivo" : "activo"}`
+        }
         aria-pressed={status}
         aria-disabled={disabled}
       >

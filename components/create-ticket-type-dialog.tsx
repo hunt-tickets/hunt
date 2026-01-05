@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, X, Ticket, Calendar, CalendarRange } from "lucide-react";
-import { createTicketType } from "@/lib/supabase/actions/events";
+import { createTicketType } from "@/actions/events";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -236,7 +236,9 @@ export function CreateTicketTypeDialog({
                     {/* All Days (Pase General) option */}
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, eventDayId: "" })}
+                      onClick={() =>
+                        setFormData({ ...formData, eventDayId: "" })
+                      }
                       className={cn(
                         "p-3 rounded-xl border text-left transition-all",
                         formData.eventDayId === ""
@@ -248,7 +250,9 @@ export function CreateTicketTypeDialog({
                         <CalendarRange className="h-4 w-4" />
                         <span className="font-medium">Pase General</span>
                       </div>
-                      <p className="text-xs opacity-60 mt-1">Válido todos los días</p>
+                      <p className="text-xs opacity-60 mt-1">
+                        Válido todos los días
+                      </p>
                     </button>
 
                     {/* Individual day options */}
@@ -264,7 +268,9 @@ export function CreateTicketTypeDialog({
                         <button
                           type="button"
                           key={day.id}
-                          onClick={() => setFormData({ ...formData, eventDayId: day.id })}
+                          onClick={() =>
+                            setFormData({ ...formData, eventDayId: day.id })
+                          }
                           className={cn(
                             "p-3 rounded-xl border text-left transition-all",
                             formData.eventDayId === day.id
@@ -333,13 +339,18 @@ export function CreateTicketTypeDialog({
                       className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                       required
                     />
-                    <p className="text-xs text-white/40">Entradas disponibles</p>
+                    <p className="text-xs text-white/40">
+                      Entradas disponibles
+                    </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="minPerOrder" className="text-sm font-medium">
+                    <Label
+                      htmlFor="minPerOrder"
+                      className="text-sm font-medium"
+                    >
                       Mínimo por orden
                     </Label>
                     <Input
@@ -348,7 +359,10 @@ export function CreateTicketTypeDialog({
                       min="1"
                       value={formData.minPerOrder}
                       onChange={(e) =>
-                        setFormData({ ...formData, minPerOrder: e.target.value })
+                        setFormData({
+                          ...formData,
+                          minPerOrder: e.target.value,
+                        })
                       }
                       placeholder="1"
                       className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
@@ -356,7 +370,10 @@ export function CreateTicketTypeDialog({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="maxPerOrder" className="text-sm font-medium">
+                    <Label
+                      htmlFor="maxPerOrder"
+                      className="text-sm font-medium"
+                    >
                       Máximo por orden
                     </Label>
                     <Input
@@ -365,7 +382,10 @@ export function CreateTicketTypeDialog({
                       min="1"
                       value={formData.maxPerOrder}
                       onChange={(e) =>
-                        setFormData({ ...formData, maxPerOrder: e.target.value })
+                        setFormData({
+                          ...formData,
+                          maxPerOrder: e.target.value,
+                        })
                       }
                       placeholder="10"
                       className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"

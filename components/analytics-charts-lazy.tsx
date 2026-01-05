@@ -6,19 +6,25 @@
  * Reduces initial bundle size and improves Time to Interactive
  */
 
-import dynamic from 'next/dynamic';
-import type { AgeGroupData, GenderData } from "@/lib/supabase/actions/profile";
+import dynamic from "next/dynamic";
+import type { AgeGroupData, GenderData } from "@/actions/profile";
 
 // Dynamic import with loading skeleton
 const AnalyticsCharts = dynamic(
-  () => import('@/components/analytics-charts').then(mod => ({ default: mod.AnalyticsCharts })),
+  () =>
+    import("@/components/analytics-charts").then((mod) => ({
+      default: mod.AnalyticsCharts,
+    })),
   {
     loading: () => (
       <div className="space-y-6 animate-pulse">
         {/* Stats Cards Skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-[#2a2a2a] rounded-lg h-32" />
+            <div
+              key={i}
+              className="bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-[#2a2a2a] rounded-lg h-32"
+            />
           ))}
         </div>
 

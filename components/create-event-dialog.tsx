@@ -10,10 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  createEvent,
-  type EventFormState,
-} from "@/lib/supabase/actions/events";
+import { createEvent, type EventFormState } from "@/actions/events";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Plus, Info, Loader2 } from "lucide-react";
 import { HoverButton } from "@/components/ui/hover-glow-button";

@@ -2,7 +2,7 @@ import { EventsWithSearch } from "@/components/events-with-search";
 import {
   getEventsWithVenue,
   type PublicEventWithVenue,
-} from "@/lib/supabase/actions/events";
+} from "@/actions/events";
 
 interface DisplayEventsProps {
   cityId?: string;
