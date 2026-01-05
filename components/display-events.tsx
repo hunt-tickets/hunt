@@ -1,8 +1,5 @@
 import { EventsWithSearch } from "@/components/events-with-search";
-import {
-  getEventsWithVenue,
-  type PublicEventWithVenue,
-} from "@/actions/events";
+import { getEventsWithVenue, PublicEventWithVenue } from "@/lib/helpers/events";
 
 interface DisplayEventsProps {
   cityId?: string;

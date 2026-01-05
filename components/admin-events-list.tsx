@@ -5,7 +5,7 @@ import { Filter } from "lucide-react";
 import { EnhancedSearchBar } from "@/components/enhanced-search-bar";
 import { EventCard } from "@/components/event-card";
 import { CreateEventDialog } from "@/components/create-event-dialog";
-import type { EventWithVenue } from "@/actions/events";
+import type { EventWithVenue } from "@/lib/helpers/events";
 
 interface AdminEventsListProps {
   events: EventWithVenue[];

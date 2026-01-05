@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toggleEventStatus } from "@/actions/events";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +30,16 @@ export function EventStatusToggle({
     setIsAnimating(true);
 
     startTransition(async () => {
-      const result = await toggleEventStatus(eventId, newStatus);
+      const response = await fetch("/api/events/toggle-status", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId, status: newStatus }),
+      });
+
+      const result = await response.json();
+
       if (result.success) {
         setStatus(newStatus);
       }

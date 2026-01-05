@@ -17,7 +17,6 @@ import {
   Smartphone,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { toggleQRScanStatus } from "@/actions/toggle-scan";
 import { toast } from "sonner";
 import { useEventTabs } from "@/contexts/event-tabs-context";
 import {
@@ -137,20 +136,6 @@ export function EventAccessControlContent({
           : qr
       )
     );
-
-    const result = await toggleQRScanStatus(qrId, currentStatus);
-
-    if (!result.success) {
-      // Revert on error
-      setLocalQRCodes((prev) =>
-        prev.map((qr) => (qr.id === qrId ? { ...qr, scan: currentStatus } : qr))
-      );
-      toast.error(result.error || "Error al actualizar el estado");
-    } else {
-      toast.success(
-        result.newStatus ? "Marcada como escaneada" : "Marcada como pendiente"
-      );
-    }
 
     setUpdatingQR(null);
   };

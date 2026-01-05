@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { EventDayDetail, TicketTypeWithDay } from "@/actions/events";
+import type { EventDayDetail, TicketTypeWithDay } from "@/lib/helpers/events";
 
 interface TicketsContainerProps {
   tickets: TicketTypeWithDay[];

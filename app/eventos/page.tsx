@@ -1,4 +1,4 @@
-import { getEventsWithVenue } from "@/actions/events";
+import { getEventsWithVenue } from "@/lib/helpers/events";
 import { EventsWithSearch } from "@/components/events-with-search";
 
 /**

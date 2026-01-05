@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Check, X, Lock, Eye, EyeOff } from "lucide-react";
-import { changePassword, checkHasPassword } from "@/actions/profile";
 import { Checkbox } from "@/components/ui/checkbox";
+import { authClient } from "@/lib/auth-client";
 
 export function ChangePasswordForm() {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
@@ -23,7 +23,20 @@ export function ChangePasswordForm() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    checkHasPassword().then(setHasPassword);
+    const checkPassword = async () => {
+      try {
+        const accounts = await authClient.listAccounts();
+        const hasCredentialAccount = accounts.data?.some(
+          (account) => account.providerId === "credential"
+        );
+        setHasPassword(!!hasCredentialAccount);
+      } catch (error) {
+        console.error("Error checking password:", error);
+        setHasPassword(false);
+      }
+    };
+
+    void checkPassword();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,14 +59,14 @@ export function ChangePasswordForm() {
     setIsPending(true);
 
     try {
-      const result = await changePassword(
+      const { error: changeError } = await authClient.changePassword({
         currentPassword,
         newPassword,
-        revokeOtherSessions
-      );
+        revokeOtherSessions,
+      });
 
-      if (result.error) {
-        setError(result.error);
+      if (changeError) {
+        setError(changeError.message || "Error al cambiar la contraseña");
       } else {
         setSuccess(true);
         setCurrentPassword("");

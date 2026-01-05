@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Shield, Link2, LogOut } from "lucide-react";
-import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
 import { PasswordManager } from "@/components/password-manager";
@@ -20,17 +19,16 @@ import { BirthDateManager } from "@/components/birth-date-manager";
 import { EmailManager } from "@/components/email-manager";
 import { DocumentManager } from "@/components/document-manager";
 import { SignOutButton } from "@/components/sign-out-button";
+// import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session?.user) {
     redirect("/sign-in");
   }
-
   const user = session.user;
 
   // Fetch user's connected accounts using Better Auth API
@@ -77,9 +75,7 @@ export default async function ProfilePage() {
           />
         </svg>
       ),
-      github: <SiGithub className="h-5 w-5" />,
-      facebook: <SiFacebook className="h-5 w-5" />,
-      apple: <SiApple className="h-5 w-5" />,
+      // apple: <SiApple className="h-5 w-5" />,
     };
     return iconMap[providerId] || <Link2 className="h-5 w-5" />;
   };
@@ -88,7 +84,7 @@ export default async function ProfilePage() {
   const formatProviderName = (providerId: string) => {
     const providerNames: { [key: string]: string } = {
       google: "Google",
-      apple: "Apple",
+      // apple: "Apple",
     };
     return (
       providerNames[providerId] ||
@@ -99,7 +95,7 @@ export default async function ProfilePage() {
   // Define available social providers
   const availableProviders = [
     { id: "google", name: "Google" },
-    { id: "apple", name: "Apple" },
+    // { id: "apple", name: "Apple" },
     // Add more providers here as needed
   ];
 
@@ -286,7 +282,9 @@ export default async function ProfilePage() {
 
       {/* Security Section */}
       <div className="space-y-4 sm:space-y-5">
-        <h2 className="text-lg sm:text-xl font-semibold leading-tight">Seguridad</h2>
+        <h2 className="text-lg sm:text-xl font-semibold leading-tight">
+          Seguridad
+        </h2>
 
         <div className="space-y-3">
           {/* Password */}
@@ -315,9 +313,7 @@ export default async function ProfilePage() {
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 <LogOut className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    Cerrar sesión
-                  </p>
+                  <p className="text-sm font-medium truncate">Cerrar sesión</p>
                   <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 leading-relaxed">
                     Salir de tu cuenta en este dispositivo
                   </p>

@@ -10,7 +10,7 @@ import {
   type CategoryKey,
 } from "@/components/event-category-filter";
 import { Filter } from "lucide-react";
-import type { PublicEventWithVenue } from "@/actions/events";
+import type { PublicEventWithVenue } from "@/lib/helpers/events";
 
 interface EventsWithSearchProps {
   // All events from server

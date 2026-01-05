@@ -5,7 +5,6 @@ import { Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { changePassword, checkHasPassword } from "@/actions/profile";
 import { toast } from "@/lib/toast";
 import {
   ERROR_MESSAGES,
@@ -13,6 +12,7 @@ import {
   VALIDATION,
 } from "@/constants/profile";
 import { validatePasswordStrength } from "@/lib/profile/utils";
+import { authClient } from "@/lib/auth-client";
 
 export function PasswordManager() {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
@@ -27,14 +27,22 @@ export function PasswordManager() {
   const [isPending, setIsPending] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Check if user has a password on mount
   useEffect(() => {
-    checkHasPassword()
-      .then(setHasPassword)
-      .catch((error) => {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Error checking password:", error);
-        }
-      });
+    const checkPassword = async () => {
+      try {
+        const accounts = await authClient.listAccounts();
+        const hasCredentialAccount = accounts.data?.some(
+          (account) => account.providerId === "credential"
+        );
+        setHasPassword(!!hasCredentialAccount);
+      } catch (error) {
+        console.error("Error checking password:", error);
+        setHasPassword(false);
+      }
+    };
+
+    void checkPassword();
   }, []);
 
   // Real-time password validation
@@ -71,14 +79,14 @@ export function PasswordManager() {
     setIsPending(true);
 
     try {
-      const result = await changePassword(
+      const { error } = await authClient.changePassword({
         currentPassword,
         newPassword,
-        revokeOtherSessions
-      );
+        revokeOtherSessions,
+      });
 
-      if (result.error) {
-        toast.error({ title: result.error });
+      if (error) {
+        toast.error({ title: error.message || ERROR_MESSAGES.PASSWORD_CHANGE_FAILED });
       } else {
         toast.success({
           title: revokeOtherSessions

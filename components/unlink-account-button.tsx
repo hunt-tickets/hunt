@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2 } from "lucide-react";
-import { unlinkAccount } from "@/actions/profile";
 import { toast } from "@/lib/toast";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/constants/profile";
 import {
@@ -18,23 +17,27 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { UnlinkAccountButtonProps } from "@/lib/profile/types";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export function UnlinkAccountButton({
   accountId,
   providerName,
 }: UnlinkAccountButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleUnlink = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const result = await unlinkAccount(accountId);
 
-      if (result.error) {
-        toast.error({ title: result.error });
-      } else if (result.success) {
-        toast.success({ title: SUCCESS_MESSAGES.ACCOUNT_UNLINKED });
-      }
+    try {
+      await authClient.unlinkAccount({
+        providerId: providerName.toLowerCase(),
+        accountId: accountId,
+      });
+
+      toast.success({ title: SUCCESS_MESSAGES.ACCOUNT_UNLINKED });
+      router.refresh();
     } catch (error) {
       toast.error({ title: ERROR_MESSAGES.UNLINK_ACCOUNT_FAILED });
       if (process.env.NODE_ENV === "development") {
@@ -43,7 +46,7 @@ export function UnlinkAccountButton({
     } finally {
       setIsLoading(false);
     }
-  }, [accountId]);
+  }, [accountId, providerName, router]);
 
   return (
     <AlertDialog>

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserPlus, Users } from "lucide-react";
-import { addProducerToEvent } from "@/actions/events";
+import { addProducerToEventDb } from "@/lib/helpers/events";
 import { useRouter } from "next/navigation";
 
 interface Producer {
@@ -52,7 +52,7 @@ export function AddProducerDialog({
     setError(null);
 
     try {
-      const result = await addProducerToEvent(eventId, selectedProducerId);
+      const result = await addProducerToEventDb(eventId, selectedProducerId);
 
       if (result.success) {
         setOpen(false);

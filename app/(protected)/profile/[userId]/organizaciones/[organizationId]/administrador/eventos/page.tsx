@@ -6,7 +6,7 @@ import { AdminEventsList } from "@/components/admin-events-list";
 import { CreateEventDialog } from "@/components/create-event-dialog";
 import { AdminHeader } from "@/components/admin-header";
 import { Metadata } from "next";
-import { getOrganizationEvents } from "@/actions/events";
+import { getOrganizationEvents } from "@/lib/helpers/events";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
