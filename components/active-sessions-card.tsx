@@ -24,6 +24,7 @@ interface ActiveSessionProps {
 }
 
 export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
+  // Later set by loadSessions in the useEffect
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
@@ -45,7 +46,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
       }
 
       if (data) {
-        setSessions(data as Session[]);
+        setSessions(data as Session[]); // Assert the type of the obj
       }
     } catch (error) {
       console.error("Error loading sessions:", error);
@@ -55,7 +56,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
     }
   };
 
-  const revokeSession = async (sessionId: string, token: string) => {
+  const revokeSession = async (sessionId: string) => {
     // If revoking current session, sign out
     if (sessionId === activeSession.id) {
       await authClient.signOut();
@@ -63,17 +64,26 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
     }
 
     try {
-      setRevokingToken(token);
-      const { error } = await authClient.revokeSession({ token });
+      setRevokingToken(sessionId);
 
-      if (error) {
-        console.error("Error revoking session:", error);
+      const response = await fetch("/api/revoke-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        console.error("Error revoking session:", result.error);
         toast.error("Error al cerrar la sesión");
         return;
       }
 
-      // Remove the session from the list
-      setSessions((prev) => prev.filter((s) => s.token !== token));
+      // Remove the session from local state
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
       toast.success("Sesión cerrada correctamente");
     } catch (error) {
       console.error("Error revoking session:", error);
@@ -86,10 +96,11 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
   const revokeOtherSessions = async () => {
     try {
       setRevokingAll(true);
-      const { error } = await authClient.revokeOtherSessions();
 
-      if (error) {
-        console.error("Error revoking other sessions:", error);
+      const result = await authClient.revokeOtherSessions();
+
+      if (result?.error) {
+        console.error("Error revoking other sessions:", result.error);
         toast.error("Error al cerrar las otras sesiones");
         return;
       }
@@ -310,7 +321,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
         {sessions.map((session) => {
           const parsed = parseUserAgent(session?.userAgent ?? null);
           const isCurrentSession = activeSession.id === session.id;
-          const isRevoking = revokingToken === session.token;
+          const isRevoking = revokingToken === session.id;
 
           return (
             <div
@@ -353,7 +364,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => revokeSession(session.id, session.token)}
+                    onClick={() => revokeSession(session.id)}
                     disabled={isRevoking || revokingAll}
                     className="text-gray-400 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 p-0"
                     title="Cerrar esta sesión"

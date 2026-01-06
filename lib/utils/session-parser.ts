@@ -24,19 +24,9 @@ export function parseUserAgent(userAgent: string | null): ParsedUserAgent {
   let deviceName = "Dispositivo desconocido";
   let deviceType: "desktop" | "mobile" | "tablet" = "desktop";
 
-  if (ua.includes("mac os x")) {
-    os = "macOS";
-    deviceName = "Macintosh";
-    deviceType = "desktop";
-  } else if (ua.includes("windows")) {
-    os = "Windows";
-    deviceName = "Windows PC";
-    deviceType = "desktop";
-  } else if (ua.includes("linux")) {
-    os = "Linux";
-    deviceName = "Linux PC";
-    deviceType = "desktop";
-  } else if (ua.includes("iphone")) {
+  // Check for mobile/tablet devices FIRST before desktop OS
+  // (iPhone/iPad user agents contain "Mac OS X" so they must be checked first)
+  if (ua.includes("iphone")) {
     os = "iOS";
     deviceName = "iPhone";
     deviceType = "mobile";
@@ -53,6 +43,18 @@ export function parseUserAgent(userAgent: string | null): ParsedUserAgent {
       deviceName = "Android Tablet";
       deviceType = "tablet";
     }
+  } else if (ua.includes("mac os x")) {
+    os = "macOS";
+    deviceName = "Macintosh";
+    deviceType = "desktop";
+  } else if (ua.includes("windows")) {
+    os = "Windows";
+    deviceName = "Windows PC";
+    deviceType = "desktop";
+  } else if (ua.includes("linux")) {
+    os = "Linux";
+    deviceName = "Linux PC";
+    deviceType = "desktop";
   }
 
   // Detect Browser
