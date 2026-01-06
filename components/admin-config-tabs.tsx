@@ -13,6 +13,9 @@ import {
   Search,
   Phone,
   X,
+  MoreVertical,
+  Trash2,
+  UserCog,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { authClient } from "@/lib/auth-client";
@@ -25,6 +28,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { EditOrganizationForm } from "@/components/edit-organization-form";
 import { AdminPaymentSettings } from "@/components/admin-payment-settings";
@@ -45,6 +60,7 @@ interface AdminConfigTabsProps {
   team: MemberWithUser[];
   invitations: Invitation[];
   currentUserRole: string;
+  currentUserId: string;
   mpOauthUrl?: string;
 }
 
@@ -55,6 +71,7 @@ export function AdminConfigTabs({
   team,
   invitations,
   currentUserRole,
+  currentUserId,
   mpOauthUrl,
 }: AdminConfigTabsProps) {
   const router = useRouter();
@@ -63,8 +80,81 @@ export function AdminConfigTabs({
   const [cancelingInvitation, setCancelingInvitation] = useState<string | null>(
     null
   );
+  const [removingMember, setRemovingMember] = useState<string | null>(null);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
 
   const displayTeam = team.length > 0 ? team : [];
+
+  // Format role for display
+  const formatRole = (role: string) => {
+    const roleMap: { [key: string]: string } = {
+      owner: "Propietario",
+      administrator: "Administrador",
+      seller: "Vendedor",
+    };
+    return roleMap[role] || role;
+  };
+
+  // Add handler to remove a member
+  const handleRemoveMember = async (memberId: string, memberEmail: string) => {
+    if (!organization) return;
+
+    setRemovingMember(memberId);
+    try {
+      const { error } = await authClient.organization.removeMember({
+        memberIdOrEmail: memberEmail,
+        organizationId: organization.id,
+      });
+
+      if (error) {
+        console.error("Error removing member:", error);
+        toast.error(error.message || "Error al eliminar miembro");
+        return;
+      }
+
+      toast.success("Miembro eliminado exitosamente");
+      router.refresh();
+    } catch (error) {
+      console.error("Error removing member:", error);
+      toast.error("Error al eliminar miembro");
+    } finally {
+      setRemovingMember(null);
+    }
+  };
+
+  // Add handler to update member role
+  const handleUpdateRole = async (
+    memberId: string,
+    newRole: string,
+    memberName: string
+  ) => {
+    if (!organization) return;
+
+    setUpdatingRole(memberId);
+    try {
+      const { error } = await authClient.organization.updateMemberRole({
+        role: newRole,
+        memberId: memberId,
+        organizationId: organization.id,
+      });
+
+      if (error) {
+        console.error("Error updating role:", error);
+        toast.error(error.message || "Error al actualizar rol");
+        return;
+      }
+
+      toast.success(
+        `Rol de ${memberName} actualizado a ${formatRole(newRole)}`
+      );
+      router.refresh();
+    } catch (error) {
+      console.error("Error updating role:", error);
+      toast.error("Error al actualizar rol");
+    } finally {
+      setUpdatingRole(null);
+    }
+  };
 
   // Cancel invitation
   const handleCancelInvitation = async (invitationId: string) => {
@@ -129,17 +219,7 @@ export function AdminConfigTabs({
   // Check permissions
   const canInvite =
     currentUserRole === "owner" || currentUserRole === "administrator";
-
-  // Format role for display
-  const formatRole = (role: string) => {
-    const roleMap: { [key: string]: string } = {
-      owner: "Propietario",
-      administrator: "Administrador",
-      seller: "Vendedor",
-      member: "Miembro",
-    };
-    return roleMap[role] || role;
-  };
+  const canManageMembers = currentUserRole === "owner";
 
   const tabs = [
     { value: "general", icon: Settings, label: "General" },
@@ -193,7 +273,10 @@ export function AdminConfigTabs({
                 <div className="flex-shrink-0">
                   {/* Mobile: Icon only */}
                   <div className="sm:hidden">
-                    <InviteMemberDialog organizationId={organization.id} iconOnly />
+                    <InviteMemberDialog
+                      organizationId={organization.id}
+                      iconOnly
+                    />
                   </div>
                   {/* Desktop: Full button */}
                   <div className="hidden sm:block">
@@ -213,6 +296,8 @@ export function AdminConfigTabs({
               <div className="md:hidden space-y-3">
                 {filteredTeamData.map((member) => {
                   const isPending = member.isPending;
+                  const isCurrentUser =
+                    !isPending && member.user?.id === currentUserId;
                   const fullName = isPending
                     ? "Invitación Pendiente"
                     : member.user?.name || "Usuario sin nombre";
@@ -235,7 +320,11 @@ export function AdminConfigTabs({
                   return (
                     <Card
                       key={member.id}
-                      className="bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10 min-w-0 overflow-hidden"
+                      className={`min-w-0 overflow-hidden ${
+                        isCurrentUser
+                          ? "bg-blue-50/50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 ring-1 ring-blue-200 dark:ring-blue-800"
+                          : "bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10"
+                      }`}
                     >
                       <CardContent className="p-3 sm:p-4">
                         <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3">
@@ -266,6 +355,11 @@ export function AdminConfigTabs({
                             </div>
                           </div>
                           <div className="flex flex-col gap-1.5 sm:gap-2 flex-shrink-0">
+                            {isCurrentUser && (
+                              <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 text-xs whitespace-nowrap font-semibold">
+                                Tú
+                              </Badge>
+                            )}
                             {isPending ? (
                               <>
                                 <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 text-xs whitespace-nowrap">
@@ -281,7 +375,9 @@ export function AdminConfigTabs({
                                   className="px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center justify-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs text-red-600 dark:text-red-400 font-medium whitespace-nowrap"
                                 >
                                   <X className="h-3 w-3" />
-                                  <span className="hidden xs:inline">Cancelar</span>
+                                  <span className="hidden xs:inline">
+                                    Cancelar
+                                  </span>
                                 </button>
                               </>
                             ) : role === "owner" ? (
@@ -324,9 +420,9 @@ export function AdminConfigTabs({
               </div>
 
               {/* Team Table - Desktop */}
-              <div className="hidden md:block rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]">
-                <div className="overflow-x-auto">
-                  <Table>
+              <div className="hidden md:block rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02] overflow-hidden">
+                <div className="overflow-x-auto w-full">
+                  <Table className="min-w-[800px]">
                     <TableHeader>
                       <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-white/5">
                         <TableHead className="font-medium text-gray-600 dark:text-white/50 py-3 pl-6 text-xs uppercase tracking-wider">
@@ -338,14 +434,21 @@ export function AdminConfigTabs({
                         <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider">
                           Teléfono
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider pr-6">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider">
                           Rol
                         </TableHead>
+                        {canManageMembers && (
+                          <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider pr-6 text-right">
+                            Acciones
+                          </TableHead>
+                        )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredTeamData.map((member) => {
                         const isPending = member.isPending;
+                        const isCurrentUser =
+                          !isPending && member.user?.id === currentUserId;
                         const fullName = isPending
                           ? "Invitación Pendiente"
                           : member.user?.name || "Usuario sin nombre";
@@ -371,7 +474,11 @@ export function AdminConfigTabs({
                         return (
                           <TableRow
                             key={member.id}
-                            className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/[0.02] transition-all duration-200"
+                            className={`border-b border-gray-200 dark:border-white/5 transition-all duration-200 ${
+                              isCurrentUser
+                                ? "bg-blue-50/50 dark:bg-blue-950/20 hover:bg-blue-100/50 dark:hover:bg-blue-950/30"
+                                : "hover:bg-gray-100 dark:hover:bg-white/[0.02]"
+                            }`}
                           >
                             <TableCell className="py-5 pl-6">
                               <div className="flex items-center gap-3">
@@ -424,57 +531,133 @@ export function AdminConfigTabs({
                               )}
                             </TableCell>
 
-                            <TableCell className="py-5 pr-6">
-                              {isPending ? (
-                                <div className="flex items-center gap-2">
-                                  <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700">
-                                    <MailCheck className="h-3 w-3 mr-1" />
-                                    Pendiente
+                            <TableCell className="py-5">
+                              <div className="flex items-center gap-2">
+                                {isCurrentUser && (
+                                  <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 font-semibold">
+                                    Tú
                                   </Badge>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleCancelInvitation(member.id);
-                                    }}
-                                    disabled={cancelingInvitation === member.id}
-                                    className="h-7 w-7 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
-                                    title="Cancelar invitación"
+                                )}
+                                {isPending ? (
+                                  <>
+                                    <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700">
+                                      <MailCheck className="h-3 w-3 mr-1" />
+                                      Pendiente
+                                    </Badge>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCancelInvitation(member.id);
+                                      }}
+                                      disabled={
+                                        cancelingInvitation === member.id
+                                      }
+                                      className="h-7 w-7 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+                                      title="Cancelar invitación"
+                                    >
+                                      <X className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                                    </button>
+                                  </>
+                                ) : role === "owner" ? (
+                                  <Badge
+                                    variant="default"
+                                    className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-2 border-gray-900 dark:border-gray-100 font-semibold"
                                   >
-                                    <X className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
-                                  </button>
-                                </div>
-                              ) : role === "owner" ? (
-                                <Badge
-                                  variant="default"
-                                  className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-2 border-gray-900 dark:border-gray-100 font-semibold"
-                                >
-                                  <Shield className="h-3 w-3 mr-1" />
-                                  {formatRole(role)}
-                                </Badge>
-                              ) : role === "administrator" ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
-                                >
-                                  <Shield className="h-3 w-3 mr-1" />
-                                  {formatRole(role)}
-                                </Badge>
-                              ) : role === "seller" ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700"
-                                >
-                                  {formatRole(role)}
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className="border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 bg-gray-50 dark:bg-white/[0.02]"
-                                >
-                                  {formatRole(role)}
-                                </Badge>
-                              )}
+                                    <Shield className="h-3 w-3 mr-1" />
+                                    {formatRole(role)}
+                                  </Badge>
+                                ) : role === "administrator" ? (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
+                                  >
+                                    <Shield className="h-3 w-3 mr-1" />
+                                    {formatRole(role)}
+                                  </Badge>
+                                ) : role === "seller" ? (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700"
+                                  >
+                                    {formatRole(role)}
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="outline"
+                                    className="border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 bg-gray-50 dark:bg-white/[0.02]"
+                                  >
+                                    {formatRole(role)}
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
+
+                            {canManageMembers && (
+                              <TableCell className="py-5 pr-6">
+                                <div className="flex items-center justify-end">
+                                  {!isPending && role !== "owner" && (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 w-8 p-0"
+                                          disabled={
+                                            removingMember === member.id ||
+                                            updatingRole === member.id
+                                          }
+                                        >
+                                          <MoreVertical className="h-4 w-4" />
+                                          <span className="sr-only">
+                                            Abrir menú
+                                          </span>
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>
+                                          Acciones
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuSub>
+                                          <DropdownMenuSubTrigger>
+                                            <UserCog className="mr-2 h-4 w-4" />
+                                            <span>Cambiar rol</span>
+                                          </DropdownMenuSubTrigger>
+                                          <DropdownMenuSubContent>
+                                            {["administrator", "seller"]
+                                              .filter((r) => r !== role)
+                                              .map((newRole) => (
+                                                <DropdownMenuItem
+                                                  key={newRole}
+                                                  onClick={() =>
+                                                    handleUpdateRole(
+                                                      member.id,
+                                                      newRole,
+                                                      fullName
+                                                    )
+                                                  }
+                                                >
+                                                  {formatRole(newRole)}
+                                                </DropdownMenuItem>
+                                              ))}
+                                          </DropdownMenuSubContent>
+                                        </DropdownMenuSub>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                                          onClick={() =>
+                                            handleRemoveMember(member.id, email)
+                                          }
+                                        >
+                                          <Trash2 className="mr-2 h-4 w-4" />
+                                          <span>Eliminar miembro</span>
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  )}
+                                </div>
+                              </TableCell>
+                            )}
                           </TableRow>
                         );
                       })}

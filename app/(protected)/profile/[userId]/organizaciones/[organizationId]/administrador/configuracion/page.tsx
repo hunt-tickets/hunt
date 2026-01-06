@@ -130,6 +130,7 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
         team={teamMembers}
         invitations={invitations}
         currentUserRole={currentUserRole}
+        currentUserId={userId}
         mpOauthUrl={mpOauthUrl}
       />
     </div>
