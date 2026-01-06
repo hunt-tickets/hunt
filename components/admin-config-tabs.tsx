@@ -420,25 +420,28 @@ export function AdminConfigTabs({
               </div>
 
               {/* Team Table - Desktop */}
-              <div className="hidden md:block rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02] overflow-hidden">
-                <div className="overflow-x-auto w-full">
-                  <Table className="min-w-[800px]">
+              <div className="hidden md:block rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]">
+                <div className="overflow-x-auto w-full scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-white/20 scrollbar-track-transparent">
+                  <Table className="w-full">
                     <TableHeader>
                       <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-white/5">
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 py-3 pl-6 text-xs uppercase tracking-wider">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 py-3 pl-6 text-xs uppercase tracking-wider min-w-[200px]">
                           Miembro
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[200px]">
                           Contacto
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[140px]">
                           Teléfono
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[140px]">
+                          Fecha de ingreso
+                        </TableHead>
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[160px]">
                           Rol
                         </TableHead>
                         {canManageMembers && (
-                          <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider pr-6 text-right">
+                          <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider pr-6 text-right min-w-[100px]">
                             Acciones
                           </TableHead>
                         )}
@@ -480,7 +483,7 @@ export function AdminConfigTabs({
                                 : "hover:bg-gray-100 dark:hover:bg-white/[0.02]"
                             }`}
                           >
-                            <TableCell className="py-5 pl-6">
+                            <TableCell className="py-5 pl-6 min-w-[200px]">
                               <div className="flex items-center gap-3">
                                 <div
                                   className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-sm ring-1 ${
@@ -501,7 +504,7 @@ export function AdminConfigTabs({
                               </div>
                             </TableCell>
 
-                            <TableCell className="py-5">
+                            <TableCell className="py-5 min-w-[200px]">
                               {email !== "Sin correo" ? (
                                 <div className="flex items-center gap-2">
                                   <Mail className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
@@ -516,7 +519,7 @@ export function AdminConfigTabs({
                               )}
                             </TableCell>
 
-                            <TableCell className="py-5">
+                            <TableCell className="py-5 min-w-[140px]">
                               {phoneNumber ? (
                                 <div className="flex items-center gap-2">
                                   <Phone className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
@@ -531,7 +534,23 @@ export function AdminConfigTabs({
                               )}
                             </TableCell>
 
-                            <TableCell className="py-5">
+                            <TableCell className="py-5 min-w-[140px]">
+                              {!isPending && "createdAt" in member && member.createdAt ? (
+                                <span className="text-sm text-gray-600 dark:text-white/70">
+                                  {new Date(member.createdAt).toLocaleDateString("es-ES", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric"
+                                  })}
+                                </span>
+                              ) : (
+                                <span className="text-sm text-gray-400 dark:text-white/30">
+                                  -
+                                </span>
+                              )}
+                            </TableCell>
+
+                            <TableCell className="py-5 min-w-[160px]">
                               <div className="flex items-center gap-2">
                                 {isCurrentUser && (
                                   <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 font-semibold">
@@ -593,7 +612,7 @@ export function AdminConfigTabs({
                             </TableCell>
 
                             {canManageMembers && (
-                              <TableCell className="py-5 pr-6">
+                              <TableCell className="py-5 pr-6 min-w-[100px]">
                                 <div className="flex items-center justify-end">
                                   {!isPending && role !== "owner" && (
                                     <DropdownMenu>
