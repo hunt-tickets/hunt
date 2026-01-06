@@ -7,10 +7,36 @@ import { EventStickyHeader } from "@/components/event-sticky-header";
 import { EventStatusToggle } from "@/components/event-status-toggle";
 import { EventOptionsMenu } from "@/components/event-options-menu";
 import { createClient } from "@/lib/supabase/server";
-import { orderItem, member } from "@/lib/schema";
+import { member } from "@/lib/schema";
 import { db } from "@/lib/drizzle";
 import { eq, and } from "drizzle-orm";
 import { Settings } from "lucide-react";
+
+// Type for Supabase order with nested relations
+type OrderWithItems = {
+  id: string;
+  user_id: string;
+  event_id: string;
+  total_amount: string;
+  currency: string;
+  marketplace_fee: string | null;
+  processor_fee: string | null;
+  payment_status: string;
+  platform: string;
+  payment_session_id: string | null;
+  sold_by: string | null;
+  created_at: string;
+  paid_at: string | null;
+  order_items: {
+    id: string;
+    orderId: string;
+    ticketTypeId: string;
+    quantity: number;
+    pricePerTicket: string;
+    subtotal: string;
+    created_at: string;
+  }[];
+};
 
 interface EventPageProps {
   params: Promise<{
@@ -23,12 +49,6 @@ interface EventPageProps {
 export default async function EventDashboardPage({ params }: EventPageProps) {
   const { userId, eventId, organizationId } = await params;
   const reqHeaders = await headers();
-
-  // Auth check
-  const session = await auth.api.getSession({ headers: reqHeaders });
-  if (!session || session.user.id !== userId) {
-    redirect("/sign-in");
-  }
 
   // Verify user is a member of the organization
   const memberRecord = await db.query.member.findFirst({
@@ -53,7 +73,9 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
 
   if (!canViewDashboard?.success) {
     // Redirect sellers to the vender page for this event
-    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`);
+    redirect(
+      `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`
+    );
   }
 
   const supabase = await createClient();
@@ -85,7 +107,75 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   }
 
   const ticketTypes = event.ticket_types || [];
-  const orders = event.orders || [];
+  const orders = (event.orders || []) as OrderWithItems[];
+
+  // Fetch organization members with user details
+  const organizationMembers = await db.query.member.findMany({
+    where: eq(member.organizationId, organizationId),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          nombres: true,
+          apellidos: true,
+          email: true,
+          phoneNumber: true,
+        },
+      },
+    },
+  });
+
+  // Aggregate seller statistics from orders
+  const sellerStats = organizationMembers.map((memberRecord) => {
+    const sellerId = memberRecord.userId;
+
+    // Filter orders sold by this seller for this event
+    const sellerOrders = orders.filter(
+      (order) => order.sold_by === sellerId && order.payment_status === "paid"
+    );
+
+    // Calculate cash sales (platform = 'cash')
+    const cashSales = sellerOrders
+      .filter((order) => order.platform === "cash")
+      .reduce((sum, order) => sum + parseFloat(order.total_amount), 0);
+
+    // Calculate gateway sales (platform = 'web' or 'app')
+    const gatewaySales = sellerOrders
+      .filter((order) => order.platform === "web" || order.platform === "app")
+      .reduce((sum, order) => sum + parseFloat(order.total_amount), 0);
+
+    // Calculate total tickets sold by counting order_items
+    const ticketsSold = sellerOrders.reduce(
+      (sum, order) =>
+        sum +
+        (order.order_items || []).reduce(
+          (itemSum, item) => itemSum + item.quantity,
+          0
+        ),
+      0
+    );
+
+    return {
+      id: memberRecord.id,
+      userId: sellerId,
+      name: memberRecord.user?.nombres || memberRecord.user?.name || null,
+      lastName: memberRecord.user?.apellidos || null,
+      email: memberRecord.user?.email || null,
+      phone: memberRecord.user?.phoneNumber || null,
+      role: memberRecord.role,
+      cashSales,
+      gatewaySales,
+      ticketsSold,
+      commission: null, // TODO: Add commission tracking
+      created_at: memberRecord.createdAt.toISOString(),
+    };
+  });
+
+  // Filter to only include sellers/administrators who have made sales
+  const sellersWithSales = sellerStats.filter(
+    (seller) => seller.ticketsSold > 0
+  );
 
   // Build tickets with analytics structure
   const ticketsWithAnalytics = ticketTypes.map((tt) => ({
@@ -116,14 +206,16 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       const marketplaceFee = parseFloat(order.marketplace_fee || "0");
       const processorFee = parseFloat(order.processor_fee || "0");
       const itemCount = (order.order_items || []).reduce(
-        (sum: number, item: orderItem) => sum + item.quantity,
+        (sum, item) => sum + item.quantity,
         0
       );
 
       acc[order.platform as "web" | "app" | "cash"].total += orderTotal;
       acc[order.platform as "web" | "app" | "cash"].count += itemCount;
-      acc[order.platform as "web" | "app" | "cash"].marketplaceFee += marketplaceFee;
-      acc[order.platform as "web" | "app" | "cash"].processorFee += processorFee;
+      acc[order.platform as "web" | "app" | "cash"].marketplaceFee +=
+        marketplaceFee;
+      acc[order.platform as "web" | "app" | "cash"].processorFee +=
+        processorFee;
       return acc;
     },
     {
@@ -153,7 +245,8 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     salesByPlatform.cash.processorFee;
 
   // Organization receives: total - fees
-  const organizationNetAmount = totalFromOrders - totalMarketplaceFee - totalProcessorFee;
+  const organizationNetAmount =
+    totalFromOrders - totalMarketplaceFee - totalProcessorFee;
 
   // Build financial report from real order data
   const financialReport = {
@@ -180,19 +273,28 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           gross: salesByPlatform.web.total,
           marketplace_fee: salesByPlatform.web.marketplaceFee,
           processor_fee: salesByPlatform.web.processorFee,
-          net: salesByPlatform.web.total - salesByPlatform.web.marketplaceFee - salesByPlatform.web.processorFee,
+          net:
+            salesByPlatform.web.total -
+            salesByPlatform.web.marketplaceFee -
+            salesByPlatform.web.processorFee,
         },
         app: {
           gross: salesByPlatform.app.total,
           marketplace_fee: salesByPlatform.app.marketplaceFee,
           processor_fee: salesByPlatform.app.processorFee,
-          net: salesByPlatform.app.total - salesByPlatform.app.marketplaceFee - salesByPlatform.app.processorFee,
+          net:
+            salesByPlatform.app.total -
+            salesByPlatform.app.marketplaceFee -
+            salesByPlatform.app.processorFee,
         },
         cash: {
           gross: salesByPlatform.cash.total,
           marketplace_fee: salesByPlatform.cash.marketplaceFee,
           processor_fee: salesByPlatform.cash.processorFee,
-          net: salesByPlatform.cash.total - salesByPlatform.cash.marketplaceFee - salesByPlatform.cash.processorFee,
+          net:
+            salesByPlatform.cash.total -
+            salesByPlatform.cash.marketplaceFee -
+            salesByPlatform.cash.processorFee,
         },
       },
     },
@@ -200,7 +302,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
 
   // Build sales records from orders and order items
   const sales = orders.flatMap((order) =>
-    (order.order_items || []).map((item: orderItem) => ({
+    (order.order_items || []).map((item) => ({
       id: item.id,
       quantity: item.quantity,
       subtotal: parseFloat(item.subtotal),
@@ -254,7 +356,8 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
               <div className="space-y-1">
                 <h2 className="text-lg font-semibold">Configura tu evento</h2>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  Agrega los detalles de tu evento para poder publicarlo y comenzar a vender entradas.
+                  Agrega los detalles de tu evento para poder publicarlo y
+                  comenzar a vender entradas.
                 </p>
               </div>
               <Link
@@ -298,6 +401,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           eventId={eventId}
           eventName={event.name}
           eventFlyer={event.flyer || "/event-placeholder.svg"}
+          sellers={sellersWithSales}
           showTabsOnly
         />
       </EventStickyHeader>
@@ -328,6 +432,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         eventId={eventId}
         eventName={event.name}
         eventFlyer={event.flyer || "/event-placeholder.svg"}
+        sellers={sellersWithSales}
         showContentOnly
       />
     </div>

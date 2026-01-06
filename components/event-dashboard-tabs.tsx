@@ -54,6 +54,19 @@ interface Ticket {
   };
 }
 
+interface Seller {
+  id: string;
+  name: string | null;
+  lastName: string | null;
+  email: string | null;
+  phone: string | null;
+  cashSales: number;
+  gatewaySales: number;
+  ticketsSold: number;
+  commission: number | null;
+  created_at: string;
+}
+
 interface EventDashboardTabsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   financialReport: any;
@@ -62,6 +75,7 @@ interface EventDashboardTabsProps {
   eventId: string;
   eventName: string;
   eventFlyer: string;
+  sellers: Seller[];
   showTabsOnly?: boolean;
   showContentOnly?: boolean;
 }
@@ -73,54 +87,12 @@ export function EventDashboardTabs({
   eventId,
   eventName,
   eventFlyer,
+  sellers,
   showTabsOnly = false,
   showContentOnly = false,
 }: EventDashboardTabsProps) {
   const { dashboardTab: activeTab, setDashboardTab: setActiveTab } =
     useEventTabs();
-
-  // Mock sellers data - In production, fetch from database
-  const mockSellers = [
-    {
-      id: "seller-1",
-      name: "Carlos",
-      lastName: "Rodríguez",
-      email: "carlos@example.com",
-      phone: "+57 300 123 4567",
-      role: "seller",
-      cashSales: 1500000,
-      gatewaySales: 1000000,
-      ticketsSold: 45,
-      commission: 250000,
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: "seller-2",
-      name: "Ana",
-      lastName: "Martínez",
-      email: "ana@example.com",
-      phone: "+57 301 234 5678",
-      role: "seller",
-      cashSales: 800000,
-      gatewaySales: 1000000,
-      ticketsSold: 32,
-      commission: null,
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: "seller-3",
-      name: "Luis",
-      lastName: "García",
-      email: "luis@example.com",
-      phone: "+57 302 345 6789",
-      role: "administrator",
-      cashSales: 2000000,
-      gatewaySales: 1200000,
-      ticketsSold: 58,
-      commission: 320000,
-      created_at: new Date().toISOString(),
-    },
-  ];
 
   // Tabs section
   const tabsSection = (
@@ -190,7 +162,7 @@ export function EventDashboardTabs({
         />
       )}
 
-      {activeTab === "vendedores" && <SellersTable sellers={mockSellers} />}
+      {activeTab === "vendedores" && <SellersTable sellers={sellers} />}
     </>
   );
 

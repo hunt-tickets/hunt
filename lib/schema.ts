@@ -14,6 +14,7 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import { sql, type InferSelectModel, type InferInsertModel } from "drizzle-orm";
+import * as relations from "./relations";
 
 // Ticketing process:
 //   1. User completes checkout → Create reservation
@@ -378,6 +379,7 @@ export const member = pgTable(
     }).onDelete("cascade"),
   ]
 );
+
 export const invitation = pgTable(
   "invitation",
   {
@@ -931,6 +933,8 @@ export const schema = {
   orderItems,
   tickets,
   emailLogs,
+  // Include relations
+  ...relations,
 };
 
 // Inferred types from Drizzle schema
