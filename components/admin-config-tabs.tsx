@@ -456,9 +456,9 @@ export function AdminConfigTabs({
                             ? member.email
                             : "Sin correo"
                           : member.user?.email || "Sin correo";
-                        const phoneNumber = isPending
-                          ? null
-                          : member.user?.phoneNumber || null;
+                        // const phoneNumber = isPending
+                        //   ? null
+                        //   : member.user?.phoneNumber || null;
                         const role = member.role || "member";
 
                         const initials = isPending
@@ -516,12 +516,16 @@ export function AdminConfigTabs({
                             </TableCell>
 
                             <TableCell className="py-4 sm:py-5 min-w-[130px]">
-                              {!isPending && "createdAt" in member && member.createdAt ? (
+                              {!isPending &&
+                              "createdAt" in member &&
+                              member.createdAt ? (
                                 <span className="text-xs sm:text-sm text-gray-600 dark:text-white/70 whitespace-nowrap">
-                                  {new Date(member.createdAt).toLocaleDateString("es-ES", {
+                                  {new Date(
+                                    member.createdAt
+                                  ).toLocaleDateString("es-ES", {
                                     year: "numeric",
                                     month: "short",
-                                    day: "numeric"
+                                    day: "numeric",
                                   })}
                                 </span>
                               ) : (
