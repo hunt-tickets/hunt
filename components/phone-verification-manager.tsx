@@ -10,6 +10,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
@@ -27,6 +38,7 @@ export function PhoneVerificationManager({
   const [isSendingOTP, setIsSendingOTP] = useState(false);
   const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showUnlinkDialog, setShowUnlinkDialog] = useState(false);
   const [pendingPhoneNumber, setPendingPhoneNumber] = useState("");
 
   const router = useRouter();
@@ -140,22 +152,24 @@ export function PhoneVerificationManager({
 
   // Unlink phone number using updateUser
   const handleUnlinkPhone = useCallback(async () => {
+    setShowUnlinkDialog(false);
     setMenuOpen(false);
 
     try {
+      console.log("🔓 Unlinking phone number...");
+
       // Remove phone number and reset verification status
-      await authClient.updateUser({
+      const result = await authClient.updateUser({
         phoneNumber: null,
         phoneNumberVerified: false,
       });
 
+      console.log("✅ Phone unlinked successfully:", result);
       toast.success({ title: SUCCESS_MESSAGES.PHONE_DELETED });
       router.refresh();
     } catch (error) {
+      console.error("❌ Failed to unlink phone number:", error);
       toast.error({ title: ERROR_MESSAGES.PHONE_DELETE_FAILED });
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to unlink phone number:", error);
-      }
     }
   }, [router]);
 
@@ -271,7 +285,10 @@ export function PhoneVerificationManager({
                 <span>Editar</span>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={handleUnlinkPhone}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setShowUnlinkDialog(true);
+                }}
                 className="rounded-xl cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 px-3 py-2"
               >
                 <Trash2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
@@ -280,6 +297,30 @@ export function PhoneVerificationManager({
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Unlink Confirmation Dialog */}
+        <AlertDialog open={showUnlinkDialog} onOpenChange={setShowUnlinkDialog}>
+          <AlertDialogContent className="rounded-2xl border dark:border-[#2a2a2a]">
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Desvincular número de teléfono?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará tu número de teléfono verificado. Podrás
+                agregar uno nuevo en cualquier momento.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="rounded-xl">
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleUnlinkPhone}
+                className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Desvincular
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
