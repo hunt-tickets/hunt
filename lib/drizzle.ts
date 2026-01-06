@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { schema } from "./schema";
+import * as relations from "./relations";
 
 /**
  * Connect to your database using the Connection Pooler.
@@ -22,4 +23,7 @@ const client = postgres(connectionString!, {
   ssl: "require", // Required for Supabase
 });
 
-export const db = drizzle(client, { schema });
+// Merge schema and relations to avoid circular dependency
+const fullSchema = { ...schema, ...relations };
+
+export const db = drizzle(client, { schema: fullSchema });
