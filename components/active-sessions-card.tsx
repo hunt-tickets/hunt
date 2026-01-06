@@ -295,8 +295,12 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
             ) : (
               <LogOut className="h-4 w-4" />
             )}
-            <span className="hidden sm:inline">Cerrar otras sesiones ({otherSessionsCount})</span>
-            <span className="sm:hidden">Cerrar otras ({otherSessionsCount})</span>
+            <span className="hidden sm:inline">
+              Cerrar otras sesiones ({otherSessionsCount})
+            </span>
+            <span className="sm:hidden">
+              Cerrar otras ({otherSessionsCount})
+            </span>
           </button>
         </div>
       )}
