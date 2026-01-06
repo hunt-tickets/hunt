@@ -19,7 +19,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  // AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -27,11 +26,26 @@ import { toast } from "@/lib/toast";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/constants/profile";
 import type { PhoneVerificationManagerProps } from "@/lib/profile/types";
 
+const LATAM_COUNTRY_CODES = [
+  { code: "+57", country: "Colombia", flag: "🇨🇴" },
+  { code: "+52", country: "México", flag: "🇲🇽" },
+  { code: "+54", country: "Argentina", flag: "🇦🇷" },
+  { code: "+56", country: "Chile", flag: "🇨🇱" },
+  { code: "+51", country: "Perú", flag: "🇵🇪" },
+  { code: "+55", country: "Brasil", flag: "🇧🇷" },
+  { code: "+593", country: "Ecuador", flag: "🇪🇨" },
+  { code: "+58", country: "Venezuela", flag: "🇻🇪" },
+  { code: "+507", country: "Panamá", flag: "🇵🇦" },
+  { code: "+506", country: "Costa Rica", flag: "🇨🇷" },
+];
+
 export function PhoneVerificationManager({
   phoneNumber,
   phoneNumberVerified,
 }: PhoneVerificationManagerProps) {
+  const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [countryCode, setCountryCode] = useState("+57");
   const [phoneInput, setPhoneInput] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [showOTPInput, setShowOTPInput] = useState(false);
@@ -55,22 +69,25 @@ export function PhoneVerificationManager({
 
   // Send OTP using Better Auth phoneNumber plugin
   const handleSendOTP = useCallback(async () => {
-    if (!phoneInput || phoneInput.length < 10) {
+    if (!phoneInput || phoneInput.length < 7) {
       toast.error({ title: ERROR_MESSAGES.PHONE_INVALID });
       return;
     }
+
+    const fullPhoneNumber = `${countryCode}${phoneInput}`;
 
     setIsSendingOTP(true);
     try {
       // Better Auth phoneNumber.sendOtp()
       await authClient.phoneNumber.sendOtp({
-        phoneNumber: phoneInput,
+        phoneNumber: fullPhoneNumber,
       });
 
       toast.success({ title: SUCCESS_MESSAGES.OTP_SENT });
-      setPendingPhoneNumber(phoneInput);
+      setPendingPhoneNumber(fullPhoneNumber);
       setShowOTPInput(true);
       setIsEditing(false);
+      setIsAdding(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : ERROR_MESSAGES.OTP_SEND_FAILED;
@@ -81,7 +98,7 @@ export function PhoneVerificationManager({
     } finally {
       setIsSendingOTP(false);
     }
-  }, [phoneInput]);
+  }, [phoneInput, countryCode]);
 
   // Verify OTP using Better Auth phoneNumber plugin
   const handleVerifyOTP = useCallback(
@@ -182,9 +199,11 @@ export function PhoneVerificationManager({
   }, [router]);
 
   const handleCancel = useCallback(() => {
+    setIsAdding(false);
     setIsEditing(false);
     setShowOTPInput(false);
     setPhoneInput("");
+    setCountryCode("+57");
     setOtp(["", "", "", "", "", ""]);
     setPendingPhoneNumber("");
   }, []);
@@ -284,7 +303,16 @@ export function PhoneVerificationManager({
               <DropdownMenuItem
                 onClick={() => {
                   setMenuOpen(false);
-                  setPhoneInput(phoneNumber);
+                  // Extract country code and number
+                  const matchedCountry = LATAM_COUNTRY_CODES.find((c) =>
+                    phoneNumber?.startsWith(c.code)
+                  );
+                  if (matchedCountry) {
+                    setCountryCode(matchedCountry.code);
+                    setPhoneInput(phoneNumber?.replace(matchedCountry.code, "") || "");
+                  } else {
+                    setPhoneInput(phoneNumber || "");
+                  }
                   setIsEditing(true);
                 }}
                 className="rounded-xl cursor-pointer flex items-center px-3 py-2"
@@ -337,76 +365,130 @@ export function PhoneVerificationManager({
   if (phoneNumber && !phoneNumberVerified && !isEditing) {
     return (
       <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           <Phone className="h-5 w-5 text-gray-400" />
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">
-              {formatPhoneNumber(phoneNumber)}
-            </span>
-            <Badge
-              variant="secondary"
-              className="text-xs px-2 py-0.5 bg-orange-600/10 text-orange-400 border-orange-600/20"
-            >
-              No verificado
-            </Badge>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {formatPhoneNumber(phoneNumber)}
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-xs px-2 py-0.5 bg-orange-600/10 text-orange-400 border-orange-600/20"
+              >
+                No verificado
+              </Badge>
+            </div>
+            <p className="text-xs text-gray-500">
+              Verifica tu número para mayor seguridad
+            </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setPhoneInput(phoneNumber);
-            setPendingPhoneNumber(phoneNumber);
-            handleSendOTP();
-          }}
-          disabled={isSendingOTP}
-          className="text-sm font-medium text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
-        >
-          {isSendingOTP ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Verificar ahora"
-          )}
-        </Button>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={async () => {
+              const fullNumber = phoneNumber?.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
+              setPendingPhoneNumber(fullNumber);
+              setIsSendingOTP(true);
+              try {
+                await authClient.phoneNumber.sendOtp({
+                  phoneNumber: fullNumber,
+                });
+                toast.success({ title: SUCCESS_MESSAGES.OTP_SENT });
+                setShowOTPInput(true);
+              } catch (error) {
+                const errorMessage =
+                  error instanceof Error ? error.message : ERROR_MESSAGES.OTP_SEND_FAILED;
+                toast.error({ title: errorMessage });
+                if (process.env.NODE_ENV === "development") {
+                  console.error("Failed to send OTP:", error);
+                }
+              } finally {
+                setIsSendingOTP(false);
+              }
+            }}
+            disabled={isSendingOTP}
+            className="text-sm font-medium hover:underline"
+          >
+            {isSendingOTP ? "Enviando..." : "Verificar ahora"}
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Edit/Add Phone Number View
+  // No Phone Number - Collapsed View
+  if (!phoneNumber && !isAdding && !isEditing) {
+    return (
+      <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+        <div className="flex items-center gap-3">
+          <Phone className="h-5 w-5 text-gray-400" />
+          <span className="text-sm font-medium text-gray-500">
+            Número de teléfono
+          </span>
+        </div>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={() => setIsAdding(true)}
+            className="text-sm font-medium hover:underline"
+          >
+            Agregar número
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Add/Edit Phone Number View
   return (
     <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
       <div className="flex items-center gap-3 mb-3">
         <Phone className="h-5 w-5 text-gray-400" aria-hidden="true" />
         <span className="text-sm font-medium">
-          {isEditing ? "Editar número de teléfono" : "Número de teléfono"}
+          {isEditing ? "Editar número de teléfono" : "Agregar número de teléfono"}
         </span>
       </div>
 
-      <input
-        type="tel"
-        value={phoneInput}
-        onChange={(e) => setPhoneInput(e.target.value)}
-        placeholder="+57 300 123 4567"
-        className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
-        disabled={isSendingOTP}
-      />
+      <div className="flex gap-2">
+        {/* Country Code Selector */}
+        <select
+          value={countryCode}
+          onChange={(e) => setCountryCode(e.target.value)}
+          className="w-32 h-10 px-2 rounded-lg border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
+          disabled={isSendingOTP}
+        >
+          {LATAM_COUNTRY_CODES.map((country) => (
+            <option key={country.code} value={country.code}>
+              {country.flag} {country.code}
+            </option>
+          ))}
+        </select>
+
+        {/* Phone Number Input */}
+        <input
+          type="tel"
+          value={phoneInput}
+          onChange={(e) => setPhoneInput(e.target.value.replace(/\D/g, ""))}
+          placeholder="300 123 4567"
+          className="flex-1 h-10 px-3 rounded-lg border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
+          disabled={isSendingOTP}
+        />
+      </div>
 
       <div className="flex justify-end gap-2 mt-3">
-        {isEditing && (
-          <Button
-            type="button"
-            onClick={handleCancel}
-            variant="ghost"
-            size="sm"
-            className="h-9 rounded-xl"
-            disabled={isSendingOTP}
-          >
-            Cancelar
-          </Button>
-        )}
+        <Button
+          type="button"
+          onClick={handleCancel}
+          variant="ghost"
+          size="sm"
+          className="h-9 rounded-xl"
+          disabled={isSendingOTP}
+        >
+          Cancelar
+        </Button>
         <Button
           onClick={handleSendOTP}
-          disabled={isSendingOTP || !phoneInput || phoneInput.length < 10}
+          disabled={isSendingOTP || !phoneInput || phoneInput.length < 7}
           size="sm"
           className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
