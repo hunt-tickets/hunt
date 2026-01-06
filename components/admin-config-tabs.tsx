@@ -11,7 +11,6 @@ import {
   CreditCard,
   MailCheck,
   Search,
-  Phone,
   X,
   MoreVertical,
   Trash2,
@@ -292,8 +291,8 @@ export function AdminConfigTabs({
         <div className="mt-6">
           {activeTab === "equipo" && (
             <div className="space-y-4">
-              {/* Team Mobile Cards */}
-              <div className="md:hidden space-y-3">
+              {/* Team Mobile Cards - Hidden, using table for all screens */}
+              <div className="hidden space-y-3">
                 {filteredTeamData.map((member) => {
                   const isPending = member.isPending;
                   const isCurrentUser =
@@ -419,29 +418,26 @@ export function AdminConfigTabs({
                 })}
               </div>
 
-              {/* Team Table - Desktop */}
-              <div className="hidden md:block rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]">
-                <div className="overflow-x-auto w-full scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-white/20 scrollbar-track-transparent">
-                  <Table className="w-full">
+              {/* Team Table - All Screens */}
+              <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02] overflow-hidden">
+                <div className="overflow-x-auto w-full">
+                  <Table className="w-full min-w-max">
                     <TableHeader>
                       <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-white/5">
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 py-3 pl-6 text-xs uppercase tracking-wider min-w-[200px]">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 py-3 pl-4 sm:pl-6 text-xs uppercase tracking-wider min-w-[180px] whitespace-nowrap">
                           Miembro
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[200px]">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[180px] whitespace-nowrap">
                           Contacto
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[140px]">
-                          Teléfono
-                        </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[140px]">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[130px] whitespace-nowrap">
                           Fecha de ingreso
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[160px]">
+                        <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider min-w-[150px] whitespace-nowrap">
                           Rol
                         </TableHead>
                         {canManageMembers && (
-                          <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider pr-6 text-right min-w-[100px]">
+                          <TableHead className="font-medium text-gray-600 dark:text-white/50 text-xs uppercase tracking-wider pr-4 sm:pr-6 text-right min-w-[90px] whitespace-nowrap">
                             Acciones
                           </TableHead>
                         )}
@@ -483,10 +479,10 @@ export function AdminConfigTabs({
                                 : "hover:bg-gray-100 dark:hover:bg-white/[0.02]"
                             }`}
                           >
-                            <TableCell className="py-5 pl-6 min-w-[200px]">
-                              <div className="flex items-center gap-3">
+                            <TableCell className="py-4 sm:py-5 pl-4 sm:pl-6 min-w-[180px]">
+                              <div className="flex items-center gap-2 sm:gap-3">
                                 <div
-                                  className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-sm ring-1 ${
+                                  className={`h-9 w-9 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center flex-shrink-0 font-semibold text-xs sm:text-sm ring-1 ${
                                     isPending
                                       ? "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 ring-orange-300 dark:ring-orange-700"
                                       : "bg-gray-200 dark:bg-white/[0.08] text-gray-700 dark:text-white/90 ring-gray-300 dark:ring-white/10"
@@ -496,7 +492,7 @@ export function AdminConfigTabs({
                                 </div>
                                 <div className="flex flex-col min-w-0 gap-0.5">
                                   <span
-                                    className={`font-medium truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
+                                    className={`font-medium text-sm whitespace-nowrap ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
                                   >
                                     {fullName}
                                   </span>
@@ -504,39 +500,24 @@ export function AdminConfigTabs({
                               </div>
                             </TableCell>
 
-                            <TableCell className="py-5 min-w-[200px]">
+                            <TableCell className="py-4 sm:py-5 min-w-[180px]">
                               {email !== "Sin correo" ? (
                                 <div className="flex items-center gap-2">
-                                  <Mail className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
-                                  <span className="text-sm text-gray-600 dark:text-white/70">
+                                  <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-400 dark:text-white/40 flex-shrink-0" />
+                                  <span className="text-xs sm:text-sm text-gray-600 dark:text-white/70 whitespace-nowrap">
                                     {email}
                                   </span>
                                 </div>
                               ) : (
-                                <span className="text-sm text-gray-400 dark:text-white/30">
+                                <span className="text-xs sm:text-sm text-gray-400 dark:text-white/30">
                                   Sin correo
                                 </span>
                               )}
                             </TableCell>
 
-                            <TableCell className="py-5 min-w-[140px]">
-                              {phoneNumber ? (
-                                <div className="flex items-center gap-2">
-                                  <Phone className="h-3.5 w-3.5 text-gray-400 dark:text-white/40" />
-                                  <span className="text-sm text-gray-600 dark:text-white/70">
-                                    {phoneNumber}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-sm text-gray-400 dark:text-white/30">
-                                  Sin teléfono
-                                </span>
-                              )}
-                            </TableCell>
-
-                            <TableCell className="py-5 min-w-[140px]">
+                            <TableCell className="py-4 sm:py-5 min-w-[130px]">
                               {!isPending && "createdAt" in member && member.createdAt ? (
-                                <span className="text-sm text-gray-600 dark:text-white/70">
+                                <span className="text-xs sm:text-sm text-gray-600 dark:text-white/70 whitespace-nowrap">
                                   {new Date(member.createdAt).toLocaleDateString("es-ES", {
                                     year: "numeric",
                                     month: "short",
@@ -544,23 +525,23 @@ export function AdminConfigTabs({
                                   })}
                                 </span>
                               ) : (
-                                <span className="text-sm text-gray-400 dark:text-white/30">
+                                <span className="text-xs sm:text-sm text-gray-400 dark:text-white/30">
                                   -
                                 </span>
                               )}
                             </TableCell>
 
-                            <TableCell className="py-5 min-w-[160px]">
-                              <div className="flex items-center gap-2">
+                            <TableCell className="py-4 sm:py-5 min-w-[150px]">
+                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                                 {isCurrentUser && (
-                                  <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 font-semibold">
+                                  <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 font-semibold text-xs">
                                     Tú
                                   </Badge>
                                 )}
                                 {isPending ? (
                                   <>
-                                    <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700">
-                                      <MailCheck className="h-3 w-3 mr-1" />
+                                    <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 text-xs">
+                                      <MailCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                                       Pendiente
                                     </Badge>
                                     <button
@@ -580,30 +561,30 @@ export function AdminConfigTabs({
                                 ) : role === "owner" ? (
                                   <Badge
                                     variant="default"
-                                    className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-2 border-gray-900 dark:border-gray-100 font-semibold"
+                                    className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-2 border-gray-900 dark:border-gray-100 font-semibold text-xs"
                                   >
-                                    <Shield className="h-3 w-3 mr-1" />
+                                    <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                                     {formatRole(role)}
                                   </Badge>
                                 ) : role === "administrator" ? (
                                   <Badge
                                     variant="outline"
-                                    className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
+                                    className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 text-xs"
                                   >
-                                    <Shield className="h-3 w-3 mr-1" />
+                                    <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                                     {formatRole(role)}
                                   </Badge>
                                 ) : role === "seller" ? (
                                   <Badge
                                     variant="outline"
-                                    className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700"
+                                    className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 text-xs"
                                   >
                                     {formatRole(role)}
                                   </Badge>
                                 ) : (
                                   <Badge
                                     variant="outline"
-                                    className="border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 bg-gray-50 dark:bg-white/[0.02]"
+                                    className="border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 bg-gray-50 dark:bg-white/[0.02] text-xs"
                                   >
                                     {formatRole(role)}
                                   </Badge>
@@ -612,7 +593,7 @@ export function AdminConfigTabs({
                             </TableCell>
 
                             {canManageMembers && (
-                              <TableCell className="py-5 pr-6 min-w-[100px]">
+                              <TableCell className="py-4 sm:py-5 pr-4 sm:pr-6 min-w-[90px]">
                                 <div className="flex items-center justify-end">
                                   {!isPending && role !== "owner" && (
                                     <DropdownMenu>
