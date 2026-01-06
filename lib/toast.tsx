@@ -13,7 +13,7 @@ export const toast = {
   success: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
-        <Alert variant="success" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
+        <Alert variant="primary" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
           <AlertIcon>
             <CheckCircle2 />
           </AlertIcon>
@@ -27,7 +27,7 @@ export const toast = {
   error: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
-        <Alert variant="destructive" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
+        <Alert variant="secondary" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
           <AlertIcon>
             <XCircle />
           </AlertIcon>
@@ -41,7 +41,7 @@ export const toast = {
   warning: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
-        <Alert variant="warning" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
+        <Alert variant="secondary" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
           <AlertIcon>
             <AlertCircle />
           </AlertIcon>
@@ -55,7 +55,7 @@ export const toast = {
   info: ({ title, duration = 4000 }: ToastOptions) => {
     return sonnerToast.custom(
       (t) => (
-        <Alert variant="info" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
+        <Alert variant="primary" appearance="solid" size="md" close onClose={() => sonnerToast.dismiss(t)}>
           <AlertIcon>
             <Info />
           </AlertIcon>
