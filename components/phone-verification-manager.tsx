@@ -150,7 +150,7 @@ export function PhoneVerificationManager({
     }
   };
 
-  // Unlink phone number using updateUser
+  // Unlink phone number via API route
   const handleUnlinkPhone = useCallback(async () => {
     setShowUnlinkDialog(false);
     setMenuOpen(false);
@@ -158,11 +158,19 @@ export function PhoneVerificationManager({
     try {
       console.log("🔓 Unlinking phone number...");
 
-      // Remove phone number and reset verification status
-      const result = await authClient.updateUser({
-        phoneNumber: null,
-        phoneNumberVerified: false,
+      // Call API route to unlink phone number
+      const response = await fetch("/api/phone/unlink", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        throw new Error(result.error || "Failed to unlink phone");
+      }
 
       console.log("✅ Phone unlinked successfully:", result);
       toast.success({ title: SUCCESS_MESSAGES.PHONE_DELETED });
