@@ -122,20 +122,21 @@ export function SellersTable({ sellers }: SellersTableProps) {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="w-full min-w-max">
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-white/5">
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 py-3 text-xs uppercase tracking-wider">Vendedor</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Tickets</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Efectivo</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Pasarela</TableHead>
-              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Comisión</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 py-3 text-xs uppercase tracking-wider min-w-[180px]">Vendedor</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider min-w-[200px]">Email</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider min-w-[100px]">Tickets</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider min-w-[130px]">Efectivo</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider min-w-[130px]">Pasarela</TableHead>
+              <TableHead className="font-medium text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider min-w-[120px]">Comisión</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentSellers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-24">
+                <TableCell colSpan={6} className="py-24">
                   <div className="text-center">
                     <Search className="h-12 w-12 mx-auto mb-3 opacity-20" />
                     <p className="text-sm text-gray-400 dark:text-white/40 mb-2">No se encontraron vendedores</p>
@@ -167,7 +168,7 @@ export function SellersTable({ sellers }: SellersTableProps) {
                   <SellerDetailSheet key={seller.id} seller={seller}>
                     <TableRow className="border-b border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-all duration-200 group cursor-pointer">
                       {/* Vendedor */}
-                      <TableCell className="py-5">
+                      <TableCell className="py-5 min-w-[180px]">
                         <div className="flex items-center gap-3">
                           <div className="h-11 w-11 rounded-xl bg-gray-100 dark:bg-white/[0.08] flex items-center justify-center flex-shrink-0 font-semibold text-sm text-gray-900 dark:text-white/90 ring-1 ring-gray-200 dark:ring-white/10">
                             {initials}
@@ -176,8 +177,19 @@ export function SellersTable({ sellers }: SellersTableProps) {
                         </div>
                       </TableCell>
 
+                      {/* Email */}
+                      <TableCell className="py-5 min-w-[200px]">
+                        {seller.email ? (
+                          <span className="text-sm text-gray-600 dark:text-white/70 truncate block">
+                            {seller.email}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400 dark:text-white/30">-</span>
+                        )}
+                      </TableCell>
+
                       {/* Tickets Vendidos */}
-                      <TableCell className="py-5">
+                      <TableCell className="py-5 min-w-[100px]">
                         <span className="text-sm text-gray-700 dark:text-white/80 flex items-center gap-1.5">
                           <ShoppingCart className="h-3.5 w-3.5 text-gray-400 dark:text-white/50" />
                           {seller.ticketsSold.toLocaleString('es-CO')}
@@ -185,7 +197,7 @@ export function SellersTable({ sellers }: SellersTableProps) {
                       </TableCell>
 
                       {/* Ventas Efectivo */}
-                      <TableCell className="py-5">
+                      <TableCell className="py-5 min-w-[130px]">
                         <span className="text-sm text-gray-700 dark:text-white/80 flex items-center gap-1.5">
                           <Banknote className="h-3.5 w-3.5 text-gray-400 dark:text-white/50" />
                           ${seller.cashSales.toLocaleString('es-CO')}
@@ -193,7 +205,7 @@ export function SellersTable({ sellers }: SellersTableProps) {
                       </TableCell>
 
                       {/* Ventas Pasarela */}
-                      <TableCell className="py-5">
+                      <TableCell className="py-5 min-w-[130px]">
                         <span className="text-sm text-gray-700 dark:text-white/80 flex items-center gap-1.5">
                           <CreditCard className="h-3.5 w-3.5 text-gray-400 dark:text-white/50" />
                           ${seller.gatewaySales.toLocaleString('es-CO')}
@@ -201,7 +213,7 @@ export function SellersTable({ sellers }: SellersTableProps) {
                       </TableCell>
 
                       {/* Comisión */}
-                      <TableCell className="py-5">
+                      <TableCell className="py-5 min-w-[120px]">
                         {seller.commission !== null ? (
                           <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                             ${seller.commission.toLocaleString('es-CO')}
