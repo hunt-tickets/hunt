@@ -37,8 +37,6 @@ export default async function ProfilePage() {
     headers: await headers(),
   });
 
-  console.log("📋 Accounts from Better Auth:", JSON.stringify(oauthAccounts, null, 2));
-
   // Helper to decode JWT and extract user info
   const decodeIdToken = (idToken: string | null) => {
     if (!idToken) return null;
@@ -284,7 +282,9 @@ export default async function ProfilePage() {
 
         <div className="space-y-3">
           {/* Password */}
-          <PasswordManager />
+          <PasswordManager
+            hasOAuthAccounts={oauthAccounts.some(acc => acc.providerId !== "credential")}
+          />
         </div>
       </div>
 

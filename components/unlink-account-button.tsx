@@ -30,10 +30,8 @@ export function UnlinkAccountButton({
 
   const handleUnlink = useCallback(async () => {
     setIsLoading(true);
-    console.log("Unlinking:", { accountId, providerId });
 
     try {
-      // Try unlinking with just providerId first
       await authClient.unlinkAccount({
         providerId: providerId,
       });

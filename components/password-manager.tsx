@@ -15,7 +15,11 @@ import { validatePasswordStrength } from "@/lib/profile/utils";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 
-export function PasswordManager() {
+interface PasswordManagerProps {
+  hasOAuthAccounts?: boolean;
+}
+
+export function PasswordManager({ hasOAuthAccounts = false }: PasswordManagerProps) {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [isChanging, setIsChanging] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -144,8 +148,9 @@ export function PasswordManager() {
         </div>
         <div className="pl-8 space-y-2">
           <p className="text-xs text-gray-400">
-            Has iniciado sesión únicamente con OAuth (Google, etc.). No tienes
-            una contraseña configurada.
+            {hasOAuthAccounts
+              ? "Has iniciado sesión únicamente con OAuth (Google, etc.). No tienes una contraseña configurada."
+              : "No tienes una contraseña configurada para tu cuenta."}
           </p>
           <p className="text-xs text-gray-400">
             <strong>Para agregar autenticación por contraseña:</strong> Usa la
