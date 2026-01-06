@@ -78,6 +78,24 @@ export function PhoneVerificationManager({
 
     setIsSendingOTP(true);
     try {
+      // First, check if phone number is already verified by another user
+      const availabilityResponse = await fetch("/api/phone/check-availability", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phoneNumber: fullPhoneNumber }),
+      });
+
+      const availabilityResult = await availabilityResponse.json();
+
+      if (!availabilityResult.available) {
+        toast.error({
+          title: availabilityResult.error || "Este número ya está en uso",
+        });
+        return;
+      }
+
       // Better Auth phoneNumber.sendOtp()
       await authClient.phoneNumber.sendOtp({
         phoneNumber: fullPhoneNumber,
@@ -391,6 +409,24 @@ export function PhoneVerificationManager({
               setPendingPhoneNumber(fullNumber);
               setIsSendingOTP(true);
               try {
+                // Check availability first
+                const availabilityResponse = await fetch("/api/phone/check-availability", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ phoneNumber: fullNumber }),
+                });
+
+                const availabilityResult = await availabilityResponse.json();
+
+                if (!availabilityResult.available) {
+                  toast.error({
+                    title: availabilityResult.error || "Este número ya está en uso",
+                  });
+                  return;
+                }
+
                 await authClient.phoneNumber.sendOtp({
                   phoneNumber: fullNumber,
                 });

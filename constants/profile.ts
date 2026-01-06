@@ -89,6 +89,7 @@ export const ERROR_MESSAGES = {
   // Phone verification errors
   PHONE_INVALID: "El número de teléfono no es válido",
   PHONE_DELETE_FAILED: "Error al eliminar el número de teléfono",
+  PHONE_ALREADY_VERIFIED: "Este número ya está verificado por otra cuenta",
   OTP_SEND_FAILED: "Error al enviar el código. Por favor intenta de nuevo.",
   OTP_VERIFY_FAILED: "Error al verificar el código. Por favor intenta de nuevo.",
   OTP_INVALID_LENGTH: "Por favor ingresa el código de verificación de 6 dígitos",
