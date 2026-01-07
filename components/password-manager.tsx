@@ -33,7 +33,9 @@ function translateAuthError(errorMessage: string): string {
   return translations[errorMessage] || errorMessage;
 }
 
-export function PasswordManager({ hasOAuthAccounts = false }: PasswordManagerProps) {
+export function PasswordManager({
+  hasOAuthAccounts = false,
+}: PasswordManagerProps) {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [isChanging, setIsChanging] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -105,7 +107,11 @@ export function PasswordManager({ hasOAuthAccounts = false }: PasswordManagerPro
       });
 
       if (error) {
-        toast.error({ title: translateAuthError(error.message) || ERROR_MESSAGES.PASSWORD_CHANGE_FAILED });
+        toast.error({
+          title: error.message
+            ? translateAuthError(error.message)
+            : ERROR_MESSAGES.PASSWORD_CHANGE_FAILED,
+        });
       } else {
         toast.success({
           title: revokeOtherSessions

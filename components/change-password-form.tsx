@@ -80,7 +80,11 @@ export function ChangePasswordForm() {
       });
 
       if (changeError) {
-        setError(translateAuthError(changeError.message) || "Error al cambiar la contraseña");
+        setError(
+          changeError.message
+            ? translateAuthError(changeError.message)
+            : "Error al cambiar la contraseña"
+        );
       } else {
         setSuccess(true);
         setCurrentPassword("");
