@@ -20,11 +20,11 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
   const { userId, eventId, organizationId } = await params;
   const reqHeaders = await headers();
 
-  // Auth check
-  const session = await auth.api.getSession({ headers: reqHeaders });
-  if (!session || session.user.id !== userId) {
-    redirect("/sign-in");
-  }
+  // // Auth check
+  // const session = await auth.api.getSession({ headers: reqHeaders });
+  // if (!session || session.user.id !== userId) {
+  //   redirect("/sign-in");
+  // }
 
   // Verify user is a member of the organization
   const memberRecord = await db.query.member.findFirst({
@@ -48,7 +48,9 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
   });
 
   if (!canManageEvents?.success) {
-    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`);
+    redirect(
+      `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`
+    );
   }
 
   const supabase = await createClient();
@@ -235,7 +237,10 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
           ticketsAnalytics={ticketTypesAnalytics}
           ticketTypes={ticketTypesList}
           variableFee={parseFloat(event.variable_fee || "0")}
-          eventType={(event.type as "single" | "multi_day" | "recurring" | "slots") || "single"}
+          eventType={
+            (event.type as "single" | "multi_day" | "recurring" | "slots") ||
+            "single"
+          }
           eventDays={eventDays}
         />
       </div>

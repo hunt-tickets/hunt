@@ -14,10 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { CreateTicketTypeDialog } from "@/components/create-ticket-type-dialog";
 import { EditTicketSheet } from "@/components/edit-ticket-sheet";
-import {
-  ChannelSalesChart,
-  TicketRevenueDistributionChart,
-} from "@/components/event-charts";
 import { updateTicketTypeActive } from "@/actions/tickets";
 import { cn } from "@/lib/utils";
 
@@ -555,115 +551,6 @@ export function EventTicketsContent({
           </div>
         );
       })()}
-
-      {/* Analytics Overview */}
-      {ticketsAnalytics &&
-        Object.keys(ticketsAnalytics).length > 0 &&
-        selectedTicketType !== "orphan_qrs" &&
-        (() => {
-          // Filtrar tickets según el tipo seleccionado (already filtered by day)
-          const filteredTicketsForAnalytics =
-            selectedTicketType === "all"
-              ? ticketsFilteredByDay
-              : ticketsFilteredByDay.filter(
-                  (t) => t.ticket_type?.id === selectedTicketType
-                );
-
-          // Calcular totales solo para los tickets filtrados
-          const totals = filteredTicketsForAnalytics.reduce(
-            (acc, ticket) => {
-              const analytics = ticketsAnalytics[ticket.id];
-              if (!analytics) return acc;
-              return {
-                total: acc.total + analytics.total.quantity,
-                revenue: acc.revenue + analytics.total.total,
-                app: acc.app + analytics.app.quantity,
-                web: acc.web + analytics.web.quantity,
-                cash: acc.cash + analytics.cash.quantity,
-              };
-            },
-            { total: 0, revenue: 0, app: 0, web: 0, cash: 0 }
-          );
-
-          // Distribución de ingresos por ticket (ordenado por recaudo) - Solo tickets filtrados
-          const revenueTickets = filteredTicketsForAnalytics
-            .map((ticket) => ({
-              ...ticket,
-              analytics: ticketsAnalytics[ticket.id],
-            }))
-            .filter((t) => t.analytics)
-            .sort((a, b) => b.analytics.total.total - a.analytics.total.total);
-
-          // Si no hay datos para mostrar, no renderizar analytics
-          if (totals.total === 0) return null;
-
-          return (
-            <div className="mb-6 space-y-4">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-                  <div className="text-xs text-white/40 mb-1">
-                    Total Vendidos
-                  </div>
-                  <div className="text-2xl font-bold">{totals.total}</div>
-                </div>
-                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-                  <div className="text-xs text-white/40 mb-1">
-                    Recaudo Total
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {formatCurrency(totals.revenue)}
-                  </div>
-                </div>
-                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-                  <div className="text-xs text-white/40 mb-1">
-                    Ticket Promedio
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {formatCurrency(
-                      totals.total > 0 ? totals.revenue / totals.total : 0
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                {/* Ventas por Canal */}
-                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.01]">
-                  <h4 className="text-sm font-semibold mb-4">
-                    Ventas por Canal
-                  </h4>
-                  <div className="h-[350px]">
-                    <ChannelSalesChart
-                      app={totals.app}
-                      web={totals.web}
-                      cash={totals.cash}
-                    />
-                  </div>
-                </div>
-
-                {/* Distribución de Ingresos */}
-                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.01]">
-                  <h4 className="text-sm font-semibold mb-4">
-                    Distribución de Ingresos por Ticket
-                  </h4>
-                  <div className="h-[350px]">
-                    <TicketRevenueDistributionChart
-                      tickets={revenueTickets.map((ticket) => ({
-                        name: ticket.name,
-                        revenue: ticket.analytics.total.total,
-                        quantity: ticket.analytics.total.quantity,
-                        percentage:
-                          (ticket.analytics.total.total / totals.revenue) * 100,
-                        color: ticket.hex || undefined,
-                      }))}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
       {(() => {
         // Handle QR Huérfanos tab

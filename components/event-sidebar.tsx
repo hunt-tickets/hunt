@@ -65,7 +65,7 @@ const menuItems = [
     requiredRoles: ["owner", "administrator"],
   },
   {
-    title: "Vender",
+    title: "Vender en Efectivo",
     icon: Banknote,
     href: "/vender",
     description: "Venta en efectivo",
