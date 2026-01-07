@@ -2,11 +2,33 @@
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { User, Ticket, Building2 } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 const ProfileTabs = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const navRef = useRef<HTMLDivElement>(null);
+
+  // Fix for Safari's dynamic viewport
+  useEffect(() => {
+    const updatePosition = () => {
+      if (navRef.current && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        const vh = window.visualViewport?.height || window.innerHeight;
+        navRef.current.style.bottom = `${window.innerHeight - vh}px`;
+      }
+    };
+
+    updatePosition();
+
+    window.visualViewport?.addEventListener('resize', updatePosition);
+    window.visualViewport?.addEventListener('scroll', updatePosition);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updatePosition);
+      window.visualViewport?.removeEventListener('scroll', updatePosition);
+    };
+  }, []);
 
   // Hide tabs if in administrador section
   const isAdministrador = pathname.includes("/administrador");
@@ -67,11 +89,11 @@ const ProfileTabs = () => {
 
       {/* Mobile: Fixed bottom navigation */}
       <div
+        ref={navRef}
         data-profile-menu-bar
-        className="md:hidden fixed bottom-0 left-0 right-0 w-full bg-background/95 backdrop-blur-md border-t border-gray-200 dark:border-[#303030] z-50 grid grid-cols-3"
+        className="md:hidden fixed bottom-0 left-0 right-0 w-full bg-background/95 backdrop-blur-md border-t border-gray-200 dark:border-[#303030] z-50 grid grid-cols-3 pb-3 pt-3 transition-all duration-100"
         style={{
-          paddingTop: '12px',
-          paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))'
+          paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))'
         }}
       >
         {tabs.map((tab) => {
