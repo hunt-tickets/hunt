@@ -232,15 +232,14 @@ export async function POST(request: NextRequest) {
     const order = orderData[0];
     const ticketsCount = order.ticket_ids?.length || 0;
 
-    // 9. Send welcome email to new users
+    // 9. Send welcome email to new users (fire-and-forget)
     if (isNewUser) {
       const eventName = event.name || "un evento";
 
-      // Send welcome email (don't await to avoid blocking response)
+      console.log(`📧 [CASH SALE] Sending welcome email to ${buyer.email}...`);
       resend.emails
         .send({
-          from:
-            process.env.FROM_EMAIL || "Hunt Tickets <noreply@hunt-tickets.com>",
+          from: process.env.FROM_EMAIL!,
           to: buyer.email,
           subject: `¡Tienes ${ticketsCount} ticket(s) para ${eventName}!`,
           html: `
@@ -261,10 +260,12 @@ export async function POST(request: NextRequest) {
           </div>
         `,
         })
-        .then(() => console.log(`✅ Welcome email sent to ${buyer.email}`))
-        .catch((err) =>
-          console.error(`❌ Failed to send welcome email:`, err)
-        );
+        .then((result) => {
+          console.log(`✅ [CASH SALE] Welcome email sent to ${buyer.email}. Resend ID: ${result.data?.id}`);
+        })
+        .catch((err) => {
+          console.error(`❌ [CASH SALE] Failed to send welcome email to ${buyer.email}:`, err);
+        });
     }
 
     return NextResponse.json({

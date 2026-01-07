@@ -68,7 +68,7 @@ export default function RootLayout({
               className: "!z-[9999]",
               unstyled: true,
               classNames: {
-                toast: "w-full max-w-md",
+                toast: "w-[calc(100%-2rem)] mx-4 sm:w-full sm:max-w-md sm:mx-0",
                 title: "text-sm font-medium",
                 description: "text-sm",
               },
