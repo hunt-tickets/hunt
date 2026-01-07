@@ -17,6 +17,9 @@ const translateError = (errorMessage: string): string => {
   if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("Invalid OTP")) {
     return "Código de verificación inválido";
   }
+  if (errorMessage.includes("Invalid password")) {
+    return "Contraseña incorrecta";
+  }
   if (errorMessage.includes("Email not confirmed")) {
     return "Correo electrónico no confirmado";
   }

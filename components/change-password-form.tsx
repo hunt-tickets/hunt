@@ -9,6 +9,20 @@ import { Check, X, Lock, Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { authClient } from "@/lib/auth-client";
 
+// Translate Better Auth error messages to Spanish
+function translateAuthError(errorMessage: string): string {
+  const translations: Record<string, string> = {
+    "Invalid password": "Contraseña incorrecta",
+    "Password is too short": "La contraseña es muy corta",
+    "Password is required": "La contraseña es requerida",
+    "Current password is required": "La contraseña actual es requerida",
+    "New password is required": "La nueva contraseña es requerida",
+    "Passwords do not match": "Las contraseñas no coinciden",
+  };
+
+  return translations[errorMessage] || errorMessage;
+}
+
 export function ChangePasswordForm() {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -66,7 +80,7 @@ export function ChangePasswordForm() {
       });
 
       if (changeError) {
-        setError(changeError.message || "Error al cambiar la contraseña");
+        setError(translateAuthError(changeError.message) || "Error al cambiar la contraseña");
       } else {
         setSuccess(true);
         setCurrentPassword("");

@@ -19,6 +19,20 @@ interface PasswordManagerProps {
   hasOAuthAccounts?: boolean;
 }
 
+// Translate Better Auth error messages to Spanish
+function translateAuthError(errorMessage: string): string {
+  const translations: Record<string, string> = {
+    "Invalid password": "Contraseña incorrecta",
+    "Password is too short": "La contraseña es muy corta",
+    "Password is required": "La contraseña es requerida",
+    "Current password is required": "La contraseña actual es requerida",
+    "New password is required": "La nueva contraseña es requerida",
+    "Passwords do not match": "Las contraseñas no coinciden",
+  };
+
+  return translations[errorMessage] || errorMessage;
+}
+
 export function PasswordManager({ hasOAuthAccounts = false }: PasswordManagerProps) {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [isChanging, setIsChanging] = useState(false);
@@ -91,7 +105,7 @@ export function PasswordManager({ hasOAuthAccounts = false }: PasswordManagerPro
       });
 
       if (error) {
-        toast.error({ title: error.message || ERROR_MESSAGES.PASSWORD_CHANGE_FAILED });
+        toast.error({ title: translateAuthError(error.message) || ERROR_MESSAGES.PASSWORD_CHANGE_FAILED });
       } else {
         toast.success({
           title: revokeOtherSessions
