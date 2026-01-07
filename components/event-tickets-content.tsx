@@ -164,11 +164,12 @@ export function EventTicketsContent({
             size="sm"
             variant="outline"
             className="rounded-lg"
-            onClick={() =>
-              router.push(
-                `/profile/${userId}/administrador/event/${eventId}/mapa`
-              )
-            }
+            disabled
+            // onClick={() =>
+            //   router.push(
+            //     `/profile/${userId}/administrador/event/${eventId}/mapa`
+            //   )
+            // }
           >
             <Map className="h-4 w-4 mr-2" />
             Mapa
