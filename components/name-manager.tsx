@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState, useEffect, useCallback, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { updateUserName } from "@/actions/profile";
@@ -51,7 +51,7 @@ export function NameManager({ nombres, apellidos }: NameManagerProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState(nombres || "");
   const [lastName, setLastName] = useState(apellidos || "");
-  const [state, formAction] = useFormState(updateUserName, {});
+  const [state, formAction] = useActionState(updateUserName, {});
 
   // Check if there are any changes
   const hasChanges =

@@ -265,7 +265,7 @@ export function PhoneVerificationManager({
                 inputMode="numeric"
                 maxLength={1}
                 autoComplete="off"
-                className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] hover:border-gray-300 dark:hover:border-[#3a3a3a] focus:border-primary/50 focus:outline-none transition-colors"
+                className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] focus:border-primary/50 focus:outline-none transition-colors"
                 value={digit}
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
@@ -487,28 +487,32 @@ export function PhoneVerificationManager({
 
       <div className="flex gap-2">
         {/* Country Code Selector */}
-        <select
-          value={countryCode}
-          onChange={(e) => setCountryCode(e.target.value)}
-          className="w-32 h-10 px-2 rounded-lg border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
-          disabled={isSendingOTP}
-        >
-          {LATAM_COUNTRY_CODES.map((country) => (
-            <option key={country.code} value={country.code}>
-              {country.flag} {country.code}
-            </option>
-          ))}
-        </select>
+        <div className="relative w-32 p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+          <select
+            value={countryCode}
+            onChange={(e) => setCountryCode(e.target.value)}
+            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 outline-none"
+            disabled={isSendingOTP}
+          >
+            {LATAM_COUNTRY_CODES.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.flag} {country.code}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* Phone Number Input */}
-        <input
-          type="tel"
-          value={phoneInput}
-          onChange={(e) => setPhoneInput(e.target.value.replace(/\D/g, ""))}
-          placeholder="300 123 4567"
-          className="flex-1 h-10 px-3 rounded-lg border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#0a0a0a] text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
-          disabled={isSendingOTP}
-        />
+        <div className="relative flex-1 p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+          <input
+            type="tel"
+            value={phoneInput}
+            onChange={(e) => setPhoneInput(e.target.value.replace(/\D/g, ""))}
+            placeholder="300 123 4567"
+            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 outline-none"
+            disabled={isSendingOTP}
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 mt-3">

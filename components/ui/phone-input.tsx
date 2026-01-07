@@ -19,7 +19,7 @@ const InputComponent = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HT
 InputComponent.displayName = 'PhoneInputComponent';
 
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }) => {
+  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }, ref) => {
     return (
       <div className="w-full">
         <div className="rounded-2xl border dark:border-[#303030] bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-primary/50 focus-within:bg-primary/5 p-4">

@@ -52,6 +52,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 8,
     password: {
       hash: async (password) => {
         return await bcrypt.hash(password, 10);

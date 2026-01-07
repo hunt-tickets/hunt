@@ -177,7 +177,7 @@ export function getFullName(
  * @returns Object with isValid flag and error message if any
  * @example
  * validatePasswordStrength("abc123") // { isValid: false, error: "..." }
- * validatePasswordStrength("SecurePass123!") // { isValid: true }
+ * validatePasswordStrength("password123") // { isValid: true }
  */
 export function validatePasswordStrength(password: string): {
   isValid: boolean;
@@ -187,33 +187,6 @@ export function validatePasswordStrength(password: string): {
     return {
       isValid: false,
       error: `La contraseña debe tener al menos ${VALIDATION.MIN_PASSWORD_LENGTH} caracteres`,
-    };
-  }
-
-  // Check for at least one uppercase, one lowercase, and one number
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-
-  if (!hasUpperCase || !hasLowerCase || !hasNumber) {
-    return {
-      isValid: false,
-      error: "La contraseña debe contener mayúsculas, minúsculas y números",
-    };
-  }
-
-  // Check against common passwords (simple check)
-  const commonPasswords = [
-    "password",
-    "12345678",
-    "password123",
-    "qwerty",
-    "abc123",
-  ];
-  if (commonPasswords.includes(password.toLowerCase())) {
-    return {
-      isValid: false,
-      error: "Esta contraseña es demasiado común",
     };
   }
 

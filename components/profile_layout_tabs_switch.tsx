@@ -12,21 +12,40 @@ const ProfileTabs = () => {
 
   // Fix for Safari's dynamic viewport
   useEffect(() => {
+    // Only run on iOS devices
+    if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) return;
+
+    let rafId: number;
+    let lastBottom = -1;
+
     const updatePosition = () => {
-      if (navRef.current && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      // Cancel any pending frame
+      if (rafId) cancelAnimationFrame(rafId);
+
+      // Use requestAnimationFrame to batch updates with browser paint cycle
+      rafId = requestAnimationFrame(() => {
+        if (!navRef.current) return;
+
         const vh = window.visualViewport?.height || window.innerHeight;
-        navRef.current.style.bottom = `${window.innerHeight - vh}px`;
-      }
+        const newBottom = window.innerHeight - vh;
+
+        // Only update if value actually changed (avoid unnecessary reflows)
+        if (newBottom !== lastBottom) {
+          navRef.current.style.bottom = `${newBottom}px`;
+          lastBottom = newBottom;
+        }
+      });
     };
 
     updatePosition();
 
+    // Only listen to resize (fires when toolbar shows/hides)
+    // Removed 'scroll' listener - resize is sufficient
     window.visualViewport?.addEventListener('resize', updatePosition);
-    window.visualViewport?.addEventListener('scroll', updatePosition);
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.visualViewport?.removeEventListener('resize', updatePosition);
-      window.visualViewport?.removeEventListener('scroll', updatePosition);
     };
   }, []);
 
