@@ -66,7 +66,7 @@ const ProfileTabs = () => {
       </div>
 
       {/* Mobile: Fixed bottom navigation */}
-      <div data-profile-menu-bar className="md:hidden fixed bottom-0 left-0 right-0 w-full h-[72px] bg-background/95 backdrop-blur-md border-t border-gray-200 dark:border-[#303030] z-50 grid grid-cols-3 safe-area-inset-bottom">
+      <div data-profile-menu-bar className="md:hidden fixed left-0 right-0 w-full bg-background/95 backdrop-blur-md border-t border-gray-200 dark:border-[#303030] z-50 grid grid-cols-3 safe-bottom" style={{ bottom: 'env(safe-area-inset-bottom, 0px)', paddingTop: '12px', paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))' }}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.value;

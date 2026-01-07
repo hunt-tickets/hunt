@@ -17,6 +17,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover", // Support for iPhone notch and dynamic UI
 };
 
 export const metadata: Metadata = {
@@ -64,8 +65,8 @@ export default function RootLayout({
           <Toaster
             position="top-center"
             expand={false}
+            className="!z-[99999]"
             toastOptions={{
-              className: "!z-[9999]",
               unstyled: true,
               classNames: {
                 toast: "w-[calc(100%-2rem)] mx-4 sm:w-full sm:max-w-md sm:mx-0",
