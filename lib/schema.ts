@@ -9,9 +9,9 @@ import {
   jsonb,
   foreignKey,
   decimal,
-  // varchar,
   pgEnum,
   integer,
+  // varchar,
 } from "drizzle-orm/pg-core";
 import { sql, type InferSelectModel, type InferInsertModel } from "drizzle-orm";
 
@@ -145,6 +145,11 @@ export const ticketStatus = pgEnum("ticket_status", [
   "cancelled",
   "transferred",
 ]);
+export const eventLifecycleStatus = pgEnum("event_lifecycle_status", [
+  "active",
+  "cancelled",
+  "archived",
+]);
 export const eventCategory = pgEnum("event_category", [
   "fiestas",
   "conciertos",
@@ -161,6 +166,11 @@ export const eventType = pgEnum("event_type", [
   "recurring",
   "slots",
 ]);
+
+/**
+ * ->>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ * ->>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ */
 
 // Countries table
 export const countries = pgTable(
@@ -191,6 +201,10 @@ export const documentType = pgTable(
     }),
   ]
 );
+
+/**
+ * Auth
+ */
 export const user = pgTable(
   "user",
   {
@@ -229,6 +243,7 @@ export const user = pgTable(
     nit: text("nit"),
   },
   (table) => [
+    // The UNIQUE constraint ensures that all values in a column are different.
     unique("user_email_key").on(table.email),
     unique("user_phoneNumber_key").on(table.phoneNumber),
     foreignKey({
@@ -328,6 +343,10 @@ export const passkey = pgTable(
     unique("passkey_credentialID_key").on(table.credentialID),
   ]
 );
+
+/**
+ * Organization
+ */
 export const organization = pgTable(
   "organization",
   {
@@ -378,7 +397,6 @@ export const member = pgTable(
     }).onDelete("cascade"),
   ]
 );
-
 export const invitation = pgTable(
   "invitation",
   {
@@ -406,7 +424,6 @@ export const invitation = pgTable(
     }).onDelete("cascade"),
   ]
 );
-
 // Payment processor account linking (OAuth-based)
 export const paymentProcessorAccount = pgTable("payment_processor_account", {
   id: text("id").primaryKey(),
@@ -475,7 +492,6 @@ export const legacyVenues = pgTable(
   },
   (table) => [index("idx_legacy_venues_name").on(table.name)]
 );
-
 // Legacy Events table - Archive of old events without organization link
 export const legacyEvents = pgTable(
   "legacy_events",
@@ -533,7 +549,9 @@ export const legacyEvents = pgTable(
   ]
 );
 
-// Venues table
+/**
+ * Events
+ */
 export const venues = pgTable(
   "venues",
   {
@@ -581,7 +599,6 @@ export const venues = pgTable(
   },
   (table) => [index("idx_venues_name").on(table.name)]
 );
-
 // Events table - NEW events linked to organizations
 export const events = pgTable(
   "events",
@@ -641,6 +658,17 @@ export const events = pgTable(
     // guestEmail: text("guest_email"),
     // guestName: text("guest_name"),
     faqs: jsonb("faqs").$type<Array<Record<string, unknown>>>(),
+    // lifecycle management
+    lifecycleStatus: eventLifecycleStatus("lifecycle_status")
+      .default("active")
+      .notNull(),
+    cancellationReason: text("cancellation_reason"),
+    cancelledBy: text("cancelled_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }), // Soft delete, to avoid losing important historical financial data
+    modificationLocked: boolean("modification_locked").default(false),
   },
   (table) => [
     // Indexes for query performance (matching your original schema)
@@ -655,6 +683,15 @@ export const events = pgTable(
       table.status,
       table.date
     ),
+    // Indexes for lifecycle management
+    // Create index for soft-delete queries (only show non-deleted events)
+    //  CREATE INDEX IF NOT EXISTS idx_events_lifecycle_status
+    //    ON events(lifecycle_status) WHERE deleted_at IS NULL;
+    //  CREATE INDEX IF NOT EXISTS idx_events_deleted
+    //    ON events(deleted_at) WHERE deleted_at IS NOT NULL;
+    index("idx_events_lifecycle_status").on(table.lifecycleStatus),
+    index("idx_events_cancelled").on(table.cancelledAt),
+    index("idx_events_deleted").on(table.deletedAt),
   ]
 );
 
@@ -665,7 +702,7 @@ export const eventDays = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     eventId: uuid("event_id")
       .notNull()
-      .references(() => events.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "restrict" }), // CRITICAL: Prevent deletion if event days exist
     date: timestamp("date", { withTimezone: true }).notNull(),
     endDate: timestamp("end_date", { withTimezone: true }),
     name: text("name"), // "Pre-Party", "Día 1", "Viernes"
@@ -687,7 +724,7 @@ export const ticketTypes = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     eventId: uuid("event_id")
       .notNull()
-      .references(() => events.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "restrict" }), // CRITICAL: Prevent deletion if ticket types exist
     eventDayId: uuid("event_day_id").references(() => eventDays.id, {
       onDelete: "set null",
     }), // null = all days
@@ -747,7 +784,7 @@ export const reservations = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     eventId: uuid("event_id")
       .notNull()
-      .references(() => events.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "restrict" }), // CRITICAL: Prevent deletion if reservations exist
     totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     status: reservationStatus("status").notNull().default("active"),
@@ -798,7 +835,7 @@ export const orders = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     eventId: uuid("event_id")
       .notNull()
-      .references(() => events.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "restrict" }), // CRITICAL: Prevent deletion if orders exist - users would lose money!
     totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
     currency: text("currency").notNull().default("COP"),
     marketplaceFee: decimal("marketplace_fee", { precision: 10, scale: 2 }), // Hunt's fee
@@ -885,23 +922,52 @@ export const tickets = pgTable(
   ]
 );
 
+// Event audit log (track all administrative actions on events)
+export const eventAuditLog = pgTable(
+  "event_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    action: text("action").notNull(), // 'cancelled', 'archived', 'modified', 'created', 'published'
+    performedBy: text("performed_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "set null" }),
+    reason: text("reason"), // Cancellation reason, modification reason, etc
+    metadata: jsonb("metadata"), // Additional context (what fields changed, impact stats, etc)
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_event_audit_log_event").on(table.eventId),
+    index("idx_event_audit_log_action").on(table.action),
+    index("idx_event_audit_log_created_at").on(table.createdAt),
+  ]
+);
+
 // Email logs (audit trail for all emails sent)
 export const emailLogs = pgTable(
   "email_logs",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    orderId: uuid("order_id")
-      .notNull()
-      .references(() => orders.id, { onDelete: "cascade" }),
-    emailType: text("email_type").notNull(), // 'purchase_confirmation', 'ticket_delivery', 'refund', etc
+    orderId: uuid("order_id").references(() => orders.id, {
+      onDelete: "cascade",
+    }), // Optional - not all emails are order-related
+    eventId: uuid("event_id").references(() => events.id, {
+      onDelete: "cascade",
+    }), // For event cancellation/modification notifications
+    emailType: text("email_type").notNull(), // 'purchase_confirmation', 'ticket_delivery', 'refund', 'event_cancelled', 'event_modified', etc
     recipientEmail: text("recipient_email").notNull(),
     emailServiceId: text("email_service_id"), // Resend ID
     status: text("status").notNull().default("sent"), // 'sent', 'failed', 'bounced', 'delivered'
-    metadata: jsonb("metadata"), // Additional data (PDF URL, QR URLs, etc)
+    metadata: jsonb("metadata"), // Additional data (PDF URL, QR URLs, cancellation details, etc)
     sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index("idx_email_logs_order").on(table.orderId),
+    index("idx_email_logs_event").on(table.eventId),
     index("idx_email_logs_recipient").on(table.recipientEmail),
     index("idx_email_logs_service_id").on(table.emailServiceId),
   ]
@@ -931,6 +997,7 @@ export const schema = {
   orders,
   orderItems,
   tickets,
+  eventAuditLog,
   emailLogs,
 };
 
@@ -959,6 +1026,8 @@ export type Member = InferSelectModel<typeof member>;
 export type NewMember = InferInsertModel<typeof member>;
 export type EmailLog = InferSelectModel<typeof emailLogs>;
 export type NewEmailLog = InferInsertModel<typeof emailLogs>;
+export type EventAuditLog = InferSelectModel<typeof eventAuditLog>;
+export type NewEventAuditLog = InferInsertModel<typeof eventAuditLog>;
 export type Invitation = InferSelectModel<typeof invitation>;
 export type NewInvitation = InferInsertModel<typeof invitation>;
 export type PaymentProcessorAccount = InferSelectModel<

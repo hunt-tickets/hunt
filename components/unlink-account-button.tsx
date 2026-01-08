@@ -21,7 +21,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 export function UnlinkAccountButton({
-  accountId,
+  // accountId,
   providerId,
   providerName,
 }: UnlinkAccountButtonProps) {
@@ -46,7 +46,7 @@ export function UnlinkAccountButton({
     } finally {
       setIsLoading(false);
     }
-  }, [accountId, providerId, router]);
+  }, [providerId, router]);
 
   return (
     <AlertDialog>

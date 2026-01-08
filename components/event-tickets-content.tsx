@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Ticket,
@@ -84,8 +84,8 @@ export function EventTicketsContent({
   eventDays = [],
 }: EventTicketsContentProps) {
   const router = useRouter();
-  const params = useParams();
-  const userId = params.userId as string;
+  // const params = useParams();
+  // const userId = params.userId as string;
 
   const [selectedTicketType, setSelectedTicketType] = useState<string>("all");
   const [selectedDay, setSelectedDay] = useState<string>("all"); // "all" or day id
