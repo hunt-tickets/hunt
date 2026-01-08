@@ -17,6 +17,7 @@ import { MercadoPagoConfig, Preference } from "mercadopago";
 import { db } from "@/lib/drizzle";
 import { paymentProcessorAccount, events } from "@/lib/schema";
 import { eq, and, sql } from "drizzle-orm";
+import { translateError } from "@/lib/error-messages";
 
 // ============================================================================
 // Types
@@ -207,9 +208,10 @@ export async function checkoutAction(
   } catch (error: any) {
     console.error("Checkout error:", error);
 
+    const errorMessage = error.message || "Error al procesar el checkout";
     return {
       success: false,
-      error: error.message || "Error al procesar el checkout",
+      error: translateError(errorMessage),
     };
   }
 }

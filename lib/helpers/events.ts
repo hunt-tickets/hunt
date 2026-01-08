@@ -366,6 +366,7 @@ export async function getEventsWithVenue(
       .where(
         and(
           eq(events.status, true),
+          eq(events.lifecycleStatus, "active"), // Extra safety
           or(gte(events.endDate, now), isNull(events.endDate))
         )
       )

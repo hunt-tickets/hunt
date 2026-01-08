@@ -54,20 +54,17 @@ export async function POST(request: NextRequest) {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
-
     if (!session?.user) {
       return NextResponse.json(
         { success: false, error: "Debes iniciar sesión para continuar" },
         { status: 401 }
       );
     }
-
     const userId = session.user.id;
 
     // 2. Parse request body
     const body = await request.json();
     const { eventId, items } = body as { eventId: string; items: CartItem[] };
-
     // 3. Validate cart items
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -76,12 +73,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Get event's organization ID
+    // 4. Get (validate) event's organization ID
     const event = await db.query.events.findFirst({
-      where: eq(events.id, eventId),
+      where: and(eq(events.id, eventId), eq(events.lifecycleStatus, "active")),
       columns: { organizationId: true },
     });
-
     if (!event) {
       return NextResponse.json(
         { success: false, error: "Evento no encontrado" },
@@ -105,13 +101,15 @@ export async function POST(request: NextRequest) {
     // 8. Fetch ticket types to get prices and names
     const ticketTypeIds = items.map((item) => item.ticket_type_id);
     const ticketTypesData = await db
-      .select({ id: ticketTypes.id, name: ticketTypes.name, price: ticketTypes.price })
+      .select({
+        id: ticketTypes.id,
+        name: ticketTypes.name,
+        price: ticketTypes.price,
+      })
       .from(ticketTypes)
       .where(inArray(ticketTypes.id, ticketTypeIds));
 
-    const ticketTypeMap = new Map(
-      ticketTypesData.map((tt) => [tt.id, tt])
-    );
+    const ticketTypeMap = new Map(ticketTypesData.map((tt) => [tt.id, tt]));
 
     // 9. Build preference items with actual prices
     const preferenceItems = items.map((item) => {

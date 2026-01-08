@@ -5,7 +5,7 @@ import { defaultStatements } from "better-auth/plugins/organization/access";
 const statement = {
   ...defaultStatements,
   // Event management
-  event: ["create", "update", "delete", "sell"],
+  event: ["create", "update", "delete", "sell", "cancel", "archive"],
   // Organization dashboard/analytics access
   dashboard: ["view"],
   analytics: ["view"],
@@ -27,13 +27,13 @@ const seller = ac.newRole({
   payment: [],
 });
 
-// Administrator role - same as owner except cannot promote members to owner
+// Administrator role - same as owner (including destructive operations on Events) except cannot promote members to owner
 // (owner promotion restriction is handled in application logic)
 const administrator = ac.newRole({
   invitation: ["create", "cancel"],
   member: ["create", "update", "delete"],
   organization: ["update"],
-  event: ["create", "update", "delete", "sell"],
+  event: ["create", "update", "delete", "sell", "cancel", "archive"],
   dashboard: ["view"],
   analytics: ["view"],
   payment: ["manage"],
@@ -44,7 +44,7 @@ const owner = ac.newRole({
   invitation: ["create", "cancel"],
   member: ["create", "update", "delete"],
   organization: ["update", "delete"],
-  event: ["create", "update", "delete", "sell"],
+  event: ["create", "update", "delete", "sell", "cancel", "archive"],
   dashboard: ["view"],
   analytics: ["view"],
   payment: ["manage"],

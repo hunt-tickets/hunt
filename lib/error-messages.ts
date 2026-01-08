@@ -39,6 +39,10 @@ const errorPatterns: Array<{
   translate: (match: RegExpMatchArray) => string;
 }> = [
   {
+    pattern: /Event not found or inactive: [a-f0-9-]+/i,
+    translate: () => "Evento no encontrado o no disponible",
+  },
+  {
     pattern: /Maximum order quantity for "(.+)" is (\d+)/,
     translate: (match) =>
       `La cantidad máxima para "${match[1]}" es ${match[2]}`,

@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreVertical, FileEdit, Trash2, Copy, Archive } from "lucide-react";
+import { MoreVertical, Trash2, Archive } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,16 +14,6 @@ interface EventOptionsMenuProps {
 }
 
 export function EventOptionsMenu({ eventId }: EventOptionsMenuProps) {
-  const handleEdit = () => {
-    // TODO: Navigate to edit event page or open edit modal
-    console.log("Edit event", eventId);
-  };
-
-  const handleDuplicate = () => {
-    // TODO: Duplicate event
-    console.log("Duplicate event", eventId);
-  };
-
   const handleArchive = () => {
     // TODO: Archive event
     console.log("Archive event", eventId);
@@ -45,22 +35,17 @@ export function EventOptionsMenu({ eventId }: EventOptionsMenuProps) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={handleEdit}>
-          <FileEdit className="mr-2 h-4 w-4" />
-          <span>Editar evento</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDuplicate}>
-          <Copy className="mr-2 h-4 w-4" />
-          <span>Duplicar</span>
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleArchive}>
           <Archive className="mr-2 h-4 w-4" />
-          <span>Archivar</span>
+          <span>Pausar/archivar</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleDelete} className="text-red-600 dark:text-red-400">
+        <DropdownMenuItem
+          onClick={handleDelete}
+          className="text-red-600 dark:text-red-400"
+        >
           <Trash2 className="mr-2 h-4 w-4" />
-          <span>Eliminar</span>
+          <span>Cancelar</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
