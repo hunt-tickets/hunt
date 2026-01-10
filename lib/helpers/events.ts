@@ -760,6 +760,40 @@ export async function toggleEventStatusDb(eventId: string, status: boolean) {
 }
 
 /**
+ * Toggle event cash sales allowance (database operation only)
+ * @param eventId - The UUID of the event
+ * @param cashEnabled - The new cash sales status (true = allowed, false = blocked)
+ * @returns Success/error response with status
+ */
+export async function toggleEventCashSalesDb(
+  eventId: string,
+  cashEnabled: boolean
+) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("events")
+    .update({ cash: cashEnabled })
+    .eq("id", eventId);
+
+  if (error) {
+    console.error("Error toggling event cash sales:", error);
+    return {
+      success: false,
+      message: "Error al cambiar el estado de ventas en efectivo",
+    };
+  }
+
+  return {
+    success: true,
+    message: cashEnabled
+      ? "Ventas en efectivo permitidas"
+      : "Ventas en efectivo bloqueadas",
+    cashEnabled,
+  };
+}
+
+/**
  * Cancel an event with proper validation and refund workflow initiation
  *
  * ⚠️ WARNING: This initiates event cancellation (PERMANENT process)

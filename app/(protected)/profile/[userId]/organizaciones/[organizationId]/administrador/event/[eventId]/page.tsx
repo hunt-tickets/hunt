@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { EventDashboardTabs } from "@/components/event-dashboard-tabs";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { EventStatusToggle } from "@/components/event-status-toggle";
+import { EventCashSalesToggle } from "@/components/event-cash-sales-toggle";
 import { EventOptionsMenu } from "@/components/event-options-menu";
 import { createClient } from "@/lib/supabase/server";
 import { member } from "@/lib/schema";
@@ -89,6 +90,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       id,
       name,
       status,
+      cash,
       flyer,
       date,
       city,
@@ -347,16 +349,22 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
                 Panel de Administración
               </p>
             </div>
-            <EventStatusToggle
-              eventId={eventId}
-              initialStatus={event.status ?? false}
-              disabled={!canPublish || isCancellationPending}
-              disabledReason={
-                isCancellationPending
-                  ? "No se puede cambiar el estado durante la cancelación"
-                  : "Completa la configuración para publicar"
-              }
-            />
+            <div className="flex items-center gap-3">
+              <EventStatusToggle
+                eventId={eventId}
+                initialStatus={event.status ?? false}
+                disabled={!canPublish || isCancellationPending}
+                disabledReason={
+                  isCancellationPending
+                    ? "No se puede cambiar el estado durante la cancelación"
+                    : "Completa la configuración para publicar"
+                }
+              />
+              <EventCashSalesToggle
+                eventId={eventId}
+                initialCashEnabled={event.cash ?? false}
+              />
+            </div>
           </div>
 
           <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
@@ -404,6 +412,10 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
                   ? "No se puede cambiar el estado durante la cancelación"
                   : "Completa la fecha y crea al menos una entrada para publicar"
               }
+            />
+            <EventCashSalesToggle
+              eventId={eventId}
+              initialCashEnabled={event.cash ?? false}
             />
             <EventOptionsMenu eventId={eventId} />
           </div>
