@@ -81,6 +81,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   const supabase = await createClient();
 
   // Single fetch: event with ticket_types and orders with order_items
+  // Exclude cancelled/deleted events
   const { data: event } = await supabase
     .from("events")
     .select(
@@ -92,6 +93,8 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       date,
       city,
       venue_id,
+      lifecycle_status,
+      deleted_at,
       ticket_types (*),
       orders (
         *,
@@ -100,6 +103,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     `
     )
     .eq("id", eventId)
+    .is("deleted_at", null) // Only fetch non-deleted events
     .single();
 
   if (!event) {

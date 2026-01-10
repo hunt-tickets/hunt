@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { notFound } from "next/navigation";
 import { EventLayoutWrapper } from "@/components/event-layout-wrapper";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
@@ -18,12 +19,18 @@ const EventLayout = async ({ children, params }: EventLayoutProps) => {
   const { userId, organizationId, eventId } = await params;
   const supabase = await createClient();
 
-  // Fetch event name and type
+  // Fetch event name and type (exclude cancelled/deleted events)
   const { data: event } = await supabase
     .from("events")
-    .select("name, type")
+    .select("name, type, lifecycle_status, deleted_at")
     .eq("id", eventId)
+    .is("deleted_at", null) // Only fetch non-deleted events
     .single();
+
+  // If event is deleted/cancelled, it should not be accessible
+  if (!event) {
+    return notFound();
+  }
 
   const eventName = event?.name || "Evento";
   const eventType =
