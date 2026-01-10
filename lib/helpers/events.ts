@@ -3,14 +3,54 @@ import { db } from "@/lib/drizzle";
 import { events, venues } from "@/lib/schema";
 import { eq, and, gte, or, isNull, asc } from "drizzle-orm";
 import type { EventFinancialReport } from "@/lib/supabase/types";
-import type { Event as EventSchema, TicketType } from "@/lib/schema";
+import type { TicketType } from "@/lib/schema";
+
+/**
+ * Raw Supabase response for events query with venue join
+ */
+type SupabaseEventResponse = {
+  id: string;
+  organization_id: string | null;
+  name: string | null;
+  description: string | null;
+  date: Date | string | null;
+  end_date: Date | string | null;
+  status: boolean | null;
+  flyer: string | null;
+  type: "single" | "multi_day" | "recurring" | "slots" | null;
+  lifecycle_status:
+    | "active"
+    | "cancellation_pending"
+    | "cancelled"
+    | "archived";
+  deleted_at: Date | string | null;
+  venues?: { name: string | null; city: string | null } | null;
+  [key: string]: unknown;
+};
 
 /**
  * Event with venue information for display
+ * Fetched via Supabase - all fields in snake_case as returned from database
  */
-export type EventWithVenue = EventSchema & {
+export type EventWithVenue = {
+  id: string;
+  organization_id: string | null;
+  name: string | null;
+  description: string | null;
+  date: Date | string | null;
+  end_date: Date | string | null;
+  status: boolean | null;
+  flyer: string | null;
+  type: "single" | "multi_day" | "recurring" | "slots" | null;
+  lifecycle_status:
+    | "active"
+    | "cancellation_pending"
+    | "cancelled"
+    | "archived";
+  deleted_at: Date | string | null;
   venue_name: string | null;
   venue_city: string | null;
+  [key: string]: unknown; // Allow other database fields
 };
 
 /**
@@ -114,12 +154,9 @@ export async function getOrganizationEvents(
     }
 
     // Transform the data to flatten venue info
+    // Supabase returns snake_case fields directly from the database
     const eventsWithVenue: EventWithVenue[] = (events || []).map(
-      (
-        event: EventSchema & {
-          venues?: { name: string | null; city: string | null } | null;
-        }
-      ) => ({
+      (event: SupabaseEventResponse) => ({
         ...event,
         venue_name: event.venues?.name || null,
         venue_city: event.venues?.city || null,
@@ -776,10 +813,13 @@ export async function cancelEvent(
       if (errorMessage.includes("Event not found")) {
         return { success: false, message: "Evento no encontrado" };
       }
-      if (errorMessage.includes("already cancelled or cancellation is pending")) {
+      if (
+        errorMessage.includes("already cancelled or cancellation is pending")
+      ) {
         return {
           success: false,
-          message: "El evento ya está cancelado o la cancelación está pendiente",
+          message:
+            "El evento ya está cancelado o la cancelación está pendiente",
         };
       }
       if (errorMessage.includes("Can only cancel active events")) {

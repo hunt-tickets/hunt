@@ -91,7 +91,7 @@ export function AdminEventsList({
               onClick={handleEventClick}
               status={event.status}
               eventType={event.type}
-              lifecycleStatus={event.lifecycleStatus}
+              lifecycleStatus={event.lifecycle_status}
             />
           ))}
         </div>

@@ -64,8 +64,7 @@ interface EventCardProps {
     | "active"
     | "cancellation_pending"
     | "cancelled"
-    | "archived"
-    | null; // Event lifecycle status
+    | "archived";
 }
 
 export function EventCard({
@@ -99,7 +98,6 @@ export function EventCard({
 
   // Parse date and convert from UTC to browser's timezone
   // Handle multiple formats: "2025-11-15 20:00:00+00", "2025-11-15T20:00:00Z", or "2025-11-15"
-
   let localDate: Date;
 
   // Check if date is valid and not empty
