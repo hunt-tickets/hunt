@@ -91,6 +91,7 @@ export function AdminEventsList({
               onClick={handleEventClick}
               status={event.status}
               eventType={event.type}
+              lifecycleStatus={event.lifecycleStatus as "active" | "cancellation_pending" | "cancelled" | "archived" | null}
             />
           ))}
         </div>

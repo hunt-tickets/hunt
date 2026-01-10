@@ -54,6 +54,7 @@ interface EventCardProps {
   status?: boolean | null; // Event status: true = active, false = draft
   category?: string | null; // Event category
   eventType?: EventType | null; // Event type: single, multi_day, recurring, slots
+  lifecycleStatus?: "active" | "cancellation_pending" | "cancelled" | "archived" | null; // Event lifecycle status
 }
 
 export function EventCard({
@@ -67,6 +68,7 @@ export function EventCard({
   status,
   category,
   eventType,
+  lifecycleStatus,
 }: EventCardProps) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -143,6 +145,13 @@ export function EventCard({
         {/* Status and Event Type badges in top left corner - only show when status is provided (admin view) */}
         {status !== undefined && (
           <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
+            {/* Lifecycle status badge - show if event is being cancelled */}
+            {lifecycleStatus === "cancellation_pending" && (
+              <div className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-yellow-500/90 text-white border border-yellow-400/50">
+                En cancelación
+              </div>
+            )}
+            {/* Regular status badge */}
             <div className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
               status
                 ? "bg-emerald-500/90 text-white"
@@ -150,6 +159,7 @@ export function EventCard({
             }`}>
               {status ? "Activo" : "Borrador"}
             </div>
+            {/* Event type badge */}
             {eventType && EVENT_TYPE_CONFIG[eventType] && (() => {
               const TypeIcon = EVENT_TYPE_CONFIG[eventType].icon;
               const typeLabel = EVENT_TYPE_CONFIG[eventType].label;
