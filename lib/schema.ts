@@ -138,6 +138,7 @@ export const orderPaymentStatus = pgEnum("order_payment_status", [
   "paid",
   "failed",
   "refunded",
+  "refund_failed",
 ]);
 export const ticketStatus = pgEnum("ticket_status", [
   "valid",
@@ -148,6 +149,7 @@ export const ticketStatus = pgEnum("ticket_status", [
 export const eventLifecycleStatus = pgEnum("event_lifecycle_status", [
   "active",
   "cancelled",
+  "cancellation_pending",
   "archived",
 ]);
 export const eventCategory = pgEnum("event_category", [
@@ -662,12 +664,19 @@ export const events = pgTable(
     lifecycleStatus: eventLifecycleStatus("lifecycle_status")
       .default("active")
       .notNull(),
+      
+    // Cancellation workflow fields
     cancellationReason: text("cancellation_reason"),
     cancelledBy: text("cancelled_by").references(() => user.id, {
       onDelete: "set null",
-    }),
-    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }), // Soft delete, to avoid losing important historical financial data
+    }), // Who initiated the cancellation
+    cancellationInitiatedAt: timestamp("cancellation_initiated_at", {
+      withTimezone: true,
+    }), // When admin clicked "Cancel Event" button
+    cancellationCompletedAt: timestamp("cancellation_completed_at", {
+      withTimezone: true,
+    }), // When all refunds finished processing (lifecycle → 'cancelled')
+    deletedAt: timestamp("deleted_at", { withTimezone: true }), // Soft delete: set when lifecycle_status = 'cancelled'
     modificationLocked: boolean("modification_locked").default(false),
   },
   (table) => [
@@ -684,13 +693,10 @@ export const events = pgTable(
       table.date
     ),
     // Indexes for lifecycle management
-    // Create index for soft-delete queries (only show non-deleted events)
-    //  CREATE INDEX IF NOT EXISTS idx_events_lifecycle_status
-    //    ON events(lifecycle_status) WHERE deleted_at IS NULL;
-    //  CREATE INDEX IF NOT EXISTS idx_events_deleted
-    //    ON events(deleted_at) WHERE deleted_at IS NOT NULL;
     index("idx_events_lifecycle_status").on(table.lifecycleStatus),
-    index("idx_events_cancelled").on(table.cancelledAt),
+    index("idx_events_cancellation_initiated").on(
+      table.cancellationInitiatedAt
+    ),
     index("idx_events_deleted").on(table.deletedAt),
   ]
 );
@@ -886,6 +892,15 @@ export const orderItems = pgTable(
   ]
 );
 
+// Refunds (order refund)
+export const refund = pgTable("refunds", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orderId: uuid("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+    
+});
+
 // Tickets (actual tickets issued)
 export const tickets = pgTable(
   "tickets",
@@ -919,6 +934,48 @@ export const tickets = pgTable(
     index("idx_tickets_ticket_type").on(table.ticketTypeId),
     index("idx_tickets_user").on(table.userId),
     index("idx_tickets_qr_code").on(table.qrCode),
+  ]
+);
+
+// Refunds table (audit trail and workflow for refund processing)
+export const refunds = pgTable(
+  "refunds",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(), // Amount to refund
+    currency: text("currency").notNull().default("COP"),
+    reason: text("reason").notNull(), // 'event_cancelled', 'customer_request', etc
+    // Workflow timestamps
+    requestedAt: timestamp("requested_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(), // When refund was created (event cancelled)
+    requestedBy: text("requested_by").references(() => user.id, {
+      onDelete: "set null",
+    }), // Who initiated the cancellation
+    approvedAt: timestamp("approved_at", { withTimezone: true }), // When admin approved
+    approvedBy: text("approved_by").references(() => user.id, {
+      onDelete: "set null",
+    }), // Who approved the refund
+    processedAt: timestamp("processed_at", { withTimezone: true }), // When MP API call succeeded
+    // Mercado Pago integration
+    mpRefundId: text("mp_refund_id"), // Mercado Pago refund ID
+    mpPaymentId: text("mp_payment_id"), // Original payment ID from order
+    // Status tracking
+    status: text("status").notNull().default("pending"), // 'pending', 'approved', 'processing', 'completed', 'failed'
+    failureReason: text("failure_reason"), // If status = 'failed'
+    metadata: jsonb("metadata"), // Additional context (retry attempts, etc)
+  },
+  (table) => [
+    index("idx_refunds_order").on(table.orderId),
+    index("idx_refunds_event").on(table.eventId),
+    index("idx_refunds_status").on(table.status),
+    index("idx_refunds_requested_at").on(table.requestedAt),
   ]
 );
 
@@ -997,6 +1054,7 @@ export const schema = {
   orders,
   orderItems,
   tickets,
+  refunds,
   eventAuditLog,
   emailLogs,
 };
@@ -1028,6 +1086,8 @@ export type EmailLog = InferSelectModel<typeof emailLogs>;
 export type NewEmailLog = InferInsertModel<typeof emailLogs>;
 export type EventAuditLog = InferSelectModel<typeof eventAuditLog>;
 export type NewEventAuditLog = InferInsertModel<typeof eventAuditLog>;
+export type Refund = InferSelectModel<typeof refunds>;
+export type NewRefund = InferInsertModel<typeof refunds>;
 export type Invitation = InferSelectModel<typeof invitation>;
 export type NewInvitation = InferInsertModel<typeof invitation>;
 export type PaymentProcessorAccount = InferSelectModel<

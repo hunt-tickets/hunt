@@ -50,16 +50,16 @@
 --      - 0 tickets: Require p_confirm_zero_tickets = TRUE (accident prevention)
 --      - Has tickets: Block if within 24 hours of event start time
 --   5. Update event:
---      - lifecycle_status → 'cancelled' (PERMANENT STATE)
---      - deleted_at → NOW() (soft delete)
+--      - lifecycle_status → 'cancellation_pending' (NOT cancelled yet!)
 --      - cancelled_by → p_cancelled_by
 --      - cancellation_reason → p_cancellation_reason
---      - cancelled_at → NOW()
---      - status → FALSE (deactivate)
---   6. Update all paid orders to 'refunded' status
---   7. Cancel all tickets (status = 'cancelled')
---   8. Insert audit log entry
---   9. Return summary for TypeScript layer to process MP refunds
+--      - cancellation_initiated_at → NOW()
+--      - status → FALSE (hide from public)
+--      - modification_locked → TRUE (lock from edits)
+--   6. Cancel all tickets (status = 'cancelled')
+--   7. Insert audit log entry
+--   8. Return count of paid orders
+--   9. Admin dashboard will query orders separately for refund management UI
 --
 -- Returns: Cancellation summary with orders to refund
 -- Security: Called server-side only via service role key
@@ -76,8 +76,7 @@ RETURNS TABLE(
   success BOOLEAN,
   message TEXT,
   tickets_sold INT,
-  orders_to_refund INT,
-  order_details JSONB -- Array of {order_id, payment_session_id, amount, user_id}
+  paid_orders_count INT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER -- Run with function owner's privileges (bypasses RLS)
@@ -88,72 +87,105 @@ DECLARE
   v_tickets_sold INT;
   v_paid_orders_count INT;
   v_hours_until_event NUMERIC;
-  v_order_details JSONB;
 BEGIN
   -- STEP 1: Validate event exists and fetch details
-  -- TODO: SELECT event with date, lifecycle_status, name
-  -- TODO: RAISE EXCEPTION if event not found
+  SELECT
+    id,
+    name,
+    date,
+    lifecycle_status,
+    organization_id
+  INTO v_event
+  FROM events
+  WHERE id = p_event_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Event not found: %', p_event_id;
+  END IF;
 
   -- STEP 2: CRITICAL CHECK - Prevent re-cancellation (idempotency)
-  -- Once cancelled, ALWAYS cancelled. This is PERMANENT.
-  -- TODO: IF v_event.lifecycle_status = 'cancelled' THEN
-  --   RAISE EXCEPTION 'Event is already cancelled and cannot be reactivated'
+  -- Once cancellation is initiated or completed, cannot cancel again
+  IF v_event.lifecycle_status IN ('cancellation_pending', 'cancelled') THEN
+    RAISE EXCEPTION 'Event is already cancelled or cancellation is pending. Current status: %', v_event.lifecycle_status;
+  END IF;
+
+  -- Check if event is not active
+  IF v_event.lifecycle_status != 'active' THEN
+    RAISE EXCEPTION 'Can only cancel active events. Current status: %', v_event.lifecycle_status;
+  END IF;
 
   -- STEP 3: Calculate total tickets sold across all ticket types
-  -- TODO: SELECT SUM(sold_count) FROM ticket_types WHERE event_id = p_event_id
+  SELECT COALESCE(SUM(sold_count), 0)
+  INTO v_tickets_sold
+  FROM ticket_types
+  WHERE event_id = p_event_id;
 
   -- STEP 4A: Apply cancellation rules - Zero tickets case
-  -- TODO: IF v_tickets_sold = 0 AND NOT p_confirm_zero_tickets THEN
-  --   RAISE EXCEPTION 'Confirmation required for cancelling events with 0 tickets'
+  IF v_tickets_sold = 0 AND NOT p_confirm_zero_tickets THEN
+    RAISE EXCEPTION 'Confirmation required for cancelling events with 0 tickets';
+  END IF;
 
   -- STEP 4B: Apply cancellation rules - 24-hour deadline for events with tickets
-  -- TODO: IF v_tickets_sold > 0 THEN
-  --   Calculate hours until event: (v_event.date - NOW())
-  --   IF hours < 24 THEN RAISE EXCEPTION 'Cannot cancel within 24 hours of event'
+  IF v_tickets_sold > 0 AND v_event.date IS NOT NULL THEN
+    -- Calculate hours until event
+    v_hours_until_event := EXTRACT(EPOCH FROM (v_event.date - NOW())) / 3600;
 
-  -- STEP 5: Update event to cancelled status (PERMANENT + SOFT DELETE)
-  -- TODO: UPDATE events SET
-  --   lifecycle_status = 'cancelled',
-  --   deleted_at = NOW(),
-  --   cancelled_by = p_cancelled_by,
-  --   cancellation_reason = p_cancellation_reason,
-  --   cancelled_at = NOW(),
-  --   status = FALSE
-  -- WHERE id = p_event_id
+    IF v_hours_until_event < 24 THEN
+      RAISE EXCEPTION 'Cannot cancel within 24 hours of event start. Hours remaining: %', ROUND(v_hours_until_event, 2);
+    END IF;
+  END IF;
 
-  -- STEP 6: Update all paid orders to refunded status
-  -- TODO: UPDATE orders SET payment_status = 'refunded'
-  -- WHERE event_id = p_event_id AND payment_status = 'paid'
+  -- STEP 5: Update event to cancellation_pending status (NOT cancelled yet - orders must be handled first)
+  UPDATE events SET
+    lifecycle_status = 'cancellation_pending',
+    cancelled_by = p_cancelled_by,
+    cancellation_reason = p_cancellation_reason,
+    cancellation_initiated_at = NOW(),
+    status = FALSE,  -- Hide from public immediately
+    modification_locked = TRUE  -- Lock the event to prevent further edits
+  WHERE id = p_event_id;
 
-  -- STEP 7: Cancel all tickets
-  -- TODO: UPDATE tickets SET status = 'cancelled'
-  -- WHERE order_id IN (SELECT id FROM orders WHERE event_id = p_event_id)
+  -- STEP 6: Mark all tickets as cancelled (user cannot use them anymore)
+  UPDATE tickets SET
+    status = 'cancelled'
+  WHERE order_id IN (
+    SELECT id FROM orders WHERE event_id = p_event_id
+  );
+
+  -- STEP 7: Count paid orders that need manual resolution
+  SELECT COUNT(*)
+  INTO v_paid_orders_count
+  FROM orders
+  WHERE event_id = p_event_id
+    AND payment_status = 'paid';
 
   -- STEP 8: Insert audit log
-  -- TODO: INSERT INTO event_audit_log
-  -- (event_id, action, performed_by, reason, metadata)
-  -- VALUES (p_event_id, 'cancelled', p_cancelled_by, p_cancellation_reason, ...)
+  INSERT INTO event_audit_log (
+    event_id,
+    action,
+    performed_by,
+    reason,
+    metadata
+  )
+  VALUES (
+    p_event_id,
+    'cancellation_initiated',
+    p_cancelled_by,
+    p_cancellation_reason,
+    jsonb_build_object(
+      'tickets_sold', v_tickets_sold,
+      'paid_orders_count', v_paid_orders_count,
+      'hours_until_event', ROUND(v_hours_until_event, 2)
+    )
+  );
 
-  -- STEP 9: Collect order details for refund processing
-  -- TODO: SELECT JSONB_AGG(jsonb_build_object(
-  --   'order_id', id,
-  --   'payment_session_id', payment_session_id,
-  --   'amount', total_amount,
-  --   'currency', currency,
-  --   'user_id', user_id
-  -- )) INTO v_order_details FROM orders
-  -- WHERE event_id = p_event_id AND payment_status = 'refunded'
-
-  -- STEP 10: Return summary for TypeScript layer
-  -- TODO: Implement complete return with actual values
-
-  -- Temporary skeleton return
+  -- STEP 9: Return summary
+  -- Admin dashboard will fetch order details separately when needed
   RETURN QUERY SELECT
     TRUE as success,
-    'Skeleton function - to be implemented' as message,
-    0 as tickets_sold,
-    0 as orders_to_refund,
-    '[]'::JSONB as order_details;
+    format('Event cancellation initiated. %s paid orders require manual resolution.', v_paid_orders_count) as message,
+    v_tickets_sold as tickets_sold,
+    v_paid_orders_count as paid_orders_count;
 END;
 $$;
 

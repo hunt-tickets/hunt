@@ -1,0 +1,1 @@
+ALTER TYPE "public"."event_lifecycle_status" ADD VALUE 'cancellation_pending' BEFORE 'archived';

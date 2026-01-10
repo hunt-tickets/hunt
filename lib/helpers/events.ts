@@ -720,3 +720,117 @@ export async function toggleEventStatusDb(eventId: string, status: boolean) {
     status,
   };
 }
+
+/**
+ * Cancel an event with proper validation and refund workflow initiation
+ *
+ * ⚠️ WARNING: This initiates event cancellation (PERMANENT process)
+ *
+ * What this function does:
+ * 1. Calls cancel_event_v1 RPC function (atomic DB operations)
+ * 2. Event moves to 'cancellation_pending' state
+ * 3. Tickets are cancelled (users cannot use them)
+ * 4. Returns count of paid orders that need manual resolution
+ *
+ * What this function DOES NOT do:
+ * - Does NOT create refund records (admin must do manually)
+ * - Does NOT call Mercado Pago API (happens later in refund workflow)
+ * - Does NOT fully cancel event (only after all refunds processed)
+ *
+ * Cancellation Rules:
+ * - Events with 0 tickets: Requires confirmZeroTickets = true
+ * - Events with tickets: Cannot cancel within 24 hours of event start
+ * - Event becomes hidden and locked immediately
+ *
+ * @param eventId - The UUID of the event to cancel
+ * @param cancelledBy - User ID of who is cancelling
+ * @param cancellationReason - Reason for cancellation (for audit trail)
+ * @param confirmZeroTickets - Must be true for events with 0 tickets sold
+ * @returns Success/error response with count of paid orders
+ */
+export async function cancelEvent(
+  eventId: string,
+  cancelledBy: string,
+  cancellationReason: string,
+  confirmZeroTickets: boolean = false
+): Promise<{
+  success: boolean;
+  message: string;
+  ticketsSold?: number;
+  paidOrdersCount?: number;
+}> {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase.rpc("cancel_event_v1", {
+      p_event_id: eventId,
+      p_cancelled_by: cancelledBy,
+      p_cancellation_reason: cancellationReason,
+      p_confirm_zero_tickets: confirmZeroTickets,
+    });
+
+    if (error) {
+      console.error("Error calling cancel_event_v1:", error);
+
+      // Parse PostgreSQL errors into user-friendly messages
+      const errorMessage = error.message || String(error);
+
+      // Handle specific error cases
+      if (errorMessage.includes("Event not found")) {
+        return { success: false, message: "Evento no encontrado" };
+      }
+      if (errorMessage.includes("already cancelled or cancellation is pending")) {
+        return {
+          success: false,
+          message: "El evento ya está cancelado o la cancelación está pendiente",
+        };
+      }
+      if (errorMessage.includes("Can only cancel active events")) {
+        return {
+          success: false,
+          message: "Solo se pueden cancelar eventos activos",
+        };
+      }
+      if (errorMessage.includes("Confirmation required")) {
+        return {
+          success: false,
+          message: "Debes confirmar la cancelación para eventos sin tickets vendidos",
+        };
+      }
+      if (errorMessage.includes("Cannot cancel within 24 hours")) {
+        // Extract hours remaining from error message
+        const match = errorMessage.match(/Hours remaining: ([\d.]+)/);
+        const hours = match ? parseFloat(match[1]) : 0;
+        return {
+          success: false,
+          message: `No se puede cancelar dentro de las 24 horas previas al evento. Quedan ${hours.toFixed(1)} horas.`,
+        };
+      }
+
+      // Generic error
+      return {
+        success: false,
+        message: errorMessage || "Error al cancelar el evento",
+      };
+    }
+
+    if (!data || data.length === 0) {
+      return { success: false, message: "Error al cancelar el evento" };
+    }
+
+    const result = data[0];
+
+    return {
+      success: result.success,
+      message: result.message,
+      ticketsSold: result.tickets_sold,
+      paidOrdersCount: result.paid_orders_count,
+    };
+  } catch (error) {
+    console.error("Unexpected error cancelling event:", error);
+    return {
+      success: false,
+      message: "Error inesperado al cancelar el evento",
+    };
+  }
+}

@@ -218,6 +218,20 @@
       "when": 1767819357212,
       "tag": "0030_secret_true_believers",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1768016793697,
+      "tag": "0031_green_wasp",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1768019123060,
+      "tag": "0032_ordinary_human_cannonball",
+      "breakpoints": true
     }
   ]
 }
