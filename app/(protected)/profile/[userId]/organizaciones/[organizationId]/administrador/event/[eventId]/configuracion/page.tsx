@@ -64,11 +64,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     notFound();
   }
 
-  // Block access if event is cancelled or locked (show 404)
-  if (event.lifecycleStatus === 'cancelled' || event.modificationLocked) {
-    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}`);
-  }
-
+  // Check lifecycle status first (most important)
   // Show message if event is being cancelled
   if (event.lifecycleStatus === 'cancellation_pending') {
     return (
@@ -97,6 +93,78 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
               </p>
               <p>
                 Una vez que se completen todos los reembolsos, podrás acceder nuevamente a los detalles del evento.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  // Show message if event is cancelled
+  if (event.lifecycleStatus === 'cancelled') {
+    return (
+      <>
+        <EventStickyHeader
+          eventName={event.name || "Evento"}
+          subtitle="Configuración del Evento"
+        >
+          <EventConfigContent showTabsOnly />
+        </EventStickyHeader>
+
+        <div className="px-3 py-3 sm:px-6 sm:py-4">
+          <Card className="border-red-500/50 bg-red-500/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="h-5 w-5" />
+                Evento cancelado
+              </CardTitle>
+              <CardDescription>
+                Este evento ha sido cancelado permanentemente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                No puedes modificar la configuración de un evento cancelado.
+              </p>
+              <p>
+                Todos los reembolsos han sido procesados y el evento está archivado.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  // Show message if event is locked
+  if (event.modificationLocked) {
+    return (
+      <>
+        <EventStickyHeader
+          eventName={event.name || "Evento"}
+          subtitle="Configuración del Evento"
+        >
+          <EventConfigContent showTabsOnly />
+        </EventStickyHeader>
+
+        <div className="px-3 py-3 sm:px-6 sm:py-4">
+          <Card className="border-orange-500/50 bg-orange-500/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-600">
+                <AlertCircle className="h-5 w-5" />
+                Evento bloqueado
+              </CardTitle>
+              <CardDescription>
+                Este evento está bloqueado temporalmente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                No puedes modificar la configuración mientras el evento está bloqueado.
+              </p>
+              <p>
+                Contacta al administrador de la organización para más información.
               </p>
             </CardContent>
           </Card>
