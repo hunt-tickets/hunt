@@ -4,7 +4,7 @@ import { FixedHeroWrapper } from "@/components/fixed-hero-wrapper";
 
 // Next.js will invalidate the cache when a
 // request comes in, at most once every 180 seconds.
-export const revalidate = 180;
+// export const revalidate = 180;
 
 export default function Page() {
   return (
