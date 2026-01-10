@@ -329,6 +329,9 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   // Event can only be published when required items are complete
   const canPublish = hasDate && hasTicketTypes;
 
+  // Check if event is being cancelled
+  const isCancellationPending = event.lifecycle_status === "cancellation_pending";
+
   // Configuration URL
   const configUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
 
@@ -347,8 +350,12 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
             <EventStatusToggle
               eventId={eventId}
               initialStatus={event.status ?? false}
-              disabled={!canPublish}
-              disabledReason="Completa la configuración para publicar"
+              disabled={!canPublish || isCancellationPending}
+              disabledReason={
+                isCancellationPending
+                  ? "No se puede cambiar el estado durante la cancelación"
+                  : "Completa la configuración para publicar"
+              }
             />
           </div>
 
@@ -391,8 +398,12 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
             <EventStatusToggle
               eventId={eventId}
               initialStatus={event.status ?? false}
-              disabled={!canPublish}
-              disabledReason="Completa la fecha y crea al menos una entrada para publicar"
+              disabled={!canPublish || isCancellationPending}
+              disabledReason={
+                isCancellationPending
+                  ? "No se puede cambiar el estado durante la cancelación"
+                  : "Completa la fecha y crea al menos una entrada para publicar"
+              }
             />
             <EventOptionsMenu eventId={eventId} />
           </div>
