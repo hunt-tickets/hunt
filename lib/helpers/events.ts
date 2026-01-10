@@ -738,21 +738,18 @@ export async function toggleEventStatusDb(eventId: string, status: boolean) {
  * - Does NOT fully cancel event (only after all refunds processed)
  *
  * Cancellation Rules:
- * - Events with 0 tickets: Requires confirmZeroTickets = true
- * - Events with tickets: Cannot cancel within 24 hours of event start
+ * - Cannot cancel within 24 hours of event start (if tickets sold)
  * - Event becomes hidden and locked immediately
  *
  * @param eventId - The UUID of the event to cancel
  * @param cancelledBy - User ID of who is cancelling
  * @param cancellationReason - Reason for cancellation (for audit trail)
- * @param confirmZeroTickets - Must be true for events with 0 tickets sold
  * @returns Success/error response with count of paid orders
  */
 export async function cancelEvent(
   eventId: string,
   cancelledBy: string,
-  cancellationReason: string,
-  confirmZeroTickets: boolean = false
+  cancellationReason: string
 ): Promise<{
   success: boolean;
   message: string;
@@ -766,7 +763,6 @@ export async function cancelEvent(
       p_event_id: eventId,
       p_cancelled_by: cancelledBy,
       p_cancellation_reason: cancellationReason,
-      p_confirm_zero_tickets: confirmZeroTickets,
     });
 
     if (error) {
@@ -789,12 +785,6 @@ export async function cancelEvent(
         return {
           success: false,
           message: "Solo se pueden cancelar eventos activos",
-        };
-      }
-      if (errorMessage.includes("Confirmation required")) {
-        return {
-          success: false,
-          message: "Debes confirmar la cancelación para eventos sin tickets vendidos",
         };
       }
       if (errorMessage.includes("Cannot cancel within 24 hours")) {

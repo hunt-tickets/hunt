@@ -47,19 +47,20 @@
 --   2. CHECK: Event is NOT already cancelled (prevent duplicate cancellation)
 --   3. Calculate total tickets sold across all ticket types
 --   4. Apply cancellation rules:
---      - 0 tickets: Require p_confirm_zero_tickets = TRUE (accident prevention)
 --      - Has tickets: Block if within 24 hours of event start time
---   5. Update event:
---      - lifecycle_status → 'cancellation_pending' (NOT cancelled yet!)
---      - cancelled_by → p_cancelled_by
---      - cancellation_reason → p_cancellation_reason
---      - cancellation_initiated_at → NOW()
---      - status → FALSE (hide from public)
---      - modification_locked → TRUE (lock from edits)
---   6. Cancel all tickets (status = 'cancelled')
---   7. Insert audit log entry
---   8. Return count of paid orders
---   9. Admin dashboard will query orders separately for refund management UI
+--   5. Cancel all tickets (status = 'cancelled')
+--   6. Count paid orders
+--   7. Update event based on paid orders count:
+--      IF 0 paid orders:
+--        - lifecycle_status → 'cancelled' (completed immediately)
+--        - cancellation_completed_at → NOW()
+--        - deleted_at → NOW() (soft delete)
+--      ELSE (has paid orders):
+--        - lifecycle_status → 'cancellation_pending' (waiting for refunds)
+--        - cancellation_initiated_at → NOW()
+--        - No deleted_at (not completed yet)
+--   8. Insert audit log entry
+--   9. Return success with appropriate message
 --
 -- Returns: Cancellation summary with orders to refund
 -- Security: Called server-side only via service role key
@@ -69,8 +70,7 @@
 CREATE OR REPLACE FUNCTION cancel_event_v1(
   p_event_id UUID,
   p_cancelled_by TEXT,
-  p_cancellation_reason TEXT,
-  p_confirm_zero_tickets BOOLEAN DEFAULT FALSE
+  p_cancellation_reason TEXT
 )
 RETURNS TABLE(
   success BOOLEAN,
@@ -120,10 +120,8 @@ BEGIN
   FROM ticket_types
   WHERE event_id = p_event_id;
 
-  -- STEP 4A: Apply cancellation rules - Zero tickets case
-  IF v_tickets_sold = 0 AND NOT p_confirm_zero_tickets THEN
-    RAISE EXCEPTION 'Confirmation required for cancelling events with 0 tickets';
-  END IF;
+  -- STEP 4A: No special rules for zero tickets
+  -- (Confirmation dialog in UI is sufficient)
 
   -- STEP 4B: Apply cancellation rules - 24-hour deadline for events with tickets
   IF v_tickets_sold > 0 AND v_event.date IS NOT NULL THEN
@@ -135,57 +133,100 @@ BEGIN
     END IF;
   END IF;
 
-  -- STEP 5: Update event to cancellation_pending status (NOT cancelled yet - orders must be handled first)
-  UPDATE events SET
-    lifecycle_status = 'cancellation_pending',
-    cancelled_by = p_cancelled_by,
-    cancellation_reason = p_cancellation_reason,
-    cancellation_initiated_at = NOW(),
-    status = FALSE,  -- Hide from public immediately
-    modification_locked = TRUE  -- Lock the event to prevent further edits
-  WHERE id = p_event_id;
-
-  -- STEP 6: Mark all tickets as cancelled (user cannot use them anymore)
+  -- STEP 5: Mark all tickets as cancelled (user cannot use them anymore)
   UPDATE tickets SET
     status = 'cancelled'
   WHERE order_id IN (
     SELECT id FROM orders WHERE event_id = p_event_id
   );
 
-  -- STEP 7: Count paid orders that need manual resolution
+  -- STEP 6: Count paid orders that need manual resolution
   SELECT COUNT(*)
   INTO v_paid_orders_count
   FROM orders
   WHERE event_id = p_event_id
     AND payment_status = 'paid';
 
-  -- STEP 8: Insert audit log
-  INSERT INTO event_audit_log (
-    event_id,
-    action,
-    performed_by,
-    reason,
-    metadata
-  )
-  VALUES (
-    p_event_id,
-    'cancellation_initiated',
-    p_cancelled_by,
-    p_cancellation_reason,
-    jsonb_build_object(
-      'tickets_sold', v_tickets_sold,
-      'paid_orders_count', v_paid_orders_count,
-      'hours_until_event', ROUND(v_hours_until_event, 2)
-    )
-  );
+  -- STEP 7: Update event status based on whether refunds are needed
+  IF v_paid_orders_count = 0 THEN
+    -- No refunds needed - complete cancellation immediately
+    UPDATE events SET
+      lifecycle_status = 'cancelled',  -- Fully cancelled
+      cancelled_by = p_cancelled_by,
+      cancellation_reason = p_cancellation_reason,
+      cancellation_initiated_at = NOW(),
+      cancellation_completed_at = NOW(),  -- Completed immediately
+      deleted_at = NOW(),  -- Soft delete
+      status = FALSE,
+      modification_locked = TRUE
+    WHERE id = p_event_id;
 
-  -- STEP 9: Return summary
-  -- Admin dashboard will fetch order details separately when needed
-  RETURN QUERY SELECT
-    TRUE as success,
-    format('Event cancellation initiated. %s paid orders require manual resolution.', v_paid_orders_count) as message,
-    v_tickets_sold as tickets_sold,
-    v_paid_orders_count as paid_orders_count;
+    -- Insert audit log for immediate cancellation
+    INSERT INTO event_audit_log (
+      event_id,
+      action,
+      performed_by,
+      reason,
+      metadata
+    )
+    VALUES (
+      p_event_id,
+      'cancelled_immediately',  -- No refunds, completed immediately
+      p_cancelled_by,
+      p_cancellation_reason,
+      jsonb_build_object(
+        'tickets_sold', v_tickets_sold,
+        'paid_orders_count', 0,
+        'hours_until_event', ROUND(v_hours_until_event, 2)
+      )
+    );
+
+    -- Return success with immediate completion message
+    RETURN QUERY SELECT
+      TRUE as success,
+      'Event cancelled successfully. No refunds required.' as message,
+      v_tickets_sold as tickets_sold,
+      0 as paid_orders_count;
+
+  ELSE
+    -- Has paid orders - needs manual refund processing
+    UPDATE events SET
+      lifecycle_status = 'cancellation_pending',  -- Waiting for refunds
+      cancelled_by = p_cancelled_by,
+      cancellation_reason = p_cancellation_reason,
+      cancellation_initiated_at = NOW(),
+      status = FALSE,  -- Hide from public immediately
+      modification_locked = TRUE  -- Lock the event to prevent further edits
+    WHERE id = p_event_id;
+
+    -- Insert audit log for pending cancellation
+    INSERT INTO event_audit_log (
+      event_id,
+      action,
+      performed_by,
+      reason,
+      metadata
+    )
+    VALUES (
+      p_event_id,
+      'cancellation_initiated',  -- Pending refund processing
+      p_cancelled_by,
+      p_cancellation_reason,
+      jsonb_build_object(
+        'tickets_sold', v_tickets_sold,
+        'paid_orders_count', v_paid_orders_count,
+        'hours_until_event', ROUND(v_hours_until_event, 2)
+      )
+    );
+
+    -- Return summary with pending status
+    RETURN QUERY SELECT
+      TRUE as success,
+      format('Event cancellation initiated. %s paid orders require manual resolution.', v_paid_orders_count) as message,
+      v_tickets_sold as tickets_sold,
+      v_paid_orders_count as paid_orders_count;
+
+  END IF;
 END;
 $$;
 

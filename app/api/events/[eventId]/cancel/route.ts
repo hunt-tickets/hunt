@@ -25,8 +25,7 @@ import { cancelEvent } from "@/lib/helpers/events";
  *
  * Request body:
  * {
- *   cancellationReason: string,
- *   confirmZeroTickets?: boolean
+ *   cancellationReason: string
  * }
  *
  * Response:
@@ -59,12 +58,8 @@ export async function POST(
 
     // 2. Parse request body
     const body = await request.json();
-    const {
-      cancellationReason,
-      confirmZeroTickets = false,
-    } = body as {
+    const { cancellationReason } = body as {
       cancellationReason: string;
-      confirmZeroTickets?: boolean;
     };
 
     // 3. Validate cancellation reason
@@ -115,8 +110,7 @@ export async function POST(
     const result = await cancelEvent(
       eventId,
       userId,
-      cancellationReason.trim(),
-      confirmZeroTickets
+      cancellationReason.trim()
     );
 
     if (!result.success) {
