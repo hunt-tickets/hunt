@@ -128,6 +128,12 @@ BEGIN
     -- Calculate hours until event
     v_hours_until_event := EXTRACT(EPOCH FROM (v_event.date - NOW())) / 3600;
 
+    -- Check if event has already occurred
+    IF v_hours_until_event < 0 THEN
+      RAISE EXCEPTION 'Cannot cancel events that have already occurred. Event was % hours ago.', ROUND(ABS(v_hours_until_event), 2);
+    END IF;
+
+    -- Check if event is within 24 hours
     IF v_hours_until_event < 24 THEN
       RAISE EXCEPTION 'Cannot cancel within 24 hours of event start. Hours remaining: %', ROUND(v_hours_until_event, 2);
     END IF;

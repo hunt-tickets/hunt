@@ -788,6 +788,15 @@ export async function cancelEvent(
           message: "Solo se pueden cancelar eventos activos",
         };
       }
+      if (errorMessage.includes("events that have already occurred")) {
+        // Extract hours ago from error message
+        const match = errorMessage.match(/Event was ([\d.]+) hours ago/);
+        const hours = match ? parseFloat(match[1]) : 0;
+        return {
+          success: false,
+          message: `No se puede cancelar eventos que ya ocurrieron. El evento fue hace ${hours.toFixed(1)} horas.`,
+        };
+      }
       if (errorMessage.includes("Cannot cancel within 24 hours")) {
         // Extract hours remaining from error message
         const match = errorMessage.match(/Hours remaining: ([\d.]+)/);
