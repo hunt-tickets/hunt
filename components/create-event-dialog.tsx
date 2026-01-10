@@ -94,7 +94,7 @@ export function CreateEventDialog({
               {/* Name */}
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium">
-                  Nombre del evento
+                  Nombre del evento <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name"
@@ -103,6 +103,8 @@ export function CreateEventDialog({
                   className="h-11 bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
                   autoFocus
                   disabled={pending}
+                  required
+                  minLength={1}
                 />
                 {state.errors?.name && (
                   <p className="text-sm text-destructive flex items-center gap-1">
