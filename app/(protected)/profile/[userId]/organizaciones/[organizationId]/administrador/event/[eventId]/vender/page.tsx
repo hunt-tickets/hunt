@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
 import { member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
 
 interface VenderPageProps {
   params: Promise<{
@@ -44,7 +46,6 @@ export default async function VenderPage({ params }: VenderPageProps) {
   const supabase = await createClient();
 
   // Fetch event with ticket types and event days
-  // Only allow selling for active events (not cancelled or pending cancellation)
   const { data: event } = await supabase
     .from("events")
     .select(
@@ -64,7 +65,8 @@ export default async function VenderPage({ params }: VenderPageProps) {
         reserved_count,
         min_per_order,
         max_per_order,
-        event_day_id
+        event_day_id,
+        active
       ),
       event_days (
         id,
@@ -76,12 +78,49 @@ export default async function VenderPage({ params }: VenderPageProps) {
     )
     .eq("id", eventId)
     .eq("organization_id", organizationId)
-    .eq("lifecycle_status", "active") // Only active events
-    .eq("ticket_types.active", true)
     .single();
 
   if (!event) {
     notFound();
+  }
+
+  // Show 404 if event is cancelled
+  if (event.lifecycle_status === 'cancelled') {
+    notFound();
+  }
+
+  // Show message if event is being cancelled
+  if (event.lifecycle_status === 'cancellation_pending') {
+    return (
+      <>
+        <EventStickyHeader
+          eventName={event.name || "Evento"}
+          subtitle="Venta en efectivo"
+        />
+
+        <div className="px-3 py-3 sm:px-6 sm:py-4">
+          <Card className="border-yellow-500/50 bg-yellow-500/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-yellow-600">
+                <AlertCircle className="h-5 w-5" />
+                Evento en proceso de cancelación
+              </CardTitle>
+              <CardDescription>
+                Este evento está siendo cancelado actualmente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                No puedes realizar ventas en efectivo mientras el evento está en proceso de cancelación.
+              </p>
+              <p>
+                Una vez que se completen todos los reembolsos, el evento será cancelado permanentemente.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
   }
 
   const isMultiDay = event.type === "multi_day" && (event.event_days || []).length > 0;
@@ -95,8 +134,10 @@ export default async function VenderPage({ params }: VenderPageProps) {
       date: day.date || "",
     }));
 
-  // Transform ticket types for the form
-  const ticketTypes = (event.ticket_types || []).map((tt) => ({
+  // Transform ticket types for the form (only active tickets)
+  const ticketTypes = (event.ticket_types || [])
+    .filter((tt) => tt.active)
+    .map((tt) => ({
     id: tt.id,
     name: tt.name,
     price: parseFloat(tt.price),

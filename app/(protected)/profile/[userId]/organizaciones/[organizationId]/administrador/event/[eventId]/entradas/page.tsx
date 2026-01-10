@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
 import { member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
 
 interface EntradasPageProps {
   params: Promise<{
@@ -110,9 +112,43 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
     notFound();
   }
 
-  // Block access if event is being cancelled or locked
-  if (event.lifecycle_status === 'cancellation_pending' || event.lifecycle_status === 'cancelled' || event.modification_locked) {
+  // Block access if event is cancelled or locked (show 404)
+  if (event.lifecycle_status === 'cancelled' || event.modification_locked) {
     redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}`);
+  }
+
+  // Show message if event is being cancelled
+  if (event.lifecycle_status === 'cancellation_pending') {
+    return (
+      <>
+        <EventStickyHeader
+          eventName={event.name || "Evento"}
+          subtitle="Gestión de Entradas"
+        />
+
+        <div className="px-3 py-3 sm:px-6 sm:py-4">
+          <Card className="border-yellow-500/50 bg-yellow-500/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-yellow-600">
+                <AlertCircle className="h-5 w-5" />
+                Evento en proceso de cancelación
+              </CardTitle>
+              <CardDescription>
+                Este evento está siendo cancelado actualmente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                No puedes ver ni modificar las entradas mientras el evento está en proceso de cancelación.
+              </p>
+              <p>
+                Una vez que se completen todos los reembolsos, podrás acceder nuevamente a los detalles del evento.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
   }
 
   const ticketTypes = event.ticket_types || [];
