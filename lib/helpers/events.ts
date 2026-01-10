@@ -105,6 +105,7 @@ export async function getOrganizationEvents(
       `
       )
       .eq("organization_id", organizationId)
+      .is("deleted_at", null) // Exclude cancelled/deleted events
       .order("date", { ascending: false, nullsFirst: false });
 
     if (error) {
