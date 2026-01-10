@@ -62,6 +62,11 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     notFound();
   }
 
+  // Block access if event is being cancelled or locked
+  if (event.lifecycleStatus === 'cancellation_pending' || event.lifecycleStatus === 'cancelled' || event.modificationLocked) {
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}`);
+  }
+
   // Fetch event days for multi-day events
   const days = await db.query.eventDays.findMany({
     where: eq(eventDays.eventId, eventId),

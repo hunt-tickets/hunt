@@ -44,6 +44,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
   const supabase = await createClient();
 
   // Fetch event with ticket types and event days
+  // Only allow selling for active events (not cancelled or pending cancellation)
   const { data: event } = await supabase
     .from("events")
     .select(
@@ -52,6 +53,8 @@ export default async function VenderPage({ params }: VenderPageProps) {
       name,
       status,
       type,
+      lifecycle_status,
+      modification_locked,
       ticket_types (
         id,
         name,
@@ -73,6 +76,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
     )
     .eq("id", eventId)
     .eq("organization_id", organizationId)
+    .eq("lifecycle_status", "active") // Only active events
     .eq("ticket_types.active", true)
     .single();
 

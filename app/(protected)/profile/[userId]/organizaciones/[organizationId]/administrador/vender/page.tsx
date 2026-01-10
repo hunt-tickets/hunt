@@ -45,7 +45,8 @@ export default async function VenderPage({ params }: VenderPageProps) {
     notFound();
   }
 
-  // Fetch active events for this organization (same logic as eventos page)
+  // Fetch active events for this organization
+  // Only show events that are active (not cancelled or pending cancellation)
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -54,6 +55,7 @@ export default async function VenderPage({ params }: VenderPageProps) {
     .select("id, name, date, flyer")
     .eq("organization_id", organizationId)
     .eq("status", true)
+    .eq("lifecycle_status", "active") // Only active events (not cancelled)
     .or(`end_date.gte.${now},end_date.is.null`)
     .order("date", { ascending: false });
 

@@ -65,6 +65,8 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
       status,
       type,
       variable_fee,
+      lifecycle_status,
+      modification_locked,
       ticket_types (
         id,
         name,
@@ -106,6 +108,11 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
 
   if (!event) {
     notFound();
+  }
+
+  // Block access if event is being cancelled or locked
+  if (event.lifecycle_status === 'cancellation_pending' || event.lifecycle_status === 'cancelled' || event.modification_locked) {
+    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}`);
   }
 
   const ticketTypes = event.ticket_types || [];
