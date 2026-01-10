@@ -7,7 +7,13 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
 import { member } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
 interface EntradasPageProps {
@@ -21,12 +27,6 @@ interface EntradasPageProps {
 export default async function EntradasPage({ params }: EntradasPageProps) {
   const { userId, eventId, organizationId } = await params;
   const reqHeaders = await headers();
-
-  // // Auth check
-  // const session = await auth.api.getSession({ headers: reqHeaders });
-  // if (!session || session.user.id !== userId) {
-  //   redirect("/sign-in");
-  // }
 
   // Verify user is a member of the organization
   const memberRecord = await db.query.member.findFirst({
@@ -114,7 +114,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
 
   // Check lifecycle status first (most important)
   // Show message if event is being cancelled
-  if (event.lifecycle_status === 'cancellation_pending') {
+  if (event.lifecycle_status === "cancellation_pending") {
     return (
       <>
         <EventStickyHeader
@@ -135,10 +135,12 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>
-                No puedes ver ni modificar las entradas mientras el evento está en proceso de cancelación.
+                No puedes ver ni modificar las entradas mientras el evento está
+                en proceso de cancelación.
               </p>
               <p>
-                Una vez que se completen todos los reembolsos, podrás acceder nuevamente a los detalles del evento.
+                Una vez que se completen todos los reembolsos, podrás acceder
+                nuevamente a los detalles del evento.
               </p>
             </CardContent>
           </Card>
@@ -148,7 +150,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
   }
 
   // Show message if event is cancelled
-  if (event.lifecycle_status === 'cancelled') {
+  if (event.lifecycle_status === "cancelled") {
     return (
       <>
         <EventStickyHeader
@@ -172,7 +174,8 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
                 No puedes ver ni modificar las entradas de un evento cancelado.
               </p>
               <p>
-                Todos los reembolsos han sido procesados y el evento está archivado.
+                Todos los reembolsos han sido procesados y el evento está
+                archivado.
               </p>
             </CardContent>
           </Card>
@@ -203,10 +206,12 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>
-                No puedes ver ni modificar las entradas mientras el evento está bloqueado.
+                No puedes ver ni modificar las entradas mientras el evento está
+                bloqueado.
               </p>
               <p>
-                Contacta al administrador de la organización para más información.
+                Contacta al administrador de la organización para más
+                información.
               </p>
             </CardContent>
           </Card>

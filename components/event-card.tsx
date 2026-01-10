@@ -6,7 +6,10 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 import { useImageBrightness } from "@/hooks/use-image-brightness";
-import { EVENT_CATEGORY_LABELS, type EventCategory } from "@/constants/event-categories";
+import {
+  EVENT_CATEGORY_LABELS,
+  type EventCategory,
+} from "@/constants/event-categories";
 import {
   Music2,
   Trophy,
@@ -36,7 +39,10 @@ const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
 
 type EventType = "single" | "multi_day" | "recurring" | "slots";
 
-const EVENT_TYPE_CONFIG: Record<EventType, { icon: LucideIcon; label: string }> = {
+const EVENT_TYPE_CONFIG: Record<
+  EventType,
+  { icon: LucideIcon; label: string }
+> = {
   single: { icon: Calendar, label: "Único" },
   multi_day: { icon: CalendarDays, label: "Varios días" },
   recurring: { icon: Repeat, label: "Recurrente" },
@@ -54,7 +60,12 @@ interface EventCardProps {
   status?: boolean | null; // Event status: true = active, false = draft
   category?: string | null; // Event category
   eventType?: EventType | null; // Event type: single, multi_day, recurring, slots
-  lifecycleStatus?: "active" | "cancellation_pending" | "cancelled" | "archived" | null; // Event lifecycle status
+  lifecycleStatus?:
+    | "active"
+    | "cancellation_pending"
+    | "cancelled"
+    | "archived"
+    | null; // Event lifecycle status
 }
 
 export function EventCard({
@@ -92,25 +103,25 @@ export function EventCard({
   let localDate: Date;
 
   // Check if date is valid and not empty
-  if (!date || typeof date !== 'string' || date.trim() === '') {
+  if (!date || typeof date !== "string" || date.trim() === "") {
     localDate = new Date();
   } else {
     // Check if date includes time (has ':' character)
-    const hasTime = date.includes(':');
+    const hasTime = date.includes(":");
 
     if (!hasTime) {
       // Date only format: "2025-11-15"
       // Treat as local date, no timezone conversion needed
-      localDate = new Date(date + 'T00:00:00');
-    } else if (date.includes(' ') && date.includes('+')) {
+      localDate = new Date(date + "T00:00:00");
+    } else if (date.includes(" ") && date.includes("+")) {
       // Format: "2025-11-15 20:00:00+00"
-      const dateTimeParts = date.split('+')[0].split(' ');
+      const dateTimeParts = date.split("+")[0].split(" ");
       const isoDateString = `${dateTimeParts[0]}T${dateTimeParts[1]}Z`;
       localDate = new Date(isoDateString);
     } else {
       // Standard ISO format with time
       // Check if it already has timezone info (Z or +/-HH:MM)
-      const hasTimezone = date.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(date);
+      const hasTimezone = date.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(date);
       const dateString = hasTimezone ? date : `${date}Z`;
       localDate = new Date(dateString);
     }
@@ -124,14 +135,10 @@ export function EventCard({
 
   // Extract day and month from the date
   const day = localDate.getDate();
-  const month = localDate.toLocaleDateString('es-ES', { month: 'short' });
+  const month = localDate.toLocaleDateString("es-ES", { month: "short" });
 
   return (
-    <Link
-      href={href || `/eventos/${id}`}
-      className="block"
-      onClick={onClick}
-    >
+    <Link href={href || `/eventos/${id}`} className="block" onClick={onClick}>
       <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden group cursor-pointer bg-white/8 border border-white/10 hover:border-white/20 backdrop-blur-sm">
         {/* Event image with hover effect */}
         <Image
@@ -146,61 +153,73 @@ export function EventCard({
         {status !== undefined && (
           <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
             {/* Lifecycle status badge - show if event is being cancelled */}
-            {lifecycleStatus === "cancellation_pending" && (
+            {lifecycleStatus === "cancellation_pending" ? (
               <div className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-yellow-500/90 text-white border border-yellow-400/50">
                 En cancelación
               </div>
+            ) : (
+              /* Regular status badge - only show when NOT in cancellation */
+              <div
+                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
+                  status
+                    ? "bg-emerald-500/90 text-white"
+                    : "bg-zinc-800/80 text-zinc-300 border border-zinc-600/50"
+                }`}
+              >
+                {status ? "Activo" : "Borrador"}
+              </div>
             )}
-            {/* Regular status badge */}
-            <div className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
-              status
-                ? "bg-emerald-500/90 text-white"
-                : "bg-zinc-800/80 text-zinc-300 border border-zinc-600/50"
-            }`}>
-              {status ? "Activo" : "Borrador"}
-            </div>
             {/* Event type badge */}
-            {eventType && EVENT_TYPE_CONFIG[eventType] && (() => {
-              const TypeIcon = EVENT_TYPE_CONFIG[eventType].icon;
-              const typeLabel = EVENT_TYPE_CONFIG[eventType].label;
-              return (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-zinc-900/80 text-zinc-200 border border-zinc-700/50 backdrop-blur-sm">
-                  <TypeIcon className="h-3 w-3" />
-                  <span>{typeLabel}</span>
-                </div>
-              );
-            })()}
+            {eventType &&
+              EVENT_TYPE_CONFIG[eventType] &&
+              (() => {
+                const TypeIcon = EVENT_TYPE_CONFIG[eventType].icon;
+                const typeLabel = EVENT_TYPE_CONFIG[eventType].label;
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-zinc-900/80 text-zinc-200 border border-zinc-700/50 backdrop-blur-sm">
+                    <TypeIcon className="h-3 w-3" />
+                    <span>{typeLabel}</span>
+                  </div>
+                );
+              })()}
           </div>
         )}
 
         {/* Category icon in top left corner - only show on public view (no status) */}
-        {status === undefined && category && CATEGORY_ICONS[category as EventCategory] && (() => {
-          const CategoryIcon = CATEGORY_ICONS[category as EventCategory];
-          const categoryLabel = EVENT_CATEGORY_LABELS[category as EventCategory] || category;
-          return (
-            <div
-              className="absolute top-4 left-4 z-10"
-              title={categoryLabel}
-            >
-              <div className="p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
-                <CategoryIcon className="h-4 w-4 text-white" />
+        {status === undefined &&
+          category &&
+          CATEGORY_ICONS[category as EventCategory] &&
+          (() => {
+            const CategoryIcon = CATEGORY_ICONS[category as EventCategory];
+            const categoryLabel =
+              EVENT_CATEGORY_LABELS[category as EventCategory] || category;
+            return (
+              <div className="absolute top-4 left-4 z-10" title={categoryLabel}>
+                <div className="p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
+                  <CategoryIcon className="h-4 w-4 text-white" />
+                </div>
               </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
 
         {/* Date badge in top right corner */}
         <div className="absolute top-4 right-4 z-10">
-          <div className={
-            isThemeDark
-              ? "bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center"
-              : isImageLight
-                ? "bg-white/80 backdrop-blur-sm border border-gray-300/50 rounded-xl px-4 py-3 text-center"
-                : "bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center"
-          }>
+          <div
+            className={
+              isThemeDark
+                ? "bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center"
+                : isImageLight
+                  ? "bg-white/80 backdrop-blur-sm border border-gray-300/50 rounded-xl px-4 py-3 text-center"
+                  : "bg-black/40 backdrop-blur-sm border border-gray-400/50 rounded-xl px-4 py-3 text-center"
+            }
+          >
             <div
               className={`text-2xl font-bold leading-none ${
-                isThemeDark ? "text-white" : (isImageLight ? "text-zinc-900" : "text-white")
+                isThemeDark
+                  ? "text-white"
+                  : isImageLight
+                    ? "text-zinc-900"
+                    : "text-white"
               }`}
               suppressHydrationWarning
             >
@@ -208,7 +227,11 @@ export function EventCard({
             </div>
             <div
               className={`text-sm uppercase leading-none mt-1 ${
-                isThemeDark ? "text-white/90" : (isImageLight ? "text-zinc-700" : "text-white/90")
+                isThemeDark
+                  ? "text-white/90"
+                  : isImageLight
+                    ? "text-zinc-700"
+                    : "text-white/90"
               }`}
               suppressHydrationWarning
             >
@@ -232,16 +255,28 @@ export function EventCard({
         {/* Event information overlay */}
         <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6 z-10">
           {/* Event title */}
-          <h2 className={`text-xl sm:text-lg md:text-xl font-bold text-balance mb-3 sm:mb-3 line-clamp-2 ${
-            isThemeDark ? "text-white" : (isImageLight ? "text-zinc-900" : "text-white")
-          }`}>
+          <h2
+            className={`text-xl sm:text-lg md:text-xl font-bold text-balance mb-3 sm:mb-3 line-clamp-2 ${
+              isThemeDark
+                ? "text-white"
+                : isImageLight
+                  ? "text-zinc-900"
+                  : "text-white"
+            }`}
+          >
             {title}
           </h2>
 
           {/* Event details */}
-          <div className={`flex flex-col gap-1.5 sm:gap-1.5 text-base sm:text-base ${
-            isThemeDark ? "text-white/90" : (isImageLight ? "text-zinc-700" : "text-white/90")
-          }`}>
+          <div
+            className={`flex flex-col gap-1.5 sm:gap-1.5 text-base sm:text-base ${
+              isThemeDark
+                ? "text-white/90"
+                : isImageLight
+                  ? "text-zinc-700"
+                  : "text-white/90"
+            }`}
+          >
             <span className="line-clamp-1">{location}</span>
           </div>
         </div>
