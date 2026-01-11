@@ -84,6 +84,7 @@ export async function POST(request: Request) {
 
     // Get payment details from Mercado Pago
     // Note: Using marketplace access token here
+    // In production, you may need to use the seller's token stored in payment_processor_account
     const mercadopago = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN!,
     });
