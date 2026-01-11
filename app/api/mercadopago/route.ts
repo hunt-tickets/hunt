@@ -100,7 +100,9 @@ export async function POST(request: Request) {
     // Only process approved payments
     if (payment.status !== "approved") {
       console.log(
-        `[Webhook] ⏭️  Payment status is '${payment.status}' (not approved), skipping`
+        `[Webhook] ⏭️  Payment status is '${payment.status}' (not approved), skipping`,
+        `Status detail: ${payment.status_detail}`,
+        `Payment method: ${payment.payment_method_id}`
       );
       return new Response(null, { status: 200 });
     }
