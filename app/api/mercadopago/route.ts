@@ -161,17 +161,30 @@ export async function POST(request: Request) {
       `[Webhook] Processing reservation ${reservationId} (platform: ${platform})`
     );
 
-    const order = await convertReservationToOrder(
-      reservationId,
-      payment.id?.toString(), // Use payment ID as idempotency key
-      platform,
-      currency,
+    console.log("[Webhook] Tax data:", {
+      taxWithholdingIca,
+      taxWithholdingFuente,
       marketplaceFee,
       processorFee,
-      undefined, // soldBy (for cash sales)
-      taxWithholdingIca,
-      taxWithholdingFuente
-    );
+    });
+
+    let order;
+    try {
+      order = await convertReservationToOrder(
+        reservationId,
+        payment.id?.toString(), // Use payment ID as idempotency key
+        platform,
+        currency,
+        marketplaceFee,
+        processorFee,
+        undefined, // soldBy (for cash sales)
+        taxWithholdingIca,
+        taxWithholdingFuente
+      );
+    } catch (conversionError) {
+      console.error("[Webhook] ❌ Order conversion failed:", conversionError);
+      throw conversionError;
+    }
 
     console.log(
       `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`
