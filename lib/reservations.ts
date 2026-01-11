@@ -194,13 +194,11 @@ export async function convertReservationToOrder(
   currency: string = "COP",
   marketplaceFee: number = 0,
   processorFee: number = 0,
-  soldBy?: string, // For cash sales: the seller who made the sale
-  taxWithholdingIca: number = 0, // Colombian ICA tax withholding
-  taxWithholdingFuente: number = 0 // Colombian Retención en la Fuente
+  soldBy?: string // For cash sales: the seller who made the sale
 ): Promise<OrderResult> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("convert_reservation_to_order_v2", {
+  const { data, error } = await supabase.rpc("convert_reservation_to_order", {
     p_reservation_id: reservationId,
     p_payment_session_id: paymentSessionId || null,
     p_platform: platform,
@@ -208,8 +206,6 @@ export async function convertReservationToOrder(
     p_marketplace_fee: marketplaceFee,
     p_processor_fee: processorFee,
     p_sold_by: soldBy || null,
-    p_tax_withholding_ica: taxWithholdingIca,
-    p_tax_withholding_fuente: taxWithholdingFuente,
   });
 
   if (error) {

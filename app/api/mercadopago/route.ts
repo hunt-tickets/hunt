@@ -92,11 +92,9 @@ export async function POST(request: Request) {
       id: body.data.id,
     });
 
-    console.log(payment, payment.fee_details);
-
-    // console.log(
-    //   `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`
-    // );
+    console.log(
+      `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`
+    );
 
     // Only process approved payments
     if (payment.status !== "approved") {
@@ -121,35 +119,6 @@ export async function POST(request: Request) {
     const marketplaceFee =
       feeDetails.find((f) => f.type === "application_fee")?.amount || 0;
 
-    // Extract tax withholdings from charges_details
-    // Note: MercadoPago SDK types are incomplete, so we need to cast to access all properties
-    const chargesDetails = (payment.charges_details || []) as Array<{
-      type?: string;
-      name?: string;
-      base_amount?: number;
-      rate?: number;
-      [key: string]: unknown;
-    }>;
-    const taxCharges = chargesDetails.filter((c) => c.type === "tax");
-
-    // Find ICA and Fuente tax withholdings
-    const icaCharge = taxCharges.find((t) =>
-      t.name?.toLowerCase().includes("ica")
-    );
-    const fuenteCharge = taxCharges.find((t) =>
-      t.name?.toLowerCase().includes("fuente")
-    );
-
-    // Calculate tax amounts: (base_amount * rate) / 100
-    const taxWithholdingIca =
-      icaCharge && icaCharge.base_amount && icaCharge.rate
-        ? (icaCharge.base_amount * icaCharge.rate) / 100
-        : 0;
-    const taxWithholdingFuente =
-      fuenteCharge && fuenteCharge.base_amount && fuenteCharge.rate
-        ? (fuenteCharge.base_amount * fuenteCharge.rate) / 100
-        : 0;
-
     if (!reservationId) {
       console.error("[Webhook] ❌ No reservation_id in payment metadata");
       return new Response("Missing reservation_id in metadata", {
@@ -161,30 +130,14 @@ export async function POST(request: Request) {
       `[Webhook] Processing reservation ${reservationId} (platform: ${platform})`
     );
 
-    console.log("[Webhook] Tax data:", {
-      taxWithholdingIca,
-      taxWithholdingFuente,
+    const order = await convertReservationToOrder(
+      reservationId,
+      payment.id?.toString(), // Use payment ID as idempotency key
+      platform,
+      currency,
       marketplaceFee,
-      processorFee,
-    });
-
-    let order;
-    try {
-      order = await convertReservationToOrder(
-        reservationId,
-        payment.id?.toString(), // Use payment ID as idempotency key
-        platform,
-        currency,
-        marketplaceFee,
-        processorFee,
-        undefined, // soldBy (for cash sales)
-        taxWithholdingIca,
-        taxWithholdingFuente
-      );
-    } catch (conversionError) {
-      console.error("[Webhook] ❌ Order conversion failed:", conversionError);
-      throw conversionError;
-    }
+      processorFee
+    );
 
     console.log(
       `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`
