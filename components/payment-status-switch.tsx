@@ -51,7 +51,7 @@ export function PaymentStatusSwitch({
       }
 
       toast.success(
-        `${processorName} ${newStatus === "active" ? "activated" : "deactivated"} successfully`
+        `${processorName} ${newStatus === "active" ? "activado" : "desactivado"} exitosamente`
       );
       router.refresh();
     } catch (error) {
@@ -59,7 +59,7 @@ export function PaymentStatusSwitch({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to update payment processor status"
+          : "Error al actualizar el estado del procesador de pagos"
       );
     } finally {
       setIsLoading(false);
@@ -88,7 +88,7 @@ export function PaymentStatusSwitch({
         aria-label={`Toggle ${processorName} status`}
       />
       <span className="text-sm text-muted-foreground">
-        {isActive ? "Active" : "Inactive"}
+        {isActive ? "Activo" : "Inactivo"}
       </span>
     </div>
   );

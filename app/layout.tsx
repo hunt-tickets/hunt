@@ -65,6 +65,7 @@ export default function RootLayout({
           <Toaster
             position="top-center"
             expand={false}
+            offset="80px"
             className="!z-[99999]"
             toastOptions={{
               unstyled: true,
