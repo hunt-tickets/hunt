@@ -84,7 +84,6 @@ export async function POST(request: Request) {
 
     // Get payment details from Mercado Pago
     // Note: Using marketplace access token here
-    // In production, you may need to use the seller's token stored in payment_processor_account
     const mercadopago = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN!,
     });
@@ -93,9 +92,11 @@ export async function POST(request: Request) {
       id: body.data.id,
     });
 
-    console.log(
-      `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`
-    );
+    console.log(payment, payment.fee_details);
+
+    // console.log(
+    //   `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`
+    // );
 
     // Only process approved payments
     if (payment.status !== "approved") {

@@ -73,10 +73,11 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2 text-base">
               <CreditCard className="h-4 w-4" />
-              Payment Processors
+              Procesadores de pagos
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Connect and manage payment processors to accept payments
+              Conectar y administrar procesadores de pagos para aceptar
+              pagos{" "}
             </CardDescription>
             {paymentAccounts.length > 0 && (
               <div className="flex items-center gap-3 pt-1">
