@@ -121,6 +121,35 @@ export async function POST(request: Request) {
     const marketplaceFee =
       feeDetails.find((f) => f.type === "application_fee")?.amount || 0;
 
+    // Extract tax withholdings from charges_details
+    // Note: MercadoPago SDK types are incomplete, so we need to cast to access all properties
+    const chargesDetails = (payment.charges_details || []) as Array<{
+      type?: string;
+      name?: string;
+      base_amount?: number;
+      rate?: number;
+      [key: string]: unknown;
+    }>;
+    const taxCharges = chargesDetails.filter((c) => c.type === "tax");
+
+    // Find ICA and Fuente tax withholdings
+    const icaCharge = taxCharges.find((t) =>
+      t.name?.toLowerCase().includes("ica")
+    );
+    const fuenteCharge = taxCharges.find((t) =>
+      t.name?.toLowerCase().includes("fuente")
+    );
+
+    // Calculate tax amounts: (base_amount * rate) / 100
+    const taxWithholdingIca =
+      icaCharge && icaCharge.base_amount && icaCharge.rate
+        ? (icaCharge.base_amount * icaCharge.rate) / 100
+        : 0;
+    const taxWithholdingFuente =
+      fuenteCharge && fuenteCharge.base_amount && fuenteCharge.rate
+        ? (fuenteCharge.base_amount * fuenteCharge.rate) / 100
+        : 0;
+
     if (!reservationId) {
       console.error("[Webhook] ❌ No reservation_id in payment metadata");
       return new Response("Missing reservation_id in metadata", {
@@ -138,7 +167,10 @@ export async function POST(request: Request) {
       platform,
       currency,
       marketplaceFee,
-      processorFee
+      processorFee,
+      undefined, // soldBy (for cash sales)
+      taxWithholdingIca,
+      taxWithholdingFuente
     );
 
     console.log(

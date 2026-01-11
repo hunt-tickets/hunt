@@ -232,6 +232,13 @@
       "when": 1768019123060,
       "tag": "0032_ordinary_human_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1768109303810,
+      "tag": "0033_chilly_the_order",
+      "breakpoints": true
     }
   ]
 }

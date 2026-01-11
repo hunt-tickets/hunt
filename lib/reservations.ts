@@ -194,7 +194,9 @@ export async function convertReservationToOrder(
   currency: string = "COP",
   marketplaceFee: number = 0,
   processorFee: number = 0,
-  soldBy?: string // For cash sales: the seller who made the sale
+  soldBy?: string, // For cash sales: the seller who made the sale
+  taxWithholdingIca: number = 0, // Colombian ICA tax withholding
+  taxWithholdingFuente: number = 0 // Colombian Retención en la Fuente
 ): Promise<OrderResult> {
   const supabase = await createClient();
 
@@ -206,6 +208,8 @@ export async function convertReservationToOrder(
     p_marketplace_fee: marketplaceFee,
     p_processor_fee: processorFee,
     p_sold_by: soldBy || null,
+    p_tax_withholding_ica: taxWithholdingIca,
+    p_tax_withholding_fuente: taxWithholdingFuente,
   });
 
   if (error) {
