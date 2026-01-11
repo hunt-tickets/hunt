@@ -200,7 +200,7 @@ export async function convertReservationToOrder(
 ): Promise<OrderResult> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("convert_reservation_to_order", {
+  const { data, error } = await supabase.rpc("convert_reservation_to_order_v2", {
     p_reservation_id: reservationId,
     p_payment_session_id: paymentSessionId || null,
     p_platform: platform,

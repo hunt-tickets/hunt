@@ -97,6 +97,9 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       venue_id,
       lifecycle_status,
       deleted_at,
+      cancelled_by,
+      cancellation_reason,
+      cancellation_initiated_at,
       ticket_types (*),
       orders (
         *,
@@ -334,6 +337,34 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   // Check if event is being cancelled
   const isCancellationPending = event.lifecycle_status === "cancellation_pending";
 
+  // Build cancellation data if event is being cancelled
+  const cancellationData = isCancellationPending
+    ? {
+        cancelledBy: event.cancelled_by || null,
+        cancellationReason: event.cancellation_reason || null,
+        cancellationInitiatedAt: event.cancellation_initiated_at || null,
+        totalOrdersToRefund: orders.filter(
+          (order) => order.payment_status === "paid"
+        ).length,
+        totalAmountToRefund: orders
+          .filter((order) => order.payment_status === "paid")
+          .reduce((sum, order) => sum + parseFloat(order.total_amount), 0),
+        orders: orders
+          .filter((order) => order.payment_status === "paid")
+          .map((order) => ({
+            orderId: order.id,
+            orderDate: order.created_at,
+            customerName: "", // TODO: Fetch from user table
+            customerEmail: "", // TODO: Fetch from user table
+            amount: parseFloat(order.total_amount),
+            platform: order.platform as "web" | "app" | "cash",
+            paymentId: order.payment_session_id,
+            refundStatus: "pending" as const, // TODO: Fetch from refunds table
+            refundId: null,
+          })),
+      }
+    : null;
+
   // Configuration URL
   const configUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
 
@@ -429,6 +460,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           eventName={event.name}
           eventFlyer={event.flyer || "/event-placeholder.svg"}
           sellers={sellersWithSales}
+          cancellationData={cancellationData}
           showTabsOnly
         />
       </EventStickyHeader>
@@ -460,6 +492,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         eventName={event.name}
         eventFlyer={event.flyer || "/event-placeholder.svg"}
         sellers={sellersWithSales}
+        cancellationData={cancellationData}
         showContentOnly
       />
     </div>

@@ -1,11 +1,13 @@
 "use client";
 
-import { BarChart3, Globe, Users } from "lucide-react";
+import { BarChart3, Globe, Users, AlertCircle } from "lucide-react";
 import { EventDashboard } from "@/components/event-dashboard";
 import { EventBorderaux } from "@/components/event-borderaux";
 import { EventWebAnalytics } from "@/components/event-web-analytics";
 import { SellersTable } from "@/components/sellers-table";
+import { RefundManagementTab } from "@/components/refund-management-tab";
 import { useEventTabs } from "@/contexts/event-tabs-context";
+import { useEffect } from "react";
 
 interface Sale {
   id: string;
@@ -67,6 +69,27 @@ interface Seller {
   created_at: string;
 }
 
+interface RefundOrder {
+  orderId: string;
+  orderDate: string;
+  customerName: string;
+  customerEmail: string;
+  amount: number;
+  platform: "web" | "app" | "cash";
+  paymentId: string | null;
+  refundStatus: "pending" | "processing" | "completed" | "failed";
+  refundId?: string | null;
+}
+
+interface CancellationData {
+  cancelledBy: string | null;
+  cancellationReason: string | null;
+  cancellationInitiatedAt: string | null;
+  totalOrdersToRefund: number;
+  totalAmountToRefund: number;
+  orders: RefundOrder[];
+}
+
 interface EventDashboardTabsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   financialReport: any;
@@ -78,6 +101,7 @@ interface EventDashboardTabsProps {
   sellers: Seller[];
   showTabsOnly?: boolean;
   showContentOnly?: boolean;
+  cancellationData?: CancellationData | null;
 }
 
 export function EventDashboardTabs({
@@ -90,13 +114,37 @@ export function EventDashboardTabs({
   sellers,
   showTabsOnly = false,
   showContentOnly = false,
+  cancellationData = null,
 }: EventDashboardTabsProps) {
   const { dashboardTab: activeTab, setDashboardTab: setActiveTab } =
     useEventTabs();
 
+  const isCancellationPending = !!cancellationData;
+
+  // Set refunds tab as default when in cancellation mode
+  useEffect(() => {
+    if (isCancellationPending && activeTab !== "refunds") {
+      setActiveTab("refunds");
+    }
+  }, [isCancellationPending, activeTab, setActiveTab]);
+
   // Tabs section
   const tabsSection = (
     <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {isCancellationPending && (
+        <button
+          onClick={() => setActiveTab("refunds")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
+            activeTab === "refunds"
+              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+              : "bg-amber-500/10 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/20 border border-amber-500/20"
+          }`}
+        >
+          <AlertCircle className="h-4 w-4" />
+          Reembolsos
+        </button>
+      )}
+
       <button
         onClick={() => setActiveTab("dashboard")}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
@@ -106,7 +154,7 @@ export function EventDashboardTabs({
         }`}
       >
         <BarChart3 className="h-4 w-4" />
-        Dashboard
+        Resumen
       </button>
 
       <button
@@ -137,6 +185,13 @@ export function EventDashboardTabs({
   // Content section
   const contentSection = (
     <>
+      {activeTab === "refunds" && cancellationData && (
+        <RefundManagementTab
+          eventId={eventId}
+          cancellationData={cancellationData}
+        />
+      )}
+
       {activeTab === "dashboard" && (
         <EventDashboard
           financialReport={financialReport}
