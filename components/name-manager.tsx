@@ -28,7 +28,7 @@ function SubmitButtons({
         onClick={onCancel}
         variant="ghost"
         size="sm"
-        className="h-9 rounded-xl"
+        className="h-9 rounded-xl hover:bg-gray-200 dark:hover:bg-accent/50"
         disabled={pending}
         aria-label="Cancelar cambios de nombre"
       >

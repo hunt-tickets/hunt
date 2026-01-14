@@ -327,7 +327,7 @@ export function PasswordManager({
               onClick={resetForm}
               variant="ghost"
               size="sm"
-              className="h-9 rounded-xl"
+              className="h-9 rounded-xl hover:bg-gray-200 dark:hover:bg-accent/50"
               disabled={isPending}
               aria-label="Cancelar cambio de contraseña"
             >
