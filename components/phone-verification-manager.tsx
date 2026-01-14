@@ -452,47 +452,50 @@ export function PhoneVerificationManager({
 
   // Add/Edit Phone Number View
   return (
-    <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
-      <div className="flex items-center gap-3 mb-3">
-        <Phone className="h-5 w-5 text-gray-400" aria-hidden="true" />
-        <span className="text-sm font-medium">
-          {isEditing ? "Editar número de teléfono" : "Agregar número de teléfono"}
-        </span>
-      </div>
+    <div className="rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors overflow-hidden">
+      <div className="p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Phone className="h-5 w-5 text-gray-400" aria-hidden="true" />
+          <span className="text-sm font-medium text-gray-500">
+            {isEditing ? "Editar número de teléfono" : "Número de teléfono"}
+          </span>
+        </div>
 
-      <PhoneInput
-        value={phoneInput}
-        onChange={setPhoneInput}
-        disabled={isSendingOTP}
-        placeholder="Ingresa tu número de teléfono"
-      />
-
-      <div className="flex justify-end gap-2 mt-3">
-        <Button
-          type="button"
-          onClick={handleCancel}
-          variant="ghost"
-          size="sm"
-          className="h-9 rounded-xl"
+        <PhoneInput
+          value={phoneInput}
+          onChange={setPhoneInput}
           disabled={isSendingOTP}
-        >
-          Cancelar
-        </Button>
-        <Button
-          onClick={handleSendOTP}
-          disabled={isSendingOTP || !phoneInput || phoneInput.length < 10}
-          size="sm"
-          className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSendingOTP ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            "Verificar"
-          )}
-        </Button>
+          placeholder="Ingresa tu número de teléfono"
+          variant="embedded"
+        />
+
+        <div className="flex justify-end gap-2 mt-3">
+          <Button
+            type="button"
+            onClick={handleCancel}
+            variant="ghost"
+            size="sm"
+            className="h-9 rounded-xl"
+            disabled={isSendingOTP}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSendOTP}
+            disabled={isSendingOTP || !phoneInput || phoneInput.length < 10}
+            size="sm"
+            className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSendingOTP ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              "Verificar"
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

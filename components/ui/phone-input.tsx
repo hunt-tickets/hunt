@@ -11,6 +11,7 @@ interface PhoneInputProps {
   error?: string;
   disabled?: boolean;
   placeholder?: string;
+  variant?: 'default' | 'embedded'; // 'embedded' removes wrapper styling
 }
 
 const InputComponent = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>((props, ref) => (
@@ -19,20 +20,28 @@ const InputComponent = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HT
 InputComponent.displayName = 'PhoneInputComponent';
 
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número" }) => {
+  ({ value, onChange, error, disabled = false, placeholder = "Ingresa tu número", variant = 'default' }) => {
+    const phoneInputElement = (
+      <PhoneInputWithCountry
+        international
+        defaultCountry="CO"
+        value={value as E164Number | undefined}
+        onChange={(val) => onChange(val || '')}
+        disabled={disabled}
+        placeholder={placeholder}
+        inputComponent={InputComponent}
+      />
+    );
+
     return (
       <div className="w-full">
-        <div className="rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors focus-within:border-primary/50 p-4">
-          <PhoneInputWithCountry
-            international
-            defaultCountry="CO"
-            value={value as E164Number | undefined}
-            onChange={(val) => onChange(val || '')}
-            disabled={disabled}
-            placeholder={placeholder}
-            inputComponent={InputComponent}
-          />
-        </div>
+        {variant === 'embedded' ? (
+          phoneInputElement
+        ) : (
+          <div className="rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors focus-within:border-primary/50 p-4">
+            {phoneInputElement}
+          </div>
+        )}
         {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
 
         <style jsx global suppressHydrationWarning>{`
