@@ -57,50 +57,6 @@ export const INTEGRATIONS: Integration[] = [
     website: "https://n8n.io",
     documentationUrl: "https://docs.n8n.io",
   },
-
-  // COMING SOON - Google Analytics
-  {
-    id: "google-analytics",
-    name: "Google Analytics",
-    description: "Rastrea el comportamiento de usuarios y mide el rendimiento de tus eventos.",
-    logo: "https://www.gstatic.com/analytics-suite/header/suite/v2/ic_analytics.svg",
-    status: "coming-soon",
-    category: INTEGRATION_CATEGORIES.WEBHOOKS,
-    website: "https://analytics.google.com",
-  },
-
-  // COMING SOON - Meta Pixel
-  {
-    id: "meta-pixel",
-    name: "Meta Pixel",
-    description: "Optimiza tus campañas publicitarias en Facebook e Instagram con tracking avanzado.",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
-    status: "coming-soon",
-    category: INTEGRATION_CATEGORIES.WEBHOOKS,
-    website: "https://business.facebook.com",
-  },
-
-  // COMING SOON - Mailchimp
-  {
-    id: "mailchimp",
-    name: "Mailchimp",
-    description: "Sincroniza tus compradores y envía campañas de email marketing personalizadas.",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Mailchimp_Logo.svg/2560px-Mailchimp_Logo.svg.png",
-    status: "coming-soon",
-    category: INTEGRATION_CATEGORIES.WEBHOOKS,
-    website: "https://mailchimp.com",
-  },
-
-  // COMING SOON - WhatsApp Business
-  {
-    id: "whatsapp-business",
-    name: "WhatsApp Business",
-    description: "Envía confirmaciones de compra y notificaciones de eventos directamente por WhatsApp.",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
-    status: "coming-soon",
-    category: INTEGRATION_CATEGORIES.WEBHOOKS,
-    website: "https://business.whatsapp.com",
-  },
 ];
 
 // Get integrations by category
