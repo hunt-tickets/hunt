@@ -122,7 +122,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
           subtitle="Gestión de Entradas"
         />
 
-        <div className="px-3 py-3 sm:px-6 sm:py-4">
+        <div className="py-3 sm:py-4">
           <Card className="border-yellow-500/50 bg-yellow-500/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-600">
@@ -158,7 +158,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
           subtitle="Gestión de Entradas"
         />
 
-        <div className="px-3 py-3 sm:px-6 sm:py-4">
+        <div className="py-3 sm:py-4">
           <Card className="border-red-500/50 bg-red-500/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-red-600">
@@ -193,7 +193,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
           subtitle="Gestión de Entradas"
         />
 
-        <div className="px-3 py-3 sm:px-6 sm:py-4">
+        <div className="py-3 sm:py-4">
           <Card className="border-orange-500/50 bg-orange-500/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-orange-600">
@@ -342,7 +342,7 @@ export default async function EntradasPage({ params }: EntradasPageProps) {
       />
 
       {/* Content */}
-      <div className="px-3 py-3 sm:px-6 sm:py-4">
+      <div className="py-3 sm:py-4">
         <EventTicketsContent
           eventId={eventId}
           tickets={ticketTypesForComponent}
