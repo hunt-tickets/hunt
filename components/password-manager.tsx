@@ -208,7 +208,7 @@ export function PasswordManager({
               placeholder="Contraseña actual"
               autoComplete="current-password"
               aria-label="Contraseña actual"
-              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
               disabled={isPending}
             />
             <button
@@ -240,7 +240,7 @@ export function PasswordManager({
               autoComplete="new-password"
               aria-label="Nueva contraseña"
               aria-describedby={passwordError ? "password-error" : undefined}
-              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
               disabled={isPending}
             />
             <button
@@ -271,7 +271,7 @@ export function PasswordManager({
               placeholder="Confirmar contraseña"
               autoComplete="new-password"
               aria-label="Confirmar contraseña"
-              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="h-6 w-full pr-8 bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
               disabled={isPending}
             />
             <button
