@@ -418,7 +418,7 @@ export function EditOrganizationForm({
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium">
                   Nombre de la organización{" "}
-                  <span className="text-red-400">*</span>
+                  <span className="text-gray-400">*</span>
                 </Label>
                 <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                   <div className="flex items-center gap-3 flex-1">
@@ -442,7 +442,7 @@ export function EditOrganizationForm({
               <div className="space-y-2">
                 <Label htmlFor="slug" className="text-sm font-medium">
                   Identificador único (slug){" "}
-                  <span className="text-red-400">*</span>
+                  <span className="text-gray-400">*</span>
                 </Label>
                 <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors relative">
                   <div className="flex items-center gap-3 flex-1">
@@ -693,7 +693,7 @@ export function EditOrganizationForm({
                   <div className="space-y-2">
                     <Label htmlFor="fullName" className="text-sm font-medium">
                       Nombres y apellidos completos{" "}
-                      <span className="text-red-400">*</span>
+                      <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -744,7 +744,7 @@ export function EditOrganizationForm({
                       className="text-sm font-medium"
                     >
                       Número de identificación{" "}
-                      <span className="text-red-400">*</span>
+                      <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -874,7 +874,7 @@ export function EditOrganizationForm({
                   <div className="space-y-2">
                     <Label htmlFor="legalName" className="text-sm font-medium">
                       Razón social completa{" "}
-                      <span className="text-red-400">*</span>
+                      <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -944,7 +944,7 @@ export function EditOrganizationForm({
                       className="text-sm font-medium"
                     >
                       Dirección del domicilio social{" "}
-                      <span className="text-red-400">*</span>
+                      <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
