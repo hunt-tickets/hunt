@@ -428,78 +428,72 @@ export function PhoneVerificationManager({
     );
   }
 
-  // No Phone Number - Collapsed View OR Add/Edit Phone Number View
-  if (!phoneNumber || isAdding || isEditing) {
+  // No Phone Number - Collapsed View
+  if (!phoneNumber && !isAdding && !isEditing) {
     return (
-      <div className="flex flex-col p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors group">
-        {/* Header with icon and title/button */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Phone className="h-5 w-5 text-gray-400" />
-            <span className="text-sm font-medium text-gray-500">
-              Número de teléfono
-            </span>
-          </div>
-
-          {/* Show "Agregar número" button only when collapsed */}
-          {!isAdding && !isEditing && (
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <button
-                onClick={() => setIsAdding(true)}
-                className="text-sm font-medium hover:underline"
-              >
-                Agregar número
-              </button>
-            </div>
-          )}
+      <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
+        <div className="flex items-center gap-3">
+          <Phone className="h-5 w-5 text-gray-400" />
+          <span className="text-sm font-medium text-gray-500">
+            Número de teléfono
+          </span>
         </div>
-
-        {/* Show input and buttons when adding or editing */}
-        {(isAdding || isEditing) && (
-          <>
-            <div className="mt-3">
-              <PhoneInput
-                value={phoneInput}
-                onChange={setPhoneInput}
-                disabled={isSendingOTP}
-                placeholder="Ingresa tu número de teléfono"
-                variant="embedded"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 mt-3">
-              <Button
-                type="button"
-                onClick={handleCancel}
-                variant="ghost"
-                size="sm"
-                className="h-9 rounded-xl"
-                disabled={isSendingOTP}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleSendOTP}
-                disabled={isSendingOTP || !phoneInput || phoneInput.length < 10}
-                size="sm"
-                className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSendingOTP ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  "Verificar"
-                )}
-              </Button>
-            </div>
-          </>
-        )}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={() => setIsAdding(true)}
+            className="text-sm font-medium hover:underline"
+          >
+            Agregar número
+          </button>
+        </div>
       </div>
     );
   }
 
-  // This code below should never be reached now, but keeping for safety
-  return null;
+  // Add/Edit Phone Number View
+  return (
+    <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+      <div className="flex items-center gap-3 mb-3">
+        <Phone className="h-5 w-5 text-gray-400" aria-hidden="true" />
+        <span className="text-sm font-medium">
+          {isEditing ? "Editar número de teléfono" : "Agregar número de teléfono"}
+        </span>
+      </div>
+
+      <PhoneInput
+        value={phoneInput}
+        onChange={setPhoneInput}
+        disabled={isSendingOTP}
+        placeholder="Ingresa tu número de teléfono"
+      />
+
+      <div className="flex justify-end gap-2 mt-3">
+        <Button
+          type="button"
+          onClick={handleCancel}
+          variant="ghost"
+          size="sm"
+          className="h-9 rounded-xl"
+          disabled={isSendingOTP}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSendOTP}
+          disabled={isSendingOTP || !phoneInput || phoneInput.length < 10}
+          size="sm"
+          className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSendingOTP ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Enviando...
+            </>
+          ) : (
+            "Verificar"
+          )}
+        </Button>
+      </div>
+    </div>
+  );
 }
