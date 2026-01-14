@@ -20,6 +20,7 @@ import { EmailManager } from "@/components/email-manager";
 import { DocumentManager } from "@/components/document-manager";
 import { SignOutButton } from "@/components/sign-out-button";
 import { NameManager } from "@/components/name-manager";
+import { ProfileAvatarManager } from "@/components/profile-avatar-manager";
 // import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 
 export default async function ProfilePage() {
@@ -112,19 +113,10 @@ export default async function ProfilePage() {
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
         <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
           {/* Avatar */}
-          <div className="relative flex-shrink-0">
-            {user.image ? (
-              <img
-                src={user.image}
-                alt={user.name || "Usuario"}
-                className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-primary/20"
-              />
-            ) : (
-              <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/20 flex items-center justify-center">
-                <User className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary" />
-              </div>
-            )}
-          </div>
+          <ProfileAvatarManager
+            currentImage={user.image}
+            userName={user.name}
+          />
 
           {/* Name and Email */}
           <div className="flex-1 min-w-0">
