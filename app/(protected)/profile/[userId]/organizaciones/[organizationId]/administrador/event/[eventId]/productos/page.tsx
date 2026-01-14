@@ -143,7 +143,7 @@ export default async function ProductosPage({ params }: ProductosPageProps) {
 
       <div className="py-3 sm:py-6 space-y-6">
         {/* Coming Soon Card */}
-        <Card className="bg-white dark:bg-[#202020] border-gray-200 dark:border-[#2a2a2a]">
+        <Card className="bg-white dark:bg-[#202020] border-gray-200 dark:border-[#2a2a2a] mx-3 sm:mx-6">
           <CardContent className="p-8 sm:p-12">
             <div className="flex flex-col items-center text-center space-y-6 max-w-2xl mx-auto">
               {/* Icon */}
