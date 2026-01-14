@@ -240,7 +240,7 @@ interface EventData {
   checkout_questions?: Array<{
     id: string;
     question: string;
-    type: "text" | "select" | "textarea";
+    type: "text" | "select" | "multiselect" | "textarea";
     required: boolean;
     scope: "per_order" | "per_ticket";
     ticket_type_ids: string[];
@@ -391,7 +391,7 @@ export function EventConfigContent({
   interface CheckoutQuestion {
     id: string;
     question: string;
-    type: "text" | "select" | "textarea";
+    type: "text" | "select" | "multiselect" | "textarea";
     required: boolean;
     scope: "per_order" | "per_ticket";
     ticket_type_ids: string[];
