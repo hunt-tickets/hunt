@@ -137,17 +137,17 @@ export function InviteMemberForm({
                 disabled={isLoading}
                 className={`w-full text-left p-4 rounded-xl border transition-all ${
                   isSelected
-                    ? "border-gray-300 dark:border-[#3a3a3a] bg-gray-100 dark:bg-[#252525]"
-                    : "border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525]"
+                    ? "border-gray-400 dark:border-[#3a3a3a] bg-gray-200 dark:bg-[#2a2a2a] ring-1 ring-gray-300 dark:ring-[#3a3a3a]"
+                    : "border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020]"
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`mt-0.5 h-9 w-9 rounded-lg flex items-center justify-center ${
                     isSelected
-                      ? "bg-gray-200 dark:bg-white/[0.08]"
+                      ? "bg-gray-300 dark:bg-white/[0.12]"
                       : "bg-gray-100 dark:bg-white/[0.05]"
                   }`}>
-                    <Icon className="h-4 w-4 text-gray-700 dark:text-white/70" />
+                    <Icon className={`h-4 w-4 ${isSelected ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-white/70"}`} />
                   </div>
 
                   <div className="flex-1 min-w-0">
