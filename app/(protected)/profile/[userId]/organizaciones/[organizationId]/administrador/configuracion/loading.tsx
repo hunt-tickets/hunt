@@ -19,11 +19,11 @@ export default function ConfiguracionLoading() {
       </div>
 
       {/* Tabs Skeleton */}
-      <div className="flex gap-2 border-b border-gray-200 dark:border-white/10">
+      <div className="flex gap-2">
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-10 w-32 bg-gray-200 dark:bg-white/10 rounded-t animate-pulse"
+            className="h-10 w-32 bg-gray-200 dark:bg-white/10 rounded animate-pulse"
           />
         ))}
       </div>
