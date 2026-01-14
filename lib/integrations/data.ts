@@ -46,6 +46,18 @@ export const INTEGRATIONS: Integration[] = [
     documentationUrl: "https://zapier.com/apps/hunt-tickets/integrations",
   },
 
+  // N8N
+  {
+    id: "n8n",
+    name: "n8n",
+    description: "Automatización de código abierto y self-hosted. Crea workflows personalizados con control total de tus datos.",
+    logo: "https://n8n.io/favicon.ico",
+    status: "available",
+    category: INTEGRATION_CATEGORIES.WEBHOOKS,
+    website: "https://n8n.io",
+    documentationUrl: "https://docs.n8n.io",
+  },
+
   // COMING SOON - Google Analytics
   {
     id: "google-analytics",
