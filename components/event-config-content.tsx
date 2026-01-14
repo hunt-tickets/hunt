@@ -1168,7 +1168,7 @@ export function EventConfigContent({
                         {/* Drop Indicator - appears above the item when dragging over it */}
                         {dragOverIndex === index &&
                           draggedFaqIndex !== index && (
-                            <div className="absolute -top-[2px] left-0 right-0 h-[3px] bg-blue-500 rounded-full z-10" />
+                            <div className="absolute -top-[2px] left-0 right-0 h-[3px] bg-gray-900 dark:bg-white rounded-full z-10" />
                           )}
 
                         <div
