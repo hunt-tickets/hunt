@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, LogOut, X } from "lucide-react";
 import { parseUserAgent, formatSessionTime } from "@/lib/utils/session-parser";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 interface Session {
   id: string;
@@ -41,7 +41,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
 
       if (error) {
         console.error("Error loading sessions:", error);
-        toast.error("Error al cargar las sesiones");
+        toast.error({ title: "Error al cargar las sesiones" });
         return;
       }
 
@@ -78,16 +78,16 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
 
       if (!response.ok || result.error) {
         console.error("Error revoking session:", result.error);
-        toast.error("Error al cerrar la sesión");
+        toast.error({ title: "Error al cerrar la sesión" });
         return;
       }
 
       // Remove the session from local state
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-      toast.success("Sesión cerrada correctamente");
+      toast.success({ title: "Sesión cerrada correctamente" });
     } catch (error) {
       console.error("Error revoking session:", error);
-      toast.error("Error al cerrar la sesión");
+      toast.error({ title: "Error al cerrar la sesión" });
     } finally {
       setRevokingToken(null);
     }
@@ -101,16 +101,16 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
 
       if (result?.error) {
         console.error("Error revoking other sessions:", result.error);
-        toast.error("Error al cerrar las otras sesiones");
+        toast.error({ title: "Error al cerrar las otras sesiones" });
         return;
       }
 
       // Keep only the current session
       setSessions([activeSession]);
-      toast.success("Otras sesiones cerradas correctamente");
+      toast.success({ title: "Otras sesiones cerradas correctamente" });
     } catch (error) {
       console.error("Error revoking other sessions:", error);
-      toast.error("Error al cerrar las otras sesiones");
+      toast.error({ title: "Error al cerrar las otras sesiones" });
     } finally {
       setRevokingAll(false);
     }
