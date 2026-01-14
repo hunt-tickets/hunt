@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, Upload, Camera } from "lucide-react";
+import { Upload, Camera } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface ProfileAvatarManagerProps {
@@ -85,7 +85,44 @@ export function ProfileAvatarManager({
           />
         ) : (
           <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-primary/20 dark:to-primary/5 border-2 border-gray-200 dark:border-[#2a2a2a] group-hover:border-gray-300 dark:group-hover:border-[#3a3a3a] flex items-center justify-center transition-colors">
-            <User className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-blue-600 dark:text-primary" />
+            <svg
+              className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g clipPath="url(#clip0_1239_18073)">
+                <path
+                  d="M9 7V10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-blue-600 dark:text-primary"
+                />
+                <path
+                  d="M15 7V10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-blue-600 dark:text-primary"
+                />
+                <path
+                  d="M1 12C1 14.9174 2.15893 17.7153 4.22183 19.7782C6.28473 21.8411 9.08262 23 12 23C14.9174 23 17.7153 21.8411 19.7782 19.7782C21.8411 17.7153 23 14.9174 23 12C23 9.08262 21.8411 6.28473 19.7782 4.22183C17.7153 2.15893 14.9174 1 12 1C9.08262 1 6.28473 2.15893 4.22183 4.22183C2.15893 6.28473 1 9.08262 1 12Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-blue-600 dark:text-primary"
+                />
+                <path
+                  d="M17 12C17 14.7614 14.7614 17 12 17C9.23858 17 7 14.7614 7 12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-blue-600 dark:text-primary"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_1239_18073">
+                  <rect width="24" height="24" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
           </div>
         )}
 
