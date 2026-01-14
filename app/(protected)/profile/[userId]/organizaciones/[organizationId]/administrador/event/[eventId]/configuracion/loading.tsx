@@ -9,31 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function EventConfigurationLoading() {
   return (
-    <>
-      {/* Sticky Header Skeleton */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-black border-b border-gray-200 dark:border-[#2a2a2a]">
-        <div className="px-3 py-3 sm:px-6 sm:py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="space-y-2 flex-1">
-              <div className="h-6 w-48 bg-gray-200 dark:bg-white/10 rounded animate-pulse" />
-              <div className="h-4 w-32 bg-gray-200 dark:bg-white/10 rounded animate-pulse" />
-            </div>
-          </div>
-
-          {/* Tabs Skeleton */}
-          <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {[1, 2].map((i) => (
-              <div
-                key={i}
-                className="h-10 w-32 bg-gray-200 dark:bg-white/10 rounded-full animate-pulse flex-shrink-0"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Content Skeleton */}
-      <div className="py-3 sm:py-4">
+    <div className="py-3 sm:py-4">
         <div className="space-y-6">
           {/* Información Básica Card */}
           <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
@@ -159,7 +135,6 @@ export default function EventConfigurationLoading() {
             <div className="h-12 w-40 bg-gray-200 dark:bg-white/10 rounded-lg animate-pulse" />
           </div>
         </div>
-      </div>
-    </>
+    </div>
   );
 }
