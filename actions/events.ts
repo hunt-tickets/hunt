@@ -214,7 +214,7 @@ export async function updateEventConfiguration(
     country?: string;
     address?: string;
     venue_name?: string;
-    private_list?: boolean;
+    // private_list?: boolean; // TODO: Waiting for DB migration
     faqs?: Array<{ id: string; question: string; answer: string }>;
   }
 ) {
@@ -267,7 +267,7 @@ export async function updateEventConfiguration(
     country: string | null;
     address: string | null;
     venue_name: string | null;
-    private_list: boolean;
+    // private_list: boolean; // TODO: Waiting for DB migration
     faqs: Array<{ id: string; question: string; answer: string }>;
   }> = {};
 
@@ -292,8 +292,8 @@ export async function updateEventConfiguration(
     updateData.address = formData.address || null;
   if (formData.venue_name !== undefined)
     updateData.venue_name = formData.venue_name || null;
-  if (formData.private_list !== undefined)
-    updateData.private_list = formData.private_list;
+  // if (formData.private_list !== undefined)
+  //   updateData.private_list = formData.private_list; // TODO: Waiting for DB migration
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
 
   const { error } = await supabase

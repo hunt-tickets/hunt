@@ -78,7 +78,7 @@ interface EventData {
   flyer?: string;
   flyer_apple?: string;
   venue_id?: string;
-  private_list?: boolean;
+  // private_list?: boolean; // TODO: Waiting for DB migration
   faqs?: Array<{ id: string; question: string; answer: string }>;
   days?: EventDayData[];
 }
@@ -152,7 +152,7 @@ export function EventConfigContent({
         age: eventData.age || 18,
         timezone: "America/Bogota",
         currency: "COP",
-        isPrivate: eventData.private_list || false,
+        isPrivate: false, // TODO: Waiting for DB migration to add private_list field
       });
 
       // Initialize images if available
@@ -334,7 +334,7 @@ export function EventConfigContent({
           venue_name: formData.venueName,
           variable_fee: huntCosts.commissionPercentage / 100,
           fixed_fee: huntCosts.costPerTicket,
-          private_list: formData.isPrivate,
+          // private_list: formData.isPrivate, // TODO: Waiting for DB migration
         });
 
         if (!result.success) {
