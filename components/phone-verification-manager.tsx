@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { Phone, Loader2, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,26 +27,12 @@ import { toast } from "@/lib/toast";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/constants/profile";
 import type { PhoneVerificationManagerProps } from "@/lib/profile/types";
 
-const LATAM_COUNTRY_CODES = [
-  { code: "+57", country: "Colombia", flag: "🇨🇴" },
-  { code: "+52", country: "México", flag: "🇲🇽" },
-  { code: "+54", country: "Argentina", flag: "🇦🇷" },
-  { code: "+56", country: "Chile", flag: "🇨🇱" },
-  { code: "+51", country: "Perú", flag: "🇵🇪" },
-  { code: "+55", country: "Brasil", flag: "🇧🇷" },
-  { code: "+593", country: "Ecuador", flag: "🇪🇨" },
-  { code: "+58", country: "Venezuela", flag: "🇻🇪" },
-  { code: "+507", country: "Panamá", flag: "🇵🇦" },
-  { code: "+506", country: "Costa Rica", flag: "🇨🇷" },
-];
-
 export function PhoneVerificationManager({
   phoneNumber,
   phoneNumberVerified,
 }: PhoneVerificationManagerProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [countryCode, setCountryCode] = useState("+57");
   const [phoneInput, setPhoneInput] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [showOTPInput, setShowOTPInput] = useState(false);
@@ -69,12 +56,10 @@ export function PhoneVerificationManager({
 
   // Send OTP using Better Auth phoneNumber plugin
   const handleSendOTP = useCallback(async () => {
-    if (!phoneInput || phoneInput.length < 7) {
+    if (!phoneInput || phoneInput.length < 10) {
       toast.error({ title: ERROR_MESSAGES.PHONE_INVALID });
       return;
     }
-
-    const fullPhoneNumber = `${countryCode}${phoneInput}`;
 
     setIsSendingOTP(true);
     try {
@@ -84,7 +69,7 @@ export function PhoneVerificationManager({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ phoneNumber: fullPhoneNumber }),
+        body: JSON.stringify({ phoneNumber: phoneInput }),
       });
 
       const availabilityResult = await availabilityResponse.json();
@@ -98,11 +83,11 @@ export function PhoneVerificationManager({
 
       // Better Auth phoneNumber.sendOtp()
       await authClient.phoneNumber.sendOtp({
-        phoneNumber: fullPhoneNumber,
+        phoneNumber: phoneInput,
       });
 
       toast.success({ title: SUCCESS_MESSAGES.OTP_SENT });
-      setPendingPhoneNumber(fullPhoneNumber);
+      setPendingPhoneNumber(phoneInput);
       setShowOTPInput(true);
       setIsEditing(false);
       setIsAdding(false);
@@ -116,7 +101,7 @@ export function PhoneVerificationManager({
     } finally {
       setIsSendingOTP(false);
     }
-  }, [phoneInput, countryCode]);
+  }, [phoneInput]);
 
   // Verify OTP using Better Auth phoneNumber plugin
   const handleVerifyOTP = useCallback(
@@ -221,7 +206,6 @@ export function PhoneVerificationManager({
     setIsEditing(false);
     setShowOTPInput(false);
     setPhoneInput("");
-    setCountryCode("+57");
     setOtp(["", "", "", "", "", ""]);
     setPendingPhoneNumber("");
   }, []);
@@ -321,16 +305,7 @@ export function PhoneVerificationManager({
               <DropdownMenuItem
                 onClick={() => {
                   setMenuOpen(false);
-                  // Extract country code and number
-                  const matchedCountry = LATAM_COUNTRY_CODES.find((c) =>
-                    phoneNumber?.startsWith(c.code)
-                  );
-                  if (matchedCountry) {
-                    setCountryCode(matchedCountry.code);
-                    setPhoneInput(phoneNumber?.replace(matchedCountry.code, "") || "");
-                  } else {
-                    setPhoneInput(phoneNumber || "");
-                  }
+                  setPhoneInput(phoneNumber || "");
                   setIsEditing(true);
                 }}
                 className="rounded-xl cursor-pointer flex items-center px-3 py-2"
@@ -485,35 +460,12 @@ export function PhoneVerificationManager({
         </span>
       </div>
 
-      <div className="flex gap-2">
-        {/* Country Code Selector */}
-        <div className="relative w-32 p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
-          <select
-            value={countryCode}
-            onChange={(e) => setCountryCode(e.target.value)}
-            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 outline-none"
-            disabled={isSendingOTP}
-          >
-            {LATAM_COUNTRY_CODES.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.flag} {country.code}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Phone Number Input */}
-        <div className="relative flex-1 p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
-          <input
-            type="tel"
-            value={phoneInput}
-            onChange={(e) => setPhoneInput(e.target.value.replace(/\D/g, ""))}
-            placeholder="300 123 4567"
-            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 outline-none"
-            disabled={isSendingOTP}
-          />
-        </div>
-      </div>
+      <PhoneInput
+        value={phoneInput}
+        onChange={setPhoneInput}
+        disabled={isSendingOTP}
+        placeholder="Ingresa tu número de teléfono"
+      />
 
       <div className="flex justify-end gap-2 mt-3">
         <Button
@@ -528,7 +480,7 @@ export function PhoneVerificationManager({
         </Button>
         <Button
           onClick={handleSendOTP}
-          disabled={isSendingOTP || !phoneInput || phoneInput.length < 7}
+          disabled={isSendingOTP || !phoneInput || phoneInput.length < 10}
           size="sm"
           className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
