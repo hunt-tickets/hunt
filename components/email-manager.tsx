@@ -28,7 +28,7 @@ export function EmailManager({ email, emailVerified = true }: EmailManagerProps)
             </span>
             <Badge
               variant="secondary"
-              className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200 dark:bg-primary/10 dark:text-primary dark:border-primary/20 flex-shrink-0"
+              className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-primary/10 dark:text-primary dark:border-primary/20 dark:hover:bg-primary/20 flex-shrink-0"
               aria-label="Correo principal"
             >
               Principal
@@ -36,7 +36,7 @@ export function EmailManager({ email, emailVerified = true }: EmailManagerProps)
             {emailVerified && (
               <Badge
                 variant="secondary"
-                className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-600/10 dark:text-green-400 dark:border-green-600/20 flex-shrink-0"
+                className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-600/10 dark:text-green-400 dark:border-green-600/20 dark:hover:bg-green-600/20 flex-shrink-0"
                 aria-label="Correo verificado"
               >
                 Verificado
