@@ -809,12 +809,12 @@ export function EventConfigContent({
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-xs text-white/50">
+                <p className="text-xs text-gray-500 dark:text-white/50">
                   Recomendado: 900x1200px (ratio 3:4), máximo 5MB
                 </p>
 
                 {images.banner ? (
-                  <div className="relative aspect-[3/4] max-w-xs rounded-lg overflow-hidden border border-white/10 bg-white/5">
+                  <div className="relative aspect-[3/4] max-w-xs rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
                     <img
                       src={images.banner as string}
                       alt="Flyer preview"
@@ -833,7 +833,7 @@ export function EventConfigContent({
                     </Button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center aspect-[3/4] max-w-xs border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:bg-white/5 transition-colors">
+                  <label className="flex flex-col items-center justify-center aspect-[3/4] max-w-xs border-2 border-dashed border-gray-300 dark:border-white/20 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                     <div className="flex flex-col items-center justify-center">
                       <Upload className="h-8 w-8 text-gray-500 dark:text-white/40 mb-2" />
                       <p className="text-sm text-gray-600 dark:text-white/60 text-center px-4">
