@@ -715,7 +715,7 @@ export function EditOrganizationForm({
                       htmlFor="documentType"
                       className="text-sm font-medium"
                     >
-                      Tipo de documento <span className="text-red-400">*</span>
+                      Tipo de documento <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <select
@@ -766,7 +766,7 @@ export function EditOrganizationForm({
 
                   <div className="space-y-2">
                     <Label htmlFor="address" className="text-sm font-medium">
-                      Dirección <span className="text-red-400">*</span>
+                      Dirección <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -785,7 +785,7 @@ export function EditOrganizationForm({
 
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-medium">
-                      Correo electrónico <span className="text-red-400">*</span>
+                      Correo electrónico <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -804,7 +804,7 @@ export function EditOrganizationForm({
 
                   <div className="space-y-2">
                     <Label htmlFor="rut" className="text-sm font-medium">
-                      RUT <span className="text-red-400">*</span>
+                      RUT <span className="text-gray-400">*</span>
                     </Label>
                     {formData.rut ? (
                       <div className="space-y-2">
@@ -896,7 +896,7 @@ export function EditOrganizationForm({
 
                   <div className="space-y-2">
                     <Label htmlFor="nit" className="text-sm font-medium">
-                      NIT <span className="text-red-400">*</span>
+                      NIT <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors flex-1">
@@ -966,7 +966,7 @@ export function EditOrganizationForm({
 
                   <div className="space-y-2">
                     <Label htmlFor="legalEmail" className="text-sm font-medium">
-                      Correo electrónico <span className="text-red-400">*</span>
+                      Correo electrónico <span className="text-gray-400">*</span>
                     </Label>
                     <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
                       <input
@@ -988,7 +988,7 @@ export function EditOrganizationForm({
 
                   <div className="space-y-2">
                     <Label htmlFor="legalRut" className="text-sm font-medium">
-                      RUT <span className="text-red-400">*</span>
+                      RUT <span className="text-gray-400">*</span>
                     </Label>
                     {formData.legalRut ? (
                       <div className="space-y-2">
@@ -1054,7 +1054,7 @@ export function EditOrganizationForm({
 
                   <div className="space-y-2">
                     <Label htmlFor="cerl" className="text-sm font-medium">
-                      CERL <span className="text-red-400">*</span>
+                      CERL <span className="text-gray-400">*</span>
                     </Label>
                     {formData.cerl ? (
                       <div className="space-y-2">

@@ -7,7 +7,7 @@ import { useEventTabs } from "@/contexts/event-tabs-context";
 import { toast } from "@/lib/toast";
 import { FormInput } from "@/components/ui/form-input";
 import { FormTextarea } from "@/components/ui/form-textarea";
-import { FormSelect } from "@/components/ui/form-select";
+import { FormModalSelect } from "@/components/ui/form-modal-select";
 import {
   EventTypeSelector,
   SingleDatePicker,
@@ -470,49 +470,47 @@ export function EventConfigContent({
                 />
 
                 {/* Category */}
-                <FormSelect
+                <FormModalSelect
                   id="category"
                   name="category"
                   label="Categoría"
-                  value={formData.category}
-                  onChange={(e) =>
+                  value={formData.category || ""}
+                  onChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      category: e.target
-                        .value as (typeof EVENT_CATEGORIES)[number],
+                      category: value as (typeof EVENT_CATEGORIES)[number],
                     }))
                   }
+                  options={EVENT_CATEGORIES.map((cat) => ({
+                    value: cat,
+                    label: EVENT_CATEGORY_LABELS[cat],
+                  }))}
+                  placeholder="Selecciona una categoría"
                   hint="La categoría ayuda a que tu evento aparezca en búsquedas y filtros, aumentando su visibilidad"
                   required
-                >
-                  <option value="">Selecciona una categoría</option>
-                  {EVENT_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {EVENT_CATEGORY_LABELS[cat]}
-                    </option>
-                  ))}
-                </FormSelect>
+                />
 
                 {/* Age Restriction */}
-                <FormSelect
+                <FormModalSelect
                   id="age"
                   name="age"
                   label="Edad Mínima"
-                  value={formData.age}
-                  onChange={(e) =>
+                  value={formData.age || 0}
+                  onChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      age: parseInt(e.target.value),
+                      age: parseInt(value),
                     }))
                   }
+                  options={[
+                    { value: "0", label: "Para todo público" },
+                    { value: "12", label: "12+" },
+                    { value: "18", label: "18+" },
+                    { value: "21", label: "21+" },
+                    { value: "25", label: "25+" },
+                  ]}
                   hint="Edad mínima requerida para asistir al evento"
-                >
-                  <option value="0">Para todo público</option>
-                  <option value="12">12+</option>
-                  <option value="18">18+</option>
-                  <option value="21">21+</option>
-                  <option value="25">25+</option>
-                </FormSelect>
+                />
               </CardContent>
             </Card>
 
@@ -725,36 +723,33 @@ export function EventConfigContent({
                 )}
 
                 {/* Timezone - shown for all types */}
-                <FormSelect
+                <FormModalSelect
                   id="timezone"
                   name="timezone"
                   label="Zona Horaria"
                   icon={<Globe className="h-4 w-4" />}
-                  value={formData.timezone}
-                  onChange={(e) =>
+                  value={formData.timezone || "America/Bogota"}
+                  onChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      timezone: e.target.value,
+                      timezone: value,
                     }))
                   }
+                  options={[
+                    { value: "America/Bogota", label: "Colombia (GMT-5)" },
+                    { value: "America/Mexico_City", label: "México (GMT-6)" },
+                    { value: "America/New_York", label: "New York (GMT-5)" },
+                    { value: "America/Los_Angeles", label: "Los Angeles (GMT-8)" },
+                    { value: "America/Chicago", label: "Chicago (GMT-6)" },
+                    { value: "America/Argentina/Buenos_Aires", label: "Buenos Aires (GMT-3)" },
+                    { value: "America/Santiago", label: "Santiago (GMT-4)" },
+                    { value: "America/Lima", label: "Lima (GMT-5)" },
+                    { value: "Europe/Madrid", label: "Madrid (GMT+1)" },
+                    { value: "Europe/London", label: "London (GMT+0)" },
+                    { value: "Asia/Tokyo", label: "Tokyo (GMT+9)" },
+                  ]}
                   hint="Las fechas y horas se mostrarán según esta zona horaria"
-                >
-                  <option value="America/Bogota">Colombia (GMT-5)</option>
-                  <option value="America/Mexico_City">México (GMT-6)</option>
-                  <option value="America/New_York">New York (GMT-5)</option>
-                  <option value="America/Los_Angeles">
-                    Los Angeles (GMT-8)
-                  </option>
-                  <option value="America/Chicago">Chicago (GMT-6)</option>
-                  <option value="America/Argentina/Buenos_Aires">
-                    Buenos Aires (GMT-3)
-                  </option>
-                  <option value="America/Santiago">Santiago (GMT-4)</option>
-                  <option value="America/Lima">Lima (GMT-5)</option>
-                  <option value="Europe/Madrid">Madrid (GMT+1)</option>
-                  <option value="Europe/London">London (GMT+0)</option>
-                  <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
-                </FormSelect>
+                />
               </CardContent>
             </Card>
 
@@ -772,30 +767,31 @@ export function EventConfigContent({
                 </div>
               </CardHeader>
               <CardContent className="space-y-5">
-                <FormSelect
+                <FormModalSelect
                   id="currency"
                   name="currency"
                   label="Moneda"
                   icon={<DollarSign className="h-4 w-4" />}
-                  value={formData.currency}
-                  onChange={(e) =>
+                  value={formData.currency || "COP"}
+                  onChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      currency: e.target.value,
+                      currency: value,
                     }))
                   }
+                  options={[
+                    { value: "COP", label: "COP - Peso Colombiano" },
+                    { value: "USD", label: "USD - Dólar Estadounidense" },
+                    { value: "EUR", label: "EUR - Euro" },
+                    { value: "MXN", label: "MXN - Peso Mexicano" },
+                    { value: "ARS", label: "ARS - Peso Argentino" },
+                    { value: "CLP", label: "CLP - Peso Chileno" },
+                    { value: "PEN", label: "PEN - Sol Peruano" },
+                    { value: "BRL", label: "BRL - Real Brasileño" },
+                    { value: "GBP", label: "GBP - Libra Esterlina" },
+                  ]}
                   hint="Todos los precios se mostrarán en esta moneda"
-                >
-                  <option value="COP">COP - Peso Colombiano</option>
-                  <option value="USD">USD - Dólar Estadounidense</option>
-                  <option value="EUR">EUR - Euro</option>
-                  <option value="MXN">MXN - Peso Mexicano</option>
-                  <option value="ARS">ARS - Peso Argentino</option>
-                  <option value="CLP">CLP - Peso Chileno</option>
-                  <option value="PEN">PEN - Sol Peruano</option>
-                  <option value="BRL">BRL - Real Brasileño</option>
-                  <option value="GBP">GBP - Libra Esterlina</option>
-                </FormSelect>
+                />
               </CardContent>
             </Card>
 
