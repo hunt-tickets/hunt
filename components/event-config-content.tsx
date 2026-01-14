@@ -1091,7 +1091,7 @@ export function EventConfigContent({
                               }
                             }}
                             placeholder="Escribe una respuesta clara y concisa..."
-                            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none min-h-[120px] resize-none text-gray-900 dark:text-white"
+                            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none min-h-[120px] resize-none !text-gray-900 dark:!text-white p-0"
                           />
                         </div>
                       </div>
