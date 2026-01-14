@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Fingerprint } from "lucide-react";
+import { Fingerprint, ChevronDown } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { DOCUMENT_TYPES, VALIDATION } from "@/constants/profile";
 import { sanitizeDocumentNumber } from "@/lib/profile/utils";
 import type { DocumentManagerProps } from "@/lib/profile/types";
@@ -10,6 +15,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
   const [docType, setDocType] = useState(documentType || "");
   const [docNumber, setDocNumber] = useState(documentNumber || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleDocumentNumberChange = useCallback((value: string) => {
     const sanitized = sanitizeDocumentNumber(value);
@@ -43,35 +49,44 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
   return (
     <div className="space-y-3">
       {/* Document Type */}
-      <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
-        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-          <Fingerprint
-            className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0"
-            aria-hidden="true"
-          />
-          <select
-            value={docType}
-            onChange={(e) => setDocType(e.target.value)}
-            onBlur={handleSave}
-            disabled={isLoading}
-            aria-label="Tipo de documento"
-            className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 w-full text-foreground appearance-none pr-8 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: '1.25em 1.25em'
-            }}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <div
+            className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
+            role="button"
+            aria-label={docType ? `Tipo de documento: ${DOCUMENT_TYPES.find(t => t.value === docType)?.label}` : "Seleccionar tipo de documento"}
+            tabIndex={0}
           >
-            <option value="" disabled>Tipo de documento (Opcional)</option>
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <Fingerprint
+                className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0"
+                aria-hidden="true"
+              />
+              <span className="text-sm font-medium text-foreground">
+                {docType ? DOCUMENT_TYPES.find(t => t.value === docType)?.label : "Tipo de documento (Opcional)"}
+              </span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0" align="start">
+          <div className="flex flex-col max-h-[300px] overflow-y-auto">
             {DOCUMENT_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>
+              <button
+                key={type.value}
+                onClick={() => {
+                  setDocType(type.value);
+                  setOpen(false);
+                  handleSave();
+                }}
+                className="px-4 py-3 text-left text-sm hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors border-b border-gray-100 dark:border-[#2a2a2a] last:border-b-0"
+              >
                 {type.label}
-              </option>
+              </button>
             ))}
-          </select>
-        </div>
-      </div>
+          </div>
+        </PopoverContent>
+      </Popover>
 
       {/* Document Number */}
       <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group">
