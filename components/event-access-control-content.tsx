@@ -305,8 +305,8 @@ export function EventAccessControlContent({
           onClick={() => setMainTab("analytics")}
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
             mainTab === "analytics"
-              ? "bg-white/10 text-white border border-white/20"
-              : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
+              ? "bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-200 dark:border-white/20"
+              : "bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10"
           }`}
         >
           <BarChart3 className="h-4 w-4" />
@@ -316,8 +316,8 @@ export function EventAccessControlContent({
           onClick={() => setMainTab("list")}
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
             mainTab === "list"
-              ? "bg-white/10 text-white border border-white/20"
-              : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
+              ? "bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-200 dark:border-white/20"
+              : "bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10"
           }`}
         >
           <List className="h-4 w-4" />
@@ -328,7 +328,7 @@ export function EventAccessControlContent({
       {/* Scan button */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-white text-black hover:bg-white/90 transition-all flex-shrink-0"
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-white/90 transition-all flex-shrink-0"
         aria-label="Escanear"
       >
         <QrCode className="h-5 w-5" />
@@ -344,15 +344,15 @@ export function EventAccessControlContent({
         <div className="space-y-4">
           {/* Statistics KPIs */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="p-3 sm:p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-              <div className="text-xs sm:text-xs text-white/40 mb-1">Total</div>
+            <div className="p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.01]">
+              <div className="text-xs sm:text-xs text-gray-500 dark:text-white/40 mb-1">Total</div>
               <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
             </div>
             <div className="p-3 sm:p-4 rounded-xl border border-green-500/20 bg-green-500/5">
               <div className="text-xs sm:text-xs text-green-400/60 mb-1">
                 Escaneadas
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 {stats.scanned}
               </div>
               <div className="text-[10px] sm:text-xs text-green-400/40 mt-0.5 sm:mt-1">
@@ -363,7 +363,7 @@ export function EventAccessControlContent({
               <div className="text-xs sm:text-xs text-yellow-400/60 mb-1">
                 Pendientes
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 {stats.pending}
               </div>
             </div>
@@ -372,17 +372,17 @@ export function EventAccessControlContent({
           {/* Empty State */}
           {ticketBreakdown.length === 0 &&
             transactionsWithoutQR.length === 0 && (
-              <Card className="bg-white/[0.02] border-white/5 min-h-[60vh]">
+              <Card className="bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5 min-h-[60vh]">
                 <CardContent className="h-full flex items-center justify-center py-16">
                   <div className="flex flex-col items-center gap-4 text-center">
                     <div className="rounded-full bg-white/5 p-4">
-                      <QrCode className="h-12 w-12 text-white/40" />
+                      <QrCode className="h-12 w-12 text-gray-500 dark:text-white/40" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         No hay datos de acceso aún
                       </h3>
-                      <p className="text-sm text-white/60 max-w-md mx-auto">
+                      <p className="text-sm text-gray-600 dark:text-white/60 max-w-md mx-auto">
                         Los datos de control de acceso aparecerán aquí cuando se
                         generen códigos QR o se realicen ventas para este
                         evento.
@@ -399,21 +399,21 @@ export function EventAccessControlContent({
               {/* Mobile View - Outside Card */}
               <div className="md:hidden">
                 <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-white/60" />
+                  <BarChart3 className="h-4 w-4 text-gray-600 dark:text-white/60" />
                   Desglose por Tipo de Entrada
                 </h3>
                 <div className="space-y-4">
                   {ticketBreakdown.map((ticket) => (
                     <div
                       key={ticket.name}
-                      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/10 p-4"
+                      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-gray-200 dark:border-white/10 p-4"
                     >
                       {/* Header with Ticket Name */}
                       <div className="mb-3">
-                        <div className="text-base font-semibold text-white mb-1">
+                        <div className="text-base font-semibold text-gray-900 dark:text-white mb-1">
                           {ticket.name}
                         </div>
-                        <div className="text-xs text-white/40">
+                        <div className="text-xs text-gray-500 dark:text-white/40">
                           {ticket.scanned} de {ticket.total} escaneadas
                         </div>
                       </div>
@@ -439,32 +439,32 @@ export function EventAccessControlContent({
               </div>
 
               {/* Desktop View - Inside Card */}
-              <Card className="hidden md:block bg-white/[0.02] border-white/5">
+              <Card className="hidden md:block bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5">
                 <CardContent className="p-6">
                   <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-white/60" />
+                    <BarChart3 className="h-4 w-4 text-gray-600 dark:text-white/60" />
                     Desglose por Tipo de Entrada
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-white/5">
-                          <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">
+                        <tr className="border-b border-gray-200 dark:border-white/5">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                             Entrada
                           </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-white/40 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                             Total
                           </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-white/40 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                             Escaneadas
                           </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-white/40 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                             Pendientes
                           </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-white/40 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                             % Escaneo
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                             Progreso
                           </th>
                         </tr>
@@ -473,13 +473,13 @@ export function EventAccessControlContent({
                         {ticketBreakdown.map((ticket) => (
                           <tr
                             key={ticket.name}
-                            className="hover:bg-white/[0.02] transition-colors"
+                            className="hover:bg-gray-50 dark:bg-white/[0.02] transition-colors"
                           >
-                            <td className="px-4 py-3 text-sm font-medium text-white/90">
+                            <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white/90">
                               {ticket.name}
                             </td>
                             <td className="px-4 py-3 text-sm text-center">
-                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-white/10 text-white/80">
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-white/10 text-gray-700 dark:text-white/80">
                                 {ticket.total}
                               </span>
                             </td>
@@ -520,7 +520,7 @@ export function EventAccessControlContent({
                                     style={{ width: `${ticket.scanRate}%` }}
                                   />
                                 </div>
-                                <div className="flex justify-between mt-1 text-xs text-white/40">
+                                <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-white/40">
                                   <span>
                                     {ticket.scanned} de {ticket.total}
                                   </span>
@@ -539,7 +539,7 @@ export function EventAccessControlContent({
 
           {/* Transactions without QR - Analytics View */}
           {transactionsWithoutQR.length > 0 && (
-            <Card className="bg-white/[0.02] border-white/5">
+            <Card className="bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5">
               <CardContent className="p-6">
                 <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
                   <QrCode className="h-4 w-4 text-red-400" />
@@ -549,20 +549,20 @@ export function EventAccessControlContent({
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-white/5">
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">
+                      <tr className="border-b border-gray-200 dark:border-white/5">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                           Usuario
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                           Entrada
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                           Comprados
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                           Generados
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
                           Faltantes
                         </th>
                       </tr>
@@ -571,18 +571,18 @@ export function EventAccessControlContent({
                       {transactionsWithoutQR.slice(0, 10).map((tx) => (
                         <tr
                           key={tx.id}
-                          className="hover:bg-white/[0.02] transition-colors"
+                          className="hover:bg-gray-50 dark:bg-white/[0.02] transition-colors"
                         >
                           <td className="px-4 py-3 text-sm">
-                            <div className="text-white/90">{tx.user_name}</div>
+                            <div className="text-gray-900 dark:text-white/90">{tx.user_name}</div>
                             <div
-                              className="text-xs text-white/40 truncate max-w-[150px]"
+                              className="text-xs text-gray-500 dark:text-white/40 truncate max-w-[150px]"
                               title={tx.user_email}
                             >
                               {tx.user_email}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-white/90">
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white/90">
                             {tx.ticket_name}
                           </td>
                           <td className="px-4 py-3 text-sm">
@@ -609,7 +609,7 @@ export function EventAccessControlContent({
                   <div className="mt-4 text-center">
                     <button
                       onClick={() => setMainTab("list")}
-                      className="text-sm text-white/60 hover:text-white transition-colors"
+                      className="text-sm text-gray-600 dark:text-white/60 hover:text-gray-900 dark:text-white transition-colors"
                     >
                       Ver todas las {transactionsWithoutQR.length} transacciones
                       →
@@ -633,7 +633,7 @@ export function EventAccessControlContent({
               <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-10">
                 <Search
                   className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-200 ${
-                    isFocused ? "text-white/80" : "text-white/50"
+                    isFocused ? "text-gray-700 dark:text-white/80" : "text-white/50"
                   }`}
                 />
               </div>
@@ -641,10 +641,10 @@ export function EventAccessControlContent({
               <Input
                 type="text"
                 placeholder="Buscar por usuario, email, entrada, pedido..."
-                className={`w-full pl-10 sm:pl-12 pr-10 sm:pr-12 h-11 sm:h-12 text-base bg-white/10 border rounded-3xl text-white placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 transition-all duration-200 ${
+                className={`w-full pl-10 sm:pl-12 pr-10 sm:pr-12 h-11 sm:h-12 text-base bg-white/10 border rounded-3xl text-gray-900 dark:text-white placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 transition-all duration-200 ${
                   isFocused
                     ? "border-white/40 bg-white/15"
-                    : "border-white/20 hover:border-white/30 hover:bg-white/12"
+                    : "border-gray-300 dark:border-white/20 hover:border-white/30 hover:bg-white/12"
                 }`}
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
@@ -659,7 +659,7 @@ export function EventAccessControlContent({
                   className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/10 transition-colors"
                   aria-label="Limpiar búsqueda"
                 >
-                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70 hover:text-white" />
+                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70 hover:text-gray-900 dark:text-white" />
                 </button>
               )}
             </div>
@@ -673,7 +673,7 @@ export function EventAccessControlContent({
                     e.target.value as "all" | "scanned" | "pending" | "noqr"
                   )
                 }
-                className="appearance-none pl-4 pr-10 py-2.5 sm:py-3 text-sm font-medium rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 focus:bg-white/10 focus:border-white/20 focus:outline-none transition-all cursor-pointer whitespace-nowrap"
+                className="appearance-none pl-4 pr-10 py-2.5 sm:py-3 text-sm font-medium rounded-full bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white hover:bg-white/10 focus:bg-white/10 focus:border-gray-300 dark:border-white/20 focus:outline-none transition-all cursor-pointer whitespace-nowrap"
               >
                 <option value="all" className="bg-zinc-900">
                   Todas - {localQRCodes.length.toLocaleString("es-CO")}
@@ -689,20 +689,20 @@ export function EventAccessControlContent({
                   {transactionsWithoutQR.length.toLocaleString("es-CO")}
                 </option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-white/40 pointer-events-none" />
             </div>
           </div>
 
           {/* Results count and Download button */}
           <div className="flex items-center justify-between">
-            <div className="text-sm text-white/60">
+            <div className="text-sm text-gray-600 dark:text-white/60">
               {activeTab === "noqr"
                 ? `${transactionsWithoutQR.length} transacción${transactionsWithoutQR.length !== 1 ? "es" : ""} sin QR`
                 : `${filteredQRCodes.length} entrada${filteredQRCodes.length !== 1 ? "s" : ""} encontrada${filteredQRCodes.length !== 1 ? "s" : ""}`}
             </div>
             <button
               onClick={handleDownloadCSV}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white hover:bg-white/10 hover:border-gray-300 dark:border-white/20 transition-all"
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Descargar CSV</span>
@@ -713,17 +713,17 @@ export function EventAccessControlContent({
           {activeTab === "noqr" ? (
             /* Transactions without QR */
             transactionsWithoutQR.length === 0 ? (
-              <Card className="bg-white/[0.02] border-white/5 min-h-[60vh]">
+              <Card className="bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5 min-h-[60vh]">
                 <CardContent className="h-full flex items-center justify-center py-16">
                   <div className="flex flex-col items-center gap-4 text-center">
                     <div className="rounded-full bg-white/5 p-4">
                       <CheckCircle2 className="h-12 w-12 text-green-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         ¡Perfecto!
                       </h3>
-                      <p className="text-sm text-white/60 max-w-md mx-auto">
+                      <p className="text-sm text-gray-600 dark:text-white/60 max-w-md mx-auto">
                         Todas las transacciones tienen códigos QR generados
                       </p>
                     </div>
@@ -735,15 +735,15 @@ export function EventAccessControlContent({
                 {transactionsWithoutQR.map((tx) => (
                   <div
                     key={tx.id}
-                    className="relative bg-white/[0.02] border border-white/5 rounded-lg p-4 hover:border-white/10 transition-all"
+                    className="relative bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-lg p-4 hover:border-gray-200 dark:border-white/10 transition-all"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-sm text-white mb-1">
+                        <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
                           {tx.ticket_name}
                         </h4>
-                        <p className="text-xs text-white/60">{tx.user_name}</p>
+                        <p className="text-xs text-gray-600 dark:text-white/60">{tx.user_name}</p>
                       </div>
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
                         Sin QR
@@ -753,7 +753,7 @@ export function EventAccessControlContent({
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-2">
                       <div className="text-center">
-                        <div className="text-xs text-white/40 mb-1">
+                        <div className="text-xs text-gray-500 dark:text-white/40 mb-1">
                           Comprados
                         </div>
                         <div className="text-lg font-bold text-blue-400">
@@ -761,7 +761,7 @@ export function EventAccessControlContent({
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-white/40 mb-1">
+                        <div className="text-xs text-gray-500 dark:text-white/40 mb-1">
                           Generados
                         </div>
                         <div className="text-lg font-bold text-green-400">
@@ -769,7 +769,7 @@ export function EventAccessControlContent({
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-white/40 mb-1">
+                        <div className="text-xs text-gray-500 dark:text-white/40 mb-1">
                           Faltantes
                         </div>
                         <div className="text-lg font-bold text-red-400">
@@ -783,19 +783,19 @@ export function EventAccessControlContent({
             )
           ) : /* QR Codes as Tickets */
           currentQRCodes.length === 0 ? (
-            <Card className="bg-white/[0.02] border-white/5 min-h-[60vh]">
+            <Card className="bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5 min-h-[60vh]">
               <CardContent className="h-full flex items-center justify-center py-16">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <div className="rounded-full bg-white/5 p-4">
-                    <QrCode className="h-12 w-12 text-white/40" />
+                    <QrCode className="h-12 w-12 text-gray-500 dark:text-white/40" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                       {searchTerm
                         ? "No se encontraron entradas"
                         : "No hay entradas"}
                     </h3>
-                    <p className="text-sm text-white/60 max-w-md mx-auto">
+                    <p className="text-sm text-gray-600 dark:text-white/60 max-w-md mx-auto">
                       {searchTerm
                         ? "Intenta con otro término de búsqueda"
                         : "Las entradas aparecerán aquí cuando haya ventas"}
@@ -813,18 +813,18 @@ export function EventAccessControlContent({
                   return (
                     <div
                       key={qr.id}
-                      className="relative bg-white/[0.02] border border-white/5 rounded-lg p-4 hover:border-white/10 transition-all"
+                      className="relative bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-lg p-4 hover:border-gray-200 dark:border-white/10 transition-all"
                     >
                       {/* Header */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-sm text-white mb-1">
+                          <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
                             {qr.ticket_name}
                           </h4>
-                          <p className="text-xs text-white/60">
+                          <p className="text-xs text-gray-600 dark:text-white/60">
                             {qr.user_name}
                           </p>
-                          <p className="text-xs text-white/40 truncate max-w-[200px]">
+                          <p className="text-xs text-gray-500 dark:text-white/40 truncate max-w-[200px]">
                             {qr.user_email}
                           </p>
                         </div>
@@ -861,14 +861,14 @@ export function EventAccessControlContent({
                       <div className="space-y-2">
                         {qr.order_id && (
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-white/40">Pedido</span>
+                            <span className="text-gray-500 dark:text-white/40">Pedido</span>
                             <span className="font-mono text-white/70">
                               {qr.order_id}
                             </span>
                           </div>
                         )}
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-white/40">Compra</span>
+                          <span className="text-gray-500 dark:text-white/40">Compra</span>
                           <span className="text-white/70">
                             {new Date(qr.created_at).toLocaleDateString(
                               undefined,
@@ -886,7 +886,7 @@ export function EventAccessControlContent({
                         {isScanned && qr.scanner_name && (
                           <>
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-white/40">
+                              <span className="text-gray-500 dark:text-white/40">
                                 Escaneado por
                               </span>
                               <span className="text-white/70">
@@ -895,7 +895,7 @@ export function EventAccessControlContent({
                             </div>
                             {qr.updated_at && (
                               <div className="flex items-center justify-between text-xs">
-                                <span className="text-white/40">
+                                <span className="text-gray-500 dark:text-white/40">
                                   Fecha escaneo
                                 </span>
                                 <span className="text-white/70">
@@ -925,7 +925,7 @@ export function EventAccessControlContent({
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4">
-                  <div className="text-sm text-white/60">
+                  <div className="text-sm text-gray-600 dark:text-white/60">
                     Mostrando {startIndex + 1} -{" "}
                     {Math.min(endIndex, filteredQRCodes.length)} de{" "}
                     {filteredQRCodes.length}
@@ -965,37 +965,37 @@ export function EventAccessControlContent({
     <div className="space-y-6 py-4 px-4">
       {/* Event Code Section */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-white/80">
+        <Label className="text-sm font-medium text-gray-700 dark:text-white/80">
           Código del Evento
         </Label>
         <div className="flex items-center gap-2">
-          <div className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 font-mono text-sm text-white">
+          <div className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 font-mono text-sm text-gray-900 dark:text-white">
             {eventId || "No disponible"}
           </div>
           <button
             onClick={handleCopyEventCode}
-            className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+            className="p-3 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-white/10 transition-colors"
             disabled={!eventId}
           >
-            <Copy className="h-4 w-4 text-white" />
+            <Copy className="h-4 w-4 text-gray-900 dark:text-white" />
           </button>
         </div>
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-gray-500 dark:text-white/40">
           Comparte este código con el personal de taquilla para que puedan
           escanear entradas
         </p>
       </div>
 
       {/* Scanner Name Requirement */}
-      <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+      <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10">
         <div className="flex-1 pr-4">
           <Label
             htmlFor="scanner-name"
-            className="text-sm font-medium text-white"
+            className="text-sm font-medium text-gray-900 dark:text-white"
           >
             Nombre obligatorio del scanner
           </Label>
-          <p className="text-xs text-white/40 mt-1">
+          <p className="text-xs text-gray-500 dark:text-white/40 mt-1">
             Requiere que el personal ingrese su nombre al escanear
           </p>
         </div>
@@ -1008,62 +1008,62 @@ export function EventAccessControlContent({
 
       {/* Download Apps Section */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-white/80">
+        <Label className="text-sm font-medium text-gray-700 dark:text-white/80">
           Descargar App de Escaneo
         </Label>
         <div className="space-y-2">
           <a
             href="#"
-            className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+            className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-white/10 transition-colors"
           >
             <div className="p-2 rounded-lg bg-black">
-              <Smartphone className="h-5 w-5 text-white" />
+              <Smartphone className="h-5 w-5 text-gray-900 dark:text-white" />
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">App Store</div>
-              <div className="text-xs text-white/40">Descargar para iOS</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-white">App Store</div>
+              <div className="text-xs text-gray-500 dark:text-white/40">Descargar para iOS</div>
             </div>
-            <ExternalLink className="h-4 w-4 text-white/40" />
+            <ExternalLink className="h-4 w-4 text-gray-500 dark:text-white/40" />
           </a>
           <a
             href="#"
-            className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+            className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-white/10 transition-colors"
           >
             <div className="p-2 rounded-lg bg-[#3DDC84]">
               <Smartphone className="h-5 w-5 text-black" />
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">Google Play</div>
-              <div className="text-xs text-white/40">
+              <div className="text-sm font-medium text-gray-900 dark:text-white">Google Play</div>
+              <div className="text-xs text-gray-500 dark:text-white/40">
                 Descargar para Android
               </div>
             </div>
-            <ExternalLink className="h-4 w-4 text-white/40" />
+            <ExternalLink className="h-4 w-4 text-gray-500 dark:text-white/40" />
           </a>
         </div>
       </div>
 
       {/* Web Scanner Link */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-white/80">Escáner Web</Label>
+        <Label className="text-sm font-medium text-gray-700 dark:text-white/80">Escáner Web</Label>
         <a
           href={`/scan/${eventId}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+          className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-white/10 transition-colors"
         >
           <div className="p-2 rounded-lg bg-white/10">
-            <QrCode className="h-5 w-5 text-white" />
+            <QrCode className="h-5 w-5 text-gray-900 dark:text-white" />
           </div>
           <div className="flex-1">
-            <div className="text-sm font-medium text-white">
+            <div className="text-sm font-medium text-gray-900 dark:text-white">
               Abrir escáner web
             </div>
-            <div className="text-xs text-white/40">
+            <div className="text-xs text-gray-500 dark:text-white/40">
               Escanear desde el navegador
             </div>
           </div>
-          <ExternalLink className="h-4 w-4 text-white/40" />
+          <ExternalLink className="h-4 w-4 text-gray-500 dark:text-white/40" />
         </a>
       </div>
     </div>
@@ -1072,12 +1072,12 @@ export function EventAccessControlContent({
   // Scanner Modal (Drawer on mobile, Dialog on desktop)
   const scannerModal = isMobile ? (
     <Drawer open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DrawerContent className="bg-[#1a1a1a] border-white/10">
+      <DrawerContent className="bg-[#1a1a1a] border-gray-200 dark:border-white/10">
         <DrawerHeader className="text-left">
-          <DrawerTitle className="text-white">
+          <DrawerTitle className="text-gray-900 dark:text-white">
             Información de Escaneo
           </DrawerTitle>
-          <DrawerDescription className="text-white/60">
+          <DrawerDescription className="text-gray-600 dark:text-white/60">
             Configura el acceso para el personal de taquilla
           </DrawerDescription>
         </DrawerHeader>
@@ -1087,12 +1087,12 @@ export function EventAccessControlContent({
     </Drawer>
   ) : (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent className="sm:max-w-md bg-[#1a1a1a] border-white/10">
+      <DialogContent className="sm:max-w-md bg-[#1a1a1a] border-gray-200 dark:border-white/10">
         <DialogHeader>
-          <DialogTitle className="text-white">
+          <DialogTitle className="text-gray-900 dark:text-white">
             Información de Escaneo
           </DialogTitle>
-          <DialogDescription className="text-white/60">
+          <DialogDescription className="text-gray-600 dark:text-white/60">
             Configura el acceso para el personal de taquilla
           </DialogDescription>
         </DialogHeader>
