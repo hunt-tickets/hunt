@@ -97,7 +97,7 @@ export function InviteMemberForm({
       {/* Email Input */}
       <div className="space-y-2">
         <Label htmlFor="email" className="text-sm font-medium">
-          Correo electrónico <span className="text-red-400">*</span>
+          Correo electrónico <span className="text-gray-400">*</span>
         </Label>
         <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
           <div className="flex items-center gap-3 flex-1">
@@ -122,7 +122,7 @@ export function InviteMemberForm({
       {/* Role Selection */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">
-          Selecciona un rol <span className="text-red-400">*</span>
+          Selecciona un rol <span className="text-gray-400">*</span>
         </Label>
         <div className="space-y-3">
           {roles.map((role) => {
