@@ -348,22 +348,22 @@ export function EventAccessControlContent({
               <div className="text-xs sm:text-xs text-gray-500 dark:text-white/40 mb-1">Total</div>
               <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
             </div>
-            <div className="p-3 sm:p-4 rounded-xl border border-green-500/20 bg-green-500/5">
-              <div className="text-xs sm:text-xs text-green-400/60 mb-1">
+            <div className="p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.01]">
+              <div className="text-xs sm:text-xs text-gray-500 dark:text-white/40 mb-1">
                 Escaneadas
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-xl sm:text-2xl font-bold">
                 {stats.scanned}
               </div>
-              <div className="text-[10px] sm:text-xs text-green-400/40 mt-0.5 sm:mt-1">
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-white/40 mt-0.5 sm:mt-1">
                 {stats.scanRate}%
               </div>
             </div>
-            <div className="p-3 sm:p-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5">
-              <div className="text-xs sm:text-xs text-yellow-400/60 mb-1">
+            <div className="p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.01]">
+              <div className="text-xs sm:text-xs text-gray-500 dark:text-white/40 mb-1">
                 Pendientes
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-xl sm:text-2xl font-bold">
                 {stats.pending}
               </div>
             </div>
