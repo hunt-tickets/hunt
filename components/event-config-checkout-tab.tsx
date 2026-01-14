@@ -83,8 +83,133 @@ export function EventConfigCheckoutTab({
               </div>
 
               <div className="space-y-4">
-                {/* Form will be added in next edit */}
-                <p className="text-sm text-gray-500">Form coming soon...</p>
+                {/* Question Text */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Pregunta <span className="text-gray-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ej. ¿Cuál es tu nombre completo?"
+                    className="w-full p-3 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600"
+                  />
+                </div>
+
+                {/* Type Selector */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Tipo de respuesta <span className="text-gray-400">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                    >
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Texto corto</div>
+                      <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Una línea de texto</div>
+                    </button>
+                    <button
+                      type="button"
+                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                    >
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Email</div>
+                      <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Dirección de correo</div>
+                    </button>
+                    <button
+                      type="button"
+                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                    >
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Selección</div>
+                      <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Opciones múltiples</div>
+                    </button>
+                    <button
+                      type="button"
+                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                    >
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Texto largo</div>
+                      <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Párrafo completo</div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Placeholder */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Texto de ayuda (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ej. Ingresa tu nombre tal como aparece en tu documento"
+                    className="w-full p-3 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600"
+                  />
+                </div>
+
+                {/* Scope Selector */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Alcance <span className="text-gray-400">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      className="p-3 rounded-xl border border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525] transition-colors text-left"
+                    >
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Por orden</div>
+                      <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Se pregunta una vez</div>
+                    </button>
+                    <button
+                      type="button"
+                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                    >
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Por ticket</div>
+                      <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Por cada entrada</div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Required Toggle */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#2a2a2a]">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">Respuesta obligatoria</div>
+                    <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">
+                      Los usuarios deben responder esta pregunta
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-900 dark:bg-white transition-colors"
+                    >
+                      <span className="inline-block h-4 w-4 transform rounded-full bg-white dark:bg-black transition translate-x-6" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Ticket Types (Optional) */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Tipos de entrada específicos (opcional)
+                  </label>
+                  <p className="text-xs text-gray-500 dark:text-white/40">
+                    Deja vacío para aplicar a todos los tipos de entrada
+                  </p>
+                  <div className="p-3 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1a1a1a]">
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 dark:border-[#2a2a2a]" />
+                        <span className="text-sm text-gray-900 dark:text-white">General</span>
+                      </label>
+                      <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 dark:border-[#2a2a2a]" />
+                        <span className="text-sm text-gray-900 dark:text-white">VIP</span>
+                      </label>
+                      <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 dark:border-[#2a2a2a]" />
+                        <span className="text-sm text-gray-900 dark:text-white">Palco</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
