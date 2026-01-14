@@ -26,8 +26,8 @@ export default async function OrganizationPage({
     );
   }
 
-  // Redirect to configuración page
+  // Redirect to eventos page
   redirect(
-    `/profile/${userId}/organizaciones/${organizationId}/administrador/configuracion`
+    `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`
   );
 }
