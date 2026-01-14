@@ -1178,7 +1178,7 @@ export function EventConfigContent({
                           onDragLeave={handleDragLeave}
                           onDrop={(e) => handleDrop(e, index)}
                           onDragEnd={handleDragEnd}
-                          className={`group relative p-5 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 hover:bg-white/[0.04] transition-all duration-200 mb-3 ${
+                          className={`group relative p-5 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-100 dark:hover:bg-white/[0.04] transition-all duration-200 mb-3 ${
                             draggedFaqIndex === index
                               ? "opacity-40 scale-[0.98] shadow-lg"
                               : "opacity-100 scale-100"
@@ -1186,18 +1186,18 @@ export function EventConfigContent({
                         >
                           <div className="flex items-start gap-3">
                             {/* Drag Handle - only visible on hover */}
-                            <div className="flex-shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-500 dark:text-white/40 hover:text-white/70">
+                            <div className="flex-shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70">
                               <GripVertical className="h-5 w-5" />
                             </div>
 
                             {/* Number Badge */}
-                            <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-white/70 font-semibold text-sm transition-transform group-hover:scale-105">
+                            <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white/70 font-semibold text-sm transition-transform group-hover:scale-105">
                               {index + 1}
                             </div>
 
                             {/* Content */}
                             <div className="flex-1 min-w-0 space-y-2.5">
-                              <h4 className="font-semibold text-white text-sm leading-snug pr-20">
+                              <h4 className="font-semibold text-gray-900 dark:text-white text-sm leading-snug pr-20">
                                 {faq.question}
                               </h4>
                               <p className="text-sm text-gray-600 dark:text-white/60 leading-relaxed">
@@ -1215,7 +1215,7 @@ export function EventConfigContent({
                                   setEditingFaq(faq);
                                   setIsAddingFaq(false);
                                 }}
-                                className="h-9 w-9 p-0 rounded-lg hover:bg-white/10 hover:text-white"
+                                className="h-9 w-9 p-0 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
                                 title="Editar pregunta"
                               >
                                 <Edit2 className="h-4 w-4" />
