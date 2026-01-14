@@ -264,7 +264,7 @@ export function CashSaleForm({ eventId, ticketTypes, eventDays = [], isMultiDay 
                       <Ticket className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-gray-500 dark:text-white/50">
                         {ticketTypes.length === 0
-                          ? "No hay tipos de tickets disponibles"
+                          ? "No hay tickets disponibles en estos momentos"
                           : "No hay entradas para este día"}
                       </p>
                     </div>
