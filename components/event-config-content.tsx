@@ -796,31 +796,20 @@ export function EventConfigContent({
                 </div>
               </CardHeader>
               <CardContent className="space-y-5">
-                <FormModalSelect
-                  id="currency"
-                  name="currency"
-                  label="Moneda"
-                  icon={<DollarSign className="h-4 w-4" />}
-                  value={formData.currency || "COP"}
-                  onChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      currency: value,
-                    }))
-                  }
-                  options={[
-                    { value: "COP", label: "COP - Peso Colombiano" },
-                    { value: "USD", label: "USD - Dólar Estadounidense" },
-                    { value: "EUR", label: "EUR - Euro" },
-                    { value: "MXN", label: "MXN - Peso Mexicano" },
-                    { value: "ARS", label: "ARS - Peso Argentino" },
-                    { value: "CLP", label: "CLP - Peso Chileno" },
-                    { value: "PEN", label: "PEN - Sol Peruano" },
-                    { value: "BRL", label: "BRL - Real Brasileño" },
-                    { value: "GBP", label: "GBP - Libra Esterlina" },
-                  ]}
-                  hint="Todos los precios se mostrarán en esta moneda"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="currency" className="text-sm font-medium">
+                    Moneda
+                  </Label>
+                  <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] opacity-60 cursor-not-allowed">
+                    <DollarSign className="h-4 w-4 text-gray-500 dark:text-white/40 mr-3 flex-shrink-0" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      COP - Peso Colombiano
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-white/40">
+                    Todos los precios se mostrarán en esta moneda
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
