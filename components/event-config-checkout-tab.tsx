@@ -8,7 +8,7 @@ import { Plus, Edit2, Trash2, GripVertical, ShoppingCart } from "lucide-react";
 interface CheckoutQuestion {
   id: string;
   question: string;
-  type: "text" | "email" | "select" | "textarea";
+  type: "text" | "select" | "textarea";
   required: boolean;
   scope: "per_order" | "per_ticket";
   ticket_type_ids: string[];
@@ -51,7 +51,7 @@ export function EventConfigCheckoutTab({
   // Local form state
   const [formData, setFormData] = useState({
     question: "",
-    type: "text" as "text" | "email" | "select" | "textarea",
+    type: "text" as "text" | "select" | "textarea",
     placeholder: "",
     scope: "per_order" as "per_order" | "per_ticket",
     required: true,
@@ -123,7 +123,7 @@ export function EventConfigCheckoutTab({
                   <label className="text-sm font-medium text-gray-900 dark:text-white">
                     Tipo de respuesta <span className="text-gray-400">*</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, type: "text" })}
@@ -138,18 +138,6 @@ export function EventConfigCheckoutTab({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, type: "email" })}
-                      className={`p-3 rounded-xl border transition-colors text-left ${
-                        formData.type === "email"
-                          ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525]"
-                          : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
-                      }`}
-                    >
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">Email</div>
-                      <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Dirección de correo</div>
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setFormData({ ...formData, type: "select" })}
                       className={`p-3 rounded-xl border transition-colors text-left ${
                         formData.type === "select"
@@ -157,7 +145,7 @@ export function EventConfigCheckoutTab({
                           : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
                       }`}
                     >
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">Selección</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Selector</div>
                       <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Opciones múltiples</div>
                     </button>
                     <button
@@ -371,8 +359,7 @@ export function EventConfigCheckoutTab({
                         {/* Type Badge */}
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/70">
                           {question.type === "text" && "Texto"}
-                          {question.type === "email" && "Email"}
-                          {question.type === "select" && "Selección"}
+                          {question.type === "select" && "Selector"}
                           {question.type === "textarea" && "Texto largo"}
                         </span>
 
