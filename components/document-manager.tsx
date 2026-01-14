@@ -69,7 +69,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
             <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-1 border-gray-200 dark:border-[#2a2a2a] rounded-xl" align="start">
+        <PopoverContent className="w-[280px] p-1 border-gray-200 dark:border-[#2a2a2a] rounded-xl bg-gray-50 dark:bg-[#1a1a1a]" align="start">
           <div className="flex flex-col max-h-[320px] overflow-y-auto">
             {DOCUMENT_TYPES.map((type) => (
               <button
