@@ -25,6 +25,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Settings,
   Image as ImageIcon,
@@ -77,6 +78,7 @@ interface EventData {
   flyer?: string;
   flyer_apple?: string;
   venue_id?: string;
+  private_list?: boolean;
   faqs?: Array<{ id: string; question: string; answer: string }>;
   days?: EventDayData[];
 }
@@ -112,6 +114,7 @@ export function EventConfigContent({
     age: 18,
     timezone: "America/Bogota",
     currency: "COP",
+    isPrivate: false,
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -149,6 +152,7 @@ export function EventConfigContent({
         age: eventData.age || 18,
         timezone: "America/Bogota",
         currency: "COP",
+        isPrivate: eventData.private_list || false,
       });
 
       // Initialize images if available
@@ -330,6 +334,7 @@ export function EventConfigContent({
           venue_name: formData.venueName,
           variable_fee: huntCosts.commissionPercentage / 100,
           fixed_fee: huntCosts.costPerTicket,
+          private_list: formData.isPrivate,
         });
 
         if (!result.success) {
@@ -511,6 +516,30 @@ export function EventConfigContent({
                   ]}
                   hint="Edad mínima requerida para asistir al evento"
                 />
+
+                {/* Private Event */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
+                    <div className="space-y-1 flex-1">
+                      <Label htmlFor="isPrivate" className="text-sm font-medium cursor-pointer">
+                        Evento Privado
+                      </Label>
+                      <p className="text-xs text-gray-500 dark:text-white/40">
+                        Los eventos privados no aparecen en búsquedas públicas
+                      </p>
+                    </div>
+                    <Switch
+                      id="isPrivate"
+                      checked={formData.isPrivate}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          isPrivate: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
 

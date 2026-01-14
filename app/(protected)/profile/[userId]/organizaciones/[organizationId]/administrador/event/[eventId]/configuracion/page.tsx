@@ -199,6 +199,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     flyer: event.flyer || undefined,
     flyer_apple: event.flyerApple || undefined,
     venue_id: event.venueId || undefined,
+    private_list: event.privateList ?? false,
     faqs: (event.faqs as Array<{ id: string; question: string; answer: string }>) || [],
     days: days.map((d) => ({
       id: d.id,
