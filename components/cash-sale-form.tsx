@@ -365,7 +365,7 @@ export function CashSaleForm({ eventId, ticketTypes, eventDays = [], isMultiDay 
               type="submit"
               size="lg"
               disabled={isLoading || totalTickets === 0 || !email.trim()}
-              className="w-full bg-gray-900 hover:bg-black text-white dark:bg-white/90 dark:hover:bg-white dark:text-black"
+              className="w-full rounded-xl bg-gray-900 hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-black"
             >
               {isLoading ? (
                 <>
