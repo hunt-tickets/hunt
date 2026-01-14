@@ -61,7 +61,7 @@ export function IntegrationGrid({
                 Próximamente más conexiones
               </h3>
               <p className="text-xs sm:text-sm text-gray-600 dark:text-white/60 leading-relaxed">
-                Nuevas integraciones en camino
+                Estamos trabajando en nuevas integraciones para tu organización
               </p>
             </div>
           </div>
