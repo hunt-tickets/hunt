@@ -11,7 +11,7 @@ interface EmailManagerProps {
 export function EmailManager({ email, emailVerified = true }: EmailManagerProps) {
   return (
     <div
-      className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-50 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors group"
+      className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors group"
       role="region"
       aria-label="Correo electrónico principal"
     >
