@@ -33,7 +33,7 @@ export function CreateOrganizationDialog({ variant = "default" }: CreateOrganiza
             <Plus className="h-4 w-4" />
           </Button>
         ) : (
-          <Button className="gap-2">
+          <Button className="gap-2 rounded-xl">
             <Plus className="h-4 w-4" />
             <span>Crear Organización</span>
           </Button>
