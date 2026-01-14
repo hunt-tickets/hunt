@@ -44,6 +44,7 @@ import {
   Info,
   ChevronRight,
   CalendarRange,
+  ShoppingCart,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -235,6 +236,17 @@ interface EventData {
   venue_id?: string;
   // private_list?: boolean; // TODO: Waiting for DB migration
   faqs?: Array<{ id: string; question: string; answer: string }>;
+  checkout_questions?: Array<{
+    id: string;
+    question: string;
+    type: "text" | "email" | "select" | "textarea";
+    required: boolean;
+    scope: "per_order" | "per_ticket";
+    ticket_type_ids: string[];
+    options: string[];
+    placeholder: string;
+    sort_order: number;
+  }>;
   days?: EventDayData[];
 }
 
@@ -320,6 +332,11 @@ export function EventConfigContent({
         setFaqs(eventData.faqs);
       }
 
+      // Initialize Checkout Questions if available
+      if (eventData.checkout_questions && Array.isArray(eventData.checkout_questions)) {
+        setCheckoutQuestions(eventData.checkout_questions);
+      }
+
       // Initialize Hunt costs
       setHuntCosts({
         commissionPercentage: (eventData.variable_fee || 0) * 100,
@@ -369,9 +386,29 @@ export function EventConfigContent({
   const [draggedFaqIndex, setDraggedFaqIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  // Checkout Questions State
+  interface CheckoutQuestion {
+    id: string;
+    question: string;
+    type: "text" | "email" | "select" | "textarea";
+    required: boolean;
+    scope: "per_order" | "per_ticket";
+    ticket_type_ids: string[];
+    options: string[];
+    placeholder: string;
+    sort_order: number;
+  }
+
+  const [checkoutQuestions, setCheckoutQuestions] = useState<CheckoutQuestion[]>([]);
+  const [editingQuestion, setEditingQuestion] = useState<CheckoutQuestion | null>(null);
+  const [isAddingQuestion, setIsAddingQuestion] = useState(false);
+  const [draggedQuestionIndex, setDraggedQuestionIndex] = useState<number | null>(null);
+  const [dragOverQuestionIndex, setDragOverQuestionIndex] = useState<number | null>(null);
+
   const tabs = [
     { id: "information", label: "Información", icon: Settings },
     { id: "faqs", label: "FAQs", icon: HelpCircle },
+    { id: "checkout", label: "Checkout", icon: ShoppingCart },
   ];
 
   const handleInputChange = (
@@ -509,6 +546,80 @@ export function EventConfigContent({
   const handleDragEnd = () => {
     setDraggedFaqIndex(null);
     setDragOverIndex(null);
+  };
+
+  // Checkout Questions Functions
+  const saveCheckoutQuestions = async (updatedQuestions: CheckoutQuestion[]) => {
+    if (!eventId) return;
+
+    try {
+      const { updateEventConfiguration } = await import("@/actions/events");
+
+      const result = await updateEventConfiguration(eventId, {
+        checkout_questions: updatedQuestions,
+      });
+
+      if (!result.success) {
+        console.error("Error al guardar preguntas de checkout:", result.message);
+      }
+    } catch (error) {
+      console.error("Error saving checkout questions:", error);
+    }
+  };
+
+  const handleQuestionDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedQuestionIndex(index);
+    if (e.currentTarget instanceof HTMLElement) {
+      e.dataTransfer.effectAllowed = "move";
+    }
+  };
+
+  const handleQuestionDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+
+    if (draggedQuestionIndex !== null && draggedQuestionIndex !== index) {
+      setDragOverQuestionIndex(index);
+    }
+  };
+
+  const handleQuestionDragLeave = () => {
+    setDragOverQuestionIndex(null);
+  };
+
+  const handleQuestionDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+
+    if (draggedQuestionIndex === null || draggedQuestionIndex === dropIndex) {
+      setDraggedQuestionIndex(null);
+      setDragOverQuestionIndex(null);
+      return;
+    }
+
+    const newQuestions = [...checkoutQuestions];
+    const draggedItem = newQuestions[draggedQuestionIndex];
+
+    // Remove from old position
+    newQuestions.splice(draggedQuestionIndex, 1);
+
+    // Insert at new position
+    newQuestions.splice(dropIndex, 0, draggedItem);
+
+    // Update sort_order
+    const updatedQuestions = newQuestions.map((q, idx) => ({
+      ...q,
+      sort_order: idx,
+    }));
+
+    setCheckoutQuestions(updatedQuestions);
+    saveCheckoutQuestions(updatedQuestions);
+    setDraggedQuestionIndex(null);
+    setDragOverQuestionIndex(null);
+  };
+
+  const handleQuestionDragEnd = () => {
+    setDraggedQuestionIndex(null);
+    setDragOverQuestionIndex(null);
   };
 
   // Tabs section

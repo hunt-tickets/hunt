@@ -5,7 +5,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 type DashboardTab = "dashboard" | "borderaux" | "web" | "vendedores" | "refunds";
 type SalesTab = "overview" | "orders" | "sellers";
 type AccessControlTab = "analytics" | "list";
-type ConfigTab = "information" | "images" | "payment" | "wallet" | "faqs";
+type ConfigTab = "information" | "images" | "payment" | "wallet" | "faqs" | "checkout";
 type TeamTab = "productores" | "vendedores" | "artistas";
 
 interface EventTabsContextValue {
