@@ -94,7 +94,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
     <div className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Mis Entradas</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+        <p className="text-sm sm:text-base text-gray-500 mt-1 sm:mt-2">
           Tus tickets para próximos eventos
         </p>
       </div>
@@ -104,11 +104,11 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
           <CardContent className="py-12">
             <div className="text-center space-y-4">
               <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <Ticket className="h-6 w-6 text-muted-foreground" />
+                <Ticket className="h-6 w-6 text-gray-400" />
               </div>
               <div>
                 <h3 className="font-semibold">No tienes entradas</h3>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   Cuando compres tickets para eventos, aparecerán aquí
                 </p>
               </div>
