@@ -112,7 +112,7 @@ export default async function AccesosPage({ params }: AccesosPageProps) {
       </EventStickyHeader>
 
       {/* Content */}
-      <div className="px-3 py-3 sm:px-6 sm:py-4">
+      <div className="py-3 sm:py-4">
         <EventAccessControlContent
           qrCodes={accessData?.qrCodes || []}
           transactionsWithoutQR={accessData?.transactionsMissingQR || []}
