@@ -147,9 +147,9 @@ export function EventCard({
           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
 
-        {/* Status and Event Type badges in top left corner - only show when status is provided (admin view) */}
+        {/* Status badge in top left corner - only show when status is provided (admin view) */}
         {status !== undefined && (
-          <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
+          <div className="absolute top-4 left-4 z-10">
             {/* Lifecycle status badge - show if event is being cancelled */}
             {lifecycleStatus === "cancellation_pending" ? (
               <div className="px-2.5 py-1 rounded-lg text-[10px] font-medium bg-yellow-50 text-yellow-700 border border-yellow-200 dark:bg-yellow-600/10 dark:text-yellow-400 dark:border-yellow-600/20">
@@ -167,19 +167,6 @@ export function EventCard({
                 {status ? "Activo" : "Borrador"}
               </div>
             )}
-            {/* Event type badge */}
-            {eventType &&
-              EVENT_TYPE_CONFIG[eventType] &&
-              (() => {
-                const TypeIcon = EVENT_TYPE_CONFIG[eventType].icon;
-                const typeLabel = EVENT_TYPE_CONFIG[eventType].label;
-                return (
-                  <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">
-                    <TypeIcon className="h-3 w-3" />
-                    <span>{typeLabel}</span>
-                  </div>
-                );
-              })()}
           </div>
         )}
 
