@@ -419,7 +419,7 @@ export function PhoneVerificationManager({
               }
             }}
             disabled={isSendingOTP}
-            className="text-sm font-medium text-foreground/70 hover:text-foreground transition-all duration-200 hover:translate-x-0.5"
+            className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors duration-200"
           >
             {isSendingOTP ? "Enviando..." : "Verificar ahora"}
           </button>
@@ -441,7 +441,7 @@ export function PhoneVerificationManager({
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={() => setIsAdding(true)}
-            className="text-sm font-medium text-foreground/70 hover:text-foreground transition-all duration-200 hover:translate-x-0.5"
+            className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors duration-200"
           >
             Agregar número
           </button>

@@ -375,7 +375,7 @@ export function PasswordManager({
       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <button
           onClick={() => setIsChanging(true)}
-          className="text-sm font-medium text-foreground/70 hover:text-foreground transition-all duration-200 hover:translate-x-0.5"
+          className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors duration-200"
           aria-label="Actualizar contraseña"
         >
           Actualizar contraseña
