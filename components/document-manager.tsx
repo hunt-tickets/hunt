@@ -79,7 +79,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
                   setOpen(false);
                   handleSave();
                 }}
-                className="px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+                className="px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors rounded-lg"
               >
                 {type.label}
               </button>
