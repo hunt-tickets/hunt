@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit2, Trash2, GripVertical, ShoppingCart } from "lucide-react";
@@ -47,6 +48,26 @@ export function EventConfigCheckoutTab({
   handleQuestionDragEnd,
   deleteCheckoutQuestion,
 }: EventConfigCheckoutTabProps) {
+  // Local form state
+  const [formData, setFormData] = useState({
+    question: "",
+    type: "text" as "text" | "email" | "select" | "textarea",
+    placeholder: "",
+    scope: "per_order" as "per_order" | "per_ticket",
+    required: true,
+    ticketTypes: [] as string[],
+  });
+
+  // Toggle ticket type selection
+  const toggleTicketType = (typeId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      ticketTypes: prev.ticketTypes.includes(typeId)
+        ? prev.ticketTypes.filter((id) => id !== typeId)
+        : [...prev.ticketTypes, typeId],
+    }));
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
@@ -90,6 +111,8 @@ export function EventConfigCheckoutTab({
                   </label>
                   <input
                     type="text"
+                    value={formData.question}
+                    onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                     placeholder="ej. ¿Cuál es tu nombre completo?"
                     className="w-full p-3 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600"
                   />
@@ -103,28 +126,48 @@ export function EventConfigCheckoutTab({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                      onClick={() => setFormData({ ...formData, type: "text" })}
+                      className={`p-3 rounded-xl border transition-colors text-left ${
+                        formData.type === "text"
+                          ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525]"
+                          : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
+                      }`}
                     >
                       <div className="text-sm font-medium text-gray-900 dark:text-white">Texto corto</div>
                       <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Una línea de texto</div>
                     </button>
                     <button
                       type="button"
-                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                      onClick={() => setFormData({ ...formData, type: "email" })}
+                      className={`p-3 rounded-xl border transition-colors text-left ${
+                        formData.type === "email"
+                          ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525]"
+                          : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
+                      }`}
                     >
                       <div className="text-sm font-medium text-gray-900 dark:text-white">Email</div>
                       <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Dirección de correo</div>
                     </button>
                     <button
                       type="button"
-                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                      onClick={() => setFormData({ ...formData, type: "select" })}
+                      className={`p-3 rounded-xl border transition-colors text-left ${
+                        formData.type === "select"
+                          ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525]"
+                          : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
+                      }`}
                     >
                       <div className="text-sm font-medium text-gray-900 dark:text-white">Selección</div>
                       <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Opciones múltiples</div>
                     </button>
                     <button
                       type="button"
-                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                      onClick={() => setFormData({ ...formData, type: "textarea" })}
+                      className={`p-3 rounded-xl border transition-colors text-left ${
+                        formData.type === "textarea"
+                          ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525]"
+                          : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
+                      }`}
                     >
                       <div className="text-sm font-medium text-gray-900 dark:text-white">Texto largo</div>
                       <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Párrafo completo</div>
@@ -139,6 +182,8 @@ export function EventConfigCheckoutTab({
                   </label>
                   <input
                     type="text"
+                    value={formData.placeholder}
+                    onChange={(e) => setFormData({ ...formData, placeholder: e.target.value })}
                     placeholder="ej. Ingresa tu nombre tal como aparece en tu documento"
                     className="w-full p-3 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600"
                   />
@@ -152,14 +197,24 @@ export function EventConfigCheckoutTab({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      className="p-3 rounded-xl border border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525] transition-colors text-left"
+                      onClick={() => setFormData({ ...formData, scope: "per_order" })}
+                      className={`p-3 rounded-xl border transition-colors text-left ${
+                        formData.scope === "per_order"
+                          ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525]"
+                          : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
+                      }`}
                     >
                       <div className="text-sm font-medium text-gray-900 dark:text-white">Por orden</div>
                       <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Se pregunta una vez</div>
                     </button>
                     <button
                       type="button"
-                      className="p-3 rounded-xl border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a] transition-colors text-left"
+                      onClick={() => setFormData({ ...formData, scope: "per_ticket" })}
+                      className={`p-3 rounded-xl border transition-colors text-left ${
+                        formData.scope === "per_ticket"
+                          ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-[#252525]"
+                          : "border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#202020] hover:border-gray-400 dark:hover:border-[#3a3a3a]"
+                      }`}
                     >
                       <div className="text-sm font-medium text-gray-900 dark:text-white">Por ticket</div>
                       <div className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Por cada entrada</div>
@@ -178,9 +233,20 @@ export function EventConfigCheckoutTab({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-900 dark:bg-white transition-colors"
+                      onClick={() => setFormData({ ...formData, required: !formData.required })}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        formData.required
+                          ? "bg-gray-900 dark:bg-white"
+                          : "bg-gray-300 dark:bg-[#3a3a3a]"
+                      }`}
                     >
-                      <span className="inline-block h-4 w-4 transform rounded-full bg-white dark:bg-black transition translate-x-6" />
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full transition ${
+                          formData.required
+                            ? "translate-x-6 bg-white dark:bg-black"
+                            : "translate-x-1 bg-white dark:bg-gray-600"
+                        }`}
+                      />
                     </button>
                   </div>
                 </div>
@@ -196,15 +262,30 @@ export function EventConfigCheckoutTab({
                   <div className="p-3 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1a1a1a]">
                     <div className="space-y-2">
                       <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer">
-                        <input type="checkbox" className="rounded border-gray-300 dark:border-[#2a2a2a]" />
+                        <input
+                          type="checkbox"
+                          checked={formData.ticketTypes.includes("general")}
+                          onChange={() => toggleTicketType("general")}
+                          className="rounded border-gray-300 dark:border-[#2a2a2a]"
+                        />
                         <span className="text-sm text-gray-900 dark:text-white">General</span>
                       </label>
                       <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer">
-                        <input type="checkbox" className="rounded border-gray-300 dark:border-[#2a2a2a]" />
+                        <input
+                          type="checkbox"
+                          checked={formData.ticketTypes.includes("vip")}
+                          onChange={() => toggleTicketType("vip")}
+                          className="rounded border-gray-300 dark:border-[#2a2a2a]"
+                        />
                         <span className="text-sm text-gray-900 dark:text-white">VIP</span>
                       </label>
                       <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] cursor-pointer">
-                        <input type="checkbox" className="rounded border-gray-300 dark:border-[#2a2a2a]" />
+                        <input
+                          type="checkbox"
+                          checked={formData.ticketTypes.includes("palco")}
+                          onChange={() => toggleTicketType("palco")}
+                          className="rounded border-gray-300 dark:border-[#2a2a2a]"
+                        />
                         <span className="text-sm text-gray-900 dark:text-white">Palco</span>
                       </label>
                     </div>
