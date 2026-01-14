@@ -1521,6 +1521,191 @@ export function EventConfigContent({
               </CardContent>
             </Card>
           )}
+
+          {/* Checkout Questions Tab */}
+          {activeTab === "checkout" && (
+            <div className="space-y-4">
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-xl">
+                        Preguntas de Checkout
+                      </CardTitle>
+                      <CardDescription className="mt-1.5 text-gray-500 dark:text-gray-400">
+                        Configura preguntas personalizadas para el proceso de compra
+                      </CardDescription>
+                    </div>
+                    {!isAddingQuestion && !editingQuestion && (
+                      <Button
+                        onClick={() => {
+                          setIsAddingQuestion(true);
+                          setEditingQuestion(null);
+                        }}
+                        className="rounded-lg shrink-0 bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-white/90"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nueva Pregunta
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Add/Edit Form - Will be implemented */}
+                  {(isAddingQuestion || editingQuestion) && (
+                    <div className="p-6 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] space-y-5">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white/80 uppercase tracking-wider">
+                          {editingQuestion ? "Editar Pregunta" : "Nueva Pregunta"}
+                        </h3>
+                      </div>
+
+                      <div className="space-y-4">
+                        {/* Form will be added in next edit */}
+                        <p className="text-sm text-gray-500">Form coming soon...</p>
+                      </div>
+
+                      <div className="flex justify-end gap-3 pt-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsAddingQuestion(false);
+                            setEditingQuestion(null);
+                          }}
+                          className="rounded-lg border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            // Will implement save logic
+                          }}
+                          className="rounded-lg min-w-[100px] bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-white/90"
+                        >
+                          {editingQuestion ? "Actualizar" : "Agregar"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Questions List - Empty State */}
+                  {checkoutQuestions.length === 0 && !isAddingQuestion && !editingQuestion ? (
+                    <div className="text-center py-16">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mb-4">
+                        <ShoppingCart className="h-8 w-8 text-gray-500 dark:text-white/40" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+                        No hay preguntas de checkout
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-white/40 max-w-md mx-auto">
+                        Crea preguntas personalizadas para recopilar información durante el proceso de compra
+                      </p>
+                    </div>
+                  ) : checkoutQuestions.length > 0 ? (
+                    <div className="space-y-0">
+                      {checkoutQuestions.map((question, index) => (
+                        <div key={question.id} className="relative">
+                          {/* Drop Indicator */}
+                          {dragOverQuestionIndex === index &&
+                            draggedQuestionIndex !== index && (
+                              <div className="absolute -top-[2px] left-0 right-0 h-[3px] bg-gray-900 dark:bg-white rounded-full z-10" />
+                            )}
+
+                          <div
+                            draggable
+                            onDragStart={(e) => handleQuestionDragStart(e, index)}
+                            onDragOver={(e) => handleQuestionDragOver(e, index)}
+                            onDragLeave={handleQuestionDragLeave}
+                            onDrop={(e) => handleQuestionDrop(e, index)}
+                            onDragEnd={handleQuestionDragEnd}
+                            className={`group relative p-5 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-100 dark:hover:bg-white/[0.04] transition-all duration-200 mb-3 ${
+                              draggedQuestionIndex === index
+                                ? "opacity-40 scale-[0.98] shadow-lg"
+                                : "opacity-100 scale-100"
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              {/* Drag Handle */}
+                              <div className="flex-shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70">
+                                <GripVertical className="h-5 w-5" />
+                              </div>
+
+                              {/* Number Badge */}
+                              <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white/70 font-semibold text-sm transition-transform group-hover:scale-105">
+                                {index + 1}
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0 space-y-2.5">
+                                <h4 className="font-semibold text-gray-900 dark:text-white text-sm leading-snug pr-20">
+                                  {question.question}
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  <span className="text-xs px-2 py-1 rounded-md bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white/70">
+                                    {question.type === "text" && "Texto"}
+                                    {question.type === "email" && "Email"}
+                                    {question.type === "select" && "Selección"}
+                                    {question.type === "textarea" && "Texto largo"}
+                                  </span>
+                                  {question.required && (
+                                    <span className="text-xs px-2 py-1 rounded-md bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400">
+                                      Obligatoria
+                                    </span>
+                                  )}
+                                  <span className="text-xs px-2 py-1 rounded-md bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400">
+                                    {question.scope === "per_order" ? "Por orden" : "Por ticket"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="absolute top-5 right-5 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingQuestion(question);
+                                    setIsAddingQuestion(false);
+                                  }}
+                                  className="h-9 w-9 p-0 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
+                                  title="Editar pregunta"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (
+                                      window.confirm(
+                                        "¿Estás seguro de eliminar esta pregunta?"
+                                      )
+                                    ) {
+                                      const updatedQuestions = checkoutQuestions.filter(
+                                        (q) => q.id !== question.id
+                                      );
+                                      setCheckoutQuestions(updatedQuestions);
+                                      saveCheckoutQuestions(updatedQuestions);
+                                    }
+                                  }}
+                                  className="h-9 w-9 p-0 rounded-lg hover:bg-red-500/20 hover:text-red-400"
+                                  title="Eliminar pregunta"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>
