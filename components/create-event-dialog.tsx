@@ -96,16 +96,18 @@ export function CreateEventDialog({
                 <Label htmlFor="name" className="text-sm font-medium">
                   Nombre del evento <span className="text-destructive">*</span>
                 </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Ej: Fiesta de Año Nuevo 2025"
-                  className="h-11 bg-gray-50 dark:bg-[#111] border-gray-200 dark:border-[#2a2a2a] focus-visible:ring-primary/50 rounded-xl"
-                  autoFocus
-                  disabled={pending}
-                  required
-                  minLength={1}
-                />
+                <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="Ej: Fiesta de Año Nuevo 2025"
+                    className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                    autoFocus
+                    disabled={pending}
+                    required
+                    minLength={1}
+                  />
+                </div>
                 {state.errors?.name && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
