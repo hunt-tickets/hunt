@@ -131,7 +131,7 @@ export function EventConfigContent({
     category: "" as (typeof EVENT_CATEGORIES)[number] | "",
     venueName: "",
     city: "",
-    country: "",
+    country: "CO", // Default to Colombia
     address: "",
     startDate: "",
     endDate: "",
@@ -570,36 +570,26 @@ export function EventConfigContent({
 
                 {/* Country and City */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormModalSelect
-                    label="País"
-                    value={formData.country}
-                    onChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        country: value,
-                        city: "", // Reset city when country changes
-                      })
-                    }
-                    options={COUNTRIES}
-                    placeholder="Selecciona un país"
-                  />
+                  {/* Country - Fixed to Colombia */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">País</Label>
+                    <div className="flex items-center p-4 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] opacity-60 cursor-not-allowed">
+                      <Globe className="h-4 w-4 mr-3 text-gray-500 dark:text-white/40" />
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        Colombia
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* City Select */}
                   <FormModalSelect
                     label="Ciudad"
                     value={formData.city}
                     onChange={(value) =>
                       setFormData({ ...formData, city: value })
                     }
-                    options={
-                      formData.country
-                        ? CITIES_BY_COUNTRY[formData.country] || []
-                        : []
-                    }
-                    placeholder={
-                      formData.country
-                        ? "Selecciona una ciudad"
-                        : "Primero selecciona un país"
-                    }
-                    disabled={!formData.country}
+                    options={CITIES_BY_COUNTRY["CO"] || []}
+                    placeholder="Selecciona una ciudad"
                   />
                 </div>
               </CardContent>
