@@ -133,12 +133,11 @@ export function CreateTicketTypeDialog({
       {/* Trigger Button */}
       <Button
         size="sm"
-        variant="outline"
         onClick={() => setOpen(true)}
-        className="rounded-lg border-white/10 hover:bg-white/5 transition-all duration-300"
+        className="rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 border-0"
       >
         <Plus className="h-4 w-4 mr-2" />
-        Nuevo Tipo
+        Nueva Entrada
       </Button>
 
       {/* Sidebar Modal */}
@@ -162,9 +161,9 @@ export function CreateTicketTypeDialog({
                   <Ticket className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">Nuevo Tipo de Entrada</h2>
+                  <h2 className="text-xl font-bold">Nueva Entrada</h2>
                   <p className="text-sm text-white/60">
-                    Crea una categoría para tus entradas
+                    Crea una nueva entrada para tu evento
                   </p>
                 </div>
               </div>

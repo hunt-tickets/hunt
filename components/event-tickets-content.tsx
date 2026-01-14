@@ -131,23 +131,11 @@ export function EventTicketsContent({
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">Tipos de Entrada</h3>
-            <div className="group relative">
-              <HelpCircle className="h-4 w-4 text-white/40 hover:text-white/60 cursor-help transition-colors" />
-              <div className="absolute left-0 top-6 w-64 p-3 bg-zinc-900 border border-white/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <p className="text-xs text-white/80 leading-relaxed">
-                  Los <strong>Tipos de Entrada</strong> permiten organizar tus
-                  boletas por categorías (VIP, General, Palco, etc.). Cada tipo
-                  puede tener múltiples tickets con diferentes precios y
-                  ubicaciones.
-                </p>
-              </div>
-            </div>
+            <h3 className="text-lg font-semibold">Entradas</h3>
           </div>
           {tickets.length > 0 && (
             <p className="text-sm text-muted-foreground">
-              {tickets.length} tipo{tickets.length !== 1 ? "s" : ""} de entrada
-              configurado{tickets.length !== 1 ? "s" : ""}
+              {tickets.length} entrada{tickets.length !== 1 ? "s" : ""} configurada{tickets.length !== 1 ? "s" : ""}
             </p>
           )}
         </div>
@@ -165,7 +153,7 @@ export function EventTicketsContent({
           <Button
             size="sm"
             variant="outline"
-            className="rounded-lg"
+            className="rounded-lg border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5"
             disabled
             // onClick={() =>
             //   router.push(
@@ -598,9 +586,9 @@ export function EventTicketsContent({
               </h3>
               <p className="text-sm text-gray-500 dark:text-white/40 mb-4">
                 {selectedDayInfo
-                  ? "Crea un tipo de entrada para este día"
+                  ? "Crea una entrada para este día"
                   : ticketsFilteredByDay.length === 0
-                    ? "Crea tipos de entrada para empezar a vender"
+                    ? "Crea entradas para empezar a vender"
                     : "Prueba con otro filtro"}
               </p>
               {/* Quick create button when viewing a specific day with no tickets */}
