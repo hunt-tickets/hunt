@@ -1597,14 +1597,14 @@ export function EventConfigContent({
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                         1
                       </div>
                       <div>
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                           Información básica
                         </p>
-                        <p className="text-xs text-white/50 mt-1">
+                        <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                           Asegúrate de incluir un nombre atractivo y una
                           descripción detallada del evento
                         </p>
@@ -1614,12 +1614,12 @@ export function EventConfigContent({
 
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                         2
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Banner del evento</p>
-                        <p className="text-xs text-white/50 mt-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Banner del evento</p>
+                        <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                           Usa una imagen de alta calidad (mínimo 1920x1080px)
                           para el banner principal
                         </p>
@@ -1629,12 +1629,12 @@ export function EventConfigContent({
 
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                         3
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Ubicación precisa</p>
-                        <p className="text-xs text-white/50 mt-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Ubicación precisa</p>
+                        <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                           Ingresa la dirección completa para que los asistentes
                           puedan encontrar el lugar fácilmente
                         </p>
@@ -1644,12 +1644,12 @@ export function EventConfigContent({
 
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                         4
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Fechas y horarios</p>
-                        <p className="text-xs text-white/50 mt-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Fechas y horarios</p>
+                        <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                           Verifica que las fechas de inicio y fin sean correctas
                         </p>
                       </div>
@@ -1658,14 +1658,14 @@ export function EventConfigContent({
                 </CardContent>
               </Card>
 
-              <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-950/30">
+              <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30">
                 <div className="flex items-start gap-3">
-                  <HelpCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-amber-200">
+                    <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
                       Recuerda guardar
                     </p>
-                    <p className="text-xs text-amber-300/80 mt-1">
+                    <p className="text-xs text-amber-700 dark:text-amber-300/80 mt-1">
                       Los cambios se guardarán automáticamente al hacer clic en
                       el botón &quot;Guardar Cambios&quot;
                     </p>
@@ -1692,12 +1692,12 @@ export function EventConfigContent({
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                       1
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Colores y branding</p>
-                      <p className="text-xs text-white/50 mt-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Colores y branding</p>
+                      <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                         Personaliza los colores para que coincidan con la
                         identidad de tu evento
                       </p>
@@ -1707,12 +1707,12 @@ export function EventConfigContent({
 
                 <div className="space-y-2">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                       2
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Logo e imágenes</p>
-                      <p className="text-xs text-white/50 mt-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Logo e imágenes</p>
+                      <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                         Sube tu logo y las imágenes que aparecerán en el pase de
                         Apple Wallet
                       </p>
@@ -1742,12 +1742,12 @@ export function EventConfigContent({
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                       1
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Preguntas comunes</p>
-                      <p className="text-xs text-white/50 mt-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Preguntas comunes</p>
+                      <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                         Incluye información sobre estacionamiento, edad mínima,
                         política de reembolsos, etc.
                       </p>
@@ -1757,12 +1757,12 @@ export function EventConfigContent({
 
                 <div className="space-y-2">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white flex items-center justify-center text-xs font-bold">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
                       2
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Orden y claridad</p>
-                      <p className="text-xs text-white/50 mt-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Orden y claridad</p>
+                      <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
                         Organiza las preguntas de más a menos importante y sé
                         claro en las respuestas
                       </p>
