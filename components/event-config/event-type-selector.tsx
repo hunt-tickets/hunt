@@ -76,7 +76,7 @@ export function EventTypeSelector({
                 variant="outline"
                 className="absolute top-2 right-2 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 text-xs"
               >
-                Próximamente
+                Pronto
               </Badge>
             )}
             <div
