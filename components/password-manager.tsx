@@ -198,7 +198,7 @@ export function PasswordManager({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-3 max-w-md">
           {/* Current Password */}
           <div className="relative p-3 rounded-lg border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
             <Input
