@@ -3,7 +3,8 @@
 import { forwardRef, ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ChevronDown, Search } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -31,6 +32,8 @@ export interface FormModalSelectProps {
   onChange: (value: string) => void;
   options: FormModalSelectOption[];
   placeholder?: string;
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
 const FormModalSelect = forwardRef<HTMLButtonElement, FormModalSelectProps>(
@@ -48,18 +51,36 @@ const FormModalSelect = forwardRef<HTMLButtonElement, FormModalSelectProps>(
       onChange,
       options,
       placeholder = "Selecciona una opción",
+      searchable = false,
+      searchPlaceholder = "Buscar...",
       id,
       name,
     },
     ref
   ) => {
     const [open, setOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
     const hasError = !!error;
     const hasSuccess = success && !hasError;
 
     // Find the selected option label
     const selectedOption = options.find((opt) => opt.value === String(value));
     const displayValue = selectedOption?.label || placeholder;
+
+    // Filter options based on search query
+    const filteredOptions = searchable
+      ? options.filter((option) =>
+          option.label.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : options;
+
+    // Reset search when closing popover
+    const handleOpenChange = (isOpen: boolean) => {
+      setOpen(isOpen);
+      if (!isOpen) {
+        setSearchQuery("");
+      }
+    };
 
     return (
       <div className={cn("space-y-2", containerClassName)}>
@@ -70,7 +91,7 @@ const FormModalSelect = forwardRef<HTMLButtonElement, FormModalSelectProps>(
           </Label>
         )}
 
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild disabled={disabled}>
             <button
               ref={ref}
@@ -108,23 +129,44 @@ const FormModalSelect = forwardRef<HTMLButtonElement, FormModalSelectProps>(
             </button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[280px] p-1 border-gray-200 dark:border-[#2a2a2a] rounded-xl bg-gray-50 dark:bg-[#1a1a1a]"
+            className="w-[280px] p-2 border-gray-200 dark:border-[#2a2a2a] rounded-xl bg-gray-50 dark:bg-[#1a1a1a]"
             align="start"
           >
+            {searchable && (
+              <div className="mb-2 px-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-white/40" />
+                  <Input
+                    type="text"
+                    placeholder={searchPlaceholder}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-9 pl-9 pr-3 bg-white dark:bg-[#202020] border-gray-200 dark:border-[#2a2a2a] rounded-lg text-sm placeholder:text-gray-400 dark:placeholder:text-white/40"
+                    autoFocus
+                  />
+                </div>
+              </div>
+            )}
             <div className="flex flex-col max-h-[320px] overflow-y-auto">
-              {options.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(option.value);
-                    setOpen(false);
-                  }}
-                  className="px-3 py-2 text-left text-sm hover:bg-gray-200 dark:hover:bg-[#2a2a2a] transition-colors rounded-lg text-gray-900 dark:text-white"
-                >
-                  {option.label}
-                </button>
-              ))}
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setOpen(false);
+                    }}
+                    className="px-3 py-2 text-left text-sm hover:bg-gray-200 dark:hover:bg-[#2a2a2a] transition-colors rounded-lg text-gray-900 dark:text-white"
+                  >
+                    {option.label}
+                  </button>
+                ))
+              ) : (
+                <div className="px-3 py-6 text-center text-sm text-gray-500 dark:text-white/40">
+                  No se encontraron resultados
+                </div>
+              )}
             </div>
           </PopoverContent>
         </Popover>

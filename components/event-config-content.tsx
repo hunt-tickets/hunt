@@ -721,6 +721,8 @@ export function EventConfigContent({
                     }
                     options={CITIES_BY_COUNTRY["CO"] || []}
                     placeholder="Selecciona una ciudad"
+                    searchable={true}
+                    searchPlaceholder="Buscar ciudad..."
                   />
                 </div>
               </CardContent>
