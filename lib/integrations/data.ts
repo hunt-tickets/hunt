@@ -35,15 +35,15 @@ export const INTEGRATIONS: Integration[] = [
     documentationUrl: "https://www.mercadopago.com.co/developers",
   },
 
-  // WEBHOOKS
+  // ZAPIER
   {
-    id: "webhooks",
-    name: "WebHooks",
-    description: "Recibe notificaciones en tiempo real sobre eventos importantes como ventas, check-ins y cancelaciones.",
-    logo: "https://cdn-icons-png.flaticon.com/512/2165/2165004.png",
+    id: "zapier",
+    name: "Zapier",
+    description: "Conecta Hunt Tickets con más de 5,000 aplicaciones y automatiza tus flujos de trabajo sin código.",
+    logo: "https://cdn.zapier.com/zapier/images/logos/zapier-logomark.png",
     status: "available",
     category: INTEGRATION_CATEGORIES.WEBHOOKS,
-    documentationUrl: "https://docs.hunt-tickets.com/webhooks",
+    documentationUrl: "https://zapier.com/apps/hunt-tickets/integrations",
   },
 
   // COMING SOON - Google Analytics
