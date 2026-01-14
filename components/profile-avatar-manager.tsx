@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, Camera } from "lucide-react";
+import { Upload, Camera, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface ProfileAvatarManagerProps {
@@ -68,6 +68,25 @@ export function ProfileAvatarManager({
 
   const handleClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleRemoveImage = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    try {
+      setIsUploading(true);
+
+      // TODO: Aquí iría la lógica para eliminar la imagen del servidor
+      // await deleteProfileImage();
+
+      setImagePreview(null);
+      toast.success({ title: "Imagen eliminada correctamente" });
+    } catch (error) {
+      console.error("Error removing image:", error);
+      toast.error({ title: "Error al eliminar la imagen" });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -144,6 +163,17 @@ export function ProfileAvatarManager({
         )}
       </div>
 
+      {/* Remove Image Button - Only show when there's an image */}
+      {imagePreview && !isUploading && (
+        <button
+          onClick={handleRemoveImage}
+          className="absolute -top-1 -right-1 sm:top-0 sm:right-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-colors border-2 border-white dark:border-[#0a0a0a] opacity-0 group-hover:opacity-100"
+          aria-label="Eliminar imagen"
+        >
+          <X className="h-4 w-4 sm:h-5 sm:w-5" />
+        </button>
+      )}
+
       {/* Hidden File Input */}
       <input
         ref={fileInputRef}
@@ -156,7 +186,7 @@ export function ProfileAvatarManager({
 
       {/* Help Text */}
       <p className="text-xs text-gray-500 dark:text-white/40 text-center mt-2">
-        {imagePreview ? "Click para cambiar" : "Click para subir foto"}
+        {imagePreview ? "Click para cambiar o eliminar" : "Click para subir foto"}
       </p>
     </div>
   );
