@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { SimpleDatePicker } from './simple-date-picker';
+import { PhoneInput } from './phone-input';
 
 // Sanitization helpers
 const sanitizeText = (text: string): string => {
@@ -88,6 +89,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [birthday, setBirthday] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("Cédula de Ciudadanía");
   const [numeroDocumento, setNumeroDocumento] = useState("");
@@ -221,6 +223,17 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                     required
                   />
                 </GlassInputWrapper>
+              </div>
+
+              <div className="animate-element animate-delay-300 space-y-2">
+                <label className="text-sm font-medium text-gray-400">
+                  Número de teléfono <span className="text-gray-500 font-normal">(opcional)</span>
+                </label>
+                <PhoneInput
+                  value={phoneNumber}
+                  onChange={setPhoneNumber}
+                  placeholder="Ingresa tu número de teléfono"
+                />
               </div>
 
               <div className="animate-element animate-delay-300 space-y-2">
