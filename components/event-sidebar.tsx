@@ -165,19 +165,6 @@ export function EventSidebar({
                 HUNT
               </div>
             </Link>
-            <div
-              className="text-xs text-gray-500 dark:text-white/40 truncate mt-2 ml-8"
-              title={eventName}
-            >
-              {eventName}
-            </div>
-            {/* Event Type Badge */}
-            <div className="mt-2 ml-8 flex items-center gap-1.5">
-              <TypeIcon className="h-3 w-3 text-gray-400 dark:text-white/40" />
-              <span className="text-[10px] font-medium text-gray-400 dark:text-white/40 uppercase tracking-wide">
-                {typeConfig.label}
-              </span>
-            </div>
           </div>
 
           {/* Navigation */}
