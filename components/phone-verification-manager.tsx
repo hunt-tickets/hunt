@@ -297,7 +297,7 @@ export function PhoneVerificationManager({
             </span>
             <Badge
               variant="secondary"
-              className="text-xs px-2 py-0.5 bg-green-600/10 text-green-400 border-green-600/20"
+              className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-600/10 dark:text-green-400 dark:border-green-600/20"
             >
               Verificado
             </Badge>

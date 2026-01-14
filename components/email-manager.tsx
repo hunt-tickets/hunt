@@ -11,7 +11,7 @@ interface EmailManagerProps {
 export function EmailManager({ email, emailVerified = true }: EmailManagerProps) {
   return (
     <div
-      className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors group"
+      className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-gray-200 bg-white dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-50 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors group"
       role="region"
       aria-label="Correo electrónico principal"
     >
@@ -28,7 +28,7 @@ export function EmailManager({ email, emailVerified = true }: EmailManagerProps)
             </span>
             <Badge
               variant="secondary"
-              className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20 flex-shrink-0"
+              className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200 dark:bg-primary/10 dark:text-primary dark:border-primary/20 flex-shrink-0"
               aria-label="Correo principal"
             >
               Principal
@@ -36,7 +36,7 @@ export function EmailManager({ email, emailVerified = true }: EmailManagerProps)
             {emailVerified && (
               <Badge
                 variant="secondary"
-                className="text-xs px-2 py-0.5 bg-green-600/10 text-green-400 border-green-600/20 flex-shrink-0"
+                className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-600/10 dark:text-green-400 dark:border-green-600/20 flex-shrink-0"
                 aria-label="Correo verificado"
               >
                 Verificado
