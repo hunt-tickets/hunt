@@ -125,10 +125,6 @@ export function CreateEventDialog({
                   onChange={setEventType}
                   disabled={pending}
                 />
-                <p className="text-xs text-amber-500/90 flex items-center gap-1.5">
-                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
-                  El tipo de evento no se puede cambiar después de crearlo.
-                </p>
                 {state.errors?.type && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
@@ -137,13 +133,18 @@ export function CreateEventDialog({
                 )}
               </div>
 
-              {/* Next steps info */}
+              {/* Info box */}
               <div className="flex gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2a2a2a]">
                 <Info className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Después de crear el evento podrás configurar fechas, flyer,
-                  boletos y más detalles.
-                </p>
+                <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="flex items-start gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-amber-500/90" />
+                    <span>El tipo de evento no se puede cambiar después de crearlo.</span>
+                  </p>
+                  <p>
+                    Después de crear el evento podrás configurar fechas, flyer, boletos y más detalles.
+                  </p>
+                </div>
               </div>
             </div>
 
