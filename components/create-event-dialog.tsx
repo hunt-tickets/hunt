@@ -137,9 +137,8 @@ export function CreateEventDialog({
               <div className="flex gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2a2a2a]">
                 <Info className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
                 <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
-                  <p className="flex items-start gap-1.5">
-                    <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-amber-500/90" />
-                    <span>El tipo de evento no se puede cambiar después de crearlo.</span>
+                  <p>
+                    <span className="text-amber-600 dark:text-amber-500 font-medium">Importante:</span> El tipo de evento no se puede cambiar después de crearlo.
                   </p>
                   <p>
                     Después de crear el evento podrás configurar fechas, flyer, boletos y más detalles.
