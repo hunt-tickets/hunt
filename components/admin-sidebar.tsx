@@ -257,7 +257,7 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
                       "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
                       isActive
                         ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
-                        : "text-gray-600 dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
+                        : "text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"
                     )}
                   >
                     <Icon className="h-4 w-4 flex-shrink-0" />
