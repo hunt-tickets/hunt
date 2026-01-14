@@ -410,8 +410,8 @@ export function EventConfigContent({
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               activeTab === tab.id
-                ? "bg-white/10 text-white border border-white/20"
-                : "bg-white/5 text-gray-600 dark:text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
+                ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
+                : "text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10"
             }`}
           >
             <Icon className="h-4 w-4" />
