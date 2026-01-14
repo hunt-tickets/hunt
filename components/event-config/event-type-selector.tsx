@@ -74,7 +74,7 @@ export function EventTypeSelector({
             {!type.available && (
               <Badge
                 variant="outline"
-                className="absolute top-2 right-2 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 text-xs"
+                className="absolute top-2 right-2 bg-gray-100 dark:bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-500/20 text-xs"
               >
                 Pronto
               </Badge>
