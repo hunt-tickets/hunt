@@ -209,7 +209,7 @@ export function CreateTicketTypeDialog({
                       setFormData({ ...formData, description: e.target.value })
                     }
                     placeholder="Describe los beneficios..."
-                    className="min-h-[60px] w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none resize-none"
+                    className="min-h-[60px] w-full !bg-transparent !border-none focus-visible:ring-0 text-sm font-medium !p-0 !text-gray-900 !dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 !shadow-none resize-none"
                     disabled={isLoading}
                   />
                 </div>
