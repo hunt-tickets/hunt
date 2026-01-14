@@ -36,7 +36,7 @@ export function InviteMemberDialog({
       <DialogTrigger asChild>
         <Button
           size={iconOnly ? "icon" : size}
-          className={`flex-shrink-0 ${iconOnly ? "rounded-full" : "h-12 rounded-3xl"}`}
+          className={`flex-shrink-0 ${iconOnly ? "rounded-full" : "h-9 rounded-xl"}`}
           aria-label={iconOnly ? "Invitar miembro" : undefined}
         >
           {iconOnly ? (
