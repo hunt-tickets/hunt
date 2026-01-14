@@ -63,10 +63,10 @@ export function EventTypeSelector({
             disabled={isDisabled}
             className={cn(
               "relative flex flex-col items-start gap-2 p-4 rounded-xl border text-left transition-all",
-              type.available && "hover:border-zinc-400 dark:hover:border-zinc-600",
+              type.available && "hover:border-gray-300 dark:hover:border-[#3a3a3a]",
               isSelected
-                ? "border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800"
-                : "border-zinc-200 dark:border-zinc-800 bg-transparent",
+                ? "border-gray-300 dark:border-[#3a3a3a] bg-gray-100 dark:bg-[#2a2a2a]"
+                : "border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1a1a1a]",
               !type.available && "opacity-50 cursor-not-allowed",
               disabled && "opacity-50 cursor-not-allowed"
             )}
@@ -83,8 +83,8 @@ export function EventTypeSelector({
               className={cn(
                 "flex items-center justify-center w-10 h-10 rounded-lg",
                 isSelected
-                  ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-400"
               )}
             >
               <Icon className="w-5 h-5" />
@@ -94,18 +94,18 @@ export function EventTypeSelector({
                 className={cn(
                   "font-medium text-sm",
                   isSelected
-                    ? "text-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-700 dark:text-zinc-300"
+                    ? "text-foreground"
+                    : "text-gray-700 dark:text-gray-300"
                 )}
               >
                 {type.label}
               </p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-500">
+              <p className="text-xs text-gray-500 dark:text-gray-500">
                 {type.description}
               </p>
             </div>
             {isSelected && (
-              <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-zinc-900 dark:bg-zinc-100" />
+              <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-primary" />
             )}
           </button>
         );

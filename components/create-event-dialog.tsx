@@ -63,15 +63,15 @@ export function CreateEventDialog({
 
       <SheetContent
         side="right"
-        className="w-full sm:max-w-md p-0 bg-[#0a0a0a] border-l border-[#1a1a1a] overflow-y-auto"
+        className="w-full sm:max-w-md p-0 bg-white dark:bg-[#0a0a0a] border-l border-gray-200 dark:border-[#2a2a2a] overflow-y-auto"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <SheetHeader className="px-6 py-5 border-b border-[#1a1a1a]">
+          <SheetHeader className="px-6 py-5 border-b border-gray-200 dark:border-[#2a2a2a]">
             <SheetTitle className="text-xl font-semibold">
               Nuevo Evento
             </SheetTitle>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Crea tu evento en segundos. Podrás configurar más detalles
               después.
             </p>
@@ -100,7 +100,7 @@ export function CreateEventDialog({
                   id="name"
                   name="name"
                   placeholder="Ej: Fiesta de Año Nuevo 2025"
-                  className="h-11 bg-[#111] border-[#2a2a2a] focus-visible:ring-primary/50"
+                  className="h-11 bg-gray-50 dark:bg-[#111] border-gray-200 dark:border-[#2a2a2a] focus-visible:ring-primary/50 rounded-xl"
                   autoFocus
                   disabled={pending}
                   required
@@ -136,9 +136,9 @@ export function CreateEventDialog({
               </div>
 
               {/* Next steps info */}
-              <div className="flex gap-3 p-3 rounded-lg bg-[#111] border border-[#2a2a2a]">
-                <Info className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-muted-foreground">
+              <div className="flex gap-3 p-3 rounded-xl bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2a2a2a]">
+                <Info className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Después de crear el evento podrás configurar fechas, flyer,
                   boletos y más detalles.
                 </p>
@@ -146,20 +146,20 @@ export function CreateEventDialog({
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-[#1a1a1a] bg-[#0a0a0a]">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
               <div className="flex gap-3">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setOpen(false)}
-                  className="flex-1 h-11"
+                  className="flex-1 h-11 rounded-xl hover:bg-gray-200 dark:hover:bg-accent/50"
                   disabled={pending}
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 h-11"
+                  className="flex-1 h-11 rounded-xl"
                   disabled={pending}
                 >
                   {pending ? (
