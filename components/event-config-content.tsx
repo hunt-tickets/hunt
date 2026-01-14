@@ -58,21 +58,152 @@ const COUNTRIES = [
 
 const CITIES_BY_COUNTRY: Record<string, Array<{ value: string; label: string }>> = {
   CO: [
+    // Principales ciudades
     { value: "Bogotá", label: "Bogotá" },
     { value: "Medellín", label: "Medellín" },
     { value: "Cali", label: "Cali" },
     { value: "Barranquilla", label: "Barranquilla" },
     { value: "Cartagena", label: "Cartagena" },
     { value: "Bucaramanga", label: "Bucaramanga" },
-    { value: "Pereira", label: "Pereira" },
-    { value: "Santa Marta", label: "Santa Marta" },
+
+    // Amazonas
+    { value: "Leticia", label: "Leticia" },
+
+    // Antioquia
+    { value: "Apartadó", label: "Apartadó" },
+    { value: "Bello", label: "Bello" },
+    { value: "Caucasia", label: "Caucasia" },
+    { value: "Envigado", label: "Envigado" },
+    { value: "Itagüí", label: "Itagüí" },
+    { value: "Rionegro", label: "Rionegro" },
+    { value: "Turbo", label: "Turbo" },
+
+    // Arauca
+    { value: "Arauca", label: "Arauca" },
+
+    // Atlántico
+    { value: "Malambo", label: "Malambo" },
+    { value: "Sabanalarga", label: "Sabanalarga" },
+    { value: "Soledad", label: "Soledad" },
+
+    // Bolívar
+    { value: "Magangué", label: "Magangué" },
+
+    // Boyacá
+    { value: "Duitama", label: "Duitama" },
+    { value: "Sogamoso", label: "Sogamoso" },
+    { value: "Tunja", label: "Tunja" },
+
+    // Caldas
     { value: "Manizales", label: "Manizales" },
-    { value: "Ibagué", label: "Ibagué" },
-    { value: "Villavicencio", label: "Villavicencio" },
-    { value: "Pasto", label: "Pasto" },
-    { value: "Cúcuta", label: "Cúcuta" },
+
+    // Caquetá
+    { value: "Florencia", label: "Florencia" },
+
+    // Casanare
+    { value: "Yopal", label: "Yopal" },
+
+    // Cauca
+    { value: "Popayán", label: "Popayán" },
+
+    // Cesar
+    { value: "Aguachica", label: "Aguachica" },
+    { value: "Valledupar", label: "Valledupar" },
+
+    // Chocó
+    { value: "Quibdó", label: "Quibdó" },
+
+    // Córdoba
+    { value: "Cereté", label: "Cereté" },
+    { value: "Lorica", label: "Lorica" },
     { value: "Montería", label: "Montería" },
+    { value: "Sahagún", label: "Sahagún" },
+
+    // Cundinamarca
+    { value: "Chía", label: "Chía" },
+    { value: "Facatativá", label: "Facatativá" },
+    { value: "Fusagasugá", label: "Fusagasugá" },
+    { value: "Girardot", label: "Girardot" },
+    { value: "Madrid", label: "Madrid" },
+    { value: "Mosquera", label: "Mosquera" },
+    { value: "Soacha", label: "Soacha" },
+    { value: "Zipaquirá", label: "Zipaquirá" },
+
+    // Guainía
+    { value: "Inírida", label: "Inírida" },
+
+    // Guaviare
+    { value: "San José del Guaviare", label: "San José del Guaviare" },
+
+    // Huila
     { value: "Neiva", label: "Neiva" },
+    { value: "Pitalito", label: "Pitalito" },
+
+    // La Guajira
+    { value: "Maicao", label: "Maicao" },
+    { value: "Riohacha", label: "Riohacha" },
+
+    // Magdalena
+    { value: "Ciénaga", label: "Ciénaga" },
+    { value: "Santa Marta", label: "Santa Marta" },
+
+    // Meta
+    { value: "Acacías", label: "Acacías" },
+    { value: "Villavicencio", label: "Villavicencio" },
+
+    // Nariño
+    { value: "Ipiales", label: "Ipiales" },
+    { value: "Pasto", label: "Pasto" },
+    { value: "Tumaco", label: "Tumaco" },
+
+    // Norte de Santander
+    { value: "Cúcuta", label: "Cúcuta" },
+    { value: "Los Patios", label: "Los Patios" },
+    { value: "Ocaña", label: "Ocaña" },
+    { value: "Villa del Rosario", label: "Villa del Rosario" },
+
+    // Putumayo
+    { value: "Mocoa", label: "Mocoa" },
+
+    // Quindío
+    { value: "Armenia", label: "Armenia" },
+    { value: "Calarcá", label: "Calarcá" },
+
+    // Risaralda
+    { value: "Dosquebradas", label: "Dosquebradas" },
+    { value: "Pereira", label: "Pereira" },
+    { value: "Santa Rosa de Cabal", label: "Santa Rosa de Cabal" },
+
+    // San Andrés y Providencia
+    { value: "San Andrés", label: "San Andrés" },
+
+    // Santander
+    { value: "Barrancabermeja", label: "Barrancabermeja" },
+    { value: "Floridablanca", label: "Floridablanca" },
+    { value: "Girón", label: "Girón" },
+    { value: "Piedecuesta", label: "Piedecuesta" },
+
+    // Sucre
+    { value: "Sincelejo", label: "Sincelejo" },
+
+    // Tolima
+    { value: "Espinal", label: "Espinal" },
+    { value: "Ibagué", label: "Ibagué" },
+
+    // Valle del Cauca
+    { value: "Buenaventura", label: "Buenaventura" },
+    { value: "Buga", label: "Buga" },
+    { value: "Cartago", label: "Cartago" },
+    { value: "Jamundí", label: "Jamundí" },
+    { value: "Palmira", label: "Palmira" },
+    { value: "Tuluá", label: "Tuluá" },
+    { value: "Yumbo", label: "Yumbo" },
+
+    // Vaupés
+    { value: "Mitú", label: "Mitú" },
+
+    // Vichada
+    { value: "Puerto Carreño", label: "Puerto Carreño" },
   ],
 };
 
