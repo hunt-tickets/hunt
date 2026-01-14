@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Calendar, CalendarRange, AlertCircle, Loader2 } from "lucide-react";
 import { createTicketType } from "@/actions/events";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,7 @@ export function CreateTicketTypeDialog({
     saleStart: "",
     saleEnd: "",
     eventDayId: selectedDayId || "", // "" means all days (pase general)
+    sellerOnly: false,
   });
 
   // Update eventDayId when selectedDayId changes
@@ -73,6 +75,7 @@ export function CreateTicketTypeDialog({
       saleStart: "",
       saleEnd: "",
       eventDayId: selectedDayId || "",
+      sellerOnly: false,
     });
     setError(null);
   };
@@ -420,6 +423,28 @@ export function CreateTicketTypeDialog({
                       disabled={isLoading}
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Disponible solo para vendedores */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a]">
+                  <div className="space-y-0.5 flex-1">
+                    <Label htmlFor="sellerOnly" className="text-sm font-medium cursor-pointer">
+                      Disponible solo para vendedores
+                    </Label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Esta entrada solo podrá ser vendida por vendedores en efectivo
+                    </p>
+                  </div>
+                  <Switch
+                    id="sellerOnly"
+                    checked={formData.sellerOnly}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, sellerOnly: checked })
+                    }
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
             </div>
