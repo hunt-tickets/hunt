@@ -141,7 +141,7 @@ export default async function ProductosPage({ params }: ProductosPageProps) {
     <>
       <EventStickyHeader eventName={event.name} />
 
-      <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
+      <div className="py-3 sm:py-6 space-y-6">
         {/* Coming Soon Card */}
         <Card className="bg-white dark:bg-[#202020] border-gray-200 dark:border-[#2a2a2a]">
           <CardContent className="p-8 sm:p-12">
