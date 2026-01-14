@@ -69,8 +69,8 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
             <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0" align="start">
-          <div className="flex flex-col max-h-[300px] overflow-y-auto">
+        <PopoverContent className="w-[320px] p-2" align="start">
+          <div className="flex flex-col gap-1 max-h-[320px] overflow-y-auto">
             {DOCUMENT_TYPES.map((type) => (
               <button
                 key={type.value}
@@ -79,7 +79,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
                   setOpen(false);
                   handleSave();
                 }}
-                className="px-4 py-3 text-left text-sm hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors border-b border-gray-100 dark:border-[#2a2a2a] last:border-b-0"
+                className="px-3 py-2.5 text-left text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
               >
                 {type.label}
               </button>
