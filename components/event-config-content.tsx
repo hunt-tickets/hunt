@@ -549,7 +549,7 @@ export function EventConfigContent({
                   <FileText className="h-5 w-5 text-gray-600 dark:text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle>Información Básica</CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-gray-500 dark:text-white/70">
                       Detalles principales de tu evento
                     </CardDescription>
                   </div>
@@ -657,7 +657,7 @@ export function EventConfigContent({
                   <MapPinned className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle>Ubicación</CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-gray-500 dark:text-white/70">
                       Dónde se llevará a cabo el evento
                     </CardDescription>
                   </div>
@@ -735,7 +735,7 @@ export function EventConfigContent({
                   <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle>Tipo de Evento</CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-gray-500 dark:text-white/70">
                       El tipo de evento no se puede modificar después de crearlo
                     </CardDescription>
                   </div>
@@ -790,7 +790,7 @@ export function EventConfigContent({
                       {eventType === "recurring" && "Patrón de Repetición"}
                       {eventType === "slots" && "Horarios Disponibles"}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-gray-500 dark:text-white/70">
                       {eventType === "single" &&
                         "Cuándo se realizará el evento"}
                       {eventType === "multi_day" &&
@@ -903,7 +903,7 @@ export function EventConfigContent({
                   <Coins className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle>Configuración Regional</CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-gray-500 dark:text-white/70">
                       Moneda y formato de precios
                     </CardDescription>
                   </div>
@@ -934,7 +934,7 @@ export function EventConfigContent({
                   <ImageIcon className="h-5 w-5 text-gray-600 dark:text-white/60" />
                   <div>
                     <CardTitle>Flyer del Evento</CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-gray-500 dark:text-white/70">
                       Imagen principal del evento (formato póster vertical)
                     </CardDescription>
                   </div>
@@ -1273,7 +1273,7 @@ export function EventConfigContent({
                       <CardTitle className="text-base">
                         Guía de Configuración
                       </CardTitle>
-                      <CardDescription className="text-xs">
+                      <CardDescription className="text-xs text-gray-500 dark:text-white/70">
                         Tips para completar la información
                       </CardDescription>
                     </div>
