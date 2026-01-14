@@ -151,7 +151,7 @@ export function CreateTicketTypeDialog({
 
       <SheetContent
         side="right"
-        className="w-full sm:w-[50vw] sm:max-w-[50vw] p-0 bg-white dark:bg-[#1a1a1a] border-l border-gray-200 dark:border-[#2a2a2a] overflow-y-auto"
+        className="w-full sm:w-[40vw] sm:max-w-[40vw] p-0 bg-white dark:bg-[#1a1a1a] border-l border-gray-200 dark:border-[#2a2a2a] overflow-y-auto"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
