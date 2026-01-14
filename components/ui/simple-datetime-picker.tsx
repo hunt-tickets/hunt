@@ -262,7 +262,7 @@ export const SimpleDateTimePicker = ({
       {label && (
         <label className="text-sm font-medium text-gray-600 dark:text-white/60 select-none">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-gray-400 ml-1">*</span>}
         </label>
       )}
 
