@@ -473,7 +473,7 @@ export function PhoneVerificationManager({
           onClick={handleCancel}
           variant="ghost"
           size="sm"
-          className="h-9 rounded-xl hover:bg-gray-100 dark:hover:bg-accent/50"
+          className="h-9 rounded-xl hover:bg-gray-200 dark:hover:bg-accent/50"
           disabled={isSendingOTP}
         >
           Cancelar
