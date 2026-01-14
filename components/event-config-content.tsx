@@ -1064,7 +1064,7 @@ export function EventConfigContent({
                             }
                           }}
                           placeholder="Ej: ¿Cómo puedo obtener mi ticket?"
-                          className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
+                          className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1088,7 +1088,7 @@ export function EventConfigContent({
                             }
                           }}
                           placeholder="Escribe una respuesta clara y concisa..."
-                          className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-sm focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors min-h-[120px] resize-none"
+                          className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors min-h-[120px] resize-none"
                         />
                       </div>
                     </div>
