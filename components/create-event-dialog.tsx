@@ -94,7 +94,7 @@ export function CreateEventDialog({
               {/* Name */}
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium">
-                  Nombre del evento <span className="text-destructive">*</span>
+                  Nombre del evento <span className="text-gray-400">*</span>
                 </Label>
                 <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                   <Input
