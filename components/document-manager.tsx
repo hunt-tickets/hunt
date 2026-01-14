@@ -70,7 +70,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-[320px] p-2" align="start">
-          <div className="flex flex-col gap-1 max-h-[320px] overflow-y-auto">
+          <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto">
             {DOCUMENT_TYPES.map((type) => (
               <button
                 key={type.value}
@@ -79,7 +79,7 @@ export function DocumentManager({ documentType, documentNumber }: DocumentManage
                   setOpen(false);
                   handleSave();
                 }}
-                className="px-3 py-2.5 text-left text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+                className="px-4 py-3 text-left text-sm font-medium rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors"
               >
                 {type.label}
               </button>
