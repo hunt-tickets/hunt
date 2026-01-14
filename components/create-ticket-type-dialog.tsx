@@ -292,15 +292,15 @@ export function CreateTicketTypeDialog({
                   <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="price"
-                      type="number"
-                      min="0"
-                      step="1000"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      placeholder="50000"
-                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.price ? parseInt(formData.price).toLocaleString('es-CO') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        setFormData({ ...formData, price: value });
+                      }}
+                      placeholder="50.000"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       disabled={isLoading}
                       required
                     />
@@ -319,14 +319,15 @@ export function CreateTicketTypeDialog({
                   <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="capacity"
-                      type="number"
-                      min="1"
-                      value={formData.capacity}
-                      onChange={(e) =>
-                        setFormData({ ...formData, capacity: e.target.value })
-                      }
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.capacity ? parseInt(formData.capacity).toLocaleString('es-CO') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        setFormData({ ...formData, capacity: value });
+                      }}
                       placeholder="100"
-                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       disabled={isLoading}
                       required
                     />
@@ -353,7 +354,7 @@ export function CreateTicketTypeDialog({
                         })
                       }
                       placeholder="1"
-                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       disabled={isLoading}
                     />
                   </div>
@@ -376,7 +377,7 @@ export function CreateTicketTypeDialog({
                         })
                       }
                       placeholder="10"
-                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       disabled={isLoading}
                     />
                   </div>
