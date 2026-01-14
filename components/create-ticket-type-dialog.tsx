@@ -1,14 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, X, Ticket, Calendar, CalendarRange } from "lucide-react";
+import { Plus, Calendar, CalendarRange, AlertCircle, Loader2 } from "lucide-react";
 import { createTicketType } from "@/actions/events";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface EventDay {
   id: string;
@@ -109,10 +116,10 @@ export function CreateTicketTypeDialog({
         resetForm();
         router.refresh();
       } else {
-        setError(result.message || "Error al crear el tipo de entrada");
+        setError(result.message || "Error al crear la entrada");
       }
     } catch {
-      setError("Error inesperado al crear el tipo de entrada");
+      setError("Error inesperado al crear la entrada");
     } finally {
       setIsLoading(false);
     }
@@ -129,8 +136,7 @@ export function CreateTicketTypeDialog({
   };
 
   return (
-    <>
-      {/* Trigger Button */}
+    <Sheet open={open} onOpenChange={setOpen}>
       <Button
         size="sm"
         onClick={() => setOpen(true)}
@@ -140,56 +146,41 @@ export function CreateTicketTypeDialog({
         Nueva Entrada
       </Button>
 
-      {/* Sidebar Modal */}
-      {open && (
-        <>
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            onClick={() => {
-              setOpen(false);
-              resetForm();
-            }}
-          />
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-md p-0 bg-white dark:bg-[#1a1a1a] border-l border-gray-200 dark:border-[#2a2a2a] overflow-y-auto"
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <SheetHeader className="px-6 py-5 border-b border-gray-200 dark:border-[#2a2a2a]">
+            <SheetTitle className="text-xl font-semibold">
+              Nueva Entrada
+            </SheetTitle>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Configura los detalles de tu entrada
+            </p>
+          </SheetHeader>
 
-          {/* Sidebar Panel */}
-          <div className="fixed top-0 right-0 h-full w-full sm:w-[500px] bg-[#1a1a1a] border-l border-white/10 z-50 overflow-y-auto">
-            {/* Sticky Header */}
-            <div className="sticky top-0 bg-[#1a1a1a] border-b border-white/10 p-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Ticket className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">Nueva Entrada</h2>
-                  <p className="text-sm text-white/60">
-                    Crea una nueva entrada para tu evento
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  resetForm();
-                }}
-                className="p-2 rounded-lg hover:bg-white/5 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
             {/* Form Content */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Información Básica */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-                  Información Básica
-                </h3>
+            <div className="flex-1 px-6 py-6 space-y-6">
+              {/* Error message */}
+              {error && (
+                <Alert
+                  variant="destructive"
+                  className="border-destructive/50 bg-destructive/10"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Nombre <span className="text-red-500">*</span>
-                  </Label>
+              {/* Nombre */}
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Nombre <span className="text-gray-400">*</span>
+                </Label>
+                <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                   <Input
                     id="name"
                     value={formData.name}
@@ -197,40 +188,37 @@ export function CreateTicketTypeDialog({
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder="Ej: General, VIP, Palco..."
-                    className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                    className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                    autoFocus
+                    disabled={isLoading}
                     required
                   />
-                  <p className="text-xs text-white/40">
-                    Nombre que identificará este tipo de entrada
-                  </p>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium">
-                    Descripción
-                  </Label>
+              {/* Descripción */}
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm font-medium">
+                  Descripción
+                </Label>
+                <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    placeholder="Describe los beneficios o características de esta entrada..."
-                    className="min-h-[80px] rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors resize-none"
+                    placeholder="Describe los beneficios..."
+                    className="min-h-[60px] w-full bg-transparent border-none focus-visible:ring-0 text-sm p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none resize-none"
+                    disabled={isLoading}
                   />
                 </div>
               </div>
 
               {/* Day Selection - Only for multi-day events */}
               {isMultiDay && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-                    Día del Evento
-                  </h3>
-                  <p className="text-xs text-white/40 -mt-2">
-                    Selecciona para qué día es válida esta entrada
-                  </p>
-
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Día del evento</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {/* All Days (Pase General) option */}
                     <button
@@ -238,18 +226,19 @@ export function CreateTicketTypeDialog({
                       onClick={() =>
                         setFormData({ ...formData, eventDayId: "" })
                       }
+                      disabled={isLoading}
                       className={cn(
                         "p-3 rounded-xl border text-left transition-all",
                         formData.eventDayId === ""
-                          ? "border-primary bg-primary/10 text-white"
-                          : "border-white/10 bg-white/5 hover:bg-white/10 text-white/70"
+                          ? "border-gray-400 dark:border-white/40 bg-gray-100 dark:bg-white/10"
+                          : "border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1a1a1a] hover:bg-gray-100 dark:hover:bg-[#202020]"
                       )}
                     >
                       <div className="flex items-center gap-2">
                         <CalendarRange className="h-4 w-4" />
-                        <span className="font-medium">Pase General</span>
+                        <span className="text-sm font-medium">Pase General</span>
                       </div>
-                      <p className="text-xs opacity-60 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Válido todos los días
                       </p>
                     </button>
@@ -270,19 +259,22 @@ export function CreateTicketTypeDialog({
                           onClick={() =>
                             setFormData({ ...formData, eventDayId: day.id })
                           }
+                          disabled={isLoading}
                           className={cn(
                             "p-3 rounded-xl border text-left transition-all",
                             formData.eventDayId === day.id
-                              ? "border-primary bg-primary/10 text-white"
-                              : "border-white/10 bg-white/5 hover:bg-white/10 text-white/70"
+                              ? "border-gray-400 dark:border-white/40 bg-gray-100 dark:bg-white/10"
+                              : "border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1a1a1a] hover:bg-gray-100 dark:hover:bg-[#202020]"
                           )}
                         >
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            <span className="font-medium">{day.name}</span>
+                            <span className="text-sm font-medium">{day.name}</span>
                           </div>
                           {dayDate && (
-                            <p className="text-xs opacity-60 mt-1">{dayDate}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {dayDate}
+                            </p>
                           )}
                         </button>
                       );
@@ -292,16 +284,12 @@ export function CreateTicketTypeDialog({
               )}
 
               {/* Precio y Capacidad */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-                  Precio y Disponibilidad
-                </h3>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price" className="text-sm font-medium">
-                      Precio <span className="text-red-500">*</span>
-                    </Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-sm font-medium">
+                    Precio <span className="text-gray-400">*</span>
+                  </Label>
+                  <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="price"
                       type="number"
@@ -312,20 +300,23 @@ export function CreateTicketTypeDialog({
                         setFormData({ ...formData, price: e.target.value })
                       }
                       placeholder="50000"
-                      className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      disabled={isLoading}
                       required
                     />
-                    {formData.price && (
-                      <p className="text-xs text-primary">
-                        {formatCurrency(formData.price)}
-                      </p>
-                    )}
                   </div>
+                  {formData.price && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatCurrency(formData.price)}
+                    </p>
+                  )}
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="capacity" className="text-sm font-medium">
-                      Capacidad <span className="text-red-500">*</span>
-                    </Label>
+                <div className="space-y-2">
+                  <Label htmlFor="capacity" className="text-sm font-medium">
+                    Capacidad <span className="text-gray-400">*</span>
+                  </Label>
+                  <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="capacity"
                       type="number"
@@ -335,23 +326,21 @@ export function CreateTicketTypeDialog({
                         setFormData({ ...formData, capacity: e.target.value })
                       }
                       placeholder="100"
-                      className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      disabled={isLoading}
                       required
                     />
-                    <p className="text-xs text-white/40">
-                      Entradas disponibles
-                    </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="minPerOrder"
-                      className="text-sm font-medium"
-                    >
-                      Mínimo por orden
-                    </Label>
+              {/* Min/Max por orden */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="minPerOrder" className="text-sm font-medium">
+                    Mínimo por orden
+                  </Label>
+                  <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="minPerOrder"
                       type="number"
@@ -364,17 +353,17 @@ export function CreateTicketTypeDialog({
                         })
                       }
                       placeholder="1"
-                      className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      disabled={isLoading}
                     />
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="maxPerOrder"
-                      className="text-sm font-medium"
-                    >
-                      Máximo por orden
-                    </Label>
+                <div className="space-y-2">
+                  <Label htmlFor="maxPerOrder" className="text-sm font-medium">
+                    Máximo por orden
+                  </Label>
+                  <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="maxPerOrder"
                       type="number"
@@ -387,26 +376,20 @@ export function CreateTicketTypeDialog({
                         })
                       }
                       placeholder="10"
-                      className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Ventana de Venta */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-                  Ventana de Venta
-                </h3>
-                <p className="text-xs text-white/40 -mt-2">
-                  Opcional: Define cuándo estará disponible esta entrada
-                </p>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="saleStart" className="text-sm font-medium">
-                      Inicio de venta
-                    </Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="saleStart" className="text-sm font-medium">
+                    Inicio de venta
+                  </Label>
+                  <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="saleStart"
                       type="datetime-local"
@@ -414,14 +397,17 @@ export function CreateTicketTypeDialog({
                       onChange={(e) =>
                         setFormData({ ...formData, saleStart: e.target.value })
                       }
-                      className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      disabled={isLoading}
                     />
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="saleEnd" className="text-sm font-medium">
-                      Fin de venta
-                    </Label>
+                <div className="space-y-2">
+                  <Label htmlFor="saleEnd" className="text-sm font-medium">
+                    Fin de venta
+                  </Label>
+                  <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
                     <Input
                       id="saleEnd"
                       type="datetime-local"
@@ -429,52 +415,48 @@ export function CreateTicketTypeDialog({
                       onChange={(e) =>
                         setFormData({ ...formData, saleEnd: e.target.value })
                       }
-                      className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                      className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none"
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Error Message */}
-              {error && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-                  <p className="text-sm text-red-500 font-medium">{error}</p>
-                </div>
-              )}
-
-              {/* Footer Buttons */}
-              <div className="flex justify-end gap-3 pt-2">
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+              <div className="flex gap-3">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => {
                     setOpen(false);
                     resetForm();
                   }}
+                  className="flex-1 h-11 rounded-xl hover:bg-gray-200 dark:hover:bg-accent/50"
                   disabled={isLoading}
-                  className="rounded-full px-6 border-white/10 hover:bg-white/5 transition-all duration-300"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
+                  className="flex-1 h-11 rounded-xl"
                   disabled={isLoading}
-                  className="rounded-full px-6 bg-primary hover:bg-primary/90 transition-all duration-300 disabled:opacity-50"
                 >
                   {isLoading ? (
-                    <span className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Creando...
-                    </span>
+                    </>
                   ) : (
-                    "Crear Tipo de Entrada"
+                    "Crear entrada"
                   )}
                 </Button>
               </div>
-            </form>
-          </div>
-        </>
-      )}
-    </>
+            </div>
+          </form>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
