@@ -51,6 +51,31 @@ import {
   EVENT_CATEGORY_LABELS,
 } from "@/constants/event-categories";
 
+// Countries and Cities
+const COUNTRIES = [
+  { value: "CO", label: "Colombia" },
+];
+
+const CITIES_BY_COUNTRY: Record<string, Array<{ value: string; label: string }>> = {
+  CO: [
+    { value: "Bogotá", label: "Bogotá" },
+    { value: "Medellín", label: "Medellín" },
+    { value: "Cali", label: "Cali" },
+    { value: "Barranquilla", label: "Barranquilla" },
+    { value: "Cartagena", label: "Cartagena" },
+    { value: "Bucaramanga", label: "Bucaramanga" },
+    { value: "Pereira", label: "Pereira" },
+    { value: "Santa Marta", label: "Santa Marta" },
+    { value: "Manizales", label: "Manizales" },
+    { value: "Ibagué", label: "Ibagué" },
+    { value: "Villavicencio", label: "Villavicencio" },
+    { value: "Pasto", label: "Pasto" },
+    { value: "Cúcuta", label: "Cúcuta" },
+    { value: "Montería", label: "Montería" },
+    { value: "Neiva", label: "Neiva" },
+  ],
+};
+
 interface EventDayData {
   id: string;
   name: string;
@@ -543,23 +568,38 @@ export function EventConfigContent({
                   icon={<MapPinned className="h-4 w-4" />}
                 />
 
-                {/* City and Country */}
+                {/* Country and City */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInput
-                    id="city"
-                    name="city"
-                    label="Ciudad"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    placeholder="ej. Bogotá"
-                  />
-                  <FormInput
-                    id="country"
-                    name="country"
+                  <FormModalSelect
                     label="País"
                     value={formData.country}
-                    onChange={handleInputChange}
-                    placeholder="ej. Colombia"
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        country: value,
+                        city: "", // Reset city when country changes
+                      })
+                    }
+                    options={COUNTRIES}
+                    placeholder="Selecciona un país"
+                  />
+                  <FormModalSelect
+                    label="Ciudad"
+                    value={formData.city}
+                    onChange={(value) =>
+                      setFormData({ ...formData, city: value })
+                    }
+                    options={
+                      formData.country
+                        ? CITIES_BY_COUNTRY[formData.country] || []
+                        : []
+                    }
+                    placeholder={
+                      formData.country
+                        ? "Selecciona una ciudad"
+                        : "Primero selecciona un país"
+                    }
+                    disabled={!formData.country}
                   />
                 </div>
               </CardContent>
