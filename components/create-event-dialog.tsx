@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { createEvent, type EventFormState } from "@/actions/events";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Plus, Info, Loader2 } from "lucide-react";
-import { HoverButton } from "@/components/ui/hover-glow-button";
 import {
   EventTypeSelector,
   type EventType,
@@ -49,17 +48,13 @@ export function CreateEventDialog({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <HoverButton
+      <Button
         onClick={() => setOpen(true)}
-        className={`flex flex-row items-center justify-center gap-2 px-6 py-3 rounded-full whitespace-nowrap text-sm font-medium bg-primary text-primary-foreground ${className}`}
-        glowColor="#000000"
-        backgroundColor="transparent"
-        textColor="inherit"
-        hoverTextColor="inherit"
+        className={`flex items-center gap-2 h-10 rounded-xl ${className}`}
       >
-        <Plus className="h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0" />
+        <Plus className="h-4 w-4 flex-shrink-0" />
         <span className="hidden sm:inline">Crear Evento</span>
-      </HoverButton>
+      </Button>
 
       <SheetContent
         side="right"

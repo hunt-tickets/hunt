@@ -63,10 +63,7 @@ export function AdminEventsList({
           />
         </div>
         <div className="flex items-center">
-          <CreateEventDialog
-            organizationId={organizationId}
-            className="sm:px-6 px-3 sm:rounded-full rounded-full"
-          />
+          <CreateEventDialog organizationId={organizationId} />
         </div>
       </div>
 
