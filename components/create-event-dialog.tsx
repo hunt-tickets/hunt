@@ -63,7 +63,7 @@ export function CreateEventDialog({
 
       <SheetContent
         side="right"
-        className="w-full sm:max-w-md p-0 bg-white dark:bg-[#0a0a0a] border-l border-gray-200 dark:border-[#2a2a2a] overflow-y-auto"
+        className="w-full sm:max-w-md p-0 bg-white dark:bg-[#1a1a1a] border-l border-gray-200 dark:border-[#2a2a2a] overflow-y-auto"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -146,7 +146,7 @@ export function CreateEventDialog({
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
               <div className="flex gap-3">
                 <Button
                   type="button"
