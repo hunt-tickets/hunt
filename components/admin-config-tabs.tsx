@@ -319,11 +319,7 @@ export function AdminConfigTabs({
                   return (
                     <Card
                       key={member.id}
-                      className={`min-w-0 overflow-hidden ${
-                        isCurrentUser
-                          ? "bg-blue-50/50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 ring-1 ring-blue-200 dark:ring-blue-800"
-                          : "bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10"
-                      }`}
+                      className="min-w-0 overflow-hidden bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/10"
                     >
                       <CardContent className="p-3 sm:p-4">
                         <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3">
@@ -338,11 +334,18 @@ export function AdminConfigTabs({
                               {initials}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p
-                                className={`font-medium text-sm sm:text-base truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
-                              >
-                                {fullName}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <p
+                                  className={`font-medium text-sm sm:text-base truncate ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
+                                >
+                                  {fullName}
+                                </p>
+                                {isCurrentUser && (
+                                  <Badge className="bg-gray-100 dark:bg-gray-500/10 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-500/20 text-xs whitespace-nowrap font-medium">
+                                    Tú
+                                  </Badge>
+                                )}
+                              </div>
                               {email !== "Sin correo" && (
                                 <div className="flex items-center gap-1 mt-0.5 sm:mt-1">
                                   <Mail className="h-3 w-3 text-gray-400 dark:text-white/40 flex-shrink-0" />
@@ -354,11 +357,6 @@ export function AdminConfigTabs({
                             </div>
                           </div>
                           <div className="flex flex-col gap-1.5 sm:gap-2 flex-shrink-0">
-                            {isCurrentUser && (
-                              <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 text-xs whitespace-nowrap font-semibold">
-                                Tú
-                              </Badge>
-                            )}
                             {isPending ? (
                               <>
                                 <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 text-xs whitespace-nowrap">
@@ -473,11 +471,7 @@ export function AdminConfigTabs({
                         return (
                           <TableRow
                             key={member.id}
-                            className={`border-b border-gray-200 dark:border-white/5 transition-all duration-200 ${
-                              isCurrentUser
-                                ? "bg-blue-50/50 dark:bg-blue-950/20 hover:bg-blue-100/50 dark:hover:bg-blue-950/30"
-                                : "hover:bg-gray-100 dark:hover:bg-white/[0.02]"
-                            }`}
+                            className="border-b border-gray-200 dark:border-white/5 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-white/[0.02]"
                           >
                             <TableCell className="py-4 sm:py-5 pl-4 sm:pl-6 min-w-[180px]">
                               <div className="flex items-center gap-2 sm:gap-3">
@@ -491,11 +485,18 @@ export function AdminConfigTabs({
                                   {initials}
                                 </div>
                                 <div className="flex flex-col min-w-0 gap-0.5">
-                                  <span
-                                    className={`font-medium text-sm whitespace-nowrap ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
-                                  >
-                                    {fullName}
-                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className={`font-medium text-sm whitespace-nowrap ${isPending ? "text-gray-600 dark:text-white/60 italic" : "text-gray-900 dark:text-white"}`}
+                                    >
+                                      {fullName}
+                                    </span>
+                                    {isCurrentUser && (
+                                      <Badge className="bg-gray-100 dark:bg-gray-500/10 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-500/20 text-xs whitespace-nowrap font-medium">
+                                        Tú
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </TableCell>
@@ -537,11 +538,6 @@ export function AdminConfigTabs({
 
                             <TableCell className="py-4 sm:py-5 min-w-[150px]">
                               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                {isCurrentUser && (
-                                  <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 font-semibold text-xs">
-                                    Tú
-                                  </Badge>
-                                )}
                                 {isPending ? (
                                   <>
                                     <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 text-xs">
