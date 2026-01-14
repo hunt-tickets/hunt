@@ -94,7 +94,7 @@ export function ProfileAvatarManager({
       {/* Avatar Display */}
       <div
         onClick={handleClick}
-        className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full cursor-pointer transition-all"
+        className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full cursor-pointer transition-all"
       >
         {imagePreview ? (
           <img
@@ -103,9 +103,9 @@ export function ProfileAvatarManager({
             className="w-full h-full rounded-full object-cover border-2 border-gray-200 dark:border-[#2a2a2a] group-hover:border-gray-300 dark:group-hover:border-[#3a3a3a] transition-colors"
           />
         ) : (
-          <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-primary/20 dark:to-primary/5 border-2 border-gray-200 dark:border-[#2a2a2a] group-hover:border-gray-300 dark:group-hover:border-[#3a3a3a] flex items-center justify-center transition-colors">
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50 border-2 border-gray-200 dark:border-[#2a2a2a] group-hover:border-gray-300 dark:group-hover:border-[#3a3a3a] flex items-center justify-center transition-colors">
             <svg
-              className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -115,25 +115,25 @@ export function ProfileAvatarManager({
                   d="M9 7V10"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-blue-600 dark:text-primary"
+                  className="text-gray-600 dark:text-gray-400"
                 />
                 <path
                   d="M15 7V10"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-blue-600 dark:text-primary"
+                  className="text-gray-600 dark:text-gray-400"
                 />
                 <path
                   d="M1 12C1 14.9174 2.15893 17.7153 4.22183 19.7782C6.28473 21.8411 9.08262 23 12 23C14.9174 23 17.7153 21.8411 19.7782 19.7782C21.8411 17.7153 23 14.9174 23 12C23 9.08262 21.8411 6.28473 19.7782 4.22183C17.7153 2.15893 14.9174 1 12 1C9.08262 1 6.28473 2.15893 4.22183 4.22183C2.15893 6.28473 1 9.08262 1 12Z"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-blue-600 dark:text-primary"
+                  className="text-gray-600 dark:text-gray-400"
                 />
                 <path
                   d="M17 12C17 14.7614 14.7614 17 12 17C9.23858 17 7 14.7614 7 12"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-blue-600 dark:text-primary"
+                  className="text-gray-600 dark:text-gray-400"
                 />
               </g>
               <defs>
@@ -184,10 +184,6 @@ export function ProfileAvatarManager({
         className="hidden"
       />
 
-      {/* Help Text */}
-      <p className="text-xs text-gray-500 dark:text-white/40 text-center mt-2">
-        {imagePreview ? "Click para cambiar o eliminar" : "Click para subir foto"}
-      </p>
     </div>
   );
 }
