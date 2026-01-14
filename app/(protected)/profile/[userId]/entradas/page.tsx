@@ -100,7 +100,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
       </div>
 
       {!hasTickets ? (
-        <Card className="border-gray-200 dark:border-[#2a2a2a]">
+        <Card className="border-gray-200 dark:border-[#2a2a2a] rounded-2xl">
           <CardContent className="py-12">
             <div className="text-center space-y-4">
               <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
