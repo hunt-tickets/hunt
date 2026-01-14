@@ -1050,22 +1050,24 @@ export function EventConfigContent({
                         >
                           Pregunta
                         </Label>
-                        <Input
-                          id="faq-question"
-                          value={editingFaq ? editingFaq.question : newQuestion}
-                          onChange={(e) => {
-                            if (editingFaq) {
-                              setEditingFaq({
-                                ...editingFaq,
-                                question: e.target.value,
-                              });
-                            } else {
-                              setNewQuestion(e.target.value);
-                            }
-                          }}
-                          placeholder="Ej: ¿Cómo puedo obtener mi ticket?"
-                          className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors"
-                        />
+                        <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+                          <Input
+                            id="faq-question"
+                            value={editingFaq ? editingFaq.question : newQuestion}
+                            onChange={(e) => {
+                              if (editingFaq) {
+                                setEditingFaq({
+                                  ...editingFaq,
+                                  question: e.target.value,
+                                });
+                              } else {
+                                setNewQuestion(e.target.value);
+                              }
+                            }}
+                            placeholder="Ej: ¿Cómo puedo obtener mi ticket?"
+                            className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none text-gray-900 dark:text-white"
+                          />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label
@@ -1074,22 +1076,24 @@ export function EventConfigContent({
                         >
                           Respuesta
                         </Label>
-                        <Textarea
-                          id="faq-answer"
-                          value={editingFaq ? editingFaq.answer : newAnswer}
-                          onChange={(e) => {
-                            if (editingFaq) {
-                              setEditingFaq({
-                                ...editingFaq,
-                                answer: e.target.value,
-                              });
-                            } else {
-                              setNewAnswer(e.target.value);
-                            }
-                          }}
-                          placeholder="Escribe una respuesta clara y concisa..."
-                          className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/20 focus:outline-none transition-colors min-h-[120px] resize-none"
-                        />
+                        <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+                          <Textarea
+                            id="faq-answer"
+                            value={editingFaq ? editingFaq.answer : newAnswer}
+                            onChange={(e) => {
+                              if (editingFaq) {
+                                setEditingFaq({
+                                  ...editingFaq,
+                                  answer: e.target.value,
+                                });
+                              } else {
+                                setNewAnswer(e.target.value);
+                              }
+                            }}
+                            placeholder="Escribe una respuesta clara y concisa..."
+                            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none min-h-[120px] resize-none text-gray-900 dark:text-white"
+                          />
+                        </div>
                       </div>
                     </div>
 
