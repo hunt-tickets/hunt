@@ -50,7 +50,7 @@ export function CreateEventDialog({
     <Sheet open={open} onOpenChange={setOpen}>
       <Button
         onClick={() => setOpen(true)}
-        className={`flex items-center gap-2 h-10 rounded-xl ${className}`}
+        className={`flex items-center gap-2 h-12 rounded-3xl ${className}`}
       >
         <Plus className="h-4 w-4 flex-shrink-0" />
         <span className="hidden sm:inline">Crear Evento</span>
