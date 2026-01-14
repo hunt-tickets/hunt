@@ -152,16 +152,16 @@ export function EventCard({
           <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
             {/* Lifecycle status badge - show if event is being cancelled */}
             {lifecycleStatus === "cancellation_pending" ? (
-              <div className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-yellow-500/90 text-white border border-yellow-400/50">
+              <div className="px-2.5 py-1 rounded-lg text-[10px] font-medium bg-yellow-50 text-yellow-700 border border-yellow-200 dark:bg-yellow-600/10 dark:text-yellow-400 dark:border-yellow-600/20">
                 En cancelación
               </div>
             ) : (
               /* Regular status badge - only show when NOT in cancellation */
               <div
-                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-medium ${
                   status
-                    ? "bg-emerald-500/90 text-white"
-                    : "bg-zinc-800/80 text-zinc-300 border border-zinc-600/50"
+                    ? "bg-green-50 text-green-700 border border-green-200 dark:bg-green-600/10 dark:text-green-400 dark:border-green-600/20"
+                    : "bg-gray-50 text-gray-700 border border-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/20"
                 }`}
               >
                 {status ? "Activo" : "Borrador"}
@@ -174,7 +174,7 @@ export function EventCard({
                 const TypeIcon = EVENT_TYPE_CONFIG[eventType].icon;
                 const typeLabel = EVENT_TYPE_CONFIG[eventType].label;
                 return (
-                  <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-zinc-900/80 text-zinc-200 border border-zinc-700/50 backdrop-blur-sm">
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">
                     <TypeIcon className="h-3 w-3" />
                     <span>{typeLabel}</span>
                   </div>
