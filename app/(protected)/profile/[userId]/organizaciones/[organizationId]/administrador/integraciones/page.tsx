@@ -1,61 +1,70 @@
-"use client";
-
-import { useState, useMemo, useCallback } from "react";
+import { redirect, notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { AdminHeader } from "@/components/admin-header";
-import { IntegrationSearch } from "@/components/integrations/integration-search";
-import { IntegrationGrid } from "@/components/integrations/integration-grid";
-import { IntegrationEmptyState } from "@/components/integrations/integration-empty-state";
-import { INTEGRATIONS } from "@/lib/integrations/data";
-import { filterIntegrations } from "@/lib/integrations/utils";
-import { UI } from "@/constants/integrations";
-import type { Integration } from "@/lib/integrations/types";
+import { db } from "@/lib/drizzle";
+import { paymentProcessorAccount } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+import { getMercadopagoAuthorizationUrl } from "@/lib/mercadopago";
+import { IntegrationsClient } from "@/components/integrations/integrations-client";
 
-export default function IntegrationsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+interface IntegrationsPageProps {
+  params: Promise<{
+    userId: string;
+    organizationId: string;
+  }>;
+  searchParams: Promise<{
+    connected?: string;
+  }>;
+}
 
-  // Filter integrations
-  const filteredIntegrations = useMemo(() => {
-    return filterIntegrations(INTEGRATIONS, searchQuery);
-  }, [searchQuery]);
+export default async function IntegrationsPage({
+  params,
+  searchParams,
+}: IntegrationsPageProps) {
+  const { userId, organizationId } = await params;
+  const { connected } = await searchParams;
+  const reqHeaders = await headers();
 
-  const hasResults = filteredIntegrations.length > 0;
+  // Check if user can view dashboard (sellers cannot access integrations)
+  const canViewDashboard = await auth.api.hasPermission({
+    headers: reqHeaders,
+    body: {
+      permission: { dashboard: ["view"] },
+      organizationId,
+    },
+  });
 
-  // Event handlers
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value);
-  }, []);
+  if (!canViewDashboard?.success) {
+    redirect(
+      `/profile/${userId}/organizaciones/${organizationId}/administrador/mis-ventas`
+    );
+  }
 
-  const handleInstall = useCallback((integration: Integration) => {
-    // TODO: Handle installation flow
-    console.log("Install integration:", integration);
-  }, []);
+  // Get payment accounts for this organization
+  const paymentAccounts = await db
+    .select()
+    .from(paymentProcessorAccount)
+    .where(eq(paymentProcessorAccount.organizationId, organizationId));
 
-  const handleConfigure = useCallback((integration: Integration) => {
-    // TODO: Open configuration modal/dialog
-    console.log("Configure integration:", integration);
-  }, []);
+  // Get MercadoPago OAuth URL
+  const mpOauthUrl = await getMercadopagoAuthorizationUrl(organizationId);
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
       {/* Page Header */}
       <AdminHeader
-        title={UI.HEADER.TITLE}
-        subtitle={UI.HEADER.DESCRIPTION}
+        title="Integraciones"
+        subtitle="Conecta servicios externos para ampliar las funcionalidades de tu organización"
       />
 
-      {/* Search Bar */}
-      <IntegrationSearch value={searchQuery} onChange={handleSearchChange} />
-
-      {/* Integrations Grid or Empty State */}
-      {hasResults ? (
-        <IntegrationGrid
-          integrations={filteredIntegrations}
-          onInstall={handleInstall}
-          onConfigure={handleConfigure}
-        />
-      ) : (
-        <IntegrationEmptyState />
-      )}
+      {/* Client Component with all interactive logic */}
+      <IntegrationsClient
+        paymentAccounts={paymentAccounts}
+        mpOauthUrl={mpOauthUrl}
+        organizationId={organizationId}
+        connectedIntegration={connected}
+      />
     </div>
   );
 }

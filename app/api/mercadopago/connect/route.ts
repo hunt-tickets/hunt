@@ -106,9 +106,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Redirect back to the organization settings with success message
+    // Redirect back to the organization integrations page with success message
     return NextResponse.redirect(
-      `${process.env.APP_URL}/profile/${session.user.id}/organizaciones/${organizationId}/administrador/configuracion?connected=mercadopago`
+      `${process.env.APP_URL}/profile/${session.user.id}/organizaciones/${organizationId}/administrador/integraciones?connected=mercadopago`
     );
   } catch (error) {
     console.error("MercadoPago connection error:", error);
