@@ -872,9 +872,9 @@ export function EventConfigContent({
               <CardContent className="space-y-6">
                 {/* Add/Edit Form */}
                 {(isAddingFaq || editingFaq) && (
-                  <div className="p-6 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/10 space-y-5">
+                  <div className="p-6 rounded-xl bg-gray-100 dark:bg-gradient-to-br dark:from-white/[0.07] dark:to-white/[0.02] border border-gray-200 dark:border-white/10 space-y-5">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white/80 uppercase tracking-wider">
                         {editingFaq ? "Editar Pregunta" : "Nueva Pregunta"}
                       </h3>
                     </div>
@@ -939,7 +939,7 @@ export function EventConfigContent({
                           setNewQuestion("");
                           setNewAnswer("");
                         }}
-                        className="rounded-lg border-white/10 hover:bg-white/10 hover:text-white"
+                        className="rounded-lg border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10"
                       >
                         Cancelar
                       </Button>
@@ -970,7 +970,7 @@ export function EventConfigContent({
                             }
                           }
                         }}
-                        className="rounded-lg min-w-[100px] bg-white text-black hover:bg-white/90"
+                        className="rounded-lg min-w-[100px] bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-white/90"
                         disabled={
                           editingFaq
                             ? !editingFaq.question.trim() ||
@@ -987,10 +987,10 @@ export function EventConfigContent({
                 {/* FAQs List */}
                 {faqs.length === 0 && !isAddingFaq && !editingFaq ? (
                   <div className="text-center py-16">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mb-4">
                       <HelpCircle className="h-8 w-8 text-gray-500 dark:text-white/40" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2 text-white">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
                       No hay preguntas frecuentes
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-white/40 max-w-md mx-auto">
