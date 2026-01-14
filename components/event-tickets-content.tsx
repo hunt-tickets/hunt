@@ -144,10 +144,12 @@ export function EventTicketsContent({
               </div>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {tickets.length} tipo{tickets.length !== 1 ? "s" : ""} de entrada
-            configurado{tickets.length !== 1 ? "s" : ""}
-          </p>
+          {tickets.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {tickets.length} tipo{tickets.length !== 1 ? "s" : ""} de entrada
+              configurado{tickets.length !== 1 ? "s" : ""}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <CreateTicketTypeDialog
@@ -557,11 +559,11 @@ export function EventTicketsContent({
         // Handle QR Huérfanos tab
         if (selectedTicketType === "orphan_qrs") {
           return (
-            <Card>
+            <Card className="border-gray-200 dark:border-white/5">
               <CardContent className="py-12 text-center">
-                <Ticket className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-1">QR Huérfanos</h3>
-                <p className="text-sm text-muted-foreground">
+                <Ticket className="h-10 w-10 text-gray-400 dark:text-white/20 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-1 text-gray-900 dark:text-white">QR Huérfanos</h3>
+                <p className="text-sm text-gray-500 dark:text-white/40">
                   Aquí aparecerán los códigos QR sin ticket asociado
                 </p>
               </CardContent>
@@ -584,17 +586,17 @@ export function EventTicketsContent({
             : null;
 
         return filteredTickets.length === 0 ? (
-          <Card>
+          <Card className="border-gray-200 dark:border-white/5">
             <CardContent className="py-12 text-center">
-              <Ticket className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-1">
+              <Ticket className="h-10 w-10 text-gray-400 dark:text-white/20 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-1 text-gray-900 dark:text-white">
                 {selectedDayInfo
                   ? `No hay entradas para ${selectedDayInfo.name}`
                   : ticketsFilteredByDay.length === 0
                     ? "No hay entradas configuradas"
                     : "No hay entradas de este tipo"}
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-gray-500 dark:text-white/40 mb-4">
                 {selectedDayInfo
                   ? "Crea un tipo de entrada para este día"
                   : ticketsFilteredByDay.length === 0
