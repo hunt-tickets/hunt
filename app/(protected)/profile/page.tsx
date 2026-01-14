@@ -289,7 +289,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Active Devices */}
-      <div className="space-y-4 sm:space-y-5">
+      <div className="space-y-4 sm:space-y-5 pt-4 sm:pt-6">
         <h2 className="text-lg sm:text-xl font-semibold leading-tight">
           Dispositivos activos
         </h2>
