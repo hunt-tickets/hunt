@@ -293,9 +293,9 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
 
   return (
     <div className="space-y-4">
-      {/* Revoke all other sessions button */}
+      {/* Revoke all other sessions button - moved to -mt-14 to align with title */}
       {otherSessionsCount > 0 && (
-        <div className="flex justify-end">
+        <div className="flex justify-end -mt-14 sm:-mt-16 mb-4">
           <button
             onClick={revokeOtherSessions}
             disabled={revokingAll}
