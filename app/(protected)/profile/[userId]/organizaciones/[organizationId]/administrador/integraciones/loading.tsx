@@ -25,7 +25,7 @@ export default function IntegracionesLoading() {
 
       {/* Integrations Grid Skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+        {[1, 2, 3, 4].map((i) => (
           <Card
             key={i}
             className="bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5"
