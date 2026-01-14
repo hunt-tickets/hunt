@@ -103,7 +103,7 @@ export function ProfileAvatarManager({
             className="w-full h-full rounded-full object-cover border-2 border-gray-200 dark:border-[#2a2a2a] group-hover:border-gray-300 dark:group-hover:border-[#3a3a3a] transition-colors"
           />
         ) : (
-          <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50 border-2 border-gray-200 dark:border-[#2a2a2a] group-hover:border-gray-300 dark:group-hover:border-[#3a3a3a] flex items-center justify-center transition-colors">
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#2a2a2a] dark:to-[#1a1a1a] border-2 border-gray-200 dark:border-[#2a2a2a] group-hover:border-gray-300 dark:group-hover:border-[#3a3a3a] flex items-center justify-center transition-colors">
             <svg
               className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
               viewBox="0 0 24 24"
