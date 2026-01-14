@@ -253,7 +253,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   </SelectTrigger>
                   <SelectContent className="max-h-48 bg-gray-50 border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a] rounded-xl">
                     {MONTHS_ES.map((monthName, idx) => (
-                      <SelectItem key={idx} value={String(idx)} className="rounded-lg focus:bg-gray-200 dark:focus:bg-[#2a2a2a]">
+                      <SelectItem key={idx} value={String(idx)} className="rounded-lg focus:bg-gray-200 dark:focus:bg-[#2a2a2a] focus:text-foreground dark:focus:text-foreground">
                         {monthName}
                       </SelectItem>
                     ))}
@@ -271,7 +271,7 @@ export function BirthDateManager({ birthDate }: BirthDateManagerProps) {
                   </SelectTrigger>
                   <SelectContent className="max-h-48 bg-gray-50 border-gray-200 dark:bg-[#1a1a1a] dark:border-[#2a2a2a] rounded-xl">
                     {years.map((year) => (
-                      <SelectItem key={year} value={String(year)} className="rounded-lg focus:bg-gray-200 dark:focus:bg-[#2a2a2a]">
+                      <SelectItem key={year} value={String(year)} className="rounded-lg focus:bg-gray-200 dark:focus:bg-[#2a2a2a] focus:text-foreground dark:focus:text-foreground">
                         {year}
                       </SelectItem>
                     ))}
