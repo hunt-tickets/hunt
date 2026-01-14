@@ -1035,7 +1035,7 @@ export function EventConfigContent({
               <CardContent className="space-y-6">
                 {/* Add/Edit Form */}
                 {(isAddingFaq || editingFaq) && (
-                  <div className="p-6 rounded-xl bg-gray-100 dark:bg-gradient-to-br dark:from-white/[0.07] dark:to-white/[0.02] border border-gray-200 dark:border-white/10 space-y-5">
+                  <div className="p-6 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] space-y-5">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold text-gray-900 dark:text-white/80 uppercase tracking-wider">
                         {editingFaq ? "Editar Pregunta" : "Nueva Pregunta"}
