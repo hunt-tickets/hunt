@@ -53,6 +53,7 @@ export async function generateMetadata({
     },
   };
 }
+
 // Static Event Route
 export default async function EventPage({ params }: EventPageProps) {
   // Await params to get the eventId

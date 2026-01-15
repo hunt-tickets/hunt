@@ -19,27 +19,6 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   const { userId, organizationId } = await params;
   const reqHeaders = await headers();
 
-  // Auth check using Better Auth
-  // const session = await auth.api.getSession({
-  //   headers: reqHeaders,
-  // });
-
-  // if (!session || session.user.id !== userId) {
-  //   redirect("/sign-in");
-  // }
-
-  // // Verify user is a member of the organization
-  // const memberRecord = await db.query.member.findFirst({
-  //   where: and(
-  //     eq(member.userId, userId),
-  //     eq(member.organizationId, organizationId)
-  //   ),
-  // });
-
-  // if (!memberRecord) {
-  //   notFound();
-  // }
-
   // Check if user can view dashboard (sellers cannot access configuration)
   const canViewDashboard = await auth.api.hasPermission({
     headers: reqHeaders,
