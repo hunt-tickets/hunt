@@ -175,7 +175,10 @@ export default async function ProfilePage() {
           <BirthDateManager birthDate={user.birthdate ?? null} />
 
           {/* Document Type and Number */}
-          <DocumentManager documentType={null} documentNumber={null} />
+          <DocumentManager
+            documentType={user.documentTypeId ?? null}
+            documentNumber={user.documentId ?? null}
+          />
         </div>
       </div>
 
