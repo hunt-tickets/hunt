@@ -9,23 +9,10 @@ import { INTEGRATIONS } from "@/lib/integrations/data";
 import { filterIntegrations } from "@/lib/integrations/utils";
 import type { Integration } from "@/lib/integrations/types";
 import { toast } from "sonner";
+import { PaymentProcessorAccount } from "@/lib/schema";
 
 interface IntegrationsClientProps {
-  paymentAccounts: Array<{
-    id: string;
-    userId: string;
-    organizationId: string;
-    processorType: "stripe" | "mercadopago";
-    processorAccountId: string;
-    accessToken: string;
-    refreshToken: string | null;
-    tokenExpiresAt: Date | null;
-    scope: string | null;
-    status: "active" | "inactive" | "suspended";
-    metadata: Record<string, unknown> | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
+  paymentAccounts: PaymentProcessorAccount[];
   mpOauthUrl: string;
   organizationId: string;
   connectedIntegration?: string;

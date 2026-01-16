@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { BUTTON_LABELS, ARIA_LABELS } from "@/constants/integrations";
 import type { IntegrationCardProps } from "@/lib/integrations/types";
 import { CheckCircle2 } from "lucide-react";

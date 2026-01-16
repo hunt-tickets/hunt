@@ -11,9 +11,6 @@ import {
   Banknote,
   ShoppingBag,
   CalendarDays,
-  Calendar,
-  Repeat,
-  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -22,15 +19,15 @@ import { SidebarUserMenu } from "@/components/sidebar-user-menu";
 
 type EventType = "single" | "multi_day" | "recurring" | "slots";
 
-const eventTypeConfig: Record<
-  EventType,
-  { label: string; icon: typeof Calendar }
-> = {
-  single: { label: "Evento único", icon: Calendar },
-  multi_day: { label: "Evento de varios días", icon: CalendarDays },
-  recurring: { label: "Evento recurrente", icon: Repeat },
-  slots: { label: "Evento por horarios", icon: Clock },
-};
+// const eventTypeConfig: Record<
+//   EventType,
+//   { label: string; icon: typeof Calendar }
+// > = {
+//   single: { label: "Evento único", icon: Calendar },
+//   multi_day: { label: "Evento de varios días", icon: CalendarDays },
+//   recurring: { label: "Evento recurrente", icon: Repeat },
+//   slots: { label: "Evento por horarios", icon: Clock },
+// };
 
 interface EventSidebarProps {
   userId: string;
@@ -91,7 +88,7 @@ export function EventSidebar({
   userId,
   organizationId,
   eventId,
-  eventName,
+  // eventName,
   eventType = "single",
   role = "seller",
   // user,
@@ -106,8 +103,8 @@ export function EventSidebar({
       : `/profile/${userId}/organizaciones/${organizationId}/administrador/eventos`;
 
   // Get event type configuration
-  const typeConfig = eventTypeConfig[eventType];
-  const TypeIcon = typeConfig.icon;
+  // const typeConfig = eventTypeConfig[eventType];
+  // const TypeIcon = typeConfig.icon;
 
   // Filter menu items based on role
   const visibleMenuItems = menuItems.filter((item) =>

@@ -216,6 +216,17 @@ export async function updateEventConfiguration(
     venue_name?: string;
     // private_list?: boolean; // TODO: Waiting for DB migration
     faqs?: Array<{ id: string; question: string; answer: string }>;
+    checkout_questions?: Array<{
+      id: string;
+      question: string;
+      type: "text" | "select" | "multiselect" | "textarea";
+      required: boolean;
+      scope: "per_order" | "per_ticket";
+      ticket_type_ids: string[];
+      options: string[];
+      placeholder: string;
+      sort_order: number;
+    }>;
   }
 ) {
   // Get session using Better Auth
@@ -269,6 +280,17 @@ export async function updateEventConfiguration(
     venue_name: string | null;
     // private_list: boolean; // TODO: Waiting for DB migration
     faqs: Array<{ id: string; question: string; answer: string }>;
+    checkout_questions: Array<{
+      id: string;
+      question: string;
+      type: "text" | "select" | "multiselect" | "textarea";
+      required: boolean;
+      scope: "per_order" | "per_ticket";
+      ticket_type_ids: string[];
+      options: string[];
+      placeholder: string;
+      sort_order: number;
+    }>;
   }> = {};
 
   if (formData.name !== undefined) updateData.name = formData.name;
@@ -295,6 +317,8 @@ export async function updateEventConfiguration(
   // if (formData.private_list !== undefined)
   //   updateData.private_list = formData.private_list; // TODO: Waiting for DB migration
   if (formData.faqs !== undefined) updateData.faqs = formData.faqs;
+  if (formData.checkout_questions !== undefined)
+    updateData.checkout_questions = formData.checkout_questions;
 
   const { error } = await supabase
     .from("events")

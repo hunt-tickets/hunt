@@ -19,10 +19,10 @@ import {
   Heart,
   GraduationCap,
   Store,
-  Calendar,
-  CalendarDays,
-  Repeat,
-  Clock,
+  // Calendar,
+  // CalendarDays,
+  // Repeat,
+  // Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -39,15 +39,15 @@ const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
 
 type EventType = "single" | "multi_day" | "recurring" | "slots";
 
-const EVENT_TYPE_CONFIG: Record<
-  EventType,
-  { icon: LucideIcon; label: string }
-> = {
-  single: { icon: Calendar, label: "Único" },
-  multi_day: { icon: CalendarDays, label: "Varios días" },
-  recurring: { icon: Repeat, label: "Recurrente" },
-  slots: { icon: Clock, label: "Por horarios" },
-};
+// const EVENT_TYPE_CONFIG: Record<
+//   EventType,
+//   { icon: LucideIcon; label: string }
+// > = {
+//   single: { icon: Calendar, label: "Único" },
+//   multi_day: { icon: CalendarDays, label: "Varios días" },
+//   recurring: { icon: Repeat, label: "Recurrente" },
+//   slots: { icon: Clock, label: "Por horarios" },
+// };
 
 interface EventCardProps {
   id: string; // Event ID for navigation
@@ -77,7 +77,7 @@ export function EventCard({
   onClick,
   status,
   category,
-  eventType,
+  // eventType,
   lifecycleStatus,
 }: EventCardProps) {
   const [mounted, setMounted] = useState(false);

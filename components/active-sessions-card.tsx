@@ -50,7 +50,7 @@ export function ActiveSessionsCard({ activeSession }: ActiveSessionProps) {
       }
     } catch (error) {
       console.error("Error loading sessions:", error);
-      toast.error("Error al cargar las sesiones");
+      toast.error({ title: "Error al cargar las sesiones" });
     } finally {
       setIsLoading(false);
     }

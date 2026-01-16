@@ -14,7 +14,6 @@ import type {
   PaymentProcessorType,
   PaymentProcessorAccount,
   OrganizationData,
-  MercadoPagoMetadata,
 } from "@/lib/schema";
 
 interface PaymentSettingsProps {
@@ -144,13 +143,13 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
                                   )}
                                 />
                               </div>
-                              {(account.metadata as MercadoPagoMetadata | null)
-                                ?.email ? (
+                              {account.processorType === "mercadopago" &&
+                              account.metadata &&
+                              typeof account.metadata === "object" &&
+                              "email" in account.metadata &&
+                              typeof account.metadata.email === "string" ? (
                                 <p className="text-xs text-muted-foreground">
-                                  {
-                                    (account.metadata as MercadoPagoMetadata)
-                                      .email
-                                  }
+                                  {account.metadata.email}
                                 </p>
                               ) : (
                                 <p className="text-xs text-muted-foreground">
@@ -163,33 +162,34 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
 
                             {/* Metadata */}
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                              {(account.metadata as MercadoPagoMetadata | null)
-                                ?.live_mode !== undefined && (
+                              {account.processorType === "mercadopago" &&
+                                account.metadata &&
+                                typeof account.metadata === "object" &&
+                                "live_mode" in account.metadata &&
+                                typeof account.metadata.live_mode === "boolean" && (
                                 <div className="flex items-center gap-1.5 text-xs">
                                   <div
                                     className={`h-1.5 w-1.5 rounded-full ${
-                                      (account.metadata as MercadoPagoMetadata)
-                                        .live_mode
+                                      account.metadata.live_mode
                                         ? "bg-green-500"
                                         : "bg-yellow-500"
                                     }`}
                                   />
                                   <span className="text-muted-foreground">
-                                    {(account.metadata as MercadoPagoMetadata)
-                                      .live_mode
+                                    {account.metadata.live_mode
                                       ? "Live"
                                       : "Test"}
                                   </span>
                                 </div>
                               )}
 
-                              {(account.metadata as MercadoPagoMetadata | null)
-                                ?.country_id && (
+                              {account.processorType === "mercadopago" &&
+                                account.metadata &&
+                                typeof account.metadata === "object" &&
+                                "country_id" in account.metadata &&
+                                typeof account.metadata.country_id === "string" && (
                                 <div className="text-xs text-muted-foreground">
-                                  {
-                                    (account.metadata as MercadoPagoMetadata)
-                                      .country_id
-                                  }
+                                  {account.metadata.country_id}
                                 </div>
                               )}
 

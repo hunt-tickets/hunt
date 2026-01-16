@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Link2, LogOut, User } from "lucide-react";
+import { Shield, Link2, LogOut } from "lucide-react";
 import { UnlinkAccountButton } from "@/components/unlink-account-button";
 import { LinkAccountButton } from "@/components/link-account-button";
 import { PasswordManager } from "@/components/password-manager";
@@ -114,7 +114,7 @@ export default async function ProfilePage() {
         <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
           {/* Avatar */}
           <ProfileAvatarManager
-            currentImage={user.image}
+            currentImage={user.image ?? null}
             userName={user.name}
           />
 
@@ -167,12 +167,12 @@ export default async function ProfilePage() {
 
           {/* Phone Number */}
           <PhoneVerificationManager
-            phoneNumber={user.phoneNumber}
+            phoneNumber={user.phoneNumber ?? null}
             phoneNumberVerified={user.phoneNumberVerified ?? false}
           />
 
           {/* Birth Date */}
-          <BirthDateManager birthDate={user.birthdate} />
+          <BirthDateManager birthDate={user.birthdate ?? null} />
 
           {/* Document Type and Number */}
           <DocumentManager documentType={null} documentNumber={null} />
@@ -275,7 +275,9 @@ export default async function ProfilePage() {
         <div className="space-y-3">
           {/* Password */}
           <PasswordManager
-            hasOAuthAccounts={oauthAccounts.some(acc => acc.providerId !== "credential")}
+            hasOAuthAccounts={oauthAccounts.some(
+              (acc) => acc.providerId !== "credential"
+            )}
           />
         </div>
       </div>

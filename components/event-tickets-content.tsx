@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Ticket,
-  HelpCircle,
   Map,
   CalendarRange,
   TrendingUp,

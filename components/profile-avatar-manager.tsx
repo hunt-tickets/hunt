@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, Camera, X } from "lucide-react";
+import { Camera, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface ProfileAvatarManagerProps {
@@ -13,9 +13,7 @@ export function ProfileAvatarManager({
   currentImage,
   userName,
 }: ProfileAvatarManagerProps) {
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    currentImage
-  );
+  const [imagePreview, setImagePreview] = useState<string | null>(currentImage);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -183,7 +181,6 @@ export function ProfileAvatarManager({
         disabled={isUploading}
         className="hidden"
       />
-
     </div>
   );
 }

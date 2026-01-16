@@ -1,0 +1,1 @@
+ALTER TABLE "events" ADD COLUMN "checkout_questions" jsonb;

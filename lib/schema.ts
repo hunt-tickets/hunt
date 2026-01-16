@@ -442,7 +442,7 @@ export const paymentProcessorAccount = pgTable("payment_processor_account", {
   tokenExpiresAt: timestamp("token_expires_at"),
   scope: text("scope"),
   status: paymentProcessorStatus("status").notNull().default("inactive"),
-  metadata: jsonb("metadata"),
+  metadata: jsonb("metadata").$type<Record<string, unknown> | null>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -660,6 +660,19 @@ export const events = pgTable(
     // guestEmail: text("guest_email"),
     // guestName: text("guest_name"),
     faqs: jsonb("faqs").$type<Array<Record<string, unknown>>>(),
+    checkout_questions: jsonb("checkout_questions").$type<
+      Array<{
+        id: string;
+        question: string;
+        type: "text" | "select" | "multiselect" | "textarea";
+        required: boolean;
+        scope: "per_order" | "per_ticket";
+        ticket_type_ids: string[];
+        options: string[];
+        placeholder: string;
+        sort_order: number;
+      }>
+    >(),
     // lifecycle management
     lifecycleStatus: eventLifecycleStatus("lifecycle_status")
       .default("active")

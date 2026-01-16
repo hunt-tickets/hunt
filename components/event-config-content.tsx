@@ -54,9 +54,9 @@ import {
 import { EventConfigCheckoutTab } from "@/components/event-config-checkout-tab";
 
 // Countries and Cities
-const COUNTRIES = [
-  { value: "CO", label: "Colombia" },
-];
+// const COUNTRIES = [
+//   { value: "CO", label: "Colombia" },
+// ];
 
 const CITIES_BY_COUNTRY: Record<string, Array<{ value: string; label: string }>> = {
   CO: [

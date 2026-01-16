@@ -1,4 +1,4 @@
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { AdminHeader } from "@/components/admin-header";
