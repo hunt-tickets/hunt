@@ -7,6 +7,7 @@
 - Programa de referidos 
 - apple wallet 
 - Analytics de ruta de eventos (organizaciones)
+- descargar tickets
 
 DONE: 
 - email de confirmacion con PDF (ver implementacion Hunt viejo)
