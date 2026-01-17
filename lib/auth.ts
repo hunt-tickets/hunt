@@ -757,7 +757,6 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         input: true,
-        fieldName: "tipo_persona",
       },
       nombres: {
         type: "string",
@@ -773,7 +772,6 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         input: true,
-        fieldName: "razon_social",
       },
       nit: {
         type: "string",
