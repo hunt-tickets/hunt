@@ -737,13 +737,11 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         input: true,
-        fieldName: "document_id",
       },
       documentTypeId: {
         type: "string",
         required: false,
         input: true,
-        fieldName: "document_type_id",
       },
       gender: {
         type: "string",

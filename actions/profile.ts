@@ -6,6 +6,7 @@ import { db } from "@/lib/drizzle";
 import { schema } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 // Type definitions for analytics data
 export interface AgeGroupData {
@@ -18,6 +19,12 @@ export interface GenderData {
   gender: string;
   users: number;
   tickets: number;
+}
+
+// Type definition for document update state
+export interface DocumentState {
+  success?: boolean;
+  error?: string;
 }
 
 export async function updateProfile(
@@ -100,5 +107,42 @@ export async function updateUserName(
   } catch (error) {
     console.error("Error updating user name:", error);
     return { error: "Error al actualizar el nombre" };
+  }
+}
+
+export async function updateUserDocument(
+  _prevState: DocumentState,
+  formData: FormData
+): Promise<DocumentState> {
+  try {
+    // Get authenticated user
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { error: "No autenticado" };
+    }
+
+    // Extract form data
+    const documentTypeId = formData.get("documentTypeId") as string | null;
+    const documentId = formData.get("documentId") as string | null;
+
+    // Update user through Better Auth API to ensure session is refreshed
+    await auth.api.updateUser({
+      headers: await headers(),
+      body: {
+        documentTypeId: documentTypeId || null,
+        documentId: documentId?.trim() || null,
+      },
+    });
+
+    // Revalidate the profile page
+    revalidatePath("/profile");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user document:", error);
+    return { error: "Error al actualizar el documento" };
   }
 }

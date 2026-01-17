@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/drizzle";
+import { documentType, countries } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import {
   Card,
   CardContent,
@@ -21,7 +24,6 @@ import { DocumentManager } from "@/components/document-manager";
 import { SignOutButton } from "@/components/sign-out-button";
 import { NameManager } from "@/components/name-manager";
 import { ProfileAvatarManager } from "@/components/profile-avatar-manager";
-// import { SiFacebook, SiGithub, SiApple } from "react-icons/si";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -32,6 +34,16 @@ export default async function ProfilePage() {
     redirect("/sign-in");
   }
   const user = session.user;
+
+  // Fetch document types from database (for Colombia)
+  const documentTypes = await db
+    .select({
+      id: documentType.id,
+      name: documentType.name,
+    })
+    .from(documentType)
+    .innerJoin(countries, eq(documentType.countryId, countries.id))
+    .where(eq(countries.countryCode, "CO"));
 
   // Fetch user's connected accounts using Better Auth API
   const oauthAccounts = await auth.api.listUserAccounts({
@@ -178,6 +190,7 @@ export default async function ProfilePage() {
           <DocumentManager
             documentType={user.documentTypeId ?? null}
             documentNumber={user.documentId ?? null}
+            documentTypes={documentTypes}
           />
         </div>
       </div>
