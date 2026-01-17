@@ -13,17 +13,25 @@ import {
 } from "@/components/ui/drawer";
 import type { TicketType } from "@/lib/schema";
 import { translateError } from "@/lib/error-messages";
+import { BillingInfoDialog, type BillingInfo } from "@/components/billing-info-dialog";
 
 interface TicketWithCount extends TicketType {
   count: number;
 }
 
-// Simplified user type for checkout - only fields we actually need
+// Extended user type for checkout with billing fields
 interface CheckoutUser {
   id: string;
   email: string;
   name?: string;
   phone?: string;
+  tipoPersona?: string | null;
+  documentTypeId?: string | null;
+  documentId?: string | null;
+  nombres?: string | null;
+  apellidos?: string | null;
+  razonSocial?: string | null;
+  nit?: string | null;
 }
 
 interface TicketSummaryDrawerProps {
@@ -33,6 +41,7 @@ interface TicketSummaryDrawerProps {
   total: number;
   open: boolean;
   close: () => void;
+  documentTypes: Array<{ id: string; name: string }>;
 }
 
 const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
@@ -42,6 +51,7 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   total,
   close,
   open,
+  documentTypes,
 }) => {
   if (!user) {
     console.log(
@@ -52,8 +62,10 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [showBillingDialog, setShowBillingDialog] = useState(false);
+  const [reservationId, setReservationId] = useState<string | null>(null);
 
-
+  // Step 1: Create reservation (locks tickets)
   const handlePayment = async () => {
     setIsProcessing(true);
     setError(null);
@@ -63,7 +75,7 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
       .map((t) => ({ ticket_type_id: t.id, quantity: t.count }));
 
     try {
-      const res = await fetch("/api/checkout", {
+      const res = await fetch("/api/checkout/reserve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ eventId, items }),
@@ -71,9 +83,61 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
 
       const response = await res.json();
 
+      if (!response.success || !response.reservation) {
+        setError(translateError(response.error || "Error al crear la reserva"));
+        setIsProcessing(false);
+        return;
+      }
+
+      // Save reservation ID and show billing dialog
+      setReservationId(response.reservation.id);
+      setShowBillingDialog(true);
+      setIsProcessing(false);
+    } catch (error) {
+      console.error("Reservation error:", error);
+      setError(
+        translateError(
+          error instanceof Error
+            ? error.message
+            : "Error al crear la reserva. Por favor intenta nuevamente."
+        )
+      );
+      setIsProcessing(false);
+    }
+  };
+
+  // Step 2: Submit billing info and create MercadoPago checkout
+  const handleBillingSubmit = async (billingInfo: BillingInfo) => {
+    if (!reservationId) {
+      setError("No se encontró la reserva");
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    const items = tickets
+      .filter((t) => t.count > 0)
+      .map((t) => ({ ticket_type_id: t.id, quantity: t.count }));
+
+    try {
+      const res = await fetch("/api/checkout/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reservationId,
+          eventId,
+          items,
+          billingInfo,
+        }),
+      });
+
+      const response = await res.json();
+
       if (!response.success || !response.checkoutUrl) {
         setError(translateError(response.error || "Error al procesar el pago"));
         setIsProcessing(false);
+        setShowBillingDialog(false);
         return;
       }
 
@@ -89,7 +153,13 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
         )
       );
       setIsProcessing(false);
+      setShowBillingDialog(false);
     }
+  };
+
+  const handleBillingClose = () => {
+    setShowBillingDialog(false);
+    setIsProcessing(false);
   };
 
   // Detect mobile screen size
@@ -179,6 +249,25 @@ const TicketSummaryDrawer: React.FC<TicketSummaryDrawerProps> = ({
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
+
+      {/* Billing Information Dialog */}
+      <BillingInfoDialog
+        open={showBillingDialog}
+        onClose={handleBillingClose}
+        onSubmit={handleBillingSubmit}
+        isProcessing={isProcessing}
+        defaultValues={{
+          tipoPersona: user.tipoPersona,
+          documentTypeId: user.documentTypeId,
+          documentId: user.documentId,
+          nombres: user.nombres,
+          apellidos: user.apellidos,
+          razonSocial: user.razonSocial,
+          nit: user.nit,
+          email: user.email,
+        }}
+        documentTypes={documentTypes}
+      />
     </Drawer>
   );
 };

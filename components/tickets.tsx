@@ -4,6 +4,7 @@ import { TicketsContainer } from "./tickets-container";
 interface TicketsProps {
   tickets: TicketType[];
   eventId: string;
+  documentTypes: Array<{ id: string; name: string }>;
 }
 
 /**
@@ -30,7 +31,7 @@ interface TicketsProps {
  *    - Client: Interactive content (quantity selection, cart state)
  *    - Result: Balanced payload size vs. UX performance
  */
-const Tickets = ({ tickets, eventId }: TicketsProps) => {
+const Tickets = ({ tickets, eventId, documentTypes }: TicketsProps) => {
   // Early return if no tickets - rendered on server
   if (!tickets || tickets.length === 0) {
     return null;
@@ -51,6 +52,7 @@ const Tickets = ({ tickets, eventId }: TicketsProps) => {
           <TicketsContainer
             tickets={tickets}
             eventId={eventId}
+            documentTypes={documentTypes}
           />
         </div>
       </div>

@@ -25,6 +25,7 @@ interface TicketsContainerProps {
   eventId: string;
   eventType?: "single" | "multi_day" | "recurring" | "slots";
   eventDays?: EventDayDetail[];
+  documentTypes: Array<{ id: string; name: string }>;
 }
 
 export function TicketsContainer({
@@ -32,6 +33,7 @@ export function TicketsContainer({
   eventId,
   eventType = "single",
   eventDays = [],
+  documentTypes,
 }: TicketsContainerProps) {
   const [ticketSelections, setTicketSelections] = useState<
     Record<string, number>
@@ -144,9 +146,14 @@ export function TicketsContainer({
             email: user.email || "",
             phone: user.phoneNumber || undefined,
             name: user.name,
-            lastName: "", // Better Auth doesn't have lastName in base schema
-            document_type_id: "", // Not in Better Auth base schema
-            document_id: "", // Not in Better Auth base schema
+            // Billing fields
+            tipoPersona: user.tipoPersona || null,
+            documentTypeId: user.documentTypeId || null,
+            documentId: user.documentId || null,
+            nombres: user.nombres || null,
+            apellidos: user.apellidos || null,
+            razonSocial: user.razonSocial || null,
+            nit: user.nit || null,
           }
         : null,
     [user]
@@ -187,6 +194,7 @@ export function TicketsContainer({
           total={totalPrice}
           open={showSummaryDrawer}
           close={() => setShowSummaryDrawer(false)}
+          documentTypes={documentTypes}
         />
       )}
 

@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { getEventById } from "@/lib/helpers/events";
 import { ShareButton } from "@/components/share-button";
 import { TicketsContainer } from "@/components/tickets-container";
+import { db } from "@/lib/drizzle";
+import { documentType, countries } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
 interface EventPageProps {
   params: Promise<{
@@ -66,6 +69,16 @@ export default async function EventPage({ params }: EventPageProps) {
   if (!event) {
     notFound();
   }
+
+  // Fetch document types for billing form (Colombia)
+  const documentTypes = await db
+    .select({
+      id: documentType.id,
+      name: documentType.name,
+    })
+    .from(documentType)
+    .innerJoin(countries, eq(documentType.countryId, countries.id))
+    .where(eq(countries.countryCode, "CO"));
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -234,6 +247,7 @@ export default async function EventPage({ params }: EventPageProps) {
                 eventId={event.id}
                 eventType={event.eventType}
                 eventDays={event.eventDays}
+                documentTypes={documentTypes}
               />
             </div>
           </div>
