@@ -157,6 +157,18 @@ export async function POST(request: Request) {
       chargesDetails.find((c) => c.type === "tax" && c.name?.includes("fuente"))
         ?.amounts?.original || 0;
 
+    // DEBUG: Log extracted fees and taxes
+    console.log("[Webhook] 💵 EXTRACTED FEES & TAXES:", {
+      processorFee,
+      marketplaceFee,
+      taxWithholdingIca,
+      taxWithholdingFuente,
+      totalDeductions: processorFee + marketplaceFee + taxWithholdingIca + taxWithholdingFuente,
+      transactionAmount: payment.transaction_amount,
+      netReceived: payment.transaction_details?.net_received_amount,
+      calculatedNet: (payment.transaction_amount || 0) - (processorFee + marketplaceFee + taxWithholdingIca + taxWithholdingFuente),
+    });
+
     if (!reservationId) {
       console.error("[Webhook] ❌ No reservation_id in payment metadata");
       return new Response("Missing reservation_id in metadata", {
