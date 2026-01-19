@@ -7,7 +7,7 @@
  * Architecture:
  * - Client cart stored in localStorage/React state (no DB writes during browsing)
  * - Reservation created ONLY when user clicks "Checkout" button
- * - 10-minute timer starts at checkout
+ * - 5-minute timer starts at checkout
  * - Mercado Pago webhook converts reservation → order + tickets
  * - Cron job expires abandoned reservations
  *
@@ -87,13 +87,13 @@ export interface ExpiryResult {
  * This function atomically:
  * 1. Validates cart items against current availability
  * 2. Locks inventory with FOR UPDATE
- * 3. Creates reservation with 10-minute expiry
+ * 3. Creates reservation with 5-minute expiry
  * 4. Increments reserved_count on ticket_types
  *
  * @param userId - Better Auth user ID
  * @param eventId - Event UUID
  * @param items - Array of cart items {ticket_type_id, quantity}
- * @param expiryMinutes - Expiry time in minutes (default: 10)
+ * @param expiryMinutes - Expiry time in minutes (default: 5)
  * @returns Reservation details or throws error if insufficient tickets
  *
  * @throws Error if:
@@ -107,7 +107,7 @@ export async function createReservation(
   userId: string,
   eventId: string,
   items: CartItem[],
-  expiryMinutes: number = 10
+  expiryMinutes: number = 5
 ): Promise<ReservationResult> {
   const supabase = await createClient();
 

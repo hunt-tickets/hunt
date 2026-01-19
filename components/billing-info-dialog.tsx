@@ -76,6 +76,7 @@ export function BillingInfoDialog({
   // Determine person type from profile (default to "natural" if null or undefined)
   const userPersonType = (defaultValues?.tipoPersona === "juridica" ? "juridica" : "natural") as "natural" | "juridica";
 
+  // Controls whether billing data can be modified
   const [useDifferentBilling, setUseDifferentBilling] = useState<"no" | "yes">("no");
 
   // Natural person form data
@@ -100,9 +101,9 @@ export function BillingInfoDialog({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Pre-fill form when dialog opens or when switching back to "No"
+  // Pre-fill form when dialog opens (regardless of billing choice)
   useEffect(() => {
-    if (open && defaultValues && useDifferentBilling === "no") {
+    if (open && defaultValues) {
       if (userPersonType === "natural") {
         // Split nombres into primer and segundo nombre
         const nombres = (defaultValues.nombres || "").split(" ").filter(Boolean);
@@ -128,35 +129,7 @@ export function BillingInfoDialog({
         });
       }
     }
-  }, [open, defaultValues, useDifferentBilling, userPersonType]);
-
-  // Clear form when switching to "Yes"
-  const handleBillingTypeChange = (value: "no" | "yes") => {
-    setUseDifferentBilling(value);
-    if (value === "yes") {
-      // Clear the form for manual entry
-      if (userPersonType === "natural") {
-        setNaturalFormData({
-          tipoDocumento: "",
-          numeroDocumento: "",
-          primerNombre: "",
-          segundoNombre: "",
-          primerApellido: "",
-          segundoApellido: "",
-          emailFactura: "",
-          confirmacionEmail: "",
-        });
-      } else {
-        setJuridicalFormData({
-          razonSocial: "",
-          nit: "",
-          emailFactura: "",
-          confirmacionEmail: "",
-        });
-      }
-      setErrors({});
-    }
-  };
+  }, [open, defaultValues, userPersonType]);
 
   const validateNatural = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -244,6 +217,14 @@ export function BillingInfoDialog({
     }
   };
 
+  // Handle billing type change
+  const handleBillingTypeChange = (value: "no" | "yes") => {
+    setUseDifferentBilling(value);
+    setErrors({}); // Clear errors when switching
+  };
+
+  // Fields are read-only when user confirms profile data ("No")
+  // Fields are editable when user wants to change data ("Sí")
   const isFormDisabled = isProcessing || useDifferentBilling === "no";
 
   return (
@@ -252,13 +233,12 @@ export function BillingInfoDialog({
         <DialogHeader>
           <DialogTitle>Información de Facturación</DialogTitle>
           <DialogDescription>
-            Por favor completa la siguiente información para generar tu factura
-            electrónica
+            Revisa y confirma los datos para tu factura electrónica. Los campos están pre-llenados con tu información de perfil.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Question: Change billing name? */}
+          {/* Legal requirement: Ask if user wants to change billing name */}
           <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
             <Label className="text-base font-medium">
               ¿Desea cambiar el nombre del cliente de la factura?
@@ -272,13 +252,13 @@ export function BillingInfoDialog({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="no" id="billing-no" />
                 <Label htmlFor="billing-no" className="font-normal cursor-pointer">
-                  No
+                  No, usar información de mi perfil
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="billing-yes" />
                 <Label htmlFor="billing-yes" className="font-normal cursor-pointer">
-                  Sí
+                  Sí, modificar datos de facturación
                 </Label>
               </div>
             </RadioGroup>
