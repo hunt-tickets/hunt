@@ -107,13 +107,27 @@ export async function POST(request: Request) {
       return new Response(null, { status: 200 });
     }
 
-    // Extract reservation ID and platform from metadata
+    // Extract reservation ID, platform, and billing info from metadata
     const reservationId = payment.metadata?.reservation_id as
       | string
       | undefined;
     const platform =
       (payment.metadata?.platform as "web" | "app" | "cash") || "web";
     const currency = payment.currency_id || "COP";
+    const eventId = payment.metadata?.event_id as string | undefined;
+    const organizationId = payment.metadata?.organization_id as
+      | string
+      | undefined;
+
+    // Parse billing info for DIAN compliance
+    let billingInfo = null;
+    try {
+      if (payment.metadata?.billing_info) {
+        billingInfo = JSON.parse(payment.metadata.billing_info as string);
+      }
+    } catch (error) {
+      console.error("[Webhook] ⚠️ Failed to parse billing_info:", error);
+    }
 
     // Extract fees from fee_details
     const feeDetails = payment.fee_details || [];
@@ -145,6 +159,47 @@ export async function POST(request: Request) {
     console.log(
       `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`
     );
+
+    // CRITICAL: Send billing info to event producer for DIAN compliance
+    // This is a legal requirement - producers need this data immediately to generate factura electrónica
+    if (billingInfo && eventId && organizationId) {
+      console.log(
+        `[Webhook] 📧 Triggering billing notification to producer (organization: ${organizationId})`
+      );
+
+      // Fire-and-forget: Call Edge Function to send email to producer
+      createClient()
+        .then((supabase) =>
+          supabase.functions.invoke("send-facturacion", {
+            body: {
+              order_id: order.order_id,
+              event_id: eventId,
+              organization_id: organizationId,
+              billing_info: billingInfo,
+              payment_details: {
+                amount: payment.transaction_amount,
+                currency: payment.currency_id,
+                payment_id: payment.id?.toString(),
+                payment_method: payment.payment_method_id,
+                paid_at: payment.date_approved,
+                ticket_count: order.ticket_ids.length,
+              },
+            },
+          })
+        )
+        .catch((error) => {
+          // Log but don't throw - this is critical but non-blocking for webhook
+          console.error(
+            "[Webhook] ⚠️ CRITICAL - Producer billing notification failed (manual follow-up needed):",
+            error
+          );
+          // TODO: Add to retry queue or alert system
+        });
+    } else {
+      console.warn(
+        "[Webhook] ⚠️ Missing billing info, event ID, or org ID - cannot notify producer"
+      );
+    }
 
     // Trigger PDF generation (fire-and-forget - don't await!)
     // This runs in the background and won't block the webhook response
