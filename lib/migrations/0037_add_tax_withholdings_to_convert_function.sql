@@ -1,45 +1,26 @@
-- Acceso a creacion de Organizaciones tiene que ser restringido (Book a demo)
-- Webhook para facturacion
-- Scanner
+-- Add tax withholding parameters to convert_reservation_to_order function
+-- This updates the function to accept and store Colombian tax withholdings
 
-- Terminar event_days y Events 
-- Palcos, silla enum. 
-- Programa de referidos 
-- apple wallet 
-- Analytics de ruta de eventos (organizaciones)
-- descargar tickets
-- reembolsos con Oscar
-- en /entradas hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
-- en el webhook, acceder del pago la informacion sobre impuestos y guardarlos en la db
-
-├ ƒ /profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId] 13.6 kB 571 kB
-├ ƒ /profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId]/entradas 9.93 kB 537 kB
-├ ƒ /profile 40.5 kB 274 kB
-├ ○ /productor 129 kB 234 kB
-
-Notes
-<!-- 41.1.1. Advantages of Using PL/pgSQL 
-SQL is the language PostgreSQL and most other relational databases use as query language. It's portable and easy to learn. But every SQL statement must be executed individually by the database server.
-
-That means that your client application must send each query to the database server, wait for it to be processed, receive and process the results, do some computation, then send further queries to the server. All this incurs interprocess communication and will also incur network overhead if your client is on a different machine than the database server.
-
-With PL/pgSQL you can group a block of computation and a series of queries inside the database server, thus having the power of a procedural language and the ease of use of SQL, but with considerable savings of client/server communication overhead.
-
-Extra round trips between client and server are eliminated
-
-Intermediate results that the client does not need do not have to be marshaled or transferred between server and client
-
-Multiple rounds of query parsing can be avoided
-
-This can result in a considerable performance increase as compared to an application that does not use stored functions.
-
-Also, with PL/pgSQL you can use all the data types, operators and functions of SQL. -->
-
-
-
-
-
-<!-- DECLARE
+CREATE OR REPLACE FUNCTION convert_reservation_to_order(
+  p_reservation_id UUID,
+  p_payment_session_id TEXT DEFAULT NULL,
+  p_platform order_from DEFAULT 'web',
+  p_currency TEXT DEFAULT 'COP',
+  p_marketplace_fee NUMERIC(10, 2) DEFAULT 0,
+  p_processor_fee NUMERIC(10, 2) DEFAULT 0,
+  p_sold_by TEXT DEFAULT NULL,
+  p_tax_withholding_ica NUMERIC(10, 2) DEFAULT 0,
+  p_tax_withholding_fuente NUMERIC(10, 2) DEFAULT 0
+)
+RETURNS TABLE(
+  order_id UUID,
+  ticket_ids UUID[]
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  DECLARE
     v_order_id UUID;
     v_reservation RECORD;
     v_item RECORD;
@@ -104,6 +85,7 @@ Also, with PL/pgSQL you can use all the data types, operators and functions of S
       RAISE EXCEPTION 'Reservation has expired at %', v_reservation.expires_at;
     END IF;
 
+    -- Updated INSERT to include tax withholdings
     INSERT INTO orders (
       user_id,
       event_id,
@@ -111,6 +93,8 @@ Also, with PL/pgSQL you can use all the data types, operators and functions of S
       currency,
       marketplace_fee,
       processor_fee,
+      tax_withholding_ica,
+      tax_withholding_fuente,
       payment_status,
       payment_session_id,
       platform,
@@ -124,6 +108,8 @@ Also, with PL/pgSQL you can use all the data types, operators and functions of S
       p_currency,
       p_marketplace_fee,
       p_processor_fee,
+      p_tax_withholding_ica,
+      p_tax_withholding_fuente,
       'paid',
       COALESCE(p_payment_session_id, v_reservation.payment_session_id),
       p_platform,
@@ -199,4 +185,5 @@ Also, with PL/pgSQL you can use all the data types, operators and functions of S
 
     RETURN QUERY
     SELECT v_order_id, v_ticket_ids;
-  END; -->
+  END;
+$$;

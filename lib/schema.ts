@@ -859,8 +859,8 @@ export const orders = pgTable(
     currency: text("currency").notNull().default("COP"),
     marketplaceFee: decimal("marketplace_fee", { precision: 10, scale: 2 }), // Hunt's fee
     processorFee: decimal("processor_fee", { precision: 10, scale: 2 }), // Mercado Pago's fee
-    // taxWithholdingIca: decimal("tax_withholding_ica", { precision: 10, scale: 2 }), // Colombian ICA tax withholding
-    // taxWithholdingFuente: decimal("tax_withholding_fuente", { precision: 10, scale: 2 }), // Colombian Retención en la Fuente
+    taxWithholdingIca: decimal("tax_withholding_ica", { precision: 10, scale: 2 }), // Colombian ICA tax withholding
+    taxWithholdingFuente: decimal("tax_withholding_fuente", { precision: 10, scale: 2 }), // Colombian Retención en la Fuente
     paymentStatus: orderPaymentStatus("payment_status")
       .notNull()
       .default("pending"),

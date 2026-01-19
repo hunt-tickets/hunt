@@ -148,6 +148,15 @@ export async function POST(request: Request) {
     const marketplaceFee =
       feeDetails.find((f) => f.type === "application_fee")?.amount || 0;
 
+    // Extract Colombian tax withholdings from charges_details
+    const chargesDetails = payment.charges_details || [];
+    const taxWithholdingIca =
+      chargesDetails.find((c) => c.type === "tax" && c.name?.includes("ica"))
+        ?.amounts?.original || 0;
+    const taxWithholdingFuente =
+      chargesDetails.find((c) => c.type === "tax" && c.name?.includes("fuente"))
+        ?.amounts?.original || 0;
+
     if (!reservationId) {
       console.error("[Webhook] ❌ No reservation_id in payment metadata");
       return new Response("Missing reservation_id in metadata", {
@@ -165,7 +174,10 @@ export async function POST(request: Request) {
       platform,
       currency,
       marketplaceFee,
-      processorFee
+      processorFee,
+      undefined, // soldBy (undefined for web/app purchases)
+      taxWithholdingIca,
+      taxWithholdingFuente
     );
 
     console.log(
