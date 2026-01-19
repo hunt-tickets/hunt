@@ -147,7 +147,6 @@ export async function POST(request: Request) {
       feeDetails.find((f) => f.type === "mercadopago_fee")?.amount || 0;
     const marketplaceFee =
       feeDetails.find((f) => f.type === "application_fee")?.amount || 0;
-    const impuestos = feeDetails;
 
     if (!reservationId) {
       console.error("[Webhook] ❌ No reservation_id in payment metadata");
