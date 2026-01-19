@@ -9,11 +9,8 @@
 - Analytics de ruta de eventos (organizaciones)
 - descargar tickets
 - reembolsos con Oscar
-- en /entradasm hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
-
-DONE: 
-- email de confirmacion con PDF (ver implementacion Hunt viejo)
-
+- en /entradas hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
+- en el webhook, acceder del pago la informacion sobre impuestos y guardarlos en la db
 
 ├ ƒ /profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId] 13.6 kB 571 kB
 ├ ƒ /profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId]/entradas 9.93 kB 537 kB

@@ -97,6 +97,18 @@ export async function POST(request: Request) {
       `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`
     );
 
+    // DEBUG: Log full payment object to analyze structure for impuestos
+    console.log("[Webhook] 📊 FULL PAYMENT OBJECT:");
+    console.log(JSON.stringify(payment, null, 2));
+
+    // DEBUG: Log fee_details specifically
+    console.log("[Webhook] 💰 FEE DETAILS:");
+    console.log(JSON.stringify(payment.fee_details, null, 2));
+
+    // DEBUG: Log transaction_details for net_received_amount
+    console.log("[Webhook] 🧾 TRANSACTION DETAILS:");
+    console.log(JSON.stringify(payment.transaction_details, null, 2));
+
     // Only process approved payments
     if (payment.status !== "approved") {
       console.log(
@@ -135,6 +147,7 @@ export async function POST(request: Request) {
       feeDetails.find((f) => f.type === "mercadopago_fee")?.amount || 0;
     const marketplaceFee =
       feeDetails.find((f) => f.type === "application_fee")?.amount || 0;
+    const impuestos = feeDetails;
 
     if (!reservationId) {
       console.error("[Webhook] ❌ No reservation_id in payment metadata");
