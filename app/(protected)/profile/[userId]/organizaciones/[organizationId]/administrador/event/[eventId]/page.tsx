@@ -10,7 +10,7 @@ import { EventOptionsMenu } from "@/components/event-options-menu";
 import { createClient } from "@/lib/supabase/server";
 import { member } from "@/lib/schema";
 import { db } from "@/lib/drizzle";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Settings } from "lucide-react";
 
 // Type for Supabase order with nested relations
@@ -51,18 +51,6 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   const { userId, eventId, organizationId } = await params;
   const reqHeaders = await headers();
 
-  // Verify user is a member of the organization
-  const memberRecord = await db.query.member.findFirst({
-    where: and(
-      eq(member.userId, userId),
-      eq(member.organizationId, organizationId)
-    ),
-  });
-
-  if (!memberRecord) {
-    notFound();
-  }
-
   // Check if user can view dashboard (sellers cannot)
   const canViewDashboard = await auth.api.hasPermission({
     headers: reqHeaders,
@@ -80,7 +68,6 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   }
 
   const supabase = await createClient();
-
   // Single fetch: event with ticket_types and orders with order_items
   // Exclude cancelled/deleted events
   const { data: event } = await supabase
@@ -335,7 +322,8 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   const canPublish = hasDate && hasTicketTypes;
 
   // Check if event is being cancelled
-  const isCancellationPending = event.lifecycle_status === "cancellation_pending";
+  const isCancellationPending =
+    event.lifecycle_status === "cancellation_pending";
 
   // Build cancellation data if event is being cancelled
   const cancellationData = isCancellationPending

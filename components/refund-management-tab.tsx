@@ -2,7 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, DollarSign, CheckCircle, XCircle, Clock } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  RefreshCw,
+  CreditCard,
+  Smartphone,
+  Banknote,
+  Calendar,
+  FileText,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -13,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
 interface RefundOrder {
@@ -38,7 +52,7 @@ interface CancellationData {
 
 interface RefundManagementTabProps {
   eventId: string;
-  cancellationData: CancellationData;
+  cancellationData: CancellationData | null;
 }
 
 export function RefundManagementTab({
@@ -50,9 +64,25 @@ export function RefundManagementTab({
     new Set()
   );
 
+  if (!cancellationData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-6">
+          <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-semibold text-foreground mb-2">
+          No hay cancelaciones activas
+        </h2>
+        <p className="text-muted-foreground text-center max-w-md text-balance">
+          Este evento no tiene cancelaciones pendientes. Los reembolsos se
+          gestionarán aquí cuando se cancele el evento.
+        </p>
+      </div>
+    );
+  }
+
   const handleProcessRefund = async (order: RefundOrder) => {
     if (order.platform === "cash") {
-      // For cash orders, just mark as completed
       handleMarkAsRefunded(order);
       return;
     }
@@ -91,17 +121,22 @@ export function RefundManagementTab({
     setProcessingOrders((prev) => new Set(prev).add(order.orderId));
 
     try {
-      const response = await fetch(`/api/events/${eventId}/refunds/mark-completed`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.orderId }),
-      });
+      const response = await fetch(
+        `/api/events/${eventId}/refunds/mark-completed`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: order.orderId }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to mark as refunded");
       }
 
-      toast.success(`Reembolso marcado como completado para ${order.customerName}`);
+      toast.success(
+        `Reembolso marcado como completado para ${order.customerName}`
+      );
       router.refresh();
     } catch (error) {
       console.error("Error marking as refunded:", error);
@@ -125,134 +160,159 @@ export function RefundManagementTab({
     (o) => o.refundStatus === "failed"
   );
 
-  const getStatusBadge = (status: RefundOrder["refundStatus"]) => {
-    switch (status) {
-      case "pending":
-        return (
-          <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-            <Clock className="h-3 w-3 mr-1" />
-            Pendiente
-          </Badge>
-        );
-      case "processing":
-        return (
-          <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
-            <Clock className="h-3 w-3 mr-1 animate-spin" />
-            Procesando
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Completado
-          </Badge>
-        );
-      case "failed":
-        return (
-          <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
-            <XCircle className="h-3 w-3 mr-1" />
-            Fallido
-          </Badge>
-        );
-    }
+  const totalOrders = cancellationData.orders.length;
+  const progressPercentage =
+    totalOrders > 0 ? (completedOrders.length / totalOrders) * 100 : 0;
+
+  const getStatusConfig = (status: RefundOrder["refundStatus"]) => {
+    const configs = {
+      pending: {
+        label: "Pendiente",
+        className: "bg-amber-50 text-amber-700 border-amber-200",
+        icon: Clock,
+      },
+      processing: {
+        label: "Procesando",
+        className: "bg-blue-50 text-blue-700 border-blue-200",
+        icon: Loader2,
+      },
+      completed: {
+        label: "Completado",
+        className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        icon: CheckCircle2,
+      },
+      failed: {
+        label: "Fallido",
+        className: "bg-red-50 text-red-700 border-red-200",
+        icon: XCircle,
+      },
+    };
+    return configs[status];
   };
 
-  const getPlatformBadge = (platform: RefundOrder["platform"]) => {
-    switch (platform) {
-      case "web":
-        return <Badge variant="secondary">Web</Badge>;
-      case "app":
-        return <Badge variant="secondary">App</Badge>;
-      case "cash":
-        return (
-          <Badge variant="secondary" className="bg-green-500/10 text-green-700 border-green-500/20">
-            <DollarSign className="h-3 w-3 mr-1" />
-            Efectivo
-          </Badge>
-        );
-    }
+  const getPlatformConfig = (platform: RefundOrder["platform"]) => {
+    const configs = {
+      web: { label: "Web", icon: CreditCard },
+      app: { label: "App", icon: Smartphone },
+      cash: { label: "Efectivo", icon: Banknote },
+    };
+    return configs[platform];
   };
 
   return (
-    <div className="space-y-6">
-      {/* Alert Banner */}
-      <div className="rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 p-4">
-        <div className="flex gap-3">
-          <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
-          <div className="space-y-2 flex-1">
-            <h3 className="font-semibold text-amber-900 dark:text-amber-200">
-              Evento en Proceso de Cancelación
-            </h3>
-            <p className="text-sm text-amber-800 dark:text-amber-300">
-              Este evento está siendo cancelado. Se requiere procesar{" "}
-              <strong>{pendingOrders.length}</strong> reembolsos antes de completar la cancelación.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-amber-700 dark:text-amber-400 mt-3">
-              {cancellationData.cancellationInitiatedAt && (
-                <div>
-                  <span className="font-medium">Fecha:</span>{" "}
-                  {new Date(cancellationData.cancellationInitiatedAt).toLocaleString("es-CO")}
-                </div>
-              )}
-              {cancellationData.cancellationReason && (
-                <div>
-                  <span className="font-medium">Razón:</span> {cancellationData.cancellationReason}
-                </div>
-              )}
+    <div className="space-y-8">
+      {/* Cancellation Status Header */}
+      <div className="rounded-2xl border border-border bg-card p-6 md:p-8">
+        <div className="flex flex-col gap-6">
+          {/* Header */}
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-amber-600" />
             </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-semibold text-foreground mb-1">
+                Evento en Proceso de Cancelación
+              </h2>
+              <p className="text-muted-foreground text-sm text-pretty">
+                Estamos aquí para ayudarte. Procesa los reembolsos pendientes
+                para completar la cancelación del evento.
+              </p>
+            </div>
+          </div>
+
+          {/* Progress Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                Progreso de reembolsos
+              </span>
+              <span className="font-medium text-foreground">
+                {completedOrders.length} de {totalOrders} completados
+              </span>
+            </div>
+            <Progress value={progressPercentage} className="h-2" />
+          </div>
+
+          {/* Info Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            {cancellationData.cancellationInitiatedAt && (
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">
+                    Fecha de cancelación
+                  </p>
+                  <p className="font-medium text-foreground">
+                    {new Date(
+                      cancellationData.cancellationInitiatedAt
+                    ).toLocaleDateString("es-CO", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+            )}
+            {cancellationData.cancellationReason && (
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Motivo</p>
+                  <p className="font-medium text-foreground">
+                    {cancellationData.cancellationReason}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Statistics Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <DollarSign className="h-4 w-4" />
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground mb-1">
             Total a Reembolsar
-          </div>
-          <div className="text-2xl font-bold">
+          </p>
+          <p className="text-2xl font-semibold text-foreground">
             ${cancellationData.totalAmountToRefund.toLocaleString("es-CO")}
-          </div>
+          </p>
         </div>
 
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Clock className="h-4 w-4" />
-            Pendientes
-          </div>
-          <div className="text-2xl font-bold text-yellow-600">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground mb-1">Pendientes</p>
+          <p className="text-2xl font-semibold text-amber-600">
             {pendingOrders.length}
-          </div>
+          </p>
         </div>
 
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <CheckCircle className="h-4 w-4" />
-            Completados
-          </div>
-          <div className="text-2xl font-bold text-green-600">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground mb-1">Completados</p>
+          <p className="text-2xl font-semibold text-emerald-600">
             {completedOrders.length}
-          </div>
+          </p>
         </div>
 
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <XCircle className="h-4 w-4" />
-            Fallidos
-          </div>
-          <div className="text-2xl font-bold text-red-600">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground mb-1">Fallidos</p>
+          <p className="text-2xl font-semibold text-red-600">
             {failedOrders.length}
-          </div>
+          </p>
         </div>
       </div>
 
       {/* Orders Table */}
-      <div className="rounded-lg border bg-card">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold">Órdenes a Reembolsar</h3>
-          <p className="text-sm text-muted-foreground mt-1">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-6 py-5 border-b border-border">
+          <h3 className="font-semibold text-foreground">
+            Órdenes a Reembolsar
+          </h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {cancellationData.totalOrdersToRefund} órdenes requieren reembolso
           </p>
         </div>
@@ -260,69 +320,134 @@ export function RefundManagementTab({
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Orden</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Monto</TableHead>
-                <TableHead>Plataforma</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-medium">Cliente</TableHead>
+                <TableHead className="font-medium">ID de Orden</TableHead>
+                <TableHead className="font-medium">Monto</TableHead>
+                <TableHead className="font-medium">Método</TableHead>
+                <TableHead className="font-medium">Estado</TableHead>
+                <TableHead className="text-right font-medium">Acción</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {cancellationData.orders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-muted-foreground py-12"
+                  >
                     No hay órdenes para reembolsar
                   </TableCell>
                 </TableRow>
               ) : (
-                cancellationData.orders.map((order) => (
-                  <TableRow key={order.orderId}>
-                    <TableCell className="font-mono text-sm">
-                      {order.orderId.slice(0, 8)}...
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{order.customerName}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {order.customerEmail}
+                cancellationData.orders.map((order) => {
+                  const statusConfig = getStatusConfig(order.refundStatus);
+                  const platformConfig = getPlatformConfig(order.platform);
+                  const StatusIcon = statusConfig.icon;
+                  const PlatformIcon = platformConfig.icon;
+                  const isProcessing = processingOrders.has(order.orderId);
+
+                  return (
+                    <TableRow key={order.orderId}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {order.customerName}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {order.customerEmail}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                          {order.orderId.slice(0, 8)}
+                        </code>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-semibold text-foreground">
+                          ${order.amount.toLocaleString("es-CO")}
                         </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      ${order.amount.toLocaleString("es-CO")}
-                    </TableCell>
-                    <TableCell>{getPlatformBadge(order.platform)}</TableCell>
-                    <TableCell>{getStatusBadge(order.refundStatus)}</TableCell>
-                    <TableCell className="text-right">
-                      {order.refundStatus === "pending" && (
-                        <Button
-                          size="sm"
-                          variant={order.platform === "cash" ? "outline" : "default"}
-                          onClick={() => handleProcessRefund(order)}
-                          disabled={processingOrders.has(order.orderId)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <PlatformIcon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">
+                            {platformConfig.label}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`${statusConfig.className} gap-1.5`}
                         >
-                          {processingOrders.has(order.orderId)
-                            ? "Procesando..."
-                            : order.platform === "cash"
-                              ? "Marcar Reembolsado"
-                              : "Procesar Reembolso"}
-                        </Button>
-                      )}
-                      {order.refundStatus === "failed" && (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleProcessRefund(order)}
-                          disabled={processingOrders.has(order.orderId)}
-                        >
-                          Reintentar
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
+                          <StatusIcon
+                            className={`w-3 h-3 ${
+                              order.refundStatus === "processing"
+                                ? "animate-spin"
+                                : ""
+                            }`}
+                          />
+                          {statusConfig.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {order.refundStatus === "pending" && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleProcessRefund(order)}
+                            disabled={isProcessing}
+                            className="gap-2"
+                          >
+                            {isProcessing ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                Procesando
+                              </>
+                            ) : order.platform === "cash" ? (
+                              <>
+                                Marcar Completado
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              </>
+                            ) : (
+                              <>
+                                Reembolsar
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        {order.refundStatus === "failed" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleProcessRefund(order)}
+                            disabled={isProcessing}
+                            className="gap-2 border-red-200 text-red-700 hover:bg-red-50"
+                          >
+                            {isProcessing ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                Reintentando
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                Reintentar
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        {order.refundStatus === "completed" && (
+                          <span className="text-sm text-emerald-600 font-medium">
+                            Completado
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

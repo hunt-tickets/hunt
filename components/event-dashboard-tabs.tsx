@@ -7,7 +7,6 @@ import { EventWebAnalytics } from "@/components/event-web-analytics";
 import { SellersTable } from "@/components/sellers-table";
 import { RefundManagementTab } from "@/components/refund-management-tab";
 import { useEventTabs } from "@/contexts/event-tabs-context";
-import { useEffect } from "react";
 
 interface Sale {
   id: string;
@@ -121,30 +120,9 @@ export function EventDashboardTabs({
 
   const isCancellationPending = !!cancellationData;
 
-  // Set refunds tab as default when in cancellation mode
-  useEffect(() => {
-    if (isCancellationPending && activeTab !== "refunds") {
-      setActiveTab("refunds");
-    }
-  }, [isCancellationPending, activeTab, setActiveTab]);
-
   // Tabs section
   const tabsSection = (
     <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      {isCancellationPending && (
-        <button
-          onClick={() => setActiveTab("refunds")}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
-            activeTab === "refunds"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-              : "bg-amber-500/10 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/20 border border-amber-500/20"
-          }`}
-        >
-          <AlertCircle className="h-4 w-4" />
-          Reembolsos
-        </button>
-      )}
-
       <button
         onClick={() => setActiveTab("dashboard")}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
@@ -179,13 +157,28 @@ export function EventDashboardTabs({
         <Users className="h-4 w-4" />
         Vendedores
       </button>
+      <button
+        onClick={() => setActiveTab("refunds")}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
+          activeTab === "refunds"
+            ? isCancellationPending
+              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+              : "bg-white/10 text-white border border-white/20"
+            : isCancellationPending
+              ? "bg-amber-500/10 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/20 border border-amber-500/20"
+              : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
+        }`}
+      >
+        <AlertCircle className="h-4 w-4" />
+        Reembolsos
+      </button>
     </div>
   );
 
   // Content section
   const contentSection = (
     <>
-      {activeTab === "refunds" && cancellationData && (
+      {activeTab === "refunds" && (
         <RefundManagementTab
           eventId={eventId}
           cancellationData={cancellationData}
