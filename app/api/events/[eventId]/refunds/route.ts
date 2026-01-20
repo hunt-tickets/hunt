@@ -131,9 +131,9 @@ export async function POST(
         .set({
           status: "processing",
           metadata: {
-            ...(existingRefund.metadata as object),
+            ...(existingRefund.metadata as Record<string, unknown>),
             retryAttempt:
-              ((existingRefund.metadata as any)?.retryAttempt || 0) + 1,
+              (((existingRefund.metadata as Record<string, unknown>)?.retryAttempt as number) || 0) + 1,
             retriedAt: new Date().toISOString(),
           },
         })
