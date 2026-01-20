@@ -260,6 +260,13 @@
       "when": 1768861671687,
       "tag": "0036_dapper_absorbing_man",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1768941465405,
+      "tag": "0037_abandoned_supernaut",
+      "breakpoints": true
     }
   ]
 }

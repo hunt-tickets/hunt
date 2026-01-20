@@ -71,8 +71,9 @@ export function TipoPersonaManager({
   const [state, formAction] = useActionState(updateUserTipoPersona, {});
 
   const hasChanges =
-    selectedTipo !== (tipoPersona || "") ||
-    (selectedTipo === "juridica" &&
+    (selectedTipo !== "" && selectedTipo !== tipoPersona) ||
+    (selectedTipo === tipoPersona &&
+      selectedTipo === "juridica" &&
       (razonSocialValue !== (razonSocial || "") ||
         nitValue !== (nit || "")));
 

@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "tipo_persona" SET DEFAULT 'natural';

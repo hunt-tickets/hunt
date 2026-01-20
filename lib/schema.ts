@@ -238,7 +238,7 @@ export const user = pgTable(
     gender: genderType("gender"),
     birthdate: timestamp("birthdate", { withTimezone: true }),
     // New fields from database
-    tipoPersona: text("tipo_persona"),
+    tipoPersona: text("tipo_persona").default("natural"),
     nombres: text("nombres"),
     apellidos: text("apellidos"),
     razonSocial: text("razon_social"),
