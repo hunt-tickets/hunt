@@ -99,15 +99,23 @@ export function RefundManagementTab({
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to process refund");
+        // Show specific error from server
+        const errorMessage = data.details || data.error || "Error al procesar el reembolso";
+        toast.error(errorMessage);
+        console.error("Refund error:", data);
+        return;
       }
 
-      toast.success(`Reembolso procesado para ${order.customerName}`);
+      toast.success(
+        `Reembolso procesado exitosamente para ${order.customerName || "el cliente"}`
+      );
       router.refresh();
     } catch (error) {
       console.error("Error processing refund:", error);
-      toast.error("Error al procesar el reembolso");
+      toast.error("Error de conexión. Por favor intenta de nuevo.");
     } finally {
       setProcessingOrders((prev) => {
         const next = new Set(prev);
