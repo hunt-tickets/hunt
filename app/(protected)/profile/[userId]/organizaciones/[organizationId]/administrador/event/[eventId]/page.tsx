@@ -22,6 +22,8 @@ type OrderWithItems = {
   currency: string;
   marketplace_fee: string | null;
   processor_fee: string | null;
+  tax_withholding_ica: string | null;
+  tax_withholding_fuente: string | null;
   payment_status: string;
   platform: string;
   payment_session_id: string | null;
