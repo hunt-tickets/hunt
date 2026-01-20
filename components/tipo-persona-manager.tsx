@@ -100,39 +100,67 @@ export function TipoPersonaManager({
     (opt) => opt.value === tipoPersona
   );
 
-  const getDisplayText = () => {
-    if (!tipoPersona) return "No configurado";
-    if (tipoPersona === "juridica" && razonSocial) {
-      return `${currentOption?.label} - ${razonSocial}`;
-    }
-    return currentOption?.label || "No configurado";
-  };
+  // const getDisplayText = () => {
+  //   if (!tipoPersona) return "No configurado";
+  //   if (tipoPersona === "juridica" && razonSocial) {
+  //     return `${currentOption?.label} - ${razonSocial}`;
+  //   }
+  //   return currentOption?.label || "No configurado";
+  // };
 
   if (!isEditing) {
     return (
       <div
-        className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors cursor-pointer group"
+        className="p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] min-h-[72px] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors group"
         role="region"
         aria-label="Información de tipo de persona"
       >
-        <div className="flex items-center gap-3">
-          <Building2 className="h-5 w-5 text-gray-400" aria-hidden="true" />
-          <div>
-            <p className="text-sm font-medium">{getDisplayText()}</p>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-              Tipo de persona (Opcional)
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-medium">{currentOption?.label || "No configurado"}</p>
+              <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                Tipo de persona (Opcional)
+              </p>
+            </div>
+          </div>
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors duration-200"
+              aria-label="Editar tipo de persona"
+            >
+              {tipoPersona ? "Editar" : "Agregar"}
+            </button>
           </div>
         </div>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button
-            onClick={() => setIsEditing(true)}
-            className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors duration-200"
-            aria-label="Editar tipo de persona"
-          >
-            {tipoPersona ? "Editar" : "Agregar"}
-          </button>
-        </div>
+
+        {tipoPersona === "juridica" && (
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-[#2a2a2a] space-y-3">
+            {/* Razon Social */}
+            <div className="flex items-start gap-3">
+              <div className="w-5" />
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 mb-1">Razón Social</p>
+                <p className="text-sm font-medium">
+                  {razonSocial || "No configurado"}
+                </p>
+              </div>
+            </div>
+
+            {/* NIT */}
+            <div className="flex items-start gap-3">
+              <div className="w-5" />
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 mb-1">NIT</p>
+                <p className="text-sm font-medium">
+                  {nit || "No configurado"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
