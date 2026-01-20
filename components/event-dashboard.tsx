@@ -167,6 +167,18 @@ export function EventDashboard({ financialReport, sales, tickets }: EventDashboa
                     -{formatCurrency(financialReport.org_summary.processor_fee)}
                   </span>
                 </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-white/60">Retención ICA</span>
+                  <span className="font-medium text-red-500 dark:text-red-400">
+                    -{formatCurrency(financialReport.org_summary.tax_withholding_ica)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-white/60">Retención en la Fuente</span>
+                  <span className="font-medium text-red-500 dark:text-red-400">
+                    -{formatCurrency(financialReport.org_summary.tax_withholding_fuente)}
+                  </span>
+                </div>
                 <div className="pt-3 mt-2 border-t border-gray-300 dark:border-white/10 flex justify-between items-center">
                   <span className="text-sm font-semibold">Neto a Recibir</span>
                   <span className="text-lg font-bold text-green-600 dark:text-green-400">
