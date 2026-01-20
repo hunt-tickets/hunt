@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/drizzle";
-import { orders, refunds } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import {
+  orders,
+  refunds,
+  events,
+  paymentProcessorAccount,
+  type MercadoPagoMetadata,
+} from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -169,9 +175,53 @@ export async function POST(
 
     console.log(`[Refunds] Refund record: ${refundRecord.id}`);
 
-    // Call MercadoPago API to process refund
-    const accessToken = process.env.MP_ACCESS_TOKEN;
-    if (!accessToken) throw new Error("MP_ACCESS_TOKEN not configured.");
+    // Get the event to find the organization
+    const event = await db.query.events.findFirst({
+      where: eq(events.id, order.eventId),
+    });
+
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    console.log(
+      `[Refunds] Event found: ${event.id} (organization: ${event.organizationId})`
+    );
+
+    // Get the seller's MercadoPago account (must use seller's token for marketplace refunds)
+    const sellerAccount = await db.query.paymentProcessorAccount.findFirst({
+      where: and(
+        eq(paymentProcessorAccount.organizationId, event.organizationId),
+        eq(paymentProcessorAccount.processorType, "mercadopago"),
+        eq(paymentProcessorAccount.status, "active")
+      ),
+    });
+
+    if (!sellerAccount) {
+      return NextResponse.json(
+        {
+          error:
+            "No active MercadoPago account found for this event's organization",
+        },
+        { status: 400 }
+      );
+    }
+
+    const mpMetadata = sellerAccount.metadata as MercadoPagoMetadata | null;
+    console.log(
+      `[Refunds] Using seller's MercadoPago account: ${sellerAccount.id}`
+    );
+    console.log(
+      `[Refunds] Account mode: ${mpMetadata?.live_mode ? "LIVE" : "TEST"}`
+    );
+
+    const accessToken = sellerAccount.accessToken;
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: "Seller's access token not found" },
+        { status: 400 }
+      );
+    }
 
     const idempotencyKey = existingRefund?.id || randomUUID();
     console.log(

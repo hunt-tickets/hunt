@@ -201,6 +201,8 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
       const orderTotal = parseFloat(order.total_amount);
       const marketplaceFee = parseFloat(order.marketplace_fee || "0");
       const processorFee = parseFloat(order.processor_fee || "0");
+      const taxWithholdingIca = parseFloat(order.tax_withholding_ica || "0");
+      const taxWithholdingFuente = parseFloat(order.tax_withholding_fuente || "0");
       const itemCount = (order.order_items || []).reduce(
         (sum, item) => sum + item.quantity,
         0
@@ -212,12 +214,16 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         marketplaceFee;
       acc[order.platform as "web" | "app" | "cash"].processorFee +=
         processorFee;
+      acc[order.platform as "web" | "app" | "cash"].taxWithholdingIca +=
+        taxWithholdingIca;
+      acc[order.platform as "web" | "app" | "cash"].taxWithholdingFuente +=
+        taxWithholdingFuente;
       return acc;
     },
     {
-      web: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0 },
-      app: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0 },
-      cash: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0 },
+      web: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0, taxWithholdingIca: 0, taxWithholdingFuente: 0 },
+      app: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0, taxWithholdingIca: 0, taxWithholdingFuente: 0 },
+      cash: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0, taxWithholdingIca: 0, taxWithholdingFuente: 0 },
     }
   );
 
@@ -230,7 +236,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     salesByPlatform.app.count +
     salesByPlatform.cash.count;
 
-  // Aggregate fees across all platforms
+  // Aggregate fees and taxes across all platforms
   const totalMarketplaceFee =
     salesByPlatform.web.marketplaceFee +
     salesByPlatform.app.marketplaceFee +
@@ -239,10 +245,18 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     salesByPlatform.web.processorFee +
     salesByPlatform.app.processorFee +
     salesByPlatform.cash.processorFee;
+  const totalTaxWithholdingIca =
+    salesByPlatform.web.taxWithholdingIca +
+    salesByPlatform.app.taxWithholdingIca +
+    salesByPlatform.cash.taxWithholdingIca;
+  const totalTaxWithholdingFuente =
+    salesByPlatform.web.taxWithholdingFuente +
+    salesByPlatform.app.taxWithholdingFuente +
+    salesByPlatform.cash.taxWithholdingFuente;
 
-  // Organization receives: total - fees
+  // Organization receives: total - fees - taxes
   const organizationNetAmount =
-    totalFromOrders - totalMarketplaceFee - totalProcessorFee;
+    totalFromOrders - totalMarketplaceFee - totalProcessorFee - totalTaxWithholdingIca - totalTaxWithholdingFuente;
 
   // Build financial report from real order data
   const financialReport = {
@@ -257,11 +271,13 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     app_total: salesByPlatform.app.total,
     web_total: salesByPlatform.web.total,
     cash_total: salesByPlatform.cash.total,
-    // Organization perspective - real fees from orders
+    // Organization perspective - real fees and taxes from orders
     org_summary: {
       gross_sales: totalFromOrders,
       marketplace_fee: totalMarketplaceFee,
       processor_fee: totalProcessorFee,
+      tax_withholding_ica: totalTaxWithholdingIca,
+      tax_withholding_fuente: totalTaxWithholdingFuente,
       net_amount: organizationNetAmount,
       // Breakdown by channel
       by_channel: {
@@ -269,28 +285,40 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           gross: salesByPlatform.web.total,
           marketplace_fee: salesByPlatform.web.marketplaceFee,
           processor_fee: salesByPlatform.web.processorFee,
+          tax_withholding_ica: salesByPlatform.web.taxWithholdingIca,
+          tax_withholding_fuente: salesByPlatform.web.taxWithholdingFuente,
           net:
             salesByPlatform.web.total -
             salesByPlatform.web.marketplaceFee -
-            salesByPlatform.web.processorFee,
+            salesByPlatform.web.processorFee -
+            salesByPlatform.web.taxWithholdingIca -
+            salesByPlatform.web.taxWithholdingFuente,
         },
         app: {
           gross: salesByPlatform.app.total,
           marketplace_fee: salesByPlatform.app.marketplaceFee,
           processor_fee: salesByPlatform.app.processorFee,
+          tax_withholding_ica: salesByPlatform.app.taxWithholdingIca,
+          tax_withholding_fuente: salesByPlatform.app.taxWithholdingFuente,
           net:
             salesByPlatform.app.total -
             salesByPlatform.app.marketplaceFee -
-            salesByPlatform.app.processorFee,
+            salesByPlatform.app.processorFee -
+            salesByPlatform.app.taxWithholdingIca -
+            salesByPlatform.app.taxWithholdingFuente,
         },
         cash: {
           gross: salesByPlatform.cash.total,
           marketplace_fee: salesByPlatform.cash.marketplaceFee,
           processor_fee: salesByPlatform.cash.processorFee,
+          tax_withholding_ica: salesByPlatform.cash.taxWithholdingIca,
+          tax_withholding_fuente: salesByPlatform.cash.taxWithholdingFuente,
           net:
             salesByPlatform.cash.total -
             salesByPlatform.cash.marketplaceFee -
-            salesByPlatform.cash.processorFee,
+            salesByPlatform.cash.processorFee -
+            salesByPlatform.cash.taxWithholdingIca -
+            salesByPlatform.cash.taxWithholdingFuente,
         },
       },
     },
