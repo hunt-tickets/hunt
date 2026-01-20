@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/drizzle";
-import {
-  orders,
-  refunds,
-  events,
-  paymentProcessorAccount,
-  type MercadoPagoMetadata,
-} from "@/lib/schema";
+import { orders, refunds, events, paymentProcessorAccount } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
@@ -23,10 +17,12 @@ import { headers } from "next/headers";
  *
  * Flow:
  * 1. Get order details (amount, payment_session_id = MP payment ID)
- * 2. Create refund record in database
- * 3. Call MercadoPago API to process full refund
- * 4. Update refund status
- * 5. Return result
+ * 2. Verify seller has MercadoPago account connected
+ * 3. Create refund record in database
+ * 4. Call MercadoPago API using MARKETPLACE owner token (MP_ACCESS_TOKEN)
+ *    - Note: Seller tokens can't refund in marketplace model
+ * 5. Update refund status
+ * 6. Return result
  */
 export async function POST(
   request: NextRequest,
@@ -139,7 +135,8 @@ export async function POST(
           metadata: {
             ...(existingRefund.metadata as Record<string, unknown>),
             retryAttempt:
-              (((existingRefund.metadata as Record<string, unknown>)?.retryAttempt as number) || 0) + 1,
+              (((existingRefund.metadata as Record<string, unknown>)
+                ?.retryAttempt as number) || 0) + 1,
             retriedAt: new Date().toISOString(),
           },
         })
@@ -156,8 +153,7 @@ export async function POST(
           amount: order.totalAmount,
           currency: order.currency,
           reason: "event_cancelled",
-          requestedBy: session.user.id
-          ,
+          requestedBy: session.user.id,
           mpPaymentId: mpPaymentId,
           status: "processing",
           metadata: {
@@ -207,21 +203,23 @@ export async function POST(
       );
     }
 
-    const mpMetadata = sellerAccount.metadata as MercadoPagoMetadata | null;
     console.log(
-      `[Refunds] Using seller's MercadoPago account: ${sellerAccount.id}`
-    );
-    console.log(
-      `[Refunds] Account mode: ${mpMetadata?.live_mode ? "LIVE" : "TEST"}`
+      `[Refunds] Seller account found: ${sellerAccount.id} (verification only)`
     );
 
-    const accessToken = sellerAccount.accessToken;
+    // IMPORTANT: For marketplace payments, refunds MUST use the marketplace owner's token
+    // The seller's token can view payments but cannot issue refunds
+    const accessToken = process.env.MP_ACCESS_TOKEN;
     if (!accessToken) {
       return NextResponse.json(
-        { error: "Seller's access token not found" },
-        { status: 400 }
+        { error: "Marketplace access token (MP_ACCESS_TOKEN) not configured" },
+        { status: 500 }
       );
     }
+
+    console.log(
+      `[Refunds] Using marketplace owner token (required for marketplace refunds)`
+    );
 
     const idempotencyKey = existingRefund?.id || randomUUID();
     console.log(

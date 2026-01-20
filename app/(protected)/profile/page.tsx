@@ -24,6 +24,8 @@ import { DocumentManager } from "@/components/document-manager";
 import { SignOutButton } from "@/components/sign-out-button";
 import { NameManager } from "@/components/name-manager";
 import { ProfileAvatarManager } from "@/components/profile-avatar-manager";
+import { GenderManager } from "@/components/gender-manager";
+import { TipoPersonaManager } from "@/components/tipo-persona-manager";
 
 export default async function ProfilePage() {
   // Secure authentication - validates with server
@@ -191,6 +193,16 @@ export default async function ProfilePage() {
             documentType={user.documentTypeId ?? null}
             documentNumber={user.documentId ?? null}
             documentTypes={documentTypes}
+          />
+
+          {/* Gender */}
+          <GenderManager gender={user.gender ?? null} />
+
+          {/* Tipo Persona */}
+          <TipoPersonaManager
+            tipoPersona={user.tipoPersona ?? null}
+            razonSocial={user.razonSocial ?? null}
+            nit={user.nit ?? null}
           />
         </div>
       </div>

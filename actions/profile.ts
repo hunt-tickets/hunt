@@ -146,3 +146,92 @@ export async function updateUserDocument(
     return { error: "Error al actualizar el documento" };
   }
 }
+
+export async function updateUserGender(
+  _prevState: any,
+  formData: FormData
+): Promise<{ success?: boolean; error?: string }> {
+  try {
+    // Get authenticated user
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { error: "No autenticado" };
+    }
+
+    // Extract form data
+    const gender = formData.get("gender") as string | null;
+
+    // Validate gender value against enum
+    const validGenders = [
+      "masculino",
+      "femenino",
+      "otro",
+      "prefiero_no_decir",
+    ] as const;
+    const genderValue =
+      gender && validGenders.includes(gender as (typeof validGenders)[number]) // is the gender value in the array?
+        ? (gender as (typeof validGenders)[number]) // assign gender with proper type 
+        : null;
+
+    // Update user gender field
+    await db
+      .update(schema.user)
+      .set({
+        gender: genderValue,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.user.id, session.user.id));
+
+    // Revalidate the profile page
+    revalidatePath("/profile");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user gender:", error);
+    return { error: "Error al actualizar el género" };
+  }
+}
+
+export async function updateUserTipoPersona(
+  _prevState: any,
+  formData: FormData
+): Promise<{ success?: boolean; error?: string }> {
+  try {
+    // Get authenticated user
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { error: "No autenticado" };
+    }
+
+    // Extract form data
+    const tipoPersona = formData.get("tipoPersona") as string | null;
+    const razonSocial = formData.get("razonSocial") as string | null;
+    const nit = formData.get("nit") as string | null;
+
+    // Update user tipo_persona fields
+    await db
+      .update(schema.user)
+      .set({
+        tipoPersona: tipoPersona || null,
+        razonSocial:
+          tipoPersona === "juridica" ? razonSocial?.trim() || null : null,
+        nit: tipoPersona === "juridica" ? nit?.trim() || null : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.user.id, session.user.id));
+
+    // Revalidate the profile page
+    revalidatePath("/profile");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user tipo persona:", error);
+    return { error: "Error al actualizar el tipo de persona" };
+  }
+}
