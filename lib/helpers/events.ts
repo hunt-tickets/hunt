@@ -128,7 +128,7 @@ export type EventDetail = {
  * @returns Array of Event objects with joined venue data
  */
 export async function getOrganizationEvents(
-  organizationId: string
+  organizationId: string,
 ): Promise<EventWithVenue[]> {
   const supabase = await createClient();
 
@@ -142,7 +142,7 @@ export async function getOrganizationEvents(
           name,
           city
         )
-      `
+      `,
       )
       .eq("organization_id", organizationId)
       .is("deleted_at", null) // Exclude cancelled/deleted events
@@ -162,7 +162,7 @@ export async function getOrganizationEvents(
         venue_name: event.venues?.name || null,
         venue_city: event.venues?.city || null,
         venues: undefined, // Remove the nested venues object
-      })
+      }),
     );
 
     return eventsWithVenue;
@@ -179,7 +179,7 @@ export async function getOrganizationEvents(
  * @returns EventFinancialReport or null if error
  */
 export async function getEventFinancialReport(
-  eventId: string
+  eventId: string,
 ): Promise<EventFinancialReport | null> {
   const supabase = await createClient();
 
@@ -188,7 +188,7 @@ export async function getEventFinancialReport(
       "get_event_sales_summary_with_validation",
       {
         p_event_id: eventId,
-      }
+      },
     );
 
     if (error) {
@@ -382,7 +382,7 @@ export async function getEventTicketTypes(eventId: string) {
  * Uses Drizzle (no cookies dependency) to allow ISR/static generation
  */
 export async function getEventsWithVenue(
-  limitCount: number = 12
+  limitCount: number = 12,
 ): Promise<PublicEventWithVenue[]> {
   try {
     const now = new Date();
@@ -404,10 +404,10 @@ export async function getEventsWithVenue(
       .leftJoin(venues, eq(events.venueId, venues.id))
       .where(
         and(
-          eq(events.status, true),
-          eq(events.lifecycleStatus, "active"), // Extra safety
-          or(gte(events.endDate, now), isNull(events.endDate))
-        )
+          eq(events.status, true), // Extra safety
+          eq(events.lifecycleStatus, "active"),
+          or(gte(events.endDate, now), isNull(events.endDate)),
+        ),
       )
       .orderBy(asc(events.date))
       .limit(limitCount);
@@ -435,7 +435,7 @@ export async function getEventsWithVenue(
  * Uses get_ticket_availability RPC for accurate ticket counts with lazy expiration
  */
 export async function getEventById(
-  eventId: string
+  eventId: string,
 ): Promise<{ data: EventDetail | null; error: { message: string } | null }> {
   const supabase = await createClient();
 
@@ -470,7 +470,7 @@ export async function getEventById(
             end_date,
             sort_order
           )
-        `
+        `,
         )
         .eq("id", eventId)
         .single(),
@@ -601,7 +601,7 @@ export async function getEventById(
  */
 export async function addProducerToEventDb(
   eventId: string,
-  producerId: string
+  producerId: string,
 ) {
   const supabase = await createClient();
 
@@ -690,7 +690,7 @@ export async function toggleEventStatusDb(eventId: string, status: boolean) {
         date,
         ticket_types (id),
         event_days (id)
-      `
+      `,
       )
       .eq("id", eventId)
       .single();
@@ -768,7 +768,7 @@ export async function toggleEventStatusDb(eventId: string, status: boolean) {
  */
 export async function toggleEventCashSalesDb(
   eventId: string,
-  cashEnabled: boolean
+  cashEnabled: boolean,
 ) {
   const supabase = await createClient();
 
@@ -822,7 +822,7 @@ export async function toggleEventCashSalesDb(
 export async function cancelEvent(
   eventId: string,
   cancelledBy: string,
-  cancellationReason: string
+  cancellationReason: string,
 ): Promise<{
   success: boolean;
   message: string;

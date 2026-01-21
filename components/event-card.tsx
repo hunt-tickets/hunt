@@ -19,10 +19,6 @@ import {
   Heart,
   GraduationCap,
   Store,
-  // Calendar,
-  // CalendarDays,
-  // Repeat,
-  // Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -38,16 +34,6 @@ const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
 };
 
 type EventType = "single" | "multi_day" | "recurring" | "slots";
-
-// const EVENT_TYPE_CONFIG: Record<
-//   EventType,
-//   { icon: LucideIcon; label: string }
-// > = {
-//   single: { icon: Calendar, label: "Único" },
-//   multi_day: { icon: CalendarDays, label: "Varios días" },
-//   recurring: { icon: Repeat, label: "Recurrente" },
-//   slots: { icon: Clock, label: "Por horarios" },
-// };
 
 interface EventCardProps {
   id: string; // Event ID for navigation
@@ -77,7 +63,6 @@ export function EventCard({
   onClick,
   status,
   category,
-  // eventType,
   lifecycleStatus,
 }: EventCardProps) {
   const [mounted, setMounted] = useState(false);
@@ -93,7 +78,7 @@ export function EventCard({
   // Analyze image brightness to determine text color (only in light mode)
   const { isDark: isImageLight } = useImageBrightness(
     !isThemeDark ? image : null,
-    { sampleHeight: 0.35, threshold: 140 }
+    { sampleHeight: 0.35, threshold: 140 },
   );
 
   // Parse date and convert from UTC to browser's timezone
@@ -146,7 +131,8 @@ export function EventCard({
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
-
+        
+        {/* ADMIN PANEL */}
         {/* Status badge in top left corner - only show when status is provided (admin view) */}
         {status !== undefined && (
           <div className="absolute top-4 left-4 z-10">

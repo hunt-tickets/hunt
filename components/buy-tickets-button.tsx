@@ -5,21 +5,12 @@ import { Button } from "./ui/button";
 import { ShoppingCart } from "lucide-react";
 
 interface BuyTicketsButtonProps {
-  ticketSelections: Record<string, number>; // Map of ticketId -> quantity
-  totalPrice?: number; // Optional: total price to display
-  termsAccepted: boolean; // Terms and conditions acceptance state
-  onPurchase: (selections: Record<string, number>) => void; // Handler for purchase action
+  ticketSelections: Record<string, number>;
+  totalPrice?: number;
+  termsAccepted: boolean;
+  onPurchase: (selections: Record<string, number>) => void;
 }
 
-/**
- * Client component for the main purchase button
- *
- * This component receives the ticket selections from the parent
- * and handles the purchase action when clicked.
- *
- * Keeping this as a separate client component allows the parent
- * to remain a server component while still having interactive purchase logic.
- */
 export function BuyTicketsButton({
   ticketSelections,
   totalPrice = 0,
@@ -28,13 +19,9 @@ export function BuyTicketsButton({
 }: BuyTicketsButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  /**
-   * Calculate total number of tickets selected
-   * Used to show count in button and determine if button should be enabled
-   */
   const totalTickets = Object.values(ticketSelections).reduce(
     (sum, qty) => sum + qty,
-    0
+    0,
   );
 
   /**
@@ -50,7 +37,7 @@ export function BuyTicketsButton({
     try {
       // Filter out tickets with 0 quantity before sending to purchase handler
       const validSelections = Object.fromEntries(
-        Object.entries(ticketSelections).filter(([, qty]) => qty > 0)
+        Object.entries(ticketSelections).filter(([, qty]) => qty > 0),
       );
 
       await onPurchase(validSelections);

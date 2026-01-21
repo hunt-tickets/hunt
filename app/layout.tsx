@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Elio",
+  title: "Nuevo Hunt",
   description: "Elevate your day.",
   icons: {
     icon: [

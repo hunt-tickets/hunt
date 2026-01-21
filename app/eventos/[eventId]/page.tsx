@@ -57,28 +57,23 @@ export async function generateMetadata({
   };
 }
 
-// Static Event Route
 export default async function EventPage({ params }: EventPageProps) {
-  // Await params to get the eventId
   const { eventId } = await params;
 
-  // Fetch event data from the server
-  const { data: event } = await getEventById(eventId);
+  const [{ data: event }, documentTypes] = await Promise.all([
+    getEventById(eventId),
 
-  // If event not found, show 404 page
+    // Fetch document types for billing form (Colombia)
+    db
+      .select({ id: documentType.id, name: documentType.name })
+      .from(documentType)
+      .innerJoin(countries, eq(documentType.countryId, countries.id))
+      .where(eq(countries.countryCode, "CO")),
+  ]);
+
   if (!event) {
     notFound();
   }
-
-  // Fetch document types for billing form (Colombia)
-  const documentTypes = await db
-    .select({
-      id: documentType.id,
-      name: documentType.name,
-    })
-    .from(documentType)
-    .innerJoin(countries, eq(documentType.countryId, countries.id))
-    .where(eq(countries.countryCode, "CO"));
 
   return (
     <div className="min-h-screen bg-background pb-20">

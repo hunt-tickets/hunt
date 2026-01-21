@@ -13,76 +13,26 @@ import { Filter } from "lucide-react";
 import type { PublicEventWithVenue } from "@/lib/helpers/events";
 
 interface EventsWithSearchProps {
-  // All events from server
   events: PublicEventWithVenue[];
-  // Number of events to display in grid
   limit?: number;
 }
 
 export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
-  // State for search query
   const [searchQuery, setSearchQuery] = useState("");
-  // State for selected city filter
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  // State for selected category
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(
-    null
+    null,
   );
 
-  /**
-   * Extract unique cities from events using useMemo
-   *
-   * WHY useMemo:
-   * - This computation involves array operations (.map, .filter, Set creation, Array.from, .sort)
-   * - Without useMemo: runs on EVERY render (when searchQuery changes, when selectedCity changes, etc.)
-   * - With useMemo: only runs when `events` array changes
-   * - Prevents unnecessary recalculations when user types in search bar
-   *
-   * TECHNICAL REASONING:
-   * - React re-renders components when state changes (searchQuery, selectedCity)
-   * - Each re-render would create a new cities array with new object references
-   * - This would cause CityFilter to re-render unnecessarily (React.memo would fail)
-   * - useMemo caches the result and returns same reference until dependencies change
-   *
-   * DEPENDENCY: [events]
-   * - Only recalculate when the events array from server changes
-   * - Events array is stable (comes from server props, doesn't change during filtering)
-   */
   const cities = useMemo(() => {
     const uniqueCities = new Set(
       events
         .map((event) => event.venue_city)
-        .filter((city) => city && city !== "Ciudad") // Filter out default/empty values
+        .filter((city) => city && city !== "Ciudad"), // Filter out default/empty values
     );
     return Array.from(uniqueCities).sort();
   }, [events]);
 
-  /**
-   * Filter events based on search query and city using useMemo
-   *
-   * WHY useMemo:
-   * - Filtering can be expensive with large event arrays (O(n) complexity)
-   * - String operations (.toLowerCase(), .includes()) are called multiple times per event
-   * - Without useMemo: filters run on every render, even when dependencies haven't changed
-   * - With useMemo: only filters when search/city/events actually change
-   *
-   * TECHNICAL REASONING:
-   * - React batches state updates but still causes re-renders
-   * - Any parent re-render would trigger this component to re-render
-   * - Memoizing prevents redundant filtering computations
-   * - Returns same array reference if dependencies unchanged (important for child components)
-   *
-   * DEPENDENCIES: [events, selectedCity, searchQuery]
-   * - events: when server data changes
-   * - selectedCity: when user selects different city
-   * - searchQuery: when user types in search
-   *
-   * PERFORMANCE IMPACT:
-   * - For 100 events with 5 filters each = 500 operations per render
-   * - User typing = potentially 10+ renders per second
-   * - Without memo: 5000+ operations/second while typing
-   * - With memo: ~500 operations only when dependencies change
-   */
   const filteredEvents = useMemo(() => {
     let filtered = events;
 
@@ -94,7 +44,7 @@ export function EventsWithSearch({ events, limit = 6 }: EventsWithSearchProps) {
     // Apply category filter
     if (selectedCategory) {
       filtered = filtered.filter(
-        (event) => event.category === selectedCategory
+        (event) => event.category === selectedCategory,
       );
     }
 
