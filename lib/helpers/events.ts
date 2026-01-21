@@ -146,6 +146,7 @@ export async function getOrganizationEvents(
       )
       .eq("organization_id", organizationId)
       .is("deleted_at", null) // Exclude cancelled/deleted events
+      .order("lifecycle_status", { ascending: true }) // active < cancellation_pending < cancelled < archived
       .order("date", { ascending: false, nullsFirst: false });
 
     if (error) {

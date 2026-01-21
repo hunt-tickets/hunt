@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, Clock } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -236,6 +236,19 @@ export function BillingInfoDialog({
             Revisa y confirma los datos para tu factura electrónica. Los campos están pre-llenados con tu información de perfil.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Reservation Timer Notice */}
+        <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <Clock className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+              Tus entradas están reservadas
+            </p>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Tienes <strong>5 minutos</strong> para completar tu compra. Haz clic en <strong>&quot;Continuar al pago&quot;</strong> para finalizar tu reserva.
+            </p>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Legal requirement: Ask if user wants to change billing name */}
