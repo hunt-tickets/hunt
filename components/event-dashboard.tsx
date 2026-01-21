@@ -8,20 +8,6 @@ import {
 } from "lucide-react";
 import { SalesDistributionChart, RevenueByChannelChart, SalesFunnelChart, DailySalesChart } from "@/components/event-charts";
 
-interface Sale {
-  id: string;
-  quantity: number;
-  subtotal: number;
-  pricePerTicket: number;
-  paymentStatus: string;
-  createdAt: string;
-  platform: string; // 'web' | 'app' | 'cash'
-  ticketTypeName: string;
-  userFullname: string;
-  userEmail: string;
-  isCash?: boolean;
-}
-
 interface Ticket {
   id: string;
   quantity: number;
@@ -56,13 +42,23 @@ interface FinancialReport {
   };
 }
 
+interface Order {
+  id: string;
+  totalAmount: string;
+  createdAt: Date;
+  platform: string;
+  orderItems: Array<{
+    quantity: number;
+  }>;
+}
+
 interface EventDashboardProps {
   financialReport: FinancialReport;
-  sales: Sale[];
+  orders: Order[];
   tickets: Ticket[];
 }
 
-export function EventDashboard({ financialReport, sales, tickets }: EventDashboardProps) {
+export function EventDashboard({ financialReport, orders, tickets }: EventDashboardProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -79,15 +75,15 @@ export function EventDashboard({ financialReport, sales, tickets }: EventDashboa
     : 0;
 
   // Calculate average price per purchase
-  const totalPurchases = sales.length;
-  const totalRevenue = sales.reduce((sum, sale) => sum + sale.subtotal, 0);
+  const totalPurchases = orders.length;
+  const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
   const averagePricePerPurchase = totalPurchases > 0
     ? (totalRevenue / totalPurchases)
     : 0;
 
   // Calculate sales funnel data
   const totalVisits = totalTicketsAvailable;
-  const totalAddedToCart = sales.length > 0 ? Math.ceil(sales.length * 0.8) : 0;
+  const totalAddedToCart = orders.length > 0 ? Math.ceil(orders.length * 0.8) : 0;
   const totalCompleted = totalTicketsSold;
 
   return (
@@ -142,7 +138,7 @@ export function EventDashboard({ financialReport, sales, tickets }: EventDashboa
       </div>
 
       {/* Daily Sales Chart */}
-      <DailySalesChart sales={sales} />
+      <DailySalesChart orders={orders} />
 
       {/* Charts Section */}
       <div className="grid gap-4 md:grid-cols-2">

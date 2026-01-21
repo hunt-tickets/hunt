@@ -58,6 +58,13 @@ interface OrderWithRefund {
     apellidos: string | null;
     email: string;
   };
+  orderItems: Array<{
+    id: string;
+    ticketTypeId: string;
+    quantity: number;
+    pricePerTicket: string;
+    subtotal: string;
+  }>;
   refund?: {
     id: string;
     amount: string;

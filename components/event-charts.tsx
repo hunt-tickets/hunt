@@ -746,15 +746,15 @@ export function ChannelSalesChart({ app, web, cash }: ChannelSalesChartProps) {
 }
 
 interface DailySalesChartProps {
-  sales: Array<{
-    createdAt: string;
-    subtotal: number;
-    quantity: number;
+  orders: Array<{
+    createdAt: Date;
+    totalAmount: string;
+    orderItems: Array<{ quantity: number }>;
   }>;
   colorPalette?: string[];
 }
 
-export function DailySalesChart({ sales }: DailySalesChartProps) {
+export function DailySalesChart({ orders }: DailySalesChartProps) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
 
@@ -787,16 +787,15 @@ export function DailySalesChart({ sales }: DailySalesChartProps) {
   // Agrupar ventas por día
   const dailySales: Record<string, { revenue: number; quantity: number }> = {};
 
-  sales.forEach(sale => {
-    const date = new Date(sale.createdAt);
-    const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+  orders.forEach(order => {
+    const dateKey = order.createdAt.toISOString().split('T')[0]; // YYYY-MM-DD
 
     if (!dailySales[dateKey]) {
       dailySales[dateKey] = { revenue: 0, quantity: 0 };
     }
 
-    dailySales[dateKey].revenue += sale.subtotal;
-    dailySales[dateKey].quantity += sale.quantity;
+    dailySales[dateKey].revenue += parseFloat(order.totalAmount);
+    dailySales[dateKey].quantity += order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
   });
 
   // Obtener rango de fechas

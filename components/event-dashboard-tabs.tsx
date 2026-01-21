@@ -22,20 +22,6 @@ interface Seller {
   created_at: string;
 }
 
-interface Sale {
-  id: string;
-  quantity: number;
-  subtotal: number;
-  pricePerTicket: number;
-  paymentStatus: string;
-  createdAt: string;
-  platform: string;
-  ticketTypeName: string;
-  userFullname: string;
-  userEmail: string;
-  isCash?: boolean;
-}
-
 interface Ticket {
   id: string;
   quantity: number;
@@ -87,6 +73,13 @@ interface OrderWithDetails {
     apellidos: string | null;
     email: string;
   };
+  orderItems: Array<{
+    id: string;
+    ticketTypeId: string;
+    quantity: number;
+    pricePerTicket: string;
+    subtotal: string;
+  }>;
   refund?: {
     id: string;
     amount: string;
@@ -108,7 +101,6 @@ interface EventDashboardTabsProps {
   eventName: string;
   eventFlyer: string;
   financialReport: FinancialReport;
-  sales: Sale[];
   tickets: Ticket[];
   sellers: Seller[];
   orders: OrderWithDetails[];
@@ -123,7 +115,6 @@ export function EventDashboardTabs({
   eventName,
   eventFlyer,
   financialReport,
-  sales,
   tickets,
   sellers,
   orders,
@@ -206,7 +197,7 @@ export function EventDashboardTabs({
       {activeTab === "dashboard" && (
         <EventDashboard
           financialReport={financialReport}
-          sales={sales}
+          orders={orders}
           tickets={tickets}
         />
       )}
@@ -216,7 +207,7 @@ export function EventDashboardTabs({
           eventId={eventId}
           eventName={eventName}
           eventFlyer={eventFlyer}
-          sales={sales}
+          orders={orders}
         />
       )}
 

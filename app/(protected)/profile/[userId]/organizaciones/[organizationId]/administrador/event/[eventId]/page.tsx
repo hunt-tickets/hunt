@@ -251,31 +251,6 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     },
   };
 
-  // Build sales array for EventDashboard
-  const sales = orders.map((order) => ({
-    id: order.id,
-    quantity: (order.orderItems || []).reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    ),
-    subtotal: parseFloat(order.totalAmount),
-    pricePerTicket:
-      (order.orderItems || []).length > 0
-        ? parseFloat(order.totalAmount) /
-          (order.orderItems || []).reduce((sum, item) => sum + item.quantity, 0)
-        : 0,
-    paymentStatus: order.paymentStatus,
-    createdAt: order.createdAt.toISOString(),
-    platform: order.platform,
-    ticketTypeName: (order.orderItems || [])[0]?.ticketTypeId || "Unknown",
-    userFullname:
-      order.user?.nombres && order.user?.apellidos
-        ? `${order.user.nombres} ${order.user.apellidos}`
-        : order.user?.name || "Unknown",
-    userEmail: order.user?.email || "Unknown",
-    isCash: order.platform === "cash",
-  }));
-
   // Build tickets array for EventDashboard
   const tickets = ticketTypes.map((ticketType) => {
     // Calculate sold tickets for this type from orders
@@ -362,7 +337,8 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   // Filter to only include sellers who have made sales
   const sellersWithSales = sellers.filter((seller) => seller.ticketsSold > 0);
 
-  // Build orders with refund details
+  // Build orders with refund details and orderItems
+  // Note: Including orderItems so client can derive sales data
   const ordersWithRefunds = orders.map((order) => ({
     id: order.id,
     userId: order.userId,
@@ -374,6 +350,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     createdAt: order.createdAt,
     paidAt: order.paidAt,
     user: order.user,
+    orderItems: order.orderItems,
     refund: order.refunds && order.refunds.length > 0
       ? {
           id: order.refunds[0].id,
@@ -489,7 +466,6 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
           eventName={event.name ?? "Sin nombre"}
           eventFlyer={event.flyer ?? "/event-placeholder.svg"}
           financialReport={financialReport}
-          sales={sales}
           tickets={tickets}
           sellers={sellersWithSales}
           orders={ordersWithRefunds}
@@ -525,7 +501,6 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         eventName={event.name ?? "Sin nombre"}
         eventFlyer={event.flyer ?? "/event-placeholder.svg"}
         financialReport={financialReport}
-        sales={sales}
         tickets={tickets}
         sellers={sellersWithSales}
         orders={ordersWithRefunds}
