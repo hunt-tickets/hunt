@@ -30,9 +30,34 @@ interface Ticket {
   };
 }
 
+interface FinancialReport {
+  app_total: number;
+  web_total: number;
+  cash_total: number;
+  channels_total: number;
+  tickets_sold: {
+    app: number;
+    web: number;
+    cash: number;
+    total: number;
+  };
+  org_summary?: {
+    gross_sales: number;
+    marketplace_fee: number;
+    processor_fee: number;
+    tax_withholding_ica: number;
+    tax_withholding_fuente: number;
+    net_amount: number;
+    by_channel: {
+      web: { gross: number; net: number };
+      app: { gross: number; net: number };
+      cash: { gross: number; net: number };
+    };
+  };
+}
+
 interface EventDashboardProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  financialReport: any;
+  financialReport: FinancialReport;
   sales: Sale[];
   tickets: Ticket[];
 }
@@ -177,6 +202,17 @@ export function EventDashboard({ financialReport, sales, tickets }: EventDashboa
                   <span className="text-gray-500 dark:text-white/60">Retención en la Fuente</span>
                   <span className="font-medium text-red-500 dark:text-red-400">
                     -{formatCurrency(financialReport.org_summary.tax_withholding_fuente)}
+                  </span>
+                </div>
+                <div className="pt-2 mt-2 border-t border-gray-200 dark:border-white/5 flex justify-between text-sm">
+                  <span className="text-gray-600 dark:text-white/70 font-medium">Total de Deducciones</span>
+                  <span className="font-semibold text-red-600 dark:text-red-500">
+                    -{formatCurrency(
+                      financialReport.org_summary.marketplace_fee +
+                      financialReport.org_summary.processor_fee +
+                      financialReport.org_summary.tax_withholding_ica +
+                      financialReport.org_summary.tax_withholding_fuente
+                    )}
                   </span>
                 </div>
                 <div className="pt-3 mt-2 border-t border-gray-300 dark:border-white/10 flex justify-between items-center">

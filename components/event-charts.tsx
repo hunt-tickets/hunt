@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ReactECharts from 'echarts-for-react';
+import { OptimizedEChart } from "@/components/optimized-echart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "next-themes";
+import type { EChartsOption } from "echarts";
 
 interface SalesDistributionChartProps {
   app: number;
@@ -39,10 +40,10 @@ export function SalesDistributionChart({ app, web, cash }: SalesDistributionChar
     { name: 'Efectivo', value: cash },
   ].filter(item => item.value > 0);
 
-  const option = {
+  const option: EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
-      trigger: 'item',
+      trigger: 'item' as const,
       backgroundColor: isDark ? '#18181b' : '#ffffff',
       borderColor: isDark ? '#303030' : '#e5e7eb',
       borderWidth: 1,
@@ -109,7 +110,7 @@ export function SalesDistributionChart({ app, web, cash }: SalesDistributionChar
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
-          <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />
+          <OptimizedEChart option={option} style={{ height: '100%', width: '100%' }} />
         </div>
       </CardContent>
     </Card>
@@ -159,10 +160,10 @@ export function RevenueByChannelChart({ appTotal, webTotal, cashTotal }: Revenue
     { name: 'Efectivo', value: cashTotal },
   ].filter(item => item.value > 0);
 
-  const option = {
+  const option: EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
-      trigger: 'axis',
+      trigger: 'axis' as const,
       backgroundColor: isDark ? '#18181b' : '#ffffff',
       borderColor: isDark ? '#303030' : '#e5e7eb',
       borderWidth: 1,
@@ -170,7 +171,7 @@ export function RevenueByChannelChart({ appTotal, webTotal, cashTotal }: Revenue
         color: isDark ? '#fff' : '#000'
       },
       axisPointer: {
-        type: 'shadow'
+        type: 'shadow' as const
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (params: any) => {
@@ -260,7 +261,7 @@ export function RevenueByChannelChart({ appTotal, webTotal, cashTotal }: Revenue
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
-          <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />
+          <OptimizedEChart option={option} style={{ height: '100%', width: '100%' }} />
         </div>
       </CardContent>
     </Card>
@@ -508,10 +509,10 @@ export function TicketRevenueDistributionChart({ tickets }: TicketRevenueDistrib
     })
   };
 
-  const option = {
+  const option: EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
-      trigger: 'item',
+      trigger: 'item' as const,
       backgroundColor: '#18181b',
       borderColor: '#303030',
       borderWidth: 1,
@@ -606,10 +607,9 @@ export function TicketRevenueDistributionChart({ tickets }: TicketRevenueDistrib
 
   return (
     <div className="h-full">
-      <ReactECharts
+      <OptimizedEChart
         option={option}
         style={{ height: '100%', width: '100%' }}
-        opts={{ renderer: 'canvas' }}
       />
     </div>
   );
@@ -644,10 +644,10 @@ export function ChannelSalesChart({ app, web, cash }: ChannelSalesChartProps) {
     { name: 'Efectivo', value: cash }
   ].filter(item => item.value > 0);
 
-  const option = {
+  const option: EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
-      trigger: 'item',
+      trigger: 'item' as const,
       backgroundColor: isDark ? '#18181b' : '#ffffff',
       borderColor: isDark ? '#303030' : '#e5e7eb',
       borderWidth: 1,
@@ -737,10 +737,9 @@ export function ChannelSalesChart({ app, web, cash }: ChannelSalesChartProps) {
 
   return (
     <div className="h-full">
-      <ReactECharts
+      <OptimizedEChart
         option={option}
         style={{ height: '100%', width: '100%' }}
-        opts={{ renderer: 'canvas' }}
       />
     </div>
   );
@@ -839,10 +838,10 @@ export function DailySalesChart({ sales }: DailySalesChartProps) {
   });
   const revenues = sortedDates.map(date => dailySales[date].revenue);
 
-  const option = {
+  const option: EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
-      trigger: 'axis',
+      trigger: 'axis' as const,
       backgroundColor: isDark ? '#18181b' : '#ffffff',
       borderColor: isDark ? '#303030' : '#e5e7eb',
       borderWidth: 1,
@@ -850,7 +849,7 @@ export function DailySalesChart({ sales }: DailySalesChartProps) {
         color: isDark ? '#fff' : '#000'
       },
       axisPointer: {
-        type: 'shadow'
+        type: 'shadow' as const
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (params: any) => {
@@ -963,7 +962,7 @@ export function DailySalesChart({ sales }: DailySalesChartProps) {
           </div>
         </div>
         <div className="h-[300px]">
-          <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />
+          <OptimizedEChart option={option} style={{ height: '100%', width: '100%' }} />
         </div>
       </CardContent>
     </Card>

@@ -7,39 +7,10 @@ import { EventStickyHeader } from "@/components/event-sticky-header";
 import { EventStatusToggle } from "@/components/event-status-toggle";
 import { EventCashSalesToggle } from "@/components/event-cash-sales-toggle";
 import { EventOptionsMenu } from "@/components/event-options-menu";
-import { createClient } from "@/lib/supabase/server";
-import { member } from "@/lib/schema";
+import { member, events, orders as ordersTable } from "@/lib/schema";
 import { db } from "@/lib/drizzle";
-import { eq } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { Settings } from "lucide-react";
-
-// Type for Supabase order with nested relations
-type OrderWithItems = {
-  id: string;
-  user_id: string;
-  event_id: string;
-  total_amount: string;
-  currency: string;
-  marketplace_fee: string | null;
-  processor_fee: string | null;
-  tax_withholding_ica: string | null;
-  tax_withholding_fuente: string | null;
-  payment_status: string;
-  platform: string;
-  payment_session_id: string | null;
-  sold_by: string | null;
-  created_at: string;
-  paid_at: string | null;
-  order_items: {
-    id: string;
-    orderId: string;
-    ticketTypeId: string;
-    quantity: number;
-    pricePerTicket: string;
-    subtotal: string;
-    created_at: string;
-  }[];
-};
 
 interface EventPageProps {
   params: Promise<{
@@ -54,7 +25,7 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
   const reqHeaders = await headers();
 
   // Check if user can view dashboard (sellers cannot)
-  const canViewDashboard = await auth.api.hasPermission({
+  const canUpdateDashboard = await auth.api.hasPermission({
     headers: reqHeaders,
     body: {
       permission: { dashboard: ["view"] },
@@ -62,92 +33,310 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     },
   });
 
-  if (!canViewDashboard?.success) {
+  if (!canUpdateDashboard?.success) {
     // Redirect sellers to the vender page for this event
     redirect(
       `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`
     );
   }
 
-  const supabase = await createClient();
-  // Single fetch: event with ticket_types and orders with order_items
-  // Exclude cancelled/deleted events
-  const { data: event } = await supabase
-    .from("events")
-    .select(
-      `
-      id,
-      name,
-      status,
-      cash,
-      flyer,
-      date,
-      city,
-      venue_id,
-      lifecycle_status,
-      deleted_at,
-      cancelled_by,
-      cancellation_reason,
-      cancellation_initiated_at,
-      ticket_types (*),
-      orders (
-        *,
-        order_items (*)
-      )
-    `
-    )
-    .eq("id", eventId)
-    .is("deleted_at", null) // Only fetch non-deleted events
-    .single();
+  const [event, organizationMembers] = await Promise.all([
+    // Fetch event with ticket types and orders using Drizzle with relations
+    // Exclude cancelled/deleted events
+    db.query.events.findFirst({
+      where: and(eq(events.id, eventId), isNull(events.deletedAt)),
+      with: {
+        ticketTypes: true,
+        orders: {
+          where: eq(ordersTable.paymentStatus, "paid"),
+          with: {
+            orderItems: true,
+            user: {
+              columns: {
+                id: true,
+                name: true,
+                nombres: true,
+                apellidos: true,
+                email: true,
+              },
+            },
+            refunds: true,
+          },
+        },
+      },
+    }),
+
+    // Fetch organization members with user details
+    db.query.member.findMany({
+      where: eq(member.organizationId, organizationId),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            nombres: true,
+            apellidos: true,
+            email: true,
+            phoneNumber: true,
+          },
+        },
+      },
+    }),
+  ]);
 
   if (!event) {
     notFound();
   }
 
-  const ticketTypes = event.ticket_types || [];
-  const orders = (event.orders || []) as OrderWithItems[];
+  const ticketTypes = event.ticketTypes || [];
+  const orders = event.orders || [];
+  const configUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
 
-  // Fetch organization members with user details
-  const organizationMembers = await db.query.member.findMany({
-    where: eq(member.organizationId, organizationId),
-    with: {
-      user: {
-        columns: {
-          id: true,
-          name: true,
-          nombres: true,
-          apellidos: true,
-          email: true,
-          phoneNumber: true,
+  // Generate server-side timestamp
+  const serverTimestamp = new Date().toLocaleString("es-CO", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "America/Bogota",
+  });
+
+  const ordersByPlatform = orders.reduce(
+    (acc, order) => {
+      const platform = order.platform as "web" | "app" | "cash";
+      const orderTotal = parseFloat(order.totalAmount);
+      const marketplaceFee = parseFloat(order.marketplaceFee || "0");
+      const processorFee = parseFloat(order.processorFee || "0");
+      const taxWithholdingIca = parseFloat(order.taxWithholdingIca || "0");
+      const taxWithholdingFuente = parseFloat(
+        order.taxWithholdingFuente || "0"
+      );
+
+      // Count tickets from order items
+      const itemCount = (order.orderItems || []).reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+
+      acc[platform].total += orderTotal;
+      acc[platform].count += itemCount;
+      acc[platform].marketplaceFee += marketplaceFee;
+      acc[platform].processorFee += processorFee;
+      acc[platform].taxWithholdingIca += taxWithholdingIca;
+      acc[platform].taxWithholdingFuente += taxWithholdingFuente;
+
+      return acc;
+    },
+    {
+      web: {
+        total: 0,
+        count: 0,
+        marketplaceFee: 0,
+        processorFee: 0,
+        taxWithholdingIca: 0,
+        taxWithholdingFuente: 0,
+      },
+      app: {
+        total: 0,
+        count: 0,
+        marketplaceFee: 0,
+        processorFee: 0,
+        taxWithholdingIca: 0,
+        taxWithholdingFuente: 0,
+      },
+      cash: {
+        total: 0,
+        count: 0,
+        marketplaceFee: 0,
+        processorFee: 0,
+        taxWithholdingIca: 0,
+        taxWithholdingFuente: 0,
+      },
+    }
+  );
+
+  // Calculate totals
+  const totalFromOrders =
+    ordersByPlatform.web.total +
+    ordersByPlatform.app.total +
+    ordersByPlatform.cash.total;
+
+  const totalTicketsFromOrders =
+    ordersByPlatform.web.count +
+    ordersByPlatform.app.count +
+    ordersByPlatform.cash.count;
+
+  // Aggregate fees and taxes
+  const totalMarketplaceFee =
+    ordersByPlatform.web.marketplaceFee +
+    ordersByPlatform.app.marketplaceFee +
+    ordersByPlatform.cash.marketplaceFee;
+
+  const totalProcessorFee =
+    ordersByPlatform.web.processorFee +
+    ordersByPlatform.app.processorFee +
+    ordersByPlatform.cash.processorFee;
+
+  const totalTaxWithholdingIca =
+    ordersByPlatform.web.taxWithholdingIca +
+    ordersByPlatform.app.taxWithholdingIca +
+    ordersByPlatform.cash.taxWithholdingIca;
+
+  const totalTaxWithholdingFuente =
+    ordersByPlatform.web.taxWithholdingFuente +
+    ordersByPlatform.app.taxWithholdingFuente +
+    ordersByPlatform.cash.taxWithholdingFuente;
+
+  // Calculate net amount (what organization receives)
+  const organizationNetAmount =
+    totalFromOrders -
+    totalMarketplaceFee -
+    totalProcessorFee -
+    totalTaxWithholdingIca -
+    totalTaxWithholdingFuente;
+
+  // Build financial report matching EventDashboard expectations
+  const financialReport = {
+    // Platform totals
+    app_total: ordersByPlatform.app.total,
+    web_total: ordersByPlatform.web.total,
+    cash_total: ordersByPlatform.cash.total,
+    channels_total: ordersByPlatform.web.total + ordersByPlatform.app.total,
+
+    // Tickets sold by platform
+    tickets_sold: {
+      app: ordersByPlatform.app.count,
+      web: ordersByPlatform.web.count,
+      cash: ordersByPlatform.cash.count,
+      total: totalTicketsFromOrders,
+    },
+
+    // Organization summary (optional but used if available)
+    org_summary: {
+      gross_sales: totalFromOrders,
+      marketplace_fee: totalMarketplaceFee,
+      processor_fee: totalProcessorFee,
+      tax_withholding_ica: totalTaxWithholdingIca,
+      tax_withholding_fuente: totalTaxWithholdingFuente,
+      net_amount: organizationNetAmount,
+
+      // Breakdown by channel
+      by_channel: {
+        web: {
+          gross: ordersByPlatform.web.total,
+          net:
+            ordersByPlatform.web.total -
+            ordersByPlatform.web.marketplaceFee -
+            ordersByPlatform.web.processorFee -
+            ordersByPlatform.web.taxWithholdingIca -
+            ordersByPlatform.web.taxWithholdingFuente,
+        },
+        app: {
+          gross: ordersByPlatform.app.total,
+          net:
+            ordersByPlatform.app.total -
+            ordersByPlatform.app.marketplaceFee -
+            ordersByPlatform.app.processorFee -
+            ordersByPlatform.app.taxWithholdingIca -
+            ordersByPlatform.app.taxWithholdingFuente,
+        },
+        cash: {
+          gross: ordersByPlatform.cash.total,
+          net:
+            ordersByPlatform.cash.total -
+            ordersByPlatform.cash.marketplaceFee -
+            ordersByPlatform.cash.processorFee -
+            ordersByPlatform.cash.taxWithholdingIca -
+            ordersByPlatform.cash.taxWithholdingFuente,
         },
       },
     },
+  };
+
+  // Build sales array for EventDashboard
+  const sales = orders.map((order) => ({
+    id: order.id,
+    quantity: (order.orderItems || []).reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    ),
+    subtotal: parseFloat(order.totalAmount),
+    pricePerTicket:
+      (order.orderItems || []).length > 0
+        ? parseFloat(order.totalAmount) /
+          (order.orderItems || []).reduce((sum, item) => sum + item.quantity, 0)
+        : 0,
+    paymentStatus: order.paymentStatus,
+    createdAt: order.createdAt.toISOString(),
+    platform: order.platform,
+    ticketTypeName: (order.orderItems || [])[0]?.ticketTypeId || "Unknown",
+    userFullname:
+      order.user?.nombres && order.user?.apellidos
+        ? `${order.user.nombres} ${order.user.apellidos}`
+        : order.user?.name || "Unknown",
+    userEmail: order.user?.email || "Unknown",
+    isCash: order.platform === "cash",
+  }));
+
+  // Build tickets array for EventDashboard
+  const tickets = ticketTypes.map((ticketType) => {
+    // Calculate sold tickets for this type from orders
+    const soldQuantity = orders.reduce((sum, order) => {
+      const itemsOfThisType = (order.orderItems || []).filter(
+        (item) => item.ticketTypeId === ticketType.id
+      );
+      return (
+        sum +
+        itemsOfThisType.reduce((itemSum, item) => itemSum + item.quantity, 0)
+      );
+    }, 0);
+
+    const totalRevenue = orders.reduce((sum, order) => {
+      const itemsOfThisType = (order.orderItems || []).filter(
+        (item) => item.ticketTypeId === ticketType.id
+      );
+      return (
+        sum +
+        itemsOfThisType.reduce(
+          (itemSum, item) =>
+            itemSum + item.quantity * parseFloat(item.pricePerTicket),
+          0
+        )
+      );
+    }, 0);
+
+    return {
+      id: ticketType.id,
+      quantity: ticketType.capacity,
+      analytics: {
+        total: {
+          quantity: soldQuantity,
+          total: totalRevenue,
+        },
+      },
+    };
   });
 
-  // Aggregate seller statistics from orders
-  const sellerStats = organizationMembers.map((memberRecord) => {
+  // Build sellers data from organization members and orders
+  const sellers = organizationMembers.map((memberRecord) => {
     const sellerId = memberRecord.userId;
 
-    // Filter orders sold by this seller for this event
-    const sellerOrders = orders.filter(
-      (order) => order.sold_by === sellerId && order.payment_status === "paid"
-    );
+    // Filter orders sold by this seller
+    const sellerOrders = orders.filter((order) => order.soldBy === sellerId);
 
     // Calculate cash sales (platform = 'cash')
     const cashSales = sellerOrders
       .filter((order) => order.platform === "cash")
-      .reduce((sum, order) => sum + parseFloat(order.total_amount), 0);
+      .reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
 
     // Calculate gateway sales (platform = 'web' or 'app')
     const gatewaySales = sellerOrders
       .filter((order) => order.platform === "web" || order.platform === "app")
-      .reduce((sum, order) => sum + parseFloat(order.total_amount), 0);
+      .reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
 
     // Calculate total tickets sold by counting order_items
     const ticketsSold = sellerOrders.reduce(
       (sum, order) =>
         sum +
-        (order.order_items || []).reduce(
+        (order.orderItems || []).reduce(
           (itemSum, item) => itemSum + item.quantity,
           0
         ),
@@ -170,221 +359,43 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     };
   });
 
-  // Filter to only include sellers/administrators who have made sales
-  const sellersWithSales = sellerStats.filter(
-    (seller) => seller.ticketsSold > 0
-  );
+  // Filter to only include sellers who have made sales
+  const sellersWithSales = sellers.filter((seller) => seller.ticketsSold > 0);
 
-  // Build tickets with analytics structure
-  const ticketsWithAnalytics = ticketTypes.map((tt) => ({
-    id: tt.id,
-    name: tt.name,
-    price: parseFloat(tt.price),
-    description: tt.description,
-    status: true,
-    quantity: tt.capacity,
-    analytics: {
-      total: {
-        quantity: tt.sold_count,
-        total: tt.sold_count * parseFloat(tt.price),
-      },
-      app: { quantity: 0, total: 0 },
-      web: { quantity: 0, total: 0 },
-      cash: { quantity: 0, total: 0 },
-    },
+  // Build orders with refund details
+  const ordersWithRefunds = orders.map((order) => ({
+    id: order.id,
+    userId: order.userId,
+    eventId: order.eventId,
+    totalAmount: order.totalAmount,
+    currency: order.currency,
+    paymentStatus: order.paymentStatus,
+    platform: order.platform,
+    createdAt: order.createdAt,
+    paidAt: order.paidAt,
+    user: order.user,
+    refund: order.refunds && order.refunds.length > 0
+      ? {
+          id: order.refunds[0].id,
+          amount: order.refunds[0].amount,
+          status: order.refunds[0].status,
+          requestedAt: order.refunds[0].requestedAt,
+          processedAt: order.refunds[0].processedAt,
+          reason: order.refunds[0].reason,
+        }
+      : null,
   }));
 
-  // Calculate sales by platform and aggregate fees
-  const salesByPlatform = orders.reduce(
-    (acc, order) => {
-      // Only count paid orders
-      if (order.payment_status !== "paid") return acc;
-
-      const orderTotal = parseFloat(order.total_amount);
-      const marketplaceFee = parseFloat(order.marketplace_fee || "0");
-      const processorFee = parseFloat(order.processor_fee || "0");
-      const taxWithholdingIca = parseFloat(order.tax_withholding_ica || "0");
-      const taxWithholdingFuente = parseFloat(order.tax_withholding_fuente || "0");
-      const itemCount = (order.order_items || []).reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      );
-
-      acc[order.platform as "web" | "app" | "cash"].total += orderTotal;
-      acc[order.platform as "web" | "app" | "cash"].count += itemCount;
-      acc[order.platform as "web" | "app" | "cash"].marketplaceFee +=
-        marketplaceFee;
-      acc[order.platform as "web" | "app" | "cash"].processorFee +=
-        processorFee;
-      acc[order.platform as "web" | "app" | "cash"].taxWithholdingIca +=
-        taxWithholdingIca;
-      acc[order.platform as "web" | "app" | "cash"].taxWithholdingFuente +=
-        taxWithholdingFuente;
-      return acc;
-    },
-    {
-      web: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0, taxWithholdingIca: 0, taxWithholdingFuente: 0 },
-      app: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0, taxWithholdingIca: 0, taxWithholdingFuente: 0 },
-      cash: { total: 0, count: 0, marketplaceFee: 0, processorFee: 0, taxWithholdingIca: 0, taxWithholdingFuente: 0 },
-    }
-  );
-
-  const totalFromOrders =
-    salesByPlatform.web.total +
-    salesByPlatform.app.total +
-    salesByPlatform.cash.total;
-  const totalTicketsFromOrders =
-    salesByPlatform.web.count +
-    salesByPlatform.app.count +
-    salesByPlatform.cash.count;
-
-  // Aggregate fees and taxes across all platforms
-  const totalMarketplaceFee =
-    salesByPlatform.web.marketplaceFee +
-    salesByPlatform.app.marketplaceFee +
-    salesByPlatform.cash.marketplaceFee;
-  const totalProcessorFee =
-    salesByPlatform.web.processorFee +
-    salesByPlatform.app.processorFee +
-    salesByPlatform.cash.processorFee;
-  const totalTaxWithholdingIca =
-    salesByPlatform.web.taxWithholdingIca +
-    salesByPlatform.app.taxWithholdingIca +
-    salesByPlatform.cash.taxWithholdingIca;
-  const totalTaxWithholdingFuente =
-    salesByPlatform.web.taxWithholdingFuente +
-    salesByPlatform.app.taxWithholdingFuente +
-    salesByPlatform.cash.taxWithholdingFuente;
-
-  // Organization receives: total - fees - taxes
-  const organizationNetAmount =
-    totalFromOrders - totalMarketplaceFee - totalProcessorFee - totalTaxWithholdingIca - totalTaxWithholdingFuente;
-
-  // Build financial report from real order data
-  const financialReport = {
-    timestamp: new Date().toISOString(),
-    channels_total: totalFromOrders,
-    tickets_sold: {
-      total: totalTicketsFromOrders,
-      app: salesByPlatform.app.count,
-      web: salesByPlatform.web.count,
-      cash: salesByPlatform.cash.count,
-    },
-    app_total: salesByPlatform.app.total,
-    web_total: salesByPlatform.web.total,
-    cash_total: salesByPlatform.cash.total,
-    // Organization perspective - real fees and taxes from orders
-    org_summary: {
-      gross_sales: totalFromOrders,
-      marketplace_fee: totalMarketplaceFee,
-      processor_fee: totalProcessorFee,
-      tax_withholding_ica: totalTaxWithholdingIca,
-      tax_withholding_fuente: totalTaxWithholdingFuente,
-      net_amount: organizationNetAmount,
-      // Breakdown by channel
-      by_channel: {
-        web: {
-          gross: salesByPlatform.web.total,
-          marketplace_fee: salesByPlatform.web.marketplaceFee,
-          processor_fee: salesByPlatform.web.processorFee,
-          tax_withholding_ica: salesByPlatform.web.taxWithholdingIca,
-          tax_withholding_fuente: salesByPlatform.web.taxWithholdingFuente,
-          net:
-            salesByPlatform.web.total -
-            salesByPlatform.web.marketplaceFee -
-            salesByPlatform.web.processorFee -
-            salesByPlatform.web.taxWithholdingIca -
-            salesByPlatform.web.taxWithholdingFuente,
-        },
-        app: {
-          gross: salesByPlatform.app.total,
-          marketplace_fee: salesByPlatform.app.marketplaceFee,
-          processor_fee: salesByPlatform.app.processorFee,
-          tax_withholding_ica: salesByPlatform.app.taxWithholdingIca,
-          tax_withholding_fuente: salesByPlatform.app.taxWithholdingFuente,
-          net:
-            salesByPlatform.app.total -
-            salesByPlatform.app.marketplaceFee -
-            salesByPlatform.app.processorFee -
-            salesByPlatform.app.taxWithholdingIca -
-            salesByPlatform.app.taxWithholdingFuente,
-        },
-        cash: {
-          gross: salesByPlatform.cash.total,
-          marketplace_fee: salesByPlatform.cash.marketplaceFee,
-          processor_fee: salesByPlatform.cash.processorFee,
-          tax_withholding_ica: salesByPlatform.cash.taxWithholdingIca,
-          tax_withholding_fuente: salesByPlatform.cash.taxWithholdingFuente,
-          net:
-            salesByPlatform.cash.total -
-            salesByPlatform.cash.marketplaceFee -
-            salesByPlatform.cash.processorFee -
-            salesByPlatform.cash.taxWithholdingIca -
-            salesByPlatform.cash.taxWithholdingFuente,
-        },
-      },
-    },
-  };
-
-  // Build sales records from orders and order items
-  const sales = orders.flatMap((order) =>
-    (order.order_items || []).map((item) => ({
-      id: item.id,
-      quantity: item.quantity,
-      subtotal: parseFloat(item.subtotal),
-      pricePerTicket: parseFloat(item.pricePerTicket),
-      paymentStatus: order.payment_status,
-      createdAt: order.created_at,
-      platform: order.platform, // 'web' | 'app' | 'cash'
-      ticketTypeName:
-        ticketTypes.find((tt) => tt.id === item.ticketTypeId)?.name || "",
-      userFullname: "",
-      userEmail: "",
-      isCash: order.platform === "cash",
-    }))
-  );
-
-  // Determine setup completion status
-  const hasDate = !!event.date;
-  const hasTicketTypes = ticketTypes.length > 0;
-
-  // Event can only be published when required items are complete
-  const canPublish = hasDate && hasTicketTypes;
-
-  // Check if event is being cancelled
-  const isCancellationPending =
-    event.lifecycle_status === "cancellation_pending";
-
-  // Build cancellation data if event is being cancelled
-  const cancellationData = isCancellationPending
-    ? {
-        cancelledBy: event.cancelled_by || null,
-        cancellationReason: event.cancellation_reason || null,
-        cancellationInitiatedAt: event.cancellation_initiated_at || null,
-        totalOrdersToRefund: orders.filter(
-          (order) => order.payment_status === "paid"
-        ).length,
-        totalAmountToRefund: orders
-          .filter((order) => order.payment_status === "paid")
-          .reduce((sum, order) => sum + parseFloat(order.total_amount), 0),
-        orders: orders
-          .filter((order) => order.payment_status === "paid")
-          .map((order) => ({
-            orderId: order.id,
-            orderDate: order.created_at,
-            customerName: "", // TODO: Fetch from user table
-            customerEmail: "", // TODO: Fetch from user table
-            amount: parseFloat(order.total_amount),
-            platform: order.platform as "web" | "app" | "cash",
-            paymentId: order.payment_session_id,
-            refundStatus: "pending" as const, // TODO: Fetch from refunds table
-            refundId: null,
-          })),
-      }
-    : null;
-
-  // Configuration URL
-  const configUrl = `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion`;
+  // Build cancellation metadata if event is in cancellation pending
+  // Note: We only send metadata, not the orders array (already in ordersWithRefunds)
+  const cancellationMetadata =
+    event.lifecycleStatus === "cancellation_pending"
+      ? {
+          cancelledBy: event.cancelledBy,
+          cancellationReason: event.cancellationReason,
+          cancellationInitiatedAt: event.cancellationInitiatedAt?.toISOString() || null,
+        }
+      : null;
 
   // Empty state - no ticket types yet, show setup message
   if (ticketTypes.length === 0) {
@@ -402,9 +413,12 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
               <EventStatusToggle
                 eventId={eventId}
                 initialStatus={event.status ?? false}
-                disabled={!canPublish || isCancellationPending}
+                disabled={
+                  !canUpdateDashboard ||
+                  event.lifecycleStatus === "cancellation_pending"
+                }
                 disabledReason={
-                  isCancellationPending
+                  event.lifecycleStatus === "cancellation_pending"
                     ? "No se puede cambiar el estado durante la cancelación"
                     : "Completa la configuración para publicar"
                 }
@@ -445,19 +459,19 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
       {/* Sticky Header with Tabs */}
       <EventStickyHeader
-        eventName={event.name}
-        subtitle={new Date(financialReport.timestamp).toLocaleString("es-CO", {
-          dateStyle: "short",
-          timeStyle: "short",
-        })}
+        eventName={event.name ?? "Sin nombre"}
+        subtitle={serverTimestamp}
         rightContent={
           <div className="flex items-center gap-3">
             <EventStatusToggle
               eventId={eventId}
               initialStatus={event.status ?? false}
-              disabled={!canPublish || isCancellationPending}
+              disabled={
+                !canUpdateDashboard ||
+                event.lifecycleStatus === "cancellation_pending"
+              }
               disabledReason={
-                isCancellationPending
+                event.lifecycleStatus === "cancellation_pending"
                   ? "No se puede cambiar el estado durante la cancelación"
                   : "Completa la fecha y crea al menos una entrada para publicar"
               }
@@ -471,20 +485,24 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
         }
       >
         <EventDashboardTabs
+          eventId={eventId}
+          eventName={event.name ?? "Sin nombre"}
+          eventFlyer={event.flyer ?? "/event-placeholder.svg"}
           financialReport={financialReport}
           sales={sales}
-          tickets={ticketsWithAnalytics}
-          eventId={eventId}
-          eventName={event.name}
-          eventFlyer={event.flyer || "/event-placeholder.svg"}
+          tickets={tickets}
           sellers={sellersWithSales}
-          cancellationData={cancellationData}
+          orders={ordersWithRefunds}
+          isInCancellationPending={
+            event.lifecycleStatus === "cancellation_pending"
+          }
+          cancellationMetadata={cancellationMetadata}
           showTabsOnly
         />
       </EventStickyHeader>
 
       {/* Setup banner - shown if event can't be published yet */}
-      {!canPublish && (
+      {!canUpdateDashboard && (
         <Link
           href={configUrl}
           className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
@@ -503,14 +521,18 @@ export default async function EventDashboardPage({ params }: EventPageProps) {
 
       {/* Content */}
       <EventDashboardTabs
+        eventId={eventId}
+        eventName={event.name ?? "Sin nombre"}
+        eventFlyer={event.flyer ?? "/event-placeholder.svg"}
         financialReport={financialReport}
         sales={sales}
-        tickets={ticketsWithAnalytics}
-        eventId={eventId}
-        eventName={event.name}
-        eventFlyer={event.flyer || "/event-placeholder.svg"}
+        tickets={tickets}
         sellers={sellersWithSales}
-        cancellationData={cancellationData}
+        orders={ordersWithRefunds}
+        isInCancellationPending={
+          event.lifecycleStatus === "cancellation_pending"
+        }
+        cancellationMetadata={cancellationMetadata}
         showContentOnly
       />
     </div>

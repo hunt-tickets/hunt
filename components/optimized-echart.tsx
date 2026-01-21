@@ -11,6 +11,7 @@ import * as echarts from 'echarts/core';
 import {
   PieChart,
   BarChart,
+  TreemapChart,
 } from 'echarts/charts';
 import {
   TitleComponent,
@@ -31,6 +32,7 @@ echarts.use([
   LegendComponent,
   PieChart,
   BarChart,
+  TreemapChart,
   CanvasRenderer
 ]);
 

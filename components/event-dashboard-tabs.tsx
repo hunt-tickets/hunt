@@ -2,11 +2,25 @@
 
 import { BarChart3, Globe, Users, AlertCircle } from "lucide-react";
 import { EventDashboard } from "@/components/event-dashboard";
-import { EventBorderaux } from "@/components/event-borderaux";
 import { EventWebAnalytics } from "@/components/event-web-analytics";
 import { SellersTable } from "@/components/sellers-table";
 import { RefundManagementTab } from "@/components/refund-management-tab";
 import { useEventTabs } from "@/contexts/event-tabs-context";
+
+interface Seller {
+  id: string;
+  userId: string;
+  name: string | null;
+  lastName: string | null;
+  email: string | null;
+  phone: string | null;
+  role: "seller" | "administrator" | "owner";
+  cashSales: number;
+  gatewaySales: number;
+  ticketsSold: number;
+  commission: null;
+  created_at: string;
+}
 
 interface Sale {
   id: string;
@@ -15,36 +29,11 @@ interface Sale {
   pricePerTicket: number;
   paymentStatus: string;
   createdAt: string;
-  platform: string; // 'web' | 'app' | 'cash'
+  platform: string;
   ticketTypeName: string;
-  eventName?: string;
   userFullname: string;
   userEmail: string;
-  promoterFullname?: string;
-  promoterEmail?: string;
   isCash?: boolean;
-  variableFee?: number;
-  tax?: number;
-  orderId?: string;
-  boldId?: string | null;
-  boldFecha?: string | null;
-  boldEstado?: string | null;
-  boldMetodoPago?: string | null;
-  boldValorCompra?: number | null;
-  boldPropina?: number | null;
-  boldIva?: number | null;
-  boldImpoconsumo?: number | null;
-  boldValorTotal?: number | null;
-  boldReteFuente?: number | null;
-  boldReteIva?: number | null;
-  boldReteIca?: number | null;
-  boldComisionPorcentaje?: number | null;
-  boldComisionFija?: number | null;
-  boldTotalDeduccion?: number | null;
-  boldDepositoCuenta?: number | null;
-  boldBanco?: string | null;
-  boldFranquicia?: string | null;
-  boldPaisTarjeta?: string | null;
 }
 
 interface Ticket {
@@ -55,70 +44,96 @@ interface Ticket {
   };
 }
 
-interface Seller {
+interface FinancialReport {
+  app_total: number;
+  web_total: number;
+  cash_total: number;
+  channels_total: number;
+  tickets_sold: {
+    app: number;
+    web: number;
+    cash: number;
+    total: number;
+  };
+  org_summary?: {
+    gross_sales: number;
+    marketplace_fee: number;
+    processor_fee: number;
+    tax_withholding_ica: number;
+    tax_withholding_fuente: number;
+    net_amount: number;
+    by_channel: {
+      web: { gross: number; net: number };
+      app: { gross: number; net: number };
+      cash: { gross: number; net: number };
+    };
+  };
+}
+
+interface OrderWithDetails {
   id: string;
-  name: string | null;
-  lastName: string | null;
-  email: string | null;
-  phone: string | null;
-  cashSales: number;
-  gatewaySales: number;
-  ticketsSold: number;
-  commission: number | null;
-  created_at: string;
+  userId: string;
+  eventId: string;
+  totalAmount: string;
+  currency: string;
+  paymentStatus: string;
+  platform: string;
+  createdAt: Date;
+  paidAt: Date | null;
+  user: {
+    id: string;
+    name: string;
+    nombres: string | null;
+    apellidos: string | null;
+    email: string;
+  };
+  refund?: {
+    id: string;
+    amount: string;
+    status: string;
+    requestedAt: Date;
+    processedAt: Date | null;
+    reason: string;
+  } | null;
 }
 
-interface RefundOrder {
-  orderId: string;
-  orderDate: string;
-  customerName: string;
-  customerEmail: string;
-  amount: number;
-  platform: "web" | "app" | "cash";
-  paymentId: string | null;
-  refundStatus: "pending" | "processing" | "completed" | "failed";
-  refundId?: string | null;
-}
-
-interface CancellationData {
+interface CancellationMetadata {
   cancelledBy: string | null;
   cancellationReason: string | null;
   cancellationInitiatedAt: string | null;
-  totalOrdersToRefund: number;
-  totalAmountToRefund: number;
-  orders: RefundOrder[];
 }
 
 interface EventDashboardTabsProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  financialReport: any;
-  sales: Sale[];
-  tickets: Ticket[];
   eventId: string;
   eventName: string;
   eventFlyer: string;
+  financialReport: FinancialReport;
+  sales: Sale[];
+  tickets: Ticket[];
   sellers: Seller[];
+  orders: OrderWithDetails[];
+  isInCancellationPending: boolean;
+  cancellationMetadata?: CancellationMetadata | null;
   showTabsOnly?: boolean;
   showContentOnly?: boolean;
-  cancellationData?: CancellationData | null;
 }
 
 export function EventDashboardTabs({
-  financialReport,
-  sales,
-  tickets,
   eventId,
   eventName,
   eventFlyer,
+  financialReport,
+  sales,
+  tickets,
   sellers,
+  orders,
+  isInCancellationPending,
+  cancellationMetadata,
   showTabsOnly = false,
   showContentOnly = false,
-  cancellationData = null,
 }: EventDashboardTabsProps) {
   const { dashboardTab: activeTab, setDashboardTab: setActiveTab } =
     useEventTabs();
-
-  const isCancellationPending = !!cancellationData;
 
   // Tabs section
   const tabsSection = (
@@ -157,14 +172,15 @@ export function EventDashboardTabs({
         <Users className="h-4 w-4" />
         Vendedores
       </button>
+      {/* TODO: Implement refunds tab later */}
       <button
         onClick={() => setActiveTab("refunds")}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
           activeTab === "refunds"
-            ? isCancellationPending
+            ? isInCancellationPending
               ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
               : "bg-white/10 text-white border border-white/20"
-            : isCancellationPending
+            : isInCancellationPending
               ? "bg-amber-500/10 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/20 border border-amber-500/20"
               : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
         }`}
@@ -181,20 +197,14 @@ export function EventDashboardTabs({
       {activeTab === "refunds" && (
         <RefundManagementTab
           eventId={eventId}
-          cancellationData={cancellationData}
+          orders={orders}
+          isInCancellationPending={isInCancellationPending}
+          cancellationMetadata={cancellationMetadata}
         />
       )}
 
       {activeTab === "dashboard" && (
         <EventDashboard
-          financialReport={financialReport}
-          sales={sales}
-          tickets={tickets}
-        />
-      )}
-
-      {activeTab === "borderaux" && (
-        <EventBorderaux
           financialReport={financialReport}
           sales={sales}
           tickets={tickets}
