@@ -493,7 +493,7 @@ export function EventConfigContent({
         [imageType]: data.url,
       }));
 
-      toast.success({ title: "Imagen subida exitosamente" });
+      toast.success({ title: "Imagen subida y guardada exitosamente" });
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error({

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-// import { db } from "@/lib/drizzle";
-// import { eq, and } from "drizzle-orm";
+import { db } from "@/lib/drizzle";
+import { events } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * API Endpoint to upload event images to Supabase Storage
@@ -93,10 +94,10 @@ export async function POST(request: NextRequest) {
         upsert: false,
       });
 
-    if (error) {
+    if (error || data === null) {
       console.error("Supabase upload error:", error);
       return NextResponse.json(
-        { error: `Upload failed: ${error.message}` },
+        { error: `Upload failed: ${error?.message}` },
         { status: 500 }
       );
     }
@@ -105,6 +106,15 @@ export async function POST(request: NextRequest) {
     const { data: publicUrlData } = supabase.storage
       .from("events")
       .getPublicUrl(data.path);
+
+    // Update the event table with the new image URL
+    if (imageType === "flyer") {
+      await db
+        .update(events)
+        .set({ flyer: publicUrlData.publicUrl })
+        .where(eq(events.id, eventId));
+    }
+    // Gallery images don't have a dedicated field yet, so we skip DB update for now
 
     return NextResponse.json({
       success: true,
