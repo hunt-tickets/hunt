@@ -6,7 +6,10 @@ import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
 import { organization } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { getMercadopagoAuthorizationUrl, shouldRefreshToken } from "@/lib/mercadopago";
+import {
+  getMercadopagoAuthorizationUrl,
+  shouldRefreshToken,
+} from "@/lib/mercadopago";
 import { refreshOrganizationTokensInBackground } from "@/lib/helpers/refresh-tokens-background";
 
 interface ConfiguracionPageProps {
@@ -63,17 +66,18 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   const mpOauthUrl = await getMercadopagoAuthorizationUrl(organizationId);
 
   // Smart background token refresh: only trigger if we actually have tokens that need refreshing
-  // Check if any MercadoPago accounts have tokens expiring in < 30 days
-  const hasTokensNeedingRefresh = fullOrganization.paymentProcessorAccount?.some(
+  // Filter MercadoPago accounts that have refresh tokens and are expiring in < 30 days
+  const accountsNeedingRefresh = fullOrganization.paymentProcessorAccount.filter(
     (account) =>
-      account.processorType === "mercadopago" &&
+      account.processorType === "mercadopago" && // Must be MercadoPago
       account.refreshToken && // Must have a refresh token
-      shouldRefreshToken(account.tokenExpiresAt)
+      shouldRefreshToken(account.tokenExpiresAt) // Must be expiring soon (< 30 days)
   );
 
-  if (hasTokensNeedingRefresh) {
+  if (accountsNeedingRefresh.length > 0) {
     // Only trigger background refresh if there's actually something to refresh
-    refreshOrganizationTokensInBackground(organizationId);
+    // Pass the filtered accounts to avoid another DB query
+    refreshOrganizationTokensInBackground(organizationId, accountsNeedingRefresh);
   }
 
   return (

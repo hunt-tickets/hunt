@@ -1,10 +1,10 @@
 import { db } from "@/lib/drizzle";
-import { paymentProcessorAccount } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
 import {
-  refreshMercadopagoToken,
-  shouldRefreshToken,
-} from "@/lib/mercadopago";
+  paymentProcessorAccount,
+  type PaymentProcessorAccount,
+} from "@/lib/schema";
+import { eq } from "drizzle-orm";
+import { refreshMercadopagoToken, shouldRefreshToken } from "@/lib/mercadopago";
 
 /**
  * Background token refresh for an organization
@@ -16,13 +16,15 @@ import {
  * The page will render immediately with current data, and the
  * refresh happens in the background.
  *
- * @param organizationId - The organization to refresh tokens for
+ * @param organizationId - The organization ID (for logging)
+ * @param accounts - The payment processor accounts to check/refresh
  */
 export function refreshOrganizationTokensInBackground(
-  organizationId: string
+  organizationId: string,
+  accounts: PaymentProcessorAccount[]
 ): void {
   // Fire-and-forget: Don't await, let it run in background
-  performBackgroundRefresh(organizationId).catch((error) => {
+  performBackgroundRefresh(organizationId, accounts).catch((error) => {
     // Log errors but don't throw - this is background work
     console.error(
       `[Background Refresh] Failed for org ${organizationId}:`,
@@ -35,45 +37,31 @@ export function refreshOrganizationTokensInBackground(
  * Internal function that does the actual refresh work
  */
 async function performBackgroundRefresh(
-  organizationId: string
+  organizationId: string,
+  accounts: PaymentProcessorAccount[]
 ): Promise<void> {
   try {
-    // Find all active MercadoPago accounts for this organization
-    const accounts = await db
-      .select()
-      .from(paymentProcessorAccount)
-      .where(
-        and(
-          eq(paymentProcessorAccount.organizationId, organizationId),
-          eq(paymentProcessorAccount.processorType, "mercadopago"),
-          eq(paymentProcessorAccount.status, "active")
-        )
-      );
+    // Filter to only active MercadoPago accounts that need refreshing
+    const accountsToRefresh = accounts.filter(
+      (account) =>
+        account.processorType === "mercadopago" &&
+        account.status === "active" &&
+        account.refreshToken &&
+        shouldRefreshToken(account.tokenExpiresAt)
+    );
 
-    if (accounts.length === 0) {
-      return; // No accounts to refresh
+    if (accountsToRefresh.length === 0) {
+      return; // No accounts need refreshing
     }
 
-    // Check and refresh each account if needed
-    for (const account of accounts) {
-      // Skip if token doesn't need refresh yet
-      if (!shouldRefreshToken(account.tokenExpiresAt)) {
-        continue;
-      }
-
-      // Skip if no refresh token
-      if (!account.refreshToken) {
-        console.warn(
-          `[Background Refresh] Account ${account.id} has no refresh token`
-        );
-        continue;
-      }
-
+    // Refresh each account (already filtered to only those needing refresh)
+    for (const account of accountsToRefresh) {
       console.log(
         `[Background Refresh] Refreshing token for account ${account.id}...`
       );
 
       try {
+        if (account.refreshToken === null) return;
         // Refresh the token
         const newCredentials = await refreshMercadopagoToken(
           account.refreshToken
@@ -84,8 +72,7 @@ async function performBackgroundRefresh(
           .update(paymentProcessorAccount)
           .set({
             accessToken: newCredentials.access_token,
-            refreshToken:
-              newCredentials.refresh_token || account.refreshToken,
+            refreshToken: newCredentials.refresh_token || account.refreshToken,
             tokenExpiresAt: newCredentials.expires_in
               ? new Date(Date.now() + newCredentials.expires_in * 1000)
               : null,
