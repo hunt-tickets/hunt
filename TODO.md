@@ -9,9 +9,7 @@
 - descargar tickets
 - reembolsos con Oscar
 - en /entradas hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
-- en el webhook, acceder del pago la informacion sobre impuestos y guardarlos en la db
-
-
+- tracking de comisiones a los vendedores en el tab de Vendedores
 
 Notes
 <!-- 41.1.1. Advantages of Using PL/pgSQL
@@ -230,7 +228,8 @@ Format: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQ..."
   With Base64 in Database:                                                                                                                                                             
   SELECT email FROM users WHERE id = 1;                                                                                                                                                
                                                                                                                                                                                        
-  What PostgreSQL does:                                                                                                                                                                
+  What PostgreSQL 
+  does:                                                                                                                                                                
   1. Find row for user ID 1                                                                                                                                                            
   2. Load ENTIRE row into memory (including 667 KB avatar!)                                                                                                                            
   3. Extract just the 'email' field                                                                                                                                                    

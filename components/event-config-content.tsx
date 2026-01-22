@@ -378,6 +378,9 @@ export function EventConfigContent({
     Array<{ id: string; url: string }>
   >([]);
 
+  const [isUploadingFlyer, setIsUploadingFlyer] = useState(false);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+
   interface FAQ {
     id: string;
     question: string;
@@ -435,20 +438,145 @@ export function EventConfigContent({
     }));
   };
 
-  const handleImageUpload = (
+  const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     imageType: "banner"
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImages((prev) => ({
-          ...prev,
-          [imageType]: (event.target?.result as string) || null,
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validate eventId exists
+    if (!eventId) {
+      toast.error({ title: "Error: eventId no disponible" });
+      return;
+    }
+
+    // Validate file size
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error({ title: "La imagen no puede superar 5MB" });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error({ title: "Solo se permiten imágenes JPG, PNG y WebP" });
+      return;
+    }
+
+    setIsUploadingFlyer(true);
+
+    try {
+      // Create FormData
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("organizationId", organizationId);
+      formData.append("eventId", eventId);
+      formData.append("imageType", "flyer");
+
+      // Upload to server
+      const response = await fetch("/api/events/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Error al subir la imagen");
+      }
+
+      // Update state with uploaded image URL
+      setImages((prev) => ({
+        ...prev,
+        [imageType]: data.url,
+      }));
+
+      toast.success({ title: "Imagen subida exitosamente" });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error({
+        title: error instanceof Error ? error.message : "Error al subir la imagen",
+      });
+    } finally {
+      setIsUploadingFlyer(false);
+    }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Validate eventId exists
+    if (!eventId) {
+      toast.error({ title: "Error: eventId no disponible" });
+      e.target.value = "";
+      return;
+    }
+
+    // Validate files
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+    for (const file of files) {
+      if (file.size > maxSize) {
+        toast.error({ title: `${file.name} supera el límite de 5MB` });
+        e.target.value = "";
+        return;
+      }
+      if (!allowedTypes.includes(file.type)) {
+        toast.error({ title: `${file.name} no es un formato válido` });
+        e.target.value = "";
+        return;
+      }
+    }
+
+    setIsUploadingGallery(true);
+
+    try {
+      // Upload all files in parallel
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("organizationId", organizationId);
+        formData.append("eventId", eventId);
+        formData.append("imageType", "gallery");
+
+        const response = await fetch("/api/events/upload-image", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Error al subir la imagen");
+        }
+
+        return {
+          id: data.path, // Use path as unique ID
+          url: data.url,
+        };
+      });
+
+      const uploadedImages = await Promise.all(uploadPromises);
+
+      // Add uploaded images to gallery
+      setGalleryImages((prev) => [...prev, ...uploadedImages]);
+
+      toast.success({
+        title: `${uploadedImages.length} imagen${uploadedImages.length > 1 ? "es" : ""} subida${uploadedImages.length > 1 ? "s" : ""} exitosamente`,
+      });
+    } catch (error) {
+      console.error("Error uploading gallery images:", error);
+      toast.error({
+        title: error instanceof Error ? error.message : "Error al subir imágenes",
+      });
+    } finally {
+      setIsUploadingGallery(false);
+      // Reset input
+      e.target.value = "";
     }
   };
 
@@ -1132,7 +1260,16 @@ export function EventConfigContent({
                     Recomendado: 900x1200px (ratio 3:4), máximo 5MB
                   </p>
 
-                  {images.banner ? (
+                  {isUploadingFlyer ? (
+                    <div className="flex flex-col items-center justify-center aspect-[3/4] max-w-xs border-2 border-dashed border-gray-300 dark:border-white/20 rounded-lg bg-gray-50 dark:bg-white/5">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white mb-2" />
+                        <p className="text-sm text-gray-600 dark:text-white/60">
+                          Subiendo imagen...
+                        </p>
+                      </div>
+                    </div>
+                  ) : images.banner ? (
                     <div className="relative aspect-[3/4] max-w-xs rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
                       <img
                         src={images.banner as string}
@@ -1167,6 +1304,7 @@ export function EventConfigContent({
                         accept="image/*"
                         onChange={(e) => handleImageUpload(e, "banner")}
                         className="hidden"
+                        disabled={isUploadingFlyer}
                       />
                     </label>
                   )}
@@ -1194,34 +1332,19 @@ export function EventConfigContent({
                           // Trigger file input
                           document.getElementById("gallery-upload")?.click();
                         }}
+                        disabled={isUploadingGallery}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Agregar Imagen
+                        {isUploadingGallery ? "Subiendo..." : "Agregar Imagen"}
                       </Button>
                       <input
                         id="gallery-upload"
                         type="file"
                         accept="image/*"
                         multiple
-                        onChange={(e) => {
-                          const files = Array.from(e.target.files || []);
-                          files.forEach((file) => {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              setGalleryImages((prev) => [
-                                ...prev,
-                                {
-                                  id: Date.now().toString() + Math.random(),
-                                  url: (event.target?.result as string) || "",
-                                },
-                              ]);
-                            };
-                            reader.readAsDataURL(file);
-                          });
-                          // Reset input
-                          e.target.value = "";
-                        }}
+                        onChange={handleGalleryUpload}
                         className="hidden"
+                        disabled={isUploadingGallery}
                       />
                     </label>
                   </div>
@@ -1274,9 +1397,10 @@ export function EventConfigContent({
                           onClick={() => {
                             document.getElementById("gallery-upload")?.click();
                           }}
+                          disabled={isUploadingGallery}
                         >
                           <Upload className="h-4 w-4 mr-2" />
-                          Subir Imágenes
+                          {isUploadingGallery ? "Subiendo..." : "Subir Imágenes"}
                         </Button>
                       </label>
                     </div>
