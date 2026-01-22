@@ -61,8 +61,15 @@ async function performBackgroundRefresh(
       );
 
       try {
-        if (account.refreshToken === null) return;
-        // Refresh the token
+        // TypeScript type guard - ensure refreshToken is not null
+        if (!account.refreshToken) {
+          console.warn(
+            `[Background Refresh] Account ${account.id} has no refresh token - skipping`
+          );
+          continue;
+        }
+
+        // Refresh the token (refreshToken is now guaranteed to be string)
         const newCredentials = await refreshMercadopagoToken(
           account.refreshToken
         );
