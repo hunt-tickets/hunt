@@ -4,9 +4,10 @@ import { headers } from "next/headers";
 import { AdminConfigTabs } from "@/components/admin-config-tabs";
 import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
-import { paymentProcessorAccount } from "@/lib/schema";
+import { organization } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getMercadopagoAuthorizationUrl } from "@/lib/mercadopago";
+import { refreshOrganizationTokensInBackground } from "@/lib/helpers/refresh-tokens-background";
 
 interface ConfiguracionPageProps {
   params: Promise<{
@@ -34,23 +35,23 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
     );
   }
 
-  // Get full organization details with members and invitations
-  const fullOrganization = await auth.api.getFullOrganization({
-    query: {
-      organizationId,
+  // Get full organization details with members, invitations, and payment accounts
+  const fullOrganization = await db.query.organization.findFirst({
+    where: eq(organization.id, organizationId),
+    with: {
+      members: {
+        with: {
+          user: true,
+        },
+      },
+      invitations: true,
+      paymentProcessorAccount: true,
     },
-    headers: reqHeaders,
   });
 
   if (!fullOrganization) {
     notFound();
   }
-
-  // Get payment accounts for this organization
-  const paymentAccounts = await db
-    .select()
-    .from(paymentProcessorAccount)
-    .where(eq(paymentProcessorAccount.organizationId, organizationId));
 
   // Get current user's role in the organization
   const currentUserMember = fullOrganization.members?.find(
@@ -58,43 +59,12 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   );
   const currentUserRole = currentUserMember?.role || "member";
 
-  // Organization data with payment accounts
-  // Additional fields (tipoOrganizacion, nombres, etc.) are automatically
-  // included by Better Auth via additionalFields in the organization plugin
-  const organizationData = {
-    ...fullOrganization,
-    paymentAccounts,
-  };
-
-  // Map team members to include phoneNumber (default to null if not present)
-  const teamMembers = (fullOrganization.members || []).map(
-    (member: {
-      id: string;
-      userId: string;
-      role: string;
-      organizationId: string;
-      createdAt: Date;
-      user?: {
-        id: string;
-        name: string;
-        email: string;
-        image?: string;
-        phoneNumber?: string;
-      };
-    }) => ({
-      ...member,
-      user: member.user
-        ? {
-            ...member.user,
-            phoneNumber: member.user.phoneNumber || null,
-          }
-        : undefined,
-    })
-  );
-  const invitations = fullOrganization.invitations || [];
-
   // Get MercadoPago OAuth URL
   const mpOauthUrl = await getMercadopagoAuthorizationUrl(organizationId);
+
+  // Trigger background token refresh for this organization (non-blocking)
+  // This checks all MercadoPago accounts and refreshes tokens expiring in <30 days
+  refreshOrganizationTokensInBackground(organizationId);
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
@@ -105,9 +75,7 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
       />
 
       <AdminConfigTabs
-        organization={organizationData}
-        team={teamMembers}
-        invitations={invitations}
+        organization={fullOrganization}
         currentUserRole={currentUserRole}
         currentUserId={userId}
         mpOauthUrl={mpOauthUrl}

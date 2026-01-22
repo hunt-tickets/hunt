@@ -42,22 +42,38 @@ import { Button } from "@/components/ui/button";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { EditOrganizationForm } from "@/components/edit-organization-form";
 import { AdminPaymentSettings } from "@/components/admin-payment-settings";
-import type { OrganizationData, Invitation, User } from "@/lib/schema";
-
-// Member data as returned by Better Auth API (role is string, not enum)
-interface MemberWithUser {
-  id: string;
-  userId: string;
-  organizationId: string;
-  role: string;
-  createdAt: Date;
-  user?: Pick<User, "id" | "name" | "email" | "phoneNumber">;
-}
+import type { User, Invitation, PaymentProcessorAccount } from "@/lib/schema";
 
 interface AdminConfigTabsProps {
-  organization: OrganizationData | null;
-  team: MemberWithUser[];
-  invitations: Invitation[];
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    logo: string | null;
+    createdAt: Date;
+    metadata: string | null;
+    tipoOrganizacion: string | null;
+    nombres: string | null;
+    apellidos: string | null;
+    tipoDocumento: string | null;
+    numeroDocumento: string | null;
+    nit: string | null;
+    direccion: string | null;
+    numeroTelefono: string | null;
+    correoElectronico: string | null;
+    rutUrl: string | null;
+    cerlUrl: string | null;
+    members: {
+      id: string;
+      createdAt: Date;
+      role: "owner" | "administrator" | "seller";
+      userId: string;
+      organizationId: string;
+      user: User;
+    }[];
+    invitations: Invitation[];
+    paymentProcessorAccount: PaymentProcessorAccount[];
+  };
   currentUserRole: string;
   currentUserId: string;
   mpOauthUrl?: string;
@@ -67,8 +83,6 @@ type TabType = "general" | "equipo" | "procesadores";
 
 export function AdminConfigTabs({
   organization,
-  team,
-  invitations,
   currentUserRole,
   currentUserId,
   mpOauthUrl,
@@ -81,6 +95,10 @@ export function AdminConfigTabs({
   );
   const [removingMember, setRemovingMember] = useState<string | null>(null);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+
+  // Extract team and invitations from organization
+  const team = organization.members || [];
+  const invitations = organization.invitations || [];
 
   const displayTeam = team.length > 0 ? team : [];
 

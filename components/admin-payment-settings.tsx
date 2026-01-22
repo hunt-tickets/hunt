@@ -41,8 +41,8 @@ export function AdminPaymentSettings({
 
   // If no payment accounts, show available payment processors
   if (
-    !organization.paymentAccounts ||
-    organization.paymentAccounts.length === 0
+    !organization.paymentProcessorAccount ||
+    organization.paymentProcessorAccount.length === 0
   ) {
     return (
       <div className="space-y-6">
@@ -126,7 +126,7 @@ export function AdminPaymentSettings({
                 Total Procesadores
               </p>
               <p className="text-lg sm:text-xl font-bold text-white">
-                {organization.paymentAccounts?.length || 0}
+                {organization.paymentProcessorAccount?.length || 0}
               </p>
             </div>
           </div>
@@ -141,7 +141,7 @@ export function AdminPaymentSettings({
               <p className="text-xs sm:text-sm text-white/50">Activos</p>
               <p className="text-lg sm:text-xl font-bold text-white">
                 {
-                  organization.paymentAccounts?.filter(
+                  organization.paymentProcessorAccount?.filter(
                     (acc) => acc.status === "active"
                   ).length
                 }
@@ -159,7 +159,7 @@ export function AdminPaymentSettings({
               <p className="text-xs sm:text-sm text-white/50">Inactivos</p>
               <p className="text-lg sm:text-xl font-bold text-white">
                 {
-                  organization.paymentAccounts?.filter(
+                  organization.paymentProcessorAccount?.filter(
                     (acc) => acc.status === "inactive"
                   ).length
                 }

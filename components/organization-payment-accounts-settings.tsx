@@ -9,6 +9,7 @@ import { CreditCard, CheckCircle, Clock, Wallet } from "lucide-react";
 import AddPaymentProcessorDialog from "./add-payment-processor-dialog";
 import { PaymentAccountActions } from "./payment-status-actions";
 import { PaymentStatusSwitch } from "./payment-status-switch";
+import { TokenExpirationWarning } from "./token-expiration-warning";
 import Image from "next/image";
 import type {
   PaymentProcessorType,
@@ -23,7 +24,7 @@ interface PaymentSettingsProps {
 
 const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
   // Get payment accounts from the organization
-  const paymentAccounts = org?.paymentAccounts || [];
+  const paymentAccounts = org?.paymentProcessorAccount || [];
 
   const formatProcessorName = (type: PaymentProcessorType) => {
     switch (type) {
@@ -197,7 +198,7 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <Clock className="h-3 w-3" />
                                   <span>
-                                    Expires{" "}
+                                    Expira{" "}
                                     {new Date(
                                       account.tokenExpiresAt
                                     ).toLocaleDateString()}
@@ -206,12 +207,24 @@ const PaymentSettings = ({ org, mpOauthUrl = "" }: PaymentSettingsProps) => {
                               )}
 
                               <div className="text-xs text-muted-foreground">
-                                Connected{" "}
+                                Conectado{" "}
                                 {new Date(
                                   account.createdAt
                                 ).toLocaleDateString()}
                               </div>
                             </div>
+
+                            {/* Token Expiration Warning - Only for MercadoPago */}
+                            {account.processorType === "mercadopago" && (
+                              <TokenExpirationWarning
+                                accountId={account.id}
+                                processorName={formatProcessorName(
+                                  account.processorType
+                                )}
+                                tokenExpiresAt={account.tokenExpiresAt}
+                                hasRefreshToken={!!account.refreshToken}
+                              />
+                            )}
                           </div>
                         </div>
 

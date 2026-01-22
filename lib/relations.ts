@@ -12,6 +12,7 @@ import {
   orders,
   orderItems,
   refunds,
+  paymentProcessorAccount,
 } from "./schema";
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -50,7 +51,18 @@ export const passkeyRelations = relations(passkey, ({ one }) => ({
 export const organizationRelations = relations(organization, ({ many }) => ({
   members: many(member),
   invitations: many(invitation),
+  paymentProcessorAccount: many(paymentProcessorAccount),
 }));
+
+export const paymentProcessorAccountRelations = relations(
+  paymentProcessorAccount,
+  ({ one }) => ({
+    organization: one(organization, {
+      fields: [paymentProcessorAccount.organizationId],
+      references: [organization.id],
+    }),
+  })
+);
 
 export const memberRelations = relations(member, ({ one }) => ({
   organization: one(organization, {

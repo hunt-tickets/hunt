@@ -1147,7 +1147,7 @@ export interface OrganizationData {
   correoElectronico?: string | null;
   rutUrl?: string | null;
   cerlUrl?: string | null;
-  paymentAccounts?: PaymentProcessorAccount[];
+  paymentProcessorAccount?: PaymentProcessorAccount[];
 }
 
 // Keep backward compatibility
