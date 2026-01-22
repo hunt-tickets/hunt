@@ -6,7 +6,7 @@ import { AdminHeader } from "@/components/admin-header";
 import { db } from "@/lib/drizzle";
 import { organization } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { getMercadopagoAuthorizationUrl } from "@/lib/mercadopago";
+import { getMercadopagoAuthorizationUrl, shouldRefreshToken } from "@/lib/mercadopago";
 import { refreshOrganizationTokensInBackground } from "@/lib/helpers/refresh-tokens-background";
 
 interface ConfiguracionPageProps {
@@ -62,9 +62,19 @@ const ConfiguracionPage = async ({ params }: ConfiguracionPageProps) => {
   // Get MercadoPago OAuth URL
   const mpOauthUrl = await getMercadopagoAuthorizationUrl(organizationId);
 
-  // Trigger background token refresh for this organization (non-blocking)
-  // This checks all MercadoPago accounts and refreshes tokens expiring in <30 days
-  refreshOrganizationTokensInBackground(organizationId);
+  // Smart background token refresh: only trigger if we actually have tokens that need refreshing
+  // Check if any MercadoPago accounts have tokens expiring in < 30 days
+  const hasTokensNeedingRefresh = fullOrganization.paymentProcessorAccount?.some(
+    (account) =>
+      account.processorType === "mercadopago" &&
+      account.refreshToken && // Must have a refresh token
+      shouldRefreshToken(account.tokenExpiresAt)
+  );
+
+  if (hasTokensNeedingRefresh) {
+    // Only trigger background refresh if there's actually something to refresh
+    refreshOrganizationTokensInBackground(organizationId);
+  }
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-6 space-y-6">
