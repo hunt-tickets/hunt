@@ -1,24 +1,20 @@
 - Acceso a creacion de Organizaciones tiene que ser restringido (Book a demo)
 - Webhook para facturacion
 - Scanner
-
-- Terminar event_days y Events 
-- Palcos, silla enum. 
-- Programa de referidos 
-- apple wallet 
+- Terminar event_days y Events
+- Palcos, silla enum.
+- Programa de referidos
+- apple wallet
 - Analytics de ruta de eventos (organizaciones)
 - descargar tickets
 - reembolsos con Oscar
 - en /entradas hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
 - en el webhook, acceder del pago la informacion sobre impuestos y guardarlos en la db
 
-├ ƒ /profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId] 13.6 kB 571 kB
-├ ƒ /profile/[userId]/organizaciones/[organizationId]/administrador/event/[eventId]/entradas 9.93 kB 537 kB
-├ ƒ /profile 40.5 kB 274 kB
-├ ○ /productor 129 kB 234 kB
+
 
 Notes
-<!-- 41.1.1. Advantages of Using PL/pgSQL 
+<!-- 41.1.1. Advantages of Using PL/pgSQL
 SQL is the language PostgreSQL and most other relational databases use as query language. It's portable and easy to learn. But every SQL statement must be executed individually by the database server.
 
 That means that your client application must send each query to the database server, wait for it to be processed, receive and process the results, do some computation, then send further queries to the server. All this incurs interprocess communication and will also incur network overhead if your client is on a different machine than the database server.
@@ -34,10 +30,6 @@ Multiple rounds of query parsing can be avoided
 This can result in a considerable performance increase as compared to an application that does not use stored functions.
 
 Also, with PL/pgSQL you can use all the data types, operators and functions of SQL. -->
-
-
-
-
 
 <!-- DECLARE
     v_order_id UUID;
@@ -200,3 +192,106 @@ Also, with PL/pgSQL you can use all the data types, operators and functions of S
     RETURN QUERY
     SELECT v_order_id, v_ticket_ids;
   END; -->
+
+
+base64 converts binary to text
+i.e.: Base64 encoded: 500 KB image = 667 KB in database (+33% larger!)                                                                                                                     
+Format: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQ..."       
+ Base64 converts binary to text:                                                                                                                                                      
+  Binary:    [0xFF, 0xD8, 0xFF]  (3 bytes)                                                                                                                                             
+             ↓ Convert to Base64                                                                                                                                                       
+  Base64:    "/9j/"              (4 characters)                                                                                                                                        
+                                                                                                                                                                                       
+  Every 3 bytes becomes 4 characters = 33% size increase   
+
+  saving base64 in a sql table is not efficient since to qeury a row, the entire row must be searched and loaded to memory                                                                                                               
+
+   Database Architecture:                                                                                                                                                               
+  ┌─────────────────────────────────────────┐                                                                                                                                          
+  │  PostgreSQL                             │                                                                                                                                          
+  │                                         │                                                                                                                                          
+  │  Table: users                           │                                                                                                                                          
+  │  ┌─────────────────────────────────┐   │                                                                                                                                           
+  │  │ Row 1:                          │   │                                                                                                                                           
+  │  │ ├─ id: 1                        │   │                                                                                                                                           
+  │  │ ├─ name: "John"                 │   │                                                                                                                                           
+  │  │ └─ avatar: "/9j/4AAQSkZJ..."   │   │                                                                                                                                            
+  │  │            (667 KB TEXT)        │   │                                                                                                                                           
+  │  │                                 │   │                                                                                                                                           
+  │  │ Problem: Entire row must be     │   │                                                                                                                                           
+  │  │ loaded to query ANY field       │   │                                                                                                                                           
+  │  └─────────────────────────────────┘   │                                                                                                                                           
+  └─────────────────────────────────────────┘                                                                                                                                          
+                                                 
+ Real-World Example                                                                                                                                                                   
+                                                                                                                                                                                       
+  Scenario: Fetch user's email                                                                                                                                                         
+                                                                                                                                                                                       
+  With Base64 in Database:                                                                                                                                                             
+  SELECT email FROM users WHERE id = 1;                                                                                                                                                
+                                                                                                                                                                                       
+  What PostgreSQL does:                                                                                                                                                                
+  1. Find row for user ID 1                                                                                                                                                            
+  2. Load ENTIRE row into memory (including 667 KB avatar!)                                                                                                                            
+  3. Extract just the 'email' field                                                                                                                                                    
+  4. Return "john@example.com"                                                                                                                                                         
+                                                                                                                                                                                       
+  💀 Problem: Had to load 667 KB to get 20 bytes!                                                                                                                                      
+                                                                                                                                                                                       
+  With Object Storage:                                                                                                                                                                 
+  SELECT email FROM users WHERE id = 1;                                                                                                                                                
+                                                                                                                                                                                       
+  What PostgreSQL does:                                                                                                                                                                
+  1. Find row for user ID 1                                                                                                                                                            
+  2. Load row (id, name, email, avatar_url)                                                                                                                                            
+  3. Row size: ~100 bytes (just the URL string!)                                                                                                                                       
+  4. Return "john@example.com"                                                                                                                                                         
+                                                                                                                                                                                       
+  ✅ Efficient: Only loaded 100 bytes!                                                                                                                                                 
+                                                                                                                                                                                       
+  ---                                       
+
+
+  Base64 encoded images are typically 33% to 37% larger than the original binary file. 
+
+This increase happens because Base64 converts binary data (8 bits per byte) into an ASCII string representation (6 bits per character, effectively using 8 bits to store them), resulting in roughly 4 bytes of text for every 3 bytes of original data. 
+
+
+Generally no. Base64 will occupy more space than necessary to store those images. Depending on the size of your images and how frequently they’re accessed, it is generally not an optimal stress to put on the database.
+
+You should store them on the file system or in something like Azure blob storage.
+
+
+98
+metaltyphoon
+•
+4y ago
+To follow up on this, the only thing you store on your database is the URI of where the bytes are stored.
+
+18
+
+5 more replies
+[deleted]
+•
+4y ago
+Your probably better using a dedicated file storage like s3 or azure equivalent.
+
+57
+
+10 more replies
+u/MrMasterplan avatar
+MrMasterplan
+•
+4y ago
+I’d keep it binary, but generally the idea is fine for small images. I’ve seen it done for avatars and icons. Just don’t go storing your photo collection like this.
+
+39
+
+1 more reply
+u/StackedLasagna avatar
+StackedLasagna
+•
+4y ago
+I'd say that generally, you should store the images in the file system.
+
+Create a folder structure that makes sense for you and then store the path of the file or the file name in the DB.

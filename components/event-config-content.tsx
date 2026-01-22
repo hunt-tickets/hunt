@@ -53,12 +53,10 @@ import {
 } from "@/constants/event-categories";
 import { EventConfigCheckoutTab } from "@/components/event-config-checkout-tab";
 
-// Countries and Cities
-// const COUNTRIES = [
-//   { value: "CO", label: "Colombia" },
-// ];
-
-const CITIES_BY_COUNTRY: Record<string, Array<{ value: string; label: string }>> = {
+const CITIES_BY_COUNTRY: Record<
+  string,
+  Array<{ value: string; label: string }>
+> = {
   CO: [
     // Principales ciudades
     { value: "Bogotá", label: "Bogotá" },
@@ -334,7 +332,10 @@ export function EventConfigContent({
       }
 
       // Initialize Checkout Questions if available
-      if (eventData.checkout_questions && Array.isArray(eventData.checkout_questions)) {
+      if (
+        eventData.checkout_questions &&
+        Array.isArray(eventData.checkout_questions)
+      ) {
         setCheckoutQuestions(eventData.checkout_questions);
       }
 
@@ -373,6 +374,10 @@ export function EventConfigContent({
     banner: null,
   });
 
+  const [galleryImages, setGalleryImages] = useState<
+    Array<{ id: string; url: string }>
+  >([]);
+
   interface FAQ {
     id: string;
     question: string;
@@ -400,14 +405,22 @@ export function EventConfigContent({
     sort_order: number;
   }
 
-  const [checkoutQuestions, setCheckoutQuestions] = useState<CheckoutQuestion[]>([]);
-  const [editingQuestion, setEditingQuestion] = useState<CheckoutQuestion | null>(null);
+  const [checkoutQuestions, setCheckoutQuestions] = useState<
+    CheckoutQuestion[]
+  >([]);
+  const [editingQuestion, setEditingQuestion] =
+    useState<CheckoutQuestion | null>(null);
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
-  const [draggedQuestionIndex, setDraggedQuestionIndex] = useState<number | null>(null);
-  const [dragOverQuestionIndex, setDragOverQuestionIndex] = useState<number | null>(null);
+  const [draggedQuestionIndex, setDraggedQuestionIndex] = useState<
+    number | null
+  >(null);
+  const [dragOverQuestionIndex, setDragOverQuestionIndex] = useState<
+    number | null
+  >(null);
 
   const tabs = [
     { id: "information", label: "Información", icon: Settings },
+    { id: "images", label: "Imágenes", icon: ImageIcon },
     { id: "faqs", label: "FAQs", icon: HelpCircle },
     { id: "checkout", label: "Checkout", icon: ShoppingCart },
   ];
@@ -550,7 +563,9 @@ export function EventConfigContent({
   };
 
   // Checkout Questions Functions
-  const saveCheckoutQuestions = async (updatedQuestions: CheckoutQuestion[]) => {
+  const saveCheckoutQuestions = async (
+    updatedQuestions: CheckoutQuestion[]
+  ) => {
     if (!eventId) return;
 
     try {
@@ -561,7 +576,10 @@ export function EventConfigContent({
       });
 
       if (!result.success) {
-        console.error("Error al guardar preguntas de checkout:", result.message);
+        console.error(
+          "Error al guardar preguntas de checkout:",
+          result.message
+        );
       }
     } catch (error) {
       console.error("Error saving checkout questions:", error);
@@ -653,171 +671,175 @@ export function EventConfigContent({
   );
 
   // Content section
-  const contentSection = activeTab === "checkout" ? (
-    // Full width layout for Checkout tab
-    <div className="space-y-4">
-      {/* Checkout Questions Tab */}
-      {activeTab === "checkout" && (
-        <EventConfigCheckoutTab
-          checkoutQuestions={checkoutQuestions}
-          isAddingQuestion={isAddingQuestion}
-          editingQuestion={editingQuestion}
-          draggedQuestionIndex={draggedQuestionIndex}
-          dragOverQuestionIndex={dragOverQuestionIndex}
-          setIsAddingQuestion={setIsAddingQuestion}
-          setEditingQuestion={setEditingQuestion}
-          handleQuestionDragStart={handleQuestionDragStart}
-          handleQuestionDragOver={handleQuestionDragOver}
-          handleQuestionDragLeave={handleQuestionDragLeave}
-          handleQuestionDrop={handleQuestionDrop}
-          handleQuestionDragEnd={handleQuestionDragEnd}
-          deleteCheckoutQuestion={deleteCheckoutQuestion}
-        />
-      )}
-    </div>
-  ) : (
-    // Two-column layout for Information and FAQs tabs
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left Column - Main Content */}
-      <div className="lg:col-span-2 space-y-4">
-        {/* Information Section */}
-        {activeTab === "information" && (
-          <div className="space-y-6">
-            {/* Basic Information */}
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-gray-600 dark:text-gray-600 dark:text-white/60" />
-                  <div>
-                    <CardTitle>Información Básica</CardTitle>
-                    <CardDescription className="text-gray-500 dark:text-gray-400">
-                      Detalles principales de tu evento
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {/* Event Name */}
-                <FormInput
-                  id="eventName"
-                  name="eventName"
-                  label="Nombre del Evento"
-                  value={formData.eventName}
-                  onChange={handleInputChange}
-                  placeholder="ej. Festival de Música 2024"
-                  required
-                />
-
-                {/* Description */}
-                <FormTextarea
-                  id="description"
-                  name="description"
-                  label="Descripción"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe tu evento, artistas, atracciones y todo lo que los asistentes deben saber..."
-                  hint="Esta descripción será visible para todos los usuarios"
-                  rows={5}
-                  maxLength={1000}
-                  showCharCount
-                />
-
-                {/* Category */}
-                <FormModalSelect
-                  id="category"
-                  name="category"
-                  label="Categoría"
-                  value={formData.category || ""}
-                  onChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      category: value as (typeof EVENT_CATEGORIES)[number],
-                    }))
-                  }
-                  options={EVENT_CATEGORIES.map((cat) => ({
-                    value: cat,
-                    label: EVENT_CATEGORY_LABELS[cat],
-                  }))}
-                  placeholder="Selecciona una categoría"
-                  hint="La categoría ayuda a que tu evento aparezca en búsquedas y filtros, aumentando su visibilidad"
-                  required
-                />
-
-                {/* Age Restriction */}
-                <FormModalSelect
-                  id="age"
-                  name="age"
-                  label="Edad Mínima"
-                  value={formData.age || 0}
-                  onChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      age: parseInt(value),
-                    }))
-                  }
-                  options={[
-                    { value: "0", label: "Para todo público" },
-                    { value: "12", label: "12+" },
-                    { value: "18", label: "18+" },
-                    { value: "21", label: "21+" },
-                    { value: "25", label: "25+" },
-                  ]}
-                  hint="Edad mínima requerida para asistir al evento"
-                />
-
-                {/* Private Event */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
-                    <div className="space-y-1 flex-1">
-                      <Label htmlFor="isPrivate" className="text-sm font-medium cursor-pointer">
-                        Evento Privado
-                      </Label>
-                      <p className="text-xs text-gray-500 dark:text-white/40">
-                        Los eventos privados no aparecen en búsquedas públicas
-                      </p>
+  const contentSection =
+    activeTab === "checkout" ? (
+      // Full width layout for Checkout tab
+      <div className="space-y-4">
+        {/* Checkout Questions Tab */}
+        {activeTab === "checkout" && (
+          <EventConfigCheckoutTab
+            checkoutQuestions={checkoutQuestions}
+            isAddingQuestion={isAddingQuestion}
+            editingQuestion={editingQuestion}
+            draggedQuestionIndex={draggedQuestionIndex}
+            dragOverQuestionIndex={dragOverQuestionIndex}
+            setIsAddingQuestion={setIsAddingQuestion}
+            setEditingQuestion={setEditingQuestion}
+            handleQuestionDragStart={handleQuestionDragStart}
+            handleQuestionDragOver={handleQuestionDragOver}
+            handleQuestionDragLeave={handleQuestionDragLeave}
+            handleQuestionDrop={handleQuestionDrop}
+            handleQuestionDragEnd={handleQuestionDragEnd}
+            deleteCheckoutQuestion={deleteCheckoutQuestion}
+          />
+        )}
+      </div>
+    ) : (
+      // Two-column layout for Information and FAQs tabs
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Main Content */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Information Section */}
+          {activeTab === "information" && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-gray-600 dark:text-gray-600 dark:text-white/60" />
+                    <div>
+                      <CardTitle>Información Básica</CardTitle>
+                      <CardDescription className="text-gray-500 dark:text-gray-400">
+                        Detalles principales de tu evento
+                      </CardDescription>
                     </div>
-                    <Switch
-                      id="isPrivate"
-                      checked={formData.isPrivate}
-                      onCheckedChange={(checked) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          isPrivate: checked,
-                        }))
-                      }
-                    />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  {/* Event Name */}
+                  <FormInput
+                    id="eventName"
+                    name="eventName"
+                    label="Nombre del Evento"
+                    value={formData.eventName}
+                    onChange={handleInputChange}
+                    placeholder="ej. Festival de Música 2024"
+                    required
+                  />
 
-            {/* Location Information */}
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <MapPinned className="h-5 w-5 text-gray-600 dark:text-white/60" />
-                  <div>
-                    <CardTitle>Ubicación</CardTitle>
-                    <CardDescription className="text-gray-500 dark:text-gray-400">
-                      Dónde se llevará a cabo el evento
-                    </CardDescription>
+                  {/* Description */}
+                  <FormTextarea
+                    id="description"
+                    name="description"
+                    label="Descripción"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Describe tu evento, artistas, atracciones y todo lo que los asistentes deben saber..."
+                    hint="Esta descripción será visible para todos los usuarios"
+                    rows={5}
+                    maxLength={1000}
+                    showCharCount
+                  />
+
+                  {/* Category */}
+                  <FormModalSelect
+                    id="category"
+                    name="category"
+                    label="Categoría"
+                    value={formData.category || ""}
+                    onChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        category: value as (typeof EVENT_CATEGORIES)[number],
+                      }))
+                    }
+                    options={EVENT_CATEGORIES.map((cat) => ({
+                      value: cat,
+                      label: EVENT_CATEGORY_LABELS[cat],
+                    }))}
+                    placeholder="Selecciona una categoría"
+                    hint="La categoría ayuda a que tu evento aparezca en búsquedas y filtros, aumentando su visibilidad"
+                    required
+                  />
+
+                  {/* Age Restriction */}
+                  <FormModalSelect
+                    id="age"
+                    name="age"
+                    label="Edad Mínima"
+                    value={formData.age || 0}
+                    onChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        age: parseInt(value),
+                      }))
+                    }
+                    options={[
+                      { value: "0", label: "Para todo público" },
+                      { value: "12", label: "12+" },
+                      { value: "18", label: "18+" },
+                      { value: "21", label: "21+" },
+                      { value: "25", label: "25+" },
+                    ]}
+                    hint="Edad mínima requerida para asistir al evento"
+                  />
+
+                  {/* Private Event */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#252525] transition-colors">
+                      <div className="space-y-1 flex-1">
+                        <Label
+                          htmlFor="isPrivate"
+                          className="text-sm font-medium cursor-pointer"
+                        >
+                          Evento Privado
+                        </Label>
+                        <p className="text-xs text-gray-500 dark:text-white/40">
+                          Los eventos privados no aparecen en búsquedas públicas
+                        </p>
+                      </div>
+                      <Switch
+                        id="isPrivate"
+                        checked={formData.isPrivate}
+                        onCheckedChange={(checked) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            isPrivate: checked,
+                          }))
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {/* Venue Name */}
-                <FormInput
-                  id="venueName"
-                  name="venueName"
-                  label="Nombre del Lugar"
-                  value={formData.venueName}
-                  onChange={handleInputChange}
-                  placeholder="ej. Movistar Arena, Club Colombia, Armando Records"
-                  icon={<MapPinned className="h-4 w-4" />}
-                />
+                </CardContent>
+              </Card>
 
-                {/* Full Address with Google Places Autocomplete - TODO: Fix Google Maps types */}
-                {/* <GooglePlacesAutocomplete
+              {/* Location Information */}
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <MapPinned className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                    <div>
+                      <CardTitle>Ubicación</CardTitle>
+                      <CardDescription className="text-gray-500 dark:text-gray-400">
+                        Dónde se llevará a cabo el evento
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  {/* Venue Name */}
+                  <FormInput
+                    id="venueName"
+                    name="venueName"
+                    label="Nombre del Lugar"
+                    value={formData.venueName}
+                    onChange={handleInputChange}
+                    placeholder="ej. Movistar Arena, Club Colombia, Armando Records"
+                    icon={<MapPinned className="h-4 w-4" />}
+                  />
+
+                  {/* Full Address with Google Places Autocomplete - TODO: Fix Google Maps types */}
+                  {/* <GooglePlacesAutocomplete
                 label="Dirección"
                 defaultValue={formData.address}
                 onPlaceSelect={(place) => {
@@ -830,592 +852,803 @@ export function EventConfigContent({
                 }}
                 required
               /> */}
-                <FormInput
-                  id="address"
-                  name="address"
-                  label="Dirección"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  placeholder="ej. Calle 123 #45-67"
-                  icon={<MapPinned className="h-4 w-4" />}
-                />
-
-                {/* Country and City */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Country - Fixed to Colombia */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">País</Label>
-                    <div className="flex items-center p-4 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] opacity-60 cursor-not-allowed">
-                      <Globe className="h-4 w-4 mr-3 text-gray-500 dark:text-white/40" />
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        Colombia
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* City Select */}
-                  <FormModalSelect
-                    label="Ciudad"
-                    value={formData.city}
-                    onChange={(value) =>
-                      setFormData({ ...formData, city: value })
-                    }
-                    options={CITIES_BY_COUNTRY["CO"] || []}
-                    placeholder="Selecciona una ciudad"
-                    searchable={true}
-                    searchPlaceholder="Buscar ciudad..."
+                  <FormInput
+                    id="address"
+                    name="address"
+                    label="Dirección"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    placeholder="ej. Calle 123 #45-67"
+                    icon={<MapPinned className="h-4 w-4" />}
                   />
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Event Type Selection - Read Only */}
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] relative overflow-hidden">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
-                  <div>
-                    <CardTitle>Tipo de Evento</CardTitle>
-                    <CardDescription className="text-gray-500 dark:text-gray-400">
-                      El tipo de evento no se puede modificar después de crearlo
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="relative">
-                  <div className="opacity-60 pointer-events-none select-none blur-[1px]">
-                    <EventTypeSelector
-                      value={eventType}
-                      onChange={() => {}}
-                      disabled={true}
-                    />
-                  </div>
-                  {/* Lock overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/5 dark:bg-white/5 rounded-lg">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-                      <svg
-                        className="w-4 h-4 text-zinc-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        />
-                      </svg>
-                      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                        {eventType === "single" && "Evento único"}
-                        {eventType === "multi_day" && "Evento de varios días"}
-                        {eventType === "recurring" && "Evento recurrente"}
-                        {eventType === "slots" && "Evento por horarios"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Date & Time Configuration - varies by event type */}
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
-                  <div>
-                    <CardTitle>
-                      {eventType === "single" && "Fecha y Hora"}
-                      {eventType === "multi_day" && "Días del Evento"}
-                      {eventType === "recurring" && "Patrón de Repetición"}
-                      {eventType === "slots" && "Horarios Disponibles"}
-                    </CardTitle>
-                    <CardDescription className="text-gray-500 dark:text-gray-400">
-                      {eventType === "single" &&
-                        "Cuándo se realizará el evento"}
-                      {eventType === "multi_day" &&
-                        "Configura cada día de tu evento"}
-                      {eventType === "recurring" && "Próximamente"}
-                      {eventType === "slots" && "Próximamente"}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {/* Single Event */}
-                {eventType === "single" && (
-                  <SingleDatePicker
-                    startDate={formData.startDate}
-                    endDate={formData.endDate}
-                    onStartDateChange={(value) =>
-                      setFormData((prev) => ({ ...prev, startDate: value }))
-                    }
-                    onEndDateChange={(value) =>
-                      setFormData((prev) => ({ ...prev, endDate: value }))
-                    }
-                  />
-                )}
-
-                {/* Multi-Day Event - Link to dedicated page */}
-                {eventType === "multi_day" && eventId && (
-                  <Link
-                    href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion/dias`}
-                    className="block"
-                  >
-                    <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
-                          <CalendarRange className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="font-medium">
-                            {eventDays.length > 0
-                              ? `${eventDays.length} día${eventDays.length !== 1 ? "s" : ""} configurado${eventDays.length !== 1 ? "s" : ""}`
-                              : "Configurar días del evento"}
-                          </p>
-                          <p className="text-sm text-zinc-500">
-                            {eventDays.length > 0
-                              ? eventDays.map((d) => d.name).join(", ")
-                              : "Agrega los días de tu festival"}
-                          </p>
-                        </div>
+                  {/* Country and City */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Country - Fixed to Colombia */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">País</Label>
+                      <div className="flex items-center p-4 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#202020] opacity-60 cursor-not-allowed">
+                        <Globe className="h-4 w-4 mr-3 text-gray-500 dark:text-white/40" />
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          Colombia
+                        </span>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-zinc-400" />
                     </div>
-                  </Link>
-                )}
 
-                {/* Recurring - Coming Soon */}
-                {eventType === "recurring" && (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <p className="text-sm text-zinc-500">
-                      La configuración de eventos recurrentes estará disponible
-                      próximamente.
-                    </p>
-                  </div>
-                )}
-
-                {/* Slots - Coming Soon */}
-                {eventType === "slots" && (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <p className="text-sm text-zinc-500">
-                      La configuración de horarios estará disponible
-                      próximamente.
-                    </p>
-                  </div>
-                )}
-
-                {/* Timezone - shown for all types */}
-                <FormModalSelect
-                  id="timezone"
-                  name="timezone"
-                  label="Zona Horaria"
-                  icon={<Globe className="h-4 w-4" />}
-                  value={formData.timezone || "America/Bogota"}
-                  onChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      timezone: value,
-                    }))
-                  }
-                  options={[
-                    { value: "America/Bogota", label: "Colombia (GMT-5)" },
-                    { value: "America/Mexico_City", label: "México (GMT-6)" },
-                    { value: "America/New_York", label: "New York (GMT-5)" },
-                    { value: "America/Los_Angeles", label: "Los Angeles (GMT-8)" },
-                    { value: "America/Chicago", label: "Chicago (GMT-6)" },
-                    { value: "America/Argentina/Buenos_Aires", label: "Buenos Aires (GMT-3)" },
-                    { value: "America/Santiago", label: "Santiago (GMT-4)" },
-                    { value: "America/Lima", label: "Lima (GMT-5)" },
-                    { value: "Europe/Madrid", label: "Madrid (GMT+1)" },
-                    { value: "Europe/London", label: "London (GMT+0)" },
-                    { value: "Asia/Tokyo", label: "Tokyo (GMT+9)" },
-                  ]}
-                  hint="Las fechas y horas se mostrarán según esta zona horaria"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Regional Settings */}
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Coins className="h-5 w-5 text-gray-600 dark:text-white/60" />
-                  <div>
-                    <CardTitle>Configuración Regional</CardTitle>
-                    <CardDescription className="text-gray-500 dark:text-gray-400">
-                      Moneda y formato de precios
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="currency" className="text-sm font-medium">
-                    Moneda
-                  </Label>
-                  <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] opacity-60 cursor-not-allowed">
-                    <DollarSign className="h-4 w-4 text-gray-500 dark:text-white/40 mr-3 flex-shrink-0" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      COP - Peso Colombiano
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-white/40">
-                    Todos los precios se mostrarán en esta moneda
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Banner Image */}
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <ImageIcon className="h-5 w-5 text-gray-600 dark:text-white/60" />
-                  <div>
-                    <CardTitle>Flyer del Evento</CardTitle>
-                    <CardDescription className="text-gray-500 dark:text-gray-400">
-                      Imagen principal del evento (formato póster vertical)
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-gray-500 dark:text-white/50">
-                  Recomendado: 900x1200px (ratio 3:4), máximo 5MB
-                </p>
-
-                {images.banner ? (
-                  <div className="relative aspect-[3/4] max-w-xs rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-                    <img
-                      src={images.banner as string}
-                      alt="Flyer preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() =>
-                        setImages((prev) => ({ ...prev, banner: null }))
+                    {/* City Select */}
+                    <FormModalSelect
+                      label="Ciudad"
+                      value={formData.city}
+                      onChange={(value) =>
+                        setFormData({ ...formData, city: value })
                       }
-                      className="absolute top-2 right-2 rounded-lg"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Eliminar
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center aspect-[3/4] max-w-xs border-2 border-dashed border-gray-300 dark:border-white/20 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                    <div className="flex flex-col items-center justify-center">
-                      <Upload className="h-8 w-8 text-gray-500 dark:text-white/40 mb-2" />
-                      <p className="text-sm text-gray-600 dark:text-white/60 text-center px-4">
-                        Haz clic o arrastra una imagen
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-white/40 mt-1">
-                        Formato vertical 3:4
-                      </p>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, "banner")}
-                      className="hidden"
+                      options={CITIES_BY_COUNTRY["CO"] || []}
+                      placeholder="Selecciona una ciudad"
+                      searchable={true}
+                      searchPlaceholder="Buscar ciudad..."
                     />
-                  </label>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Save Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={() => handleSaveConfig("información")}
-                className="rounded-lg px-8 bg-white text-black hover:bg-white/90"
-                size="lg"
-                disabled={isSaving}
-              >
-                {isSaving ? "Guardando..." : "Guardar Cambios"}
-              </Button>
-            </div>
-          </div>
-        )}
-
-
-        {/* FAQs Section */}
-        {activeTab === "faqs" && (
-          <div className="space-y-4">
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-xl">
-                      Preguntas Frecuentes
-                    </CardTitle>
-                    <CardDescription className="mt-1.5">
-                      Crea y gestiona las preguntas más comunes de tus
-                      asistentes
-                    </CardDescription>
                   </div>
-                  {!isAddingFaq && !editingFaq && (
-                    <Button
-                      onClick={() => {
-                        setIsAddingFaq(true);
-                        setEditingFaq(null);
-                        setNewQuestion("");
-                        setNewAnswer("");
-                      }}
-                      className="rounded-full shrink-0"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nueva Pregunta
-                    </Button>
+                </CardContent>
+              </Card>
+
+              {/* Event Type Selection - Read Only */}
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] relative overflow-hidden">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                    <div>
+                      <CardTitle>Tipo de Evento</CardTitle>
+                      <CardDescription className="text-gray-500 dark:text-gray-400">
+                        El tipo de evento no se puede modificar después de
+                        crearlo
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="relative">
+                    <div className="opacity-60 pointer-events-none select-none blur-[1px]">
+                      <EventTypeSelector
+                        value={eventType}
+                        onChange={() => {}}
+                        disabled={true}
+                      />
+                    </div>
+                    {/* Lock overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/5 dark:bg-white/5 rounded-lg">
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                        <svg
+                          className="w-4 h-4 text-zinc-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                          />
+                        </svg>
+                        <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                          {eventType === "single" && "Evento único"}
+                          {eventType === "multi_day" && "Evento de varios días"}
+                          {eventType === "recurring" && "Evento recurrente"}
+                          {eventType === "slots" && "Evento por horarios"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Date & Time Configuration - varies by event type */}
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                    <div>
+                      <CardTitle>
+                        {eventType === "single" && "Fecha y Hora"}
+                        {eventType === "multi_day" && "Días del Evento"}
+                        {eventType === "recurring" && "Patrón de Repetición"}
+                        {eventType === "slots" && "Horarios Disponibles"}
+                      </CardTitle>
+                      <CardDescription className="text-gray-500 dark:text-gray-400">
+                        {eventType === "single" &&
+                          "Cuándo se realizará el evento"}
+                        {eventType === "multi_day" &&
+                          "Configura cada día de tu evento"}
+                        {eventType === "recurring" && "Próximamente"}
+                        {eventType === "slots" && "Próximamente"}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  {/* Single Event */}
+                  {eventType === "single" && (
+                    <SingleDatePicker
+                      startDate={formData.startDate}
+                      endDate={formData.endDate}
+                      onStartDateChange={(value) =>
+                        setFormData((prev) => ({ ...prev, startDate: value }))
+                      }
+                      onEndDateChange={(value) =>
+                        setFormData((prev) => ({ ...prev, endDate: value }))
+                      }
+                    />
                   )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Add/Edit Form */}
-                {(isAddingFaq || editingFaq) && (
-                  <div className="p-6 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] space-y-5">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white/80 uppercase tracking-wider">
-                        {editingFaq ? "Editar Pregunta" : "Nueva Pregunta"}
-                      </h3>
-                    </div>
 
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="faq-question"
-                          className="text-sm font-medium"
-                        >
-                          Pregunta
-                        </Label>
-                        <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
-                          <Input
-                            id="faq-question"
-                            value={editingFaq ? editingFaq.question : newQuestion}
-                            onChange={(e) => {
-                              if (editingFaq) {
-                                setEditingFaq({
-                                  ...editingFaq,
-                                  question: e.target.value,
-                                });
-                              } else {
-                                setNewQuestion(e.target.value);
-                              }
-                            }}
-                            placeholder="Ej: ¿Cómo puedo obtener mi ticket?"
-                            className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none text-gray-900 dark:text-white"
-                          />
+                  {/* Multi-Day Event - Link to dedicated page */}
+                  {eventType === "multi_day" && eventId && (
+                    <Link
+                      href={`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/configuracion/dias`}
+                      className="block"
+                    >
+                      <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
+                            <CalendarRange className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              {eventDays.length > 0
+                                ? `${eventDays.length} día${eventDays.length !== 1 ? "s" : ""} configurado${eventDays.length !== 1 ? "s" : ""}`
+                                : "Configurar días del evento"}
+                            </p>
+                            <p className="text-sm text-zinc-500">
+                              {eventDays.length > 0
+                                ? eventDays.map((d) => d.name).join(", ")
+                                : "Agrega los días de tu festival"}
+                            </p>
+                          </div>
                         </div>
+                        <ChevronRight className="w-5 h-5 text-zinc-400" />
                       </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="faq-answer"
-                          className="text-sm font-medium"
-                        >
-                          Respuesta
-                        </Label>
-                        <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
-                          <Textarea
-                            id="faq-answer"
-                            value={editingFaq ? editingFaq.answer : newAnswer}
-                            onChange={(e) => {
-                              if (editingFaq) {
-                                setEditingFaq({
-                                  ...editingFaq,
-                                  answer: e.target.value,
-                                });
-                              } else {
-                                setNewAnswer(e.target.value);
-                              }
-                            }}
-                            placeholder="Escribe una respuesta clara y concisa..."
-                            className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none min-h-[120px] resize-none !text-gray-900 dark:!text-white p-0"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    </Link>
+                  )}
 
-                    <div className="flex justify-end gap-3 pt-2">
+                  {/* Recurring - Coming Soon */}
+                  {eventType === "recurring" && (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <p className="text-sm text-zinc-500">
+                        La configuración de eventos recurrentes estará
+                        disponible próximamente.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Slots - Coming Soon */}
+                  {eventType === "slots" && (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <p className="text-sm text-zinc-500">
+                        La configuración de horarios estará disponible
+                        próximamente.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Timezone - shown for all types */}
+                  <FormModalSelect
+                    id="timezone"
+                    name="timezone"
+                    label="Zona Horaria"
+                    icon={<Globe className="h-4 w-4" />}
+                    value={formData.timezone || "America/Bogota"}
+                    onChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        timezone: value,
+                      }))
+                    }
+                    options={[
+                      { value: "America/Bogota", label: "Colombia (GMT-5)" },
+                      { value: "America/Mexico_City", label: "México (GMT-6)" },
+                      { value: "America/New_York", label: "New York (GMT-5)" },
+                      {
+                        value: "America/Los_Angeles",
+                        label: "Los Angeles (GMT-8)",
+                      },
+                      { value: "America/Chicago", label: "Chicago (GMT-6)" },
+                      {
+                        value: "America/Argentina/Buenos_Aires",
+                        label: "Buenos Aires (GMT-3)",
+                      },
+                      { value: "America/Santiago", label: "Santiago (GMT-4)" },
+                      { value: "America/Lima", label: "Lima (GMT-5)" },
+                      { value: "Europe/Madrid", label: "Madrid (GMT+1)" },
+                      { value: "Europe/London", label: "London (GMT+0)" },
+                      { value: "Asia/Tokyo", label: "Tokyo (GMT+9)" },
+                    ]}
+                    hint="Las fechas y horas se mostrarán según esta zona horaria"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Regional Settings */}
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Coins className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                    <div>
+                      <CardTitle>Configuración Regional</CardTitle>
+                      <CardDescription className="text-gray-500 dark:text-gray-400">
+                        Moneda y formato de precios
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="currency" className="text-sm font-medium">
+                      Moneda
+                    </Label>
+                    <div className="flex items-center p-4 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#202020] opacity-60 cursor-not-allowed">
+                      <DollarSign className="h-4 w-4 text-gray-500 dark:text-white/40 mr-3 flex-shrink-0" />
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        COP - Peso Colombiano
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-white/40">
+                      Todos los precios se mostrarán en esta moneda
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Save Button */}
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => handleSaveConfig("información")}
+                  className="rounded-lg px-8 bg-white text-black hover:bg-white/90"
+                  size="lg"
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Guardando..." : "Guardar Cambios"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Images Section */}
+          {activeTab === "images" && (
+            <div className="space-y-6">
+              {/* Main Flyer */}
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                    <div>
+                      <CardTitle>Flyer Principal</CardTitle>
+                      <CardDescription className="text-gray-500 dark:text-gray-400">
+                        Imagen principal del evento (formato póster vertical)
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-xs text-gray-500 dark:text-white/50">
+                    Recomendado: 900x1200px (ratio 3:4), máximo 5MB
+                  </p>
+
+                  {images.banner ? (
+                    <div className="relative aspect-[3/4] max-w-xs rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+                      <img
+                        src={images.banner as string}
+                        alt="Flyer preview"
+                        className="w-full h-full object-cover"
+                      />
                       <Button
-                        variant="outline"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() =>
+                          setImages((prev) => ({ ...prev, banner: null }))
+                        }
+                        className="absolute top-2 right-2 rounded-lg"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Eliminar
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center aspect-[3/4] max-w-xs border-2 border-dashed border-gray-300 dark:border-white/20 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                      <div className="flex flex-col items-center justify-center">
+                        <Upload className="h-8 w-8 text-gray-500 dark:text-white/40 mb-2" />
+                        <p className="text-sm text-gray-600 dark:text-white/60 text-center px-4">
+                          Haz clic o arrastra una imagen
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-white/40 mt-1">
+                          Formato vertical 3:4
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, "banner")}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Gallery Images */}
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                      <div>
+                        <CardTitle>Galería de Imágenes</CardTitle>
+                        <CardDescription className="text-gray-500 dark:text-gray-400">
+                          Imágenes adicionales del evento, lugar, artistas, etc.
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <label className="shrink-0">
+                      <Button
+                        type="button"
+                        className="rounded-full"
                         onClick={() => {
-                          setIsAddingFaq(false);
+                          // Trigger file input
+                          document.getElementById("gallery-upload")?.click();
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar Imagen
+                      </Button>
+                      <input
+                        id="gallery-upload"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach((file) => {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setGalleryImages((prev) => [
+                                ...prev,
+                                {
+                                  id: Date.now().toString() + Math.random(),
+                                  url: (event.target?.result as string) || "",
+                                },
+                              ]);
+                            };
+                            reader.readAsDataURL(file);
+                          });
+                          // Reset input
+                          e.target.value = "";
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {galleryImages.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {galleryImages.map((image) => (
+                        <div
+                          key={image.id}
+                          className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5"
+                        >
+                          <img
+                            src={image.url}
+                            alt="Gallery image"
+                            className="w-full h-full object-cover"
+                          />
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() =>
+                              setGalleryImages((prev) =>
+                                prev.filter((img) => img.id !== image.id)
+                              )
+                            }
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mb-4">
+                        <ImageIcon className="h-8 w-8 text-gray-500 dark:text-white/40" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+                        No hay imágenes en la galería
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-white/40 max-w-md mx-auto mb-4">
+                        Agrega imágenes del evento, lugar, artistas o cualquier
+                        otro contenido visual que quieras mostrar
+                      </p>
+                      <label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-lg"
+                          onClick={() => {
+                            document.getElementById("gallery-upload")?.click();
+                          }}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Subir Imágenes
+                        </Button>
+                      </label>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* FAQs Section */}
+          {activeTab === "faqs" && (
+            <div className="space-y-4">
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-xl">
+                        Preguntas Frecuentes
+                      </CardTitle>
+                      <CardDescription className="mt-1.5">
+                        Crea y gestiona las preguntas más comunes de tus
+                        asistentes
+                      </CardDescription>
+                    </div>
+                    {!isAddingFaq && !editingFaq && (
+                      <Button
+                        onClick={() => {
+                          setIsAddingFaq(true);
                           setEditingFaq(null);
                           setNewQuestion("");
                           setNewAnswer("");
                         }}
-                        className="rounded-lg border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10"
+                        className="rounded-full shrink-0"
                       >
-                        Cancelar
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nueva Pregunta
                       </Button>
-                      <Button
-                        onClick={() => {
-                          if (editingFaq) {
-                            const updatedFaqs = faqs.map((faq) =>
-                              faq.id === editingFaq.id ? editingFaq : faq
-                            );
-                            setFaqs(updatedFaqs);
-                            saveFaqs(updatedFaqs); // Save to database
-                            setEditingFaq(null);
-                          } else {
-                            if (newQuestion.trim() && newAnswer.trim()) {
-                              const updatedFaqs = [
-                                ...faqs,
-                                {
-                                  id: Date.now().toString(),
-                                  question: newQuestion,
-                                  answer: newAnswer,
-                                },
-                              ];
-                              setFaqs(updatedFaqs);
-                              saveFaqs(updatedFaqs); // Save to database
-                              setNewQuestion("");
-                              setNewAnswer("");
-                              setIsAddingFaq(false);
-                            }
-                          }
-                        }}
-                        className="rounded-lg min-w-[100px] bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-white/90"
-                        disabled={
-                          editingFaq
-                            ? !editingFaq.question.trim() ||
-                              !editingFaq.answer.trim()
-                            : !newQuestion.trim() || !newAnswer.trim()
-                        }
-                      >
-                        {editingFaq ? "Actualizar" : "Agregar"}
-                      </Button>
-                    </div>
+                    )}
                   </div>
-                )}
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Add/Edit Form */}
+                  {(isAddingFaq || editingFaq) && (
+                    <div className="p-6 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] space-y-5">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white/80 uppercase tracking-wider">
+                          {editingFaq ? "Editar Pregunta" : "Nueva Pregunta"}
+                        </h3>
+                      </div>
 
-                {/* FAQs List */}
-                {faqs.length === 0 && !isAddingFaq && !editingFaq ? (
-                  <div className="text-center py-16">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mb-4">
-                      <HelpCircle className="h-8 w-8 text-gray-500 dark:text-white/40" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
-                      No hay preguntas frecuentes
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-white/40 max-w-md mx-auto">
-                      Crea preguntas frecuentes para ayudar a tus asistentes a
-                      resolver sus dudas rápidamente
-                    </p>
-                  </div>
-                ) : faqs.length > 0 ? (
-                  <div className="space-y-0">
-                    {faqs.map((faq, index) => (
-                      <div key={faq.id} className="relative">
-                        {/* Drop Indicator - appears above the item when dragging over it */}
-                        {dragOverIndex === index &&
-                          draggedFaqIndex !== index && (
-                            <div className="absolute -top-[2px] left-0 right-0 h-[3px] bg-gray-900 dark:bg-white rounded-full z-10" />
-                          )}
-
-                        <div
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, index)}
-                          onDragOver={(e) => handleDragOver(e, index)}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, index)}
-                          onDragEnd={handleDragEnd}
-                          className={`group relative p-5 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-100 dark:hover:bg-white/[0.04] transition-all duration-200 mb-3 ${
-                            draggedFaqIndex === index
-                              ? "opacity-40 scale-[0.98] shadow-lg"
-                              : "opacity-100 scale-100"
-                          }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            {/* Drag Handle - only visible on hover */}
-                            <div className="flex-shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70">
-                              <GripVertical className="h-5 w-5" />
-                            </div>
-
-                            {/* Number Badge */}
-                            <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white/70 font-semibold text-sm transition-transform group-hover:scale-105">
-                              {index + 1}
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 min-w-0 space-y-2.5">
-                              <h4 className="font-semibold text-gray-900 dark:text-white text-sm leading-snug pr-20">
-                                {faq.question}
-                              </h4>
-                              <p className="text-sm text-gray-600 dark:text-white/60 leading-relaxed">
-                                {faq.answer}
-                              </p>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="absolute top-5 right-5 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingFaq(faq);
-                                  setIsAddingFaq(false);
-                                }}
-                                className="h-9 w-9 p-0 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
-                                title="Editar pregunta"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (
-                                    window.confirm(
-                                      "¿Estás seguro de eliminar esta pregunta?"
-                                    )
-                                  ) {
-                                    const updatedFaqs = faqs.filter(
-                                      (f) => f.id !== faq.id
-                                    );
-                                    setFaqs(updatedFaqs);
-                                    saveFaqs(updatedFaqs); // Save to database
-                                  }
-                                }}
-                                className="h-9 w-9 p-0 rounded-lg hover:bg-red-500/20 hover:text-red-400"
-                                title="Eliminar pregunta"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="faq-question"
+                            className="text-sm font-medium"
+                          >
+                            Pregunta
+                          </Label>
+                          <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+                            <Input
+                              id="faq-question"
+                              value={
+                                editingFaq ? editingFaq.question : newQuestion
+                              }
+                              onChange={(e) => {
+                                if (editingFaq) {
+                                  setEditingFaq({
+                                    ...editingFaq,
+                                    question: e.target.value,
+                                  });
+                                } else {
+                                  setNewQuestion(e.target.value);
+                                }
+                              }}
+                              placeholder="Ej: ¿Cómo puedo obtener mi ticket?"
+                              className="h-6 w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none text-gray-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="faq-answer"
+                            className="text-sm font-medium"
+                          >
+                            Respuesta
+                          </Label>
+                          <div className="p-3 rounded-xl border border-gray-200 bg-gray-50 dark:border-[#2a2a2a] dark:bg-[#1a1a1a] hover:border-gray-300 hover:bg-gray-100 dark:hover:border-[#3a3a3a] dark:hover:bg-[#202020] transition-colors">
+                            <Textarea
+                              id="faq-answer"
+                              value={editingFaq ? editingFaq.answer : newAnswer}
+                              onChange={(e) => {
+                                if (editingFaq) {
+                                  setEditingFaq({
+                                    ...editingFaq,
+                                    answer: e.target.value,
+                                  });
+                                } else {
+                                  setNewAnswer(e.target.value);
+                                }
+                              }}
+                              placeholder="Escribe una respuesta clara y concisa..."
+                              className="w-full bg-transparent border-none focus-visible:ring-0 text-sm font-medium placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-none min-h-[120px] resize-none !text-gray-900 dark:!text-white p-0"
+                            />
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : null}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
 
-      {/* Right Column - Instructions */}
-      <div className="lg:col-span-1">
-        <div className="sticky top-6 space-y-4">
-          {/* Instructions Card for Information Tab */}
-          {activeTab === "information" && (
-            <>
+                      <div className="flex justify-end gap-3 pt-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsAddingFaq(false);
+                            setEditingFaq(null);
+                            setNewQuestion("");
+                            setNewAnswer("");
+                          }}
+                          className="rounded-lg border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            if (editingFaq) {
+                              const updatedFaqs = faqs.map((faq) =>
+                                faq.id === editingFaq.id ? editingFaq : faq
+                              );
+                              setFaqs(updatedFaqs);
+                              saveFaqs(updatedFaqs); // Save to database
+                              setEditingFaq(null);
+                            } else {
+                              if (newQuestion.trim() && newAnswer.trim()) {
+                                const updatedFaqs = [
+                                  ...faqs,
+                                  {
+                                    id: Date.now().toString(),
+                                    question: newQuestion,
+                                    answer: newAnswer,
+                                  },
+                                ];
+                                setFaqs(updatedFaqs);
+                                saveFaqs(updatedFaqs); // Save to database
+                                setNewQuestion("");
+                                setNewAnswer("");
+                                setIsAddingFaq(false);
+                              }
+                            }
+                          }}
+                          className="rounded-lg min-w-[100px] bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-white/90"
+                          disabled={
+                            editingFaq
+                              ? !editingFaq.question.trim() ||
+                                !editingFaq.answer.trim()
+                              : !newQuestion.trim() || !newAnswer.trim()
+                          }
+                        >
+                          {editingFaq ? "Actualizar" : "Agregar"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* FAQs List */}
+                  {faqs.length === 0 && !isAddingFaq && !editingFaq ? (
+                    <div className="text-center py-16">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mb-4">
+                        <HelpCircle className="h-8 w-8 text-gray-500 dark:text-white/40" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+                        No hay preguntas frecuentes
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-white/40 max-w-md mx-auto">
+                        Crea preguntas frecuentes para ayudar a tus asistentes a
+                        resolver sus dudas rápidamente
+                      </p>
+                    </div>
+                  ) : faqs.length > 0 ? (
+                    <div className="space-y-0">
+                      {faqs.map((faq, index) => (
+                        <div key={faq.id} className="relative">
+                          {/* Drop Indicator - appears above the item when dragging over it */}
+                          {dragOverIndex === index &&
+                            draggedFaqIndex !== index && (
+                              <div className="absolute -top-[2px] left-0 right-0 h-[3px] bg-gray-900 dark:bg-white rounded-full z-10" />
+                            )}
+
+                          <div
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, index)}
+                            onDragEnd={handleDragEnd}
+                            className={`group relative p-5 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-100 dark:hover:bg-white/[0.04] transition-all duration-200 mb-3 ${
+                              draggedFaqIndex === index
+                                ? "opacity-40 scale-[0.98] shadow-lg"
+                                : "opacity-100 scale-100"
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              {/* Drag Handle - only visible on hover */}
+                              <div className="flex-shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70">
+                                <GripVertical className="h-5 w-5" />
+                              </div>
+
+                              {/* Number Badge */}
+                              <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white/70 font-semibold text-sm transition-transform group-hover:scale-105">
+                                {index + 1}
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0 space-y-2.5">
+                                <h4 className="font-semibold text-gray-900 dark:text-white text-sm leading-snug pr-20">
+                                  {faq.question}
+                                </h4>
+                                <p className="text-sm text-gray-600 dark:text-white/60 leading-relaxed">
+                                  {faq.answer}
+                                </p>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="absolute top-5 right-5 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingFaq(faq);
+                                    setIsAddingFaq(false);
+                                  }}
+                                  className="h-9 w-9 p-0 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
+                                  title="Editar pregunta"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (
+                                      window.confirm(
+                                        "¿Estás seguro de eliminar esta pregunta?"
+                                      )
+                                    ) {
+                                      const updatedFaqs = faqs.filter(
+                                        (f) => f.id !== faq.id
+                                      );
+                                      setFaqs(updatedFaqs);
+                                      saveFaqs(updatedFaqs); // Save to database
+                                    }
+                                  }}
+                                  className="h-9 w-9 p-0 rounded-lg hover:bg-red-500/20 hover:text-red-400"
+                                  title="Eliminar pregunta"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column - Instructions */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-6 space-y-4">
+            {/* Instructions Card for Information Tab */}
+            {activeTab === "information" && (
+              <>
+                <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                      <div>
+                        <CardTitle className="text-base">
+                          Guía de Configuración
+                        </CardTitle>
+                        <CardDescription className="text-xs text-gray-500 dark:text-gray-400">
+                          Tips para completar la información
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
+                          1
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            Información básica
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                            Asegúrate de incluir un nombre atractivo y una
+                            descripción detallada del evento
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
+                          2
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            Ubicación precisa
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                            Ingresa la dirección completa para que los
+                            asistentes puedan encontrar el lugar fácilmente
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
+                          3
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            Fechas y horarios
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                            Verifica que las fechas de inicio y fin sean
+                            correctas
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30">
+                  <div className="flex items-start gap-3">
+                    <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                        Recuerda guardar
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-300/80 mt-1">
+                        Los cambios se guardarán automáticamente al hacer clic
+                        en el botón &quot;Guardar Cambios&quot;
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Instructions for Images Tab */}
+            {activeTab === "images" && (
               <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
                     <div>
                       <CardTitle className="text-base">
-                        Guía de Configuración
+                        Guía de Imágenes
                       </CardTitle>
                       <CardDescription className="text-xs text-gray-500 dark:text-gray-400">
-                        Tips para completar la información
+                        Tips para optimizar tus imágenes
                       </CardDescription>
                     </div>
                   </div>
@@ -1428,11 +1661,11 @@ export function EventConfigContent({
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          Información básica
+                          Flyer principal
                         </p>
                         <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
-                          Asegúrate de incluir un nombre atractivo y una
-                          descripción detallada del evento
+                          Usa formato vertical 3:4 (900x1200px). Esta es la
+                          imagen que aparecerá en tarjetas y previews
                         </p>
                       </div>
                     </div>
@@ -1444,10 +1677,12 @@ export function EventConfigContent({
                         2
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">Banner del evento</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Galería de imágenes
+                        </p>
                         <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
-                          Usa una imagen de alta calidad (mínimo 1920x1080px)
-                          para el banner principal
+                          Agrega fotos del lugar, artistas, eventos anteriores o
+                          cualquier contenido que genere interés
                         </p>
                       </div>
                     </div>
@@ -1459,10 +1694,48 @@ export function EventConfigContent({
                         3
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">Ubicación precisa</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Calidad y tamaño
+                        </p>
                         <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
-                          Ingresa la dirección completa para que los asistentes
-                          puedan encontrar el lugar fácilmente
+                          Máximo 5MB por imagen. JPG, PNG y WebP son soportados
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Instructions for FAQs Tab */}
+            {activeTab === "faqs" && (
+              <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
+                    <div>
+                      <CardTitle className="text-base">
+                        Preguntas Frecuentes
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Ayuda a tus asistentes
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
+                        1
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Preguntas comunes
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
+                          Incluye información sobre estacionamiento, edad
+                          mínima, política de reembolsos, etc.
                         </p>
                       </div>
                     </div>
@@ -1471,90 +1744,26 @@ export function EventConfigContent({
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
-                        4
+                        2
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">Fechas y horarios</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          Orden y claridad
+                        </p>
                         <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
-                          Verifica que las fechas de inicio y fin sean correctas
+                          Organiza las preguntas de más a menos importante y sé
+                          claro en las respuestas
                         </p>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-
-              <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30">
-                <div className="flex items-start gap-3">
-                  <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-                      Recuerda guardar
-                    </p>
-                    <p className="text-xs text-amber-700 dark:text-amber-300/80 mt-1">
-                      Los cambios se guardarán automáticamente al hacer clic en
-                      el botón &quot;Guardar Cambios&quot;
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-
-          {/* Instructions for FAQs Tab */}
-          {activeTab === "faqs" && (
-            <Card className="border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Info className="h-5 w-5 text-gray-600 dark:text-white/60" />
-                  <div>
-                    <CardTitle className="text-base">
-                      Preguntas Frecuentes
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Ayuda a tus asistentes
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
-                      1
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">Preguntas comunes</p>
-                      <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
-                        Incluye información sobre estacionamiento, edad mínima,
-                        política de reembolsos, etc.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white flex items-center justify-center text-xs font-bold">
-                      2
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">Orden y claridad</p>
-                      <p className="text-xs text-gray-600 dark:text-white/50 mt-1">
-                        Organiza las preguntas de más a menos importante y sé
-                        claro en las respuestas
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 
   // Return based on mode
   if (showTabsOnly) {

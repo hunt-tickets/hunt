@@ -4,9 +4,15 @@ import { headers } from "next/headers";
 import { EventConfigContent } from "@/components/event-config-content";
 import { EventStickyHeader } from "@/components/event-sticky-header";
 import { db } from "@/lib/drizzle";
-import { member, events, eventDays } from "@/lib/schema";
+import { events, eventDays } from "@/lib/schema";
 import { eq, and, asc } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
 interface ConfiguracionPageProps {
@@ -17,27 +23,11 @@ interface ConfiguracionPageProps {
   }>;
 }
 
-export default async function ConfiguracionPage({ params }: ConfiguracionPageProps) {
+export default async function ConfiguracionPage({
+  params,
+}: ConfiguracionPageProps) {
   const { userId, eventId, organizationId } = await params;
   const reqHeaders = await headers();
-
-  // Auth check
-  const session = await auth.api.getSession({ headers: reqHeaders });
-  if (!session || session.user.id !== userId) {
-    redirect("/sign-in");
-  }
-
-  // Verify user is a member of the organization
-  const memberRecord = await db.query.member.findFirst({
-    where: and(
-      eq(member.userId, userId),
-      eq(member.organizationId, organizationId)
-    ),
-  });
-
-  if (!memberRecord) {
-    notFound();
-  }
 
   // Check if user can manage events (sellers cannot)
   const canManageEvents = await auth.api.hasPermission({
@@ -49,7 +39,9 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
   });
 
   if (!canManageEvents?.success) {
-    redirect(`/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`);
+    redirect(
+      `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`
+    );
   }
 
   // Fetch event data from database
@@ -66,7 +58,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
 
   // Check lifecycle status first (most important)
   // Show message if event is being cancelled
-  if (event.lifecycleStatus === 'cancellation_pending') {
+  if (event.lifecycleStatus === "cancellation_pending") {
     return (
       <>
         <EventStickyHeader
@@ -89,10 +81,12 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>
-                No puedes modificar la configuración mientras el evento está en proceso de cancelación.
+                No puedes modificar la configuración mientras el evento está en
+                proceso de cancelación.
               </p>
               <p>
-                Una vez que se completen todos los reembolsos, podrás acceder nuevamente a los detalles del evento.
+                Una vez que se completen todos los reembolsos, podrás acceder
+                nuevamente a los detalles del evento.
               </p>
             </CardContent>
           </Card>
@@ -102,7 +96,7 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
   }
 
   // Show message if event is cancelled
-  if (event.lifecycleStatus === 'cancelled') {
+  if (event.lifecycleStatus === "cancelled") {
     return (
       <>
         <EventStickyHeader
@@ -128,7 +122,8 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
                 No puedes modificar la configuración de un evento cancelado.
               </p>
               <p>
-                Todos los reembolsos han sido procesados y el evento está archivado.
+                Todos los reembolsos han sido procesados y el evento está
+                archivado.
               </p>
             </CardContent>
           </Card>
@@ -161,10 +156,12 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>
-                No puedes modificar la configuración mientras el evento está bloqueado.
+                No puedes modificar la configuración mientras el evento está
+                bloqueado.
               </p>
               <p>
-                Contacta al administrador de la organización para más información.
+                Contacta al administrador de la organización para más
+                información.
               </p>
             </CardContent>
           </Card>
@@ -185,7 +182,9 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     name: event.name || "",
     description: event.description || "",
     category: event.category || undefined,
-    type: (event.type as "single" | "multi_day" | "recurring" | "slots") || "single",
+    type:
+      (event.type as "single" | "multi_day" | "recurring" | "slots") ||
+      "single",
     date: event.date?.toISOString(),
     end_date: event.endDate?.toISOString(),
     status: event.status ?? false,
@@ -197,10 +196,12 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
     address: event.address || undefined,
     venue_name: event.venueName || undefined,
     flyer: event.flyer || undefined,
-    flyer_apple: event.flyerApple || undefined,
+    // flyer_apple: event.flyerApple || undefined,
     venue_id: event.venueId || undefined,
     // private_list: event.privateList ?? false, // TODO: Waiting for DB migration
-    faqs: (event.faqs as Array<{ id: string; question: string; answer: string }>) || [],
+    faqs:
+      (event.faqs as Array<{ id: string; question: string; answer: string }>) ||
+      [],
     days: days.map((d) => ({
       id: d.id,
       name: d.name || "",
@@ -222,7 +223,11 @@ export default async function ConfiguracionPage({ params }: ConfiguracionPagePro
 
       {/* Content */}
       <div className="py-3 sm:py-4">
-        <EventConfigContent showContentOnly eventData={eventData} eventId={eventId} />
+        <EventConfigContent
+          showContentOnly
+          eventData={eventData}
+          eventId={eventId}
+        />
       </div>
     </>
   );

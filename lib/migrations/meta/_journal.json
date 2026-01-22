@@ -267,6 +267,13 @@
       "when": 1768941465405,
       "tag": "0037_abandoned_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1769113735733,
+      "tag": "0038_freezing_lady_bullseye",
+      "breakpoints": true
     }
   ]
 }
