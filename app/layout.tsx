@@ -96,7 +96,7 @@ export default function RootLayout({
         </ThemeProvider>
         {/* <Analytics /> */}
 
-        {/* Chatbase Widget */}
+        {/* Chatbase Widget
         <Script
           id="chatbase-config"
           strategy="afterInteractive"
@@ -114,7 +114,7 @@ export default function RootLayout({
           id="fNQScYCO-p2DSA8hisks2"
           data-domain="www.chatbase.co"
           strategy="afterInteractive"
-        />
+        /> */}
       </body>
     </html>
   );

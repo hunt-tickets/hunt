@@ -41,7 +41,7 @@ interface EventCardProps {
   title: string;
   date: string; // Date string from API
   location: string;
-  image: string;
+  image: string | null;
   href?: string; // Optional custom URL (defaults to /eventos/{id})
   onClick?: () => void; // Optional callback when card is clicked
   status?: boolean | null; // Event status: true = active, false = draft
@@ -123,39 +123,31 @@ export function EventCard({
 
   // Single, reliable rule for how src is produced
   // Convert to RELATIVE PATH at render time (only for Supabase images)
-  const safeImage = image && image.trim() !== "" ? image : null;
+  const safeImage =
+    typeof image === "string" && image.trim() !== "" ? image : null;
 
-  const isSupabaseImage =
-    typeof safeImage === "string" &&
-    safeImage.includes("/storage/v1/object/public/") &&
-    extractSupabasePath(safeImage).length > 0;
+  const supabasePath =
+    safeImage && safeImage.includes("/storage/v1/object/public/")
+      ? extractSupabasePath(safeImage)
+      : "";
 
-  const src = isSupabaseImage
-    ? extractSupabasePath(safeImage)
-    : "/event-placeholder.svg";
+  const isSupabaseImage = supabasePath.length > 0;
+
+  const finalSrc = isSupabaseImage ? supabasePath : "/event-placeholder.svg";
 
   return (
     <Link href={href || `/eventos/${id}`} className="block" onClick={onClick}>
       <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden group cursor-pointer bg-white/8 border border-white/10 hover:border-white/20 backdrop-blur-sm">
         {/* Event image with hover effect */}
-        {isSupabaseImage ? (
-          <Image
-            loader={isSupabaseImage ? supabaseLoader : undefined}
-            src={src}
-            alt={title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          />
-        ) : (
-          <Image
-            src={src || "/event-placeholder.svg"}
-            alt={title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          />
-        )}
+        <Image
+          src={finalSrc}
+          alt={title}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          loader={isSupabaseImage ? supabaseLoader : undefined}
+          unoptimized={!isSupabaseImage} // 🔑 THIS IS THE CRITICAL LINE
+        />
 
         {/* ADMIN PANEL */}
         {/* Status badge in top left corner - only show when status is provided (admin view) */}
