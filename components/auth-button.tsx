@@ -103,7 +103,7 @@ export function AuthButton() {
               <span>Mi Perfil</span>
             </Link>
           </DropdownMenuItem>
-          {organizations && (
+          {!organizations || organizations?.length === 0  &&  (
             <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
               <Link
                 href={`/profile/${user.id}/organizaciones`}
