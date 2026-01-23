@@ -8,7 +8,6 @@ import {
   Settings,
   Mail,
   Shield,
-  CreditCard,
   MailCheck,
   Search,
   X,
@@ -78,7 +77,7 @@ interface AdminConfigTabsProps {
   mpOauthUrl?: string;
 }
 
-type TabType = "general" | "equipo" | "procesadores";
+type TabType = "general" | "equipo";
 
 export function AdminConfigTabs({
   organization,
@@ -89,7 +88,7 @@ export function AdminConfigTabs({
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [searchQuery, setSearchQuery] = useState("");
   const [cancelingInvitation, setCancelingInvitation] = useState<string | null>(
-    null
+    null,
   );
   const [removingMember, setRemovingMember] = useState<string | null>(null);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
@@ -141,7 +140,7 @@ export function AdminConfigTabs({
   const handleUpdateRole = async (
     memberId: string,
     newRole: string,
-    memberName: string
+    memberName: string,
   ) => {
     if (!organization) return;
 
@@ -160,7 +159,7 @@ export function AdminConfigTabs({
       }
 
       toast.success(
-        `Rol de ${memberName} actualizado a ${formatRole(newRole)}`
+        `Rol de ${memberName} actualizado a ${formatRole(newRole)}`,
       );
       router.refresh();
     } catch (error) {
@@ -239,7 +238,7 @@ export function AdminConfigTabs({
   const tabs = [
     { value: "general", icon: Settings, label: "General" },
     { value: "equipo", icon: Users, label: "Equipo" },
-    { value: "procesadores", icon: CreditCard, label: "Procesadores" },
+    // { value: "procesadores", icon: CreditCard, label: "Procesadores" },
   ] as const;
 
   return (
@@ -538,7 +537,7 @@ export function AdminConfigTabs({
                               member.createdAt ? (
                                 <span className="text-xs sm:text-sm text-gray-600 dark:text-white/70 whitespace-nowrap">
                                   {new Date(
-                                    member.createdAt
+                                    member.createdAt,
                                   ).toLocaleDateString("es-ES", {
                                     year: "numeric",
                                     month: "short",
@@ -649,7 +648,7 @@ export function AdminConfigTabs({
                                                     handleUpdateRole(
                                                       member.id,
                                                       newRole,
-                                                      fullName
+                                                      fullName,
                                                     )
                                                   }
                                                 >

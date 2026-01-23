@@ -123,9 +123,15 @@ export function EventCard({
 
   // Single, reliable rule for how src is produced
   // Convert to RELATIVE PATH at render time (only for Supabase images)
-  const isSupabaseImage = image?.includes("/storage/v1/object/public/");
-  const relativePathSrc = isSupabaseImage
-    ? extractSupabasePath(image)
+  const safeImage = image && image.trim() !== "" ? image : null;
+
+  const isSupabaseImage =
+    typeof safeImage === "string" &&
+    safeImage.includes("/storage/v1/object/public/") &&
+    extractSupabasePath(safeImage).length > 0;
+
+  const src = isSupabaseImage
+    ? extractSupabasePath(safeImage)
     : "/event-placeholder.svg";
 
   return (
@@ -134,7 +140,7 @@ export function EventCard({
         {/* Event image with hover effect */}
         <Image
           loader={isSupabaseImage ? supabaseLoader : undefined}
-          src={relativePathSrc}
+          src={src}
           alt={title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
