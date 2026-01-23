@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { CreditCard, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -142,7 +144,7 @@ export function AdminPaymentSettings({
               <p className="text-lg sm:text-xl font-bold text-white">
                 {
                   organization.paymentProcessorAccount?.filter(
-                    (acc) => acc.status === "active"
+                    (acc) => acc.status === "active",
                   ).length
                 }
               </p>
@@ -160,7 +162,7 @@ export function AdminPaymentSettings({
               <p className="text-lg sm:text-xl font-bold text-white">
                 {
                   organization.paymentProcessorAccount?.filter(
-                    (acc) => acc.status === "inactive"
+                    (acc) => acc.status === "inactive",
                   ).length
                 }
               </p>

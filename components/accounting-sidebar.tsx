@@ -135,7 +135,7 @@ export function AccountingSidebar({ userId }: AccountingSidebarProps) {
           <div className="pt-4 border-t border-[#2a2a2a] space-y-1">
             <ThemeToggle />
             <Link
-              href={`/profile/${userId}/administrador`}
+              href={`/profile/${userId}`}
               className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />

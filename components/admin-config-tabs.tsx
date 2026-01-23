@@ -41,7 +41,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { EditOrganizationForm } from "@/components/edit-organization-form";
-import { AdminPaymentSettings } from "@/components/admin-payment-settings";
 import type { User, Invitation, PaymentProcessorAccount } from "@/lib/schema";
 
 interface AdminConfigTabsProps {
@@ -693,13 +692,13 @@ export function AdminConfigTabs({
             />
           )}
 
-          {activeTab === "procesadores" && organization && (
+          {/* {activeTab === "procesadores" && organization && (
             <AdminPaymentSettings
               organization={organization}
               currentUserRole={currentUserRole}
               mpOauthUrl={mpOauthUrl}
             />
-          )}
+          )} */}
         </div>
       </div>
     </div>

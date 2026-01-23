@@ -154,14 +154,14 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
 
   // Filter menu items based on role
   const visibleMenuItems = primaryMenuItems.filter((item) =>
-    item.roles.includes(role)
+    item.roles.includes(role),
   );
 
   // Handle organization switch - navigate to the new organization's events page
   const handleOrganizationChange = (newOrgId: string) => {
     if (newOrgId !== organizationId) {
       router.push(
-        `/profile/${userId}/organizaciones/${newOrgId}/administrador/eventos`
+        `/profile/${userId}/organizaciones/${newOrgId}/administrador/eventos`,
       );
     }
   };
@@ -180,7 +180,7 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
       <aside
         className={cn(
           "fixed top-0 left-0 h-screen w-64 bg-white dark:bg-[#202020] border-r border-gray-200 dark:border-[#2a2a2a] z-50 transition-transform duration-300 lg:translate-x-0 flex-shrink-0",
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex flex-col h-full p-6">
@@ -257,7 +257,7 @@ export function AdminSidebar({ userId, organizationId }: AdminSidebarProps) {
                       "flex items-center gap-3 px-4 py-2 rounded-full transition-all text-sm font-medium",
                       isActive
                         ? "bg-gray-100 dark:bg-white/10 text-foreground border border-gray-200 dark:border-white/20"
-                        : "text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"
+                        : "text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5",
                     )}
                   >
                     <Icon className="h-4 w-4 flex-shrink-0" />

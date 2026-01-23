@@ -63,7 +63,7 @@ const SettingsPage = async ({ params }: SettingsPageProps) => {
       title: "Administrar Eventos",
       description: "Configuración y gestión de eventos",
       icon: Calendar,
-      href: `/profile/${userId}/administrador`,
+      href: `/profile/${userId}/administrador/eventos`,
       color: "text-purple-600 dark:text-purple-400",
       bgColor: "bg-purple-50 dark:bg-purple-950/30",
     },
