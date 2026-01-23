@@ -3,11 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Allow devtunnels for local development with tunnels
   // Uses APP_URL from environment variables
-  allowedDevOrigins: process.env.APP_URL
-    ? [process.env.APP_URL]
-    : [],
+  allowedDevOrigins: process.env.APP_URL ? [process.env.APP_URL] : [],
   // Configure external image domains for Next.js Image component
   images: {
+    // To use a cloud provider to optimize images instead of using the Next.js built-in Image Optimization API, you can configure next.config.js with the following:
+    loader: "custom",
+    loaderFile: "./supabase-image-loader.ts",
     remotePatterns: [
       {
         // Allow images from Unsplash (placeholder images)

@@ -40,7 +40,7 @@ export default async function ConfiguracionPage({
 
   if (!canManageEvents?.success) {
     redirect(
-      `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`
+      `/profile/${userId}/organizaciones/${organizationId}/administrador/event/${eventId}/vender`,
     );
   }
 
@@ -48,7 +48,7 @@ export default async function ConfiguracionPage({
   const event = await db.query.events.findFirst({
     where: and(
       eq(events.id, eventId),
-      eq(events.organizationId, organizationId)
+      eq(events.organizationId, organizationId),
     ),
   });
 
@@ -199,9 +199,7 @@ export default async function ConfiguracionPage({
     // flyer_apple: event.flyerApple || undefined,
     venue_id: event.venueId || undefined,
     // private_list: event.privateList ?? false, // TODO: Waiting for DB migration
-    faqs:
-      (event.faqs as Array<{ id: string; question: string; answer: string }>) ||
-      [],
+
     days: days.map((d) => ({
       id: d.id,
       name: d.name || "",

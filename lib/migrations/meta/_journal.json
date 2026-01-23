@@ -274,6 +274,13 @@
       "when": 1769113735733,
       "tag": "0038_freezing_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1769142320651,
+      "tag": "0039_giant_bug",
+      "breakpoints": true
     }
   ]
 }

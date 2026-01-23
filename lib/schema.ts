@@ -659,7 +659,6 @@ export const events = pgTable(
     // lateFee: decimal("late_fee"),
     // guestEmail: text("guest_email"),
     // guestName: text("guest_name"),
-    faqs: jsonb("faqs").$type<Array<Record<string, unknown>>>(),
     checkout_questions: jsonb("checkout_questions").$type<
       Array<{
         id: string;

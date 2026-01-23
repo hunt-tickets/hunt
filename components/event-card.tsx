@@ -21,6 +21,7 @@ import {
   Store,
   type LucideIcon,
 } from "lucide-react";
+import supabaseLoader, { extractSupabasePath } from "@/supabase-image-loader";
 
 const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
   fiestas: PartyPopper,
@@ -120,18 +121,26 @@ export function EventCard({
   const day = localDate.getDate();
   const month = localDate.toLocaleDateString("es-ES", { month: "short" });
 
+  // Single, reliable rule for how src is produced
+  // Convert to RELATIVE PATH at render time (only for Supabase images)
+  const isSupabaseImage = image?.includes("/storage/v1/object/public/");
+  const relativePathSrc = isSupabaseImage
+    ? extractSupabasePath(image)
+    : "/event-placeholder.svg";
+
   return (
     <Link href={href || `/eventos/${id}`} className="block" onClick={onClick}>
       <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden group cursor-pointer bg-white/8 border border-white/10 hover:border-white/20 backdrop-blur-sm">
         {/* Event image with hover effect */}
         <Image
-          src={image || "/event-placeholder.svg"}
+          loader={isSupabaseImage ? supabaseLoader : undefined}
+          src={relativePathSrc}
           alt={title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
-        
+
         {/* ADMIN PANEL */}
         {/* Status badge in top left corner - only show when status is provided (admin view) */}
         {status !== undefined && (

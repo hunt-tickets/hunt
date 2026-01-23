@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,8 @@ import { TicketsContainer } from "@/components/tickets-container";
 import { db } from "@/lib/drizzle";
 import { documentType, countries } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { extractSupabasePath } from "@/supabase-image-loader";
+import EventPageImage from "@/components/event-page-image";
 
 interface EventPageProps {
   params: Promise<{
@@ -75,17 +76,22 @@ export default async function EventPage({ params }: EventPageProps) {
     notFound();
   }
 
+  // Single, reliable rule for how src is produced
+  // Convert to RELATIVE PATH at render time (only for Supabase images)
+  const isSupabaseImage = !!event.flyer?.includes("/storage/v1/object/public/");
+  const relativePathSrc =
+    isSupabaseImage && event.flyer
+      ? extractSupabasePath(event.flyer)
+      : "/event-placeholder.svg";
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Hero Image - Full width on mobile */}
       <div className="relative w-full aspect-[3/4] sm:aspect-[16/9] lg:aspect-[21/9] bg-muted">
-        <Image
-          src={event.flyer || "/event-placeholder.svg"}
+        <EventPageImage
           alt={event.name || "Evento"}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-top"
+          isSupabaseImage={isSupabaseImage}
+          relativePathSrc={relativePathSrc}
         />
         {/* Gradient overlay - only in dark mode */}
         <div className="absolute inset-0 dark:bg-gradient-to-t dark:from-background dark:via-background/60 dark:to-transparent" />
