@@ -84,7 +84,6 @@ export function AdminConfigTabs({
   organization,
   currentUserRole,
   currentUserId,
-  mpOauthUrl,
 }: AdminConfigTabsProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("general");
