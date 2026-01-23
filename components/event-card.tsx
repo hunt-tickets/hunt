@@ -138,14 +138,24 @@ export function EventCard({
     <Link href={href || `/eventos/${id}`} className="block" onClick={onClick}>
       <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden group cursor-pointer bg-white/8 border border-white/10 hover:border-white/20 backdrop-blur-sm">
         {/* Event image with hover effect */}
-        <Image
-          loader={isSupabaseImage ? supabaseLoader : undefined}
-          src={src}
-          alt={title}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-        />
+        {isSupabaseImage ? (
+          <Image
+            loader={isSupabaseImage ? supabaseLoader : undefined}
+            src={src}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          />
+        ) : (
+          <Image
+            src={src || "/event-placeholder.svg"}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          />
+        )}
 
         {/* ADMIN PANEL */}
         {/* Status badge in top left corner - only show when status is provided (admin view) */}
