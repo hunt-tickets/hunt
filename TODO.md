@@ -11,6 +11,11 @@
 - en /entradas hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
 - tracking de comisiones a los vendedores en el tab de Vendedores
 
+RULES:
+IMAGE TRANSFORMATIONS DONE WITH NEXTJS LOADER (GENERATES A URL SO THAT SUPABASE CAN MAKE THE TRANSFORMATION IN THE CDN AND CACHE THE IMAGE)
+ALL COMMUNICATION WITH SUPABASE SERVER, EXCEPT PUBLIC IMAGES/FILES SHOULD BE DONE VIA THE SERVER, TO AVOID LEAKING ANON_KEY 
+
+
 Notes
 <!-- 41.1.1. Advantages of Using PL/pgSQL
 SQL is the language PostgreSQL and most other relational databases use as query language. It's portable and easy to learn. But every SQL statement must be executed individually by the database server.

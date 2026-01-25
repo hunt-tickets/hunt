@@ -6,7 +6,7 @@ import { db } from "@/lib/drizzle";
 import { schema } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 
 // Type definitions for analytics data
 export interface AgeGroupData {
