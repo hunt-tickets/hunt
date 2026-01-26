@@ -1,9 +1,17 @@
-import { CheckCircle, Ticket, Calendar, MapPin, Sparkles, PartyPopper } from "lucide-react";
+import {
+  CheckCircle,
+  Ticket,
+  Calendar,
+  MapPin,
+  Sparkles,
+  PartyPopper,
+} from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import Image from "next/image";
+// import Image from "next/image";
+// import { EventCard } from "@/components/event-card";
 
 interface SuccessPageProps {
   searchParams: Promise<{
@@ -29,7 +37,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
     const supabase = await createClient();
     const { data: order } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id,
         total_amount,
         created_at,
@@ -53,7 +62,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             city
           )
         )
-      `)
+      `,
+      )
       .eq("payment_session_id", payment_id)
       .single();
 
@@ -64,7 +74,10 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const event = orderData?.events as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orderItems = (orderData?.order_items || []) as any[];
-  const totalTickets = orderItems.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
+  const totalTickets = orderItems.reduce(
+    (sum: number, item: { quantity: number }) => sum + item.quantity,
+    0,
+  );
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -93,9 +106,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
           <h1 className="text-3xl font-bold text-white mb-2">
             ¡Compra Exitosa!
           </h1>
-          <p className="text-white/60">
-            Tus entradas están listas
-          </p>
+          <p className="text-white/60">Tus entradas están listas</p>
         </div>
 
         {/* Event Card */}
@@ -104,15 +115,11 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             {/* Event Flyer */}
             {event.flyer && (
               <div className="relative h-40 w-full">
-                <Image
-                  src={event.flyer}
-                  alt={event.name}
-                  fill
-                  className="object-cover"
-                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-3 left-4 right-4">
-                  <h2 className="text-xl font-bold text-white truncate">{event.name}</h2>
+                  <h2 className="text-xl font-bold text-white truncate">
+                    {event.name}
+                  </h2>
                 </div>
               </div>
             )}
@@ -120,7 +127,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             {/* Event Details */}
             <div className="p-4 space-y-3">
               {!event.flyer && (
-                <h2 className="text-xl font-bold text-white mb-3">{event.name}</h2>
+                <h2 className="text-xl font-bold text-white mb-3">
+                  {event.name}
+                </h2>
               )}
 
               <div className="flex items-center gap-3 text-white/60 text-sm">
@@ -175,7 +184,10 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                       {item.ticket_types?.name || "Entrada"}
                     </p>
                     <p className="text-white/40 text-sm">
-                      {item.quantity} × ${Number(item.ticket_types?.price || 0).toLocaleString("es-CO")}
+                      {item.quantity} × $
+                      {Number(item.ticket_types?.price || 0).toLocaleString(
+                        "es-CO",
+                      )}
                     </p>
                   </div>
                   <p className="text-white font-semibold">
@@ -188,7 +200,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               <div className="flex items-center justify-between pt-3 border-t border-white/10">
                 <span className="text-white/60">Total pagado</span>
                 <span className="text-xl font-bold text-green-400">
-                  ${Number(orderData?.total_amount || 0).toLocaleString("es-CO")}
+                  $
+                  {Number(orderData?.total_amount || 0).toLocaleString("es-CO")}
                 </span>
               </div>
             </div>

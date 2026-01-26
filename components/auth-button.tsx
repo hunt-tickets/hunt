@@ -13,10 +13,11 @@ import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { Organization } from "better-auth/plugins";
 
 export function AuthButton() {
+  const [organizations, setOrganizations] = useState<Organization[] | null>([]);
   const { data: session, isPending } = authClient.useSession();
-  const { data: organizations } = authClient.useListOrganizations();
 
   const router = useRouter();
   const { resolvedTheme } = useTheme();
@@ -26,6 +27,28 @@ export function AuthButton() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch organizations when session is ready
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const fetchOrganizations = async () => {
+      try {
+        const { data, error } = await authClient.organization.list();
+
+        if (error) {
+          console.error("Error loading organizations:", error);
+          return;
+        }
+        console.log(data);
+        setOrganizations(data);
+      } catch (err) {
+        console.error("Unexpected error loading organizations:", err);
+      }
+    };
+
+    fetchOrganizations();
+  }, [session?.user]);
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -50,7 +73,6 @@ export function AuthButton() {
     );
   }
 
-  // Use theme only after mounted
   const isDark = resolvedTheme === "dark";
 
   // If not logged in, show sign in button
@@ -103,7 +125,7 @@ export function AuthButton() {
               <span>Mi Perfil</span>
             </Link>
           </DropdownMenuItem>
-          {!organizations || organizations?.length === 0  &&  (
+          {organizations && organizations.length >= 1 && (
             <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
               <Link
                 href={`/profile/${user.id}/organizaciones`}

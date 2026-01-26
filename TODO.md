@@ -34,6 +34,7 @@ This can result in a considerable performance increase as compared to an applica
 
 Also, with PL/pgSQL you can use all the data types, operators and functions of SQL. -->
 
+
 <!-- DECLARE
     v_order_id UUID;
     v_reservation RECORD;

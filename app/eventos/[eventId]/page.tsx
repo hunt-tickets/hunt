@@ -9,8 +9,8 @@ import { TicketsContainer } from "@/components/tickets-container";
 import { db } from "@/lib/drizzle";
 import { documentType, countries } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { extractSupabasePath } from "@/supabase-image-loader";
-import EventPageImage from "@/components/event-page-image";
+// import { extractSupabasePath } from "@/supabase-image-loader";
+// import EventPageImage from "@/components/event-page-image";
 
 interface EventPageProps {
   params: Promise<{
@@ -36,25 +36,25 @@ export async function generateMetadata({
     description:
       event.description ||
       `Compra tickets para ${event.name || "este evento"} en ${event.venue_city}`,
-    openGraph: {
-      title: event.name || "Evento",
-      description: event.description || `Evento en ${event.venue_city}`,
-      images: [
-        {
-          url: event.flyer || "/event-placeholder.svg",
-          width: 1200,
-          height: 630,
-          alt: event.name || "Evento",
-        },
-      ],
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: event.name || "Evento",
-      description: event.description || `Evento en ${event.venue_city}`,
-      images: [event.flyer || "/event-placeholder.svg"],
-    },
+    // openGraph: {
+    //   title: event.name || "Evento",
+    //   description: event.description || `Evento en ${event.venue_city}`,
+    //   // images: [
+    //   //   {
+    //   //     url: event.flyer || "/event-placeholder.svg",
+    //   //     width: 1200,
+    //   //     height: 630,
+    //   //     alt: event.name || "Evento",
+    //   //   },
+    //   // ],
+    //   type: "website",
+    // },
+    // twitter: {
+    //   card: "summary_large_image",
+    //   title: event.name || "Evento",
+    //   description: event.description || `Evento en ${event.venue_city}`,
+    //   // images: [event.flyer || "/event-placeholder.svg"],
+    // },
   };
 }
 
@@ -78,21 +78,29 @@ export default async function EventPage({ params }: EventPageProps) {
 
   // Single, reliable rule for how src is produced
   // Convert to RELATIVE PATH at render time (only for Supabase images)
-  const isSupabaseImage = !!event.flyer?.includes("/storage/v1/object/public/");
-  const relativePathSrc =
-    isSupabaseImage && event.flyer
-      ? extractSupabasePath(event.flyer)
-      : "/event-placeholder.svg";
+  // const safeImage =
+  //   typeof event.flyer === "string" && event.flyer.trim() !== ""
+  //     ? event.flyer
+  //     : null;
+
+  // const supabasePath =
+  //   safeImage && safeImage.includes("/storage/v1/object/public/")
+  //     ? extractSupabasePath(safeImage)
+  //     : "";
+
+  // const isSupabaseImage = supabasePath.length > 0;
+
+  // const finalSrc = isSupabaseImage ? supabasePath : "/event-placeholder.svg";
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Hero Image - Full width on mobile */}
       <div className="relative w-full aspect-[3/4] sm:aspect-[16/9] lg:aspect-[21/9] bg-muted">
-        <EventPageImage
+        {/* <EventPageImage
           alt={event.name || "Evento"}
           isSupabaseImage={isSupabaseImage}
-          relativePathSrc={relativePathSrc}
-        />
+          relativePathSrc={finalSrc}
+        /> */}
         {/* Gradient overlay - only in dark mode */}
         <div className="absolute inset-0 dark:bg-gradient-to-t dark:from-background dark:via-background/60 dark:to-transparent" />
       </div>
