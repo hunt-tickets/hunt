@@ -36,45 +36,55 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   // Fetch order details using payment_id
   let orderData = null;
   if (payment_id) {
-    orderData = await db.query.orders.findFirst({
-      where: eq(orders.paymentSessionId, payment_id),
-      columns: {
-        id: true,
-        totalAmount: true,
-        createdAt: true,
-      },
-      with: {
-        event: {
-          columns: {
-            id: true,
-            name: true,
-            date: true,
-            flyer: true,
-          },
-          with: {
-            venues: {
-              columns: { name: true, city: true },
+    try {
+      orderData = await db.query.orders.findFirst({
+        where: eq(orders.paymentSessionId, payment_id),
+        columns: {
+          id: true,
+          totalAmount: true,
+          createdAt: true,
+        },
+        with: {
+          event: {
+            columns: {
+              id: true,
+              name: true,
+              date: true,
+              flyer: true,
+            },
+            with: {
+              venues: {
+                columns: { name: true, city: true },
+              },
             },
           },
-        },
-        orderItems: {
-          columns: {
-            id: true,
-            quantity: true,
-            subtotal: true,
-          },
-          with: {
-            ticketType: {
-              columns: {
-                id: true,
-                name: true,
-                price: true,
+          orderItems: {
+            columns: {
+              id: true,
+              quantity: true,
+              subtotal: true,
+            },
+            with: {
+              ticketType: {
+                columns: {
+                  id: true,
+                  name: true,
+                  price: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+
+      console.log('[Payment Success] Order data:', orderData ? 'found' : 'not found');
+      console.log('[Payment Success] Payment ID:', payment_id);
+      if (orderData) {
+        console.log('[Payment Success] Order items count:', orderData.orderItems?.length || 0);
+      }
+    } catch (error) {
+      console.error('[Payment Success] Error fetching order:', error);
+    }
   }
 
   // Get the foreign-key ables
@@ -192,11 +202,11 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                 >
                   <div>
                     <p className="text-white font-medium">
-                      {item.ticket_types?.name || "Entrada"}
+                      {item.ticketType?.name || "Entrada"}
                     </p>
                     <p className="text-white/40 text-sm">
                       {item.quantity} × $
-                      {Number(item.ticket_types?.price || 0).toLocaleString(
+                      {Number(item.ticketType?.price || 0).toLocaleString(
                         "es-CO",
                       )}
                     </p>
