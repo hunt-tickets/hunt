@@ -7,11 +7,13 @@ import {
   PartyPopper,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/drizzle";
 import { eq } from "drizzle-orm";
 import { orders } from "@/lib/schema";
+import { extractSupabasePath } from "@/supabase-image-loader";
 
 interface SuccessPageProps {
   searchParams: Promise<{
@@ -118,8 +120,15 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             {/* Event Flyer */}
             {event.flyer && (
               <div className="relative h-40 w-full">
+                <Image
+                  src={extractSupabasePath(event.flyer)}
+                  alt={event.name || "Event"}
+                  fill
+                  sizes="672px"
+                  className="object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                <div className="absolute bottom-3 left-4 right-4">
+                <div className="absolute bottom-3 left-4 right-4 z-10">
                   <h2 className="text-xl font-bold text-white truncate">
                     {event.name}
                   </h2>

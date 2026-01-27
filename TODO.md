@@ -18,6 +18,17 @@ IMAGE TRANSFORMATIONS DONE WITH NEXTJS LOADER (GENERATES A URL SO THAT SUPABASE 
 ALL COMMUNICATION WITH SUPABASE SERVER, EXCEPT PUBLIC IMAGES/FILES SHOULD BE DONE VIA THE SERVER, TO AVOID LEAKING ANON_KEY 
 
 
+TEST USERS FOR MERCADOPAGO
+TESTUSER4246955244978058217
+mpeoE8fIYk
+seller+
+TESTUSER7267917373753755190
+HWG8rHpXPe
+marketplace
+TESTUSER2538612194358989926
+wcK8gOoSU4
+
+
 Notes
 <!-- 41.1.1. Advantages of Using PL/pgSQL
 SQL is the language PostgreSQL and most other relational databases use as query language. It's portable and easy to learn. But every SQL statement must be executed individually by the database server.
