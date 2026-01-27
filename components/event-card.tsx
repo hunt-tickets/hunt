@@ -21,7 +21,7 @@ import {
   Store,
   type LucideIcon,
 } from "lucide-react";
-import supabaseLoader, { extractSupabasePath } from "@/supabase-image-loader";
+import { extractSupabasePath } from "@/supabase-image-loader";
 
 const CATEGORY_ICONS: Record<EventCategory, LucideIcon> = {
   fiestas: PartyPopper,
@@ -76,12 +76,6 @@ export function EventCard({
   // Use false (light mode) as default on server to avoid hydration mismatch
   const isThemeDark = mounted ? resolvedTheme === "dark" : false;
 
-  // Analyze image brightness to determine text color (only in light mode)
-  const { isDark: isImageLight } = useImageBrightness(
-    !isThemeDark ? image : null,
-    { sampleHeight: 0.35, threshold: 140 },
-  );
-
   // Parse date and convert from UTC to browser's timezone
   // Handle multiple formats: "2025-11-15 20:00:00+00", "2025-11-15T20:00:00Z", or "2025-11-15"
   let localDate: Date;
@@ -135,6 +129,17 @@ export function EventCard({
 
   const finalSrc = isSupabaseImage ? supabasePath : "/event-placeholder.svg";
 
+  // Analyze image brightness to determine text color (only in light mode)
+  // Use optimized version for brightness analysis to save bandwidth
+  const imageForAnalysis = !isThemeDark && isSupabaseImage
+    ? `https://db.hunt-tickets.com/storage/v1/render/image/public/${supabasePath}?width=400&quality=75`
+    : !isThemeDark ? image : null;
+
+  const { isDark: isImageLight } = useImageBrightness(
+    imageForAnalysis,
+    { sampleHeight: 0.35, threshold: 140 },
+  );
+
   return (
     <Link href={href || `/eventos/${id}`} className="block" onClick={onClick}>
       <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden group cursor-pointer bg-white/8 border border-white/10 hover:border-white/20 backdrop-blur-sm">
@@ -145,8 +150,7 @@ export function EventCard({
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          loader={isSupabaseImage ? supabaseLoader : undefined}
-          unoptimized={!isSupabaseImage} // 🔑 THIS IS THE CRITICAL LINE
+          unoptimized={!isSupabaseImage} // Skip optimization for non-Supabase images
         />
 
         {/* ADMIN PANEL */}

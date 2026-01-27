@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Eye,
@@ -11,6 +12,7 @@ import {
   ExternalLink,
   TrendingDown
 } from "lucide-react";
+import { extractSupabasePath } from "@/supabase-image-loader";
 
 interface Order {
   platform: string;
@@ -151,10 +153,12 @@ export function EventWebAnalytics({
 
               {/* Website content preview */}
               <div className="aspect-[16/9] bg-black relative overflow-hidden">
-                <img
-                  src={eventFlyer || '/event-placeholder.svg'}
+                <Image
+                  src={extractSupabasePath(eventFlyer || '/event-placeholder.svg')}
                   alt={eventName}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
                   <div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useEventTabs } from "@/contexts/event-tabs-context";
 import { toast } from "@/lib/toast";
 import { FormInput } from "@/components/ui/form-input";
@@ -52,6 +53,7 @@ import {
   EVENT_CATEGORY_LABELS,
 } from "@/constants/event-categories";
 import { EventConfigCheckoutTab } from "@/components/event-config-checkout-tab";
+import { extractSupabasePath } from "@/supabase-image-loader";
 
 const CITIES_BY_COUNTRY: Record<
   string,
@@ -1271,10 +1273,12 @@ export function EventConfigContent({
                     </div>
                   ) : images.banner ? (
                     <div className="relative aspect-[3/4] max-w-xs rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-                      <img
-                        src={images.banner as string}
+                      <Image
+                        src={extractSupabasePath(images.banner as string)}
                         alt="Flyer preview"
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="384px"
+                        className="object-cover"
                       />
                       <Button
                         variant="destructive"
@@ -1282,7 +1286,7 @@ export function EventConfigContent({
                         onClick={() =>
                           setImages((prev) => ({ ...prev, banner: null }))
                         }
-                        className="absolute top-2 right-2 rounded-lg"
+                        className="absolute top-2 right-2 rounded-lg z-10"
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
                         Eliminar
@@ -1357,10 +1361,12 @@ export function EventConfigContent({
                           key={image.id}
                           className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5"
                         >
-                          <img
-                            src={image.url}
+                          <Image
+                            src={extractSupabasePath(image.url)}
                             alt="Gallery image"
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                            className="object-cover"
                           />
                           <Button
                             variant="destructive"
@@ -1370,7 +1376,7 @@ export function EventConfigContent({
                                 prev.filter((img) => img.id !== image.id)
                               )
                             }
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg h-8 w-8 p-0"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg h-8 w-8 p-0 z-10"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

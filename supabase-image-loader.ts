@@ -19,7 +19,9 @@ import type { ImageLoader } from "next/image";
 const baseUrl = "https://db.hunt-tickets.com"; // or your supabase domain
 
 const supabaseLoader: ImageLoader = ({ src, width, quality }) => {
-  return `${baseUrl}/storage/v1/render/image/public/${src}?width=${width}&quality=${quality || 75}`;
+  const url = `${baseUrl}/storage/v1/render/image/public/${src}?width=${width}&quality=${quality || 75}`;
+  console.log('[Supabase Loader] Called with:', { src, width, quality, outputUrl: url });
+  return url;
 };
 
 export default supabaseLoader;

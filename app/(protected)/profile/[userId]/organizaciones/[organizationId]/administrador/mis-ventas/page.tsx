@@ -1,7 +1,9 @@
 import { redirect, notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/lib/auth";
+import { extractSupabasePath } from "@/supabase-image-loader";
 import { db } from "@/lib/drizzle";
 import { orders, member, events, tickets, user } from "@/lib/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -204,11 +206,15 @@ export default async function MisVentasPage({ params }: MisVentasPageProps) {
                 >
                   <div className="flex items-center gap-3 p-3 rounded-lg border border-[#303030] bg-background/30 hover:border-primary/50 hover:bg-background/50 transition-all">
                     {event.flyer ? (
-                      <img
-                        src={event.flyer}
-                        alt={event.name || "Evento"}
-                        className="h-12 w-12 rounded-lg object-cover"
-                      />
+                      <div className="relative h-12 w-12 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image
+                          src={extractSupabasePath(event.flyer)}
+                          alt={event.name || "Evento"}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
+                      </div>
                     ) : (
                       <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                         <Calendar className="h-6 w-6 text-primary" />

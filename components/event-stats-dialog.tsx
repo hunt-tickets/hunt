@@ -24,6 +24,7 @@ import {
   Calendar,
 } from "lucide-react";
 import Image from "next/image";
+import { extractSupabasePath } from "@/supabase-image-loader";
 
 interface EventStatsDialogProps {
   event: {
@@ -72,7 +73,7 @@ export function EventStatsDialog({
             {event.flyer && (
               <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden flex-shrink-0">
                 <Image
-                  src={event.flyer}
+                  src={extractSupabasePath(event.flyer)}
                   alt={event.name}
                   fill
                   className="object-cover"

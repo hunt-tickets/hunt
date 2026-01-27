@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SimpleDateTimePicker } from "@/components/ui/simple-datetime-picker";
 import { Calendar, Clock, FileImage } from "lucide-react";
 import type { EventDayOutput } from "@/actions/event-days";
+import { extractSupabasePath } from "@/supabase-image-loader";
 
 type EventDay = EventDayOutput;
 
@@ -222,15 +224,13 @@ export function DayDetailSheet({
                 className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
               />
               {formData.flyer && (
-                <div className="mt-3 rounded-xl overflow-hidden border border-white/10">
-                  <img
-                    src={formData.flyer}
+                <div className="mt-3 rounded-xl overflow-hidden border border-white/10 relative h-40">
+                  <Image
+                    src={extractSupabasePath(formData.flyer)}
                     alt="Vista previa"
-                    className="w-full h-40 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "";
-                      e.currentTarget.alt = "Error al cargar imagen";
-                    }}
+                    fill
+                    sizes="600px"
+                    className="object-cover"
                   />
                 </div>
               )}

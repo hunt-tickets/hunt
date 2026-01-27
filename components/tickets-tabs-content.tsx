@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Ticket, Calendar, Clock, QrCode } from "lucide-react";
+import { extractSupabasePath } from "@/supabase-image-loader";
 
 interface Event {
   event_id: string;
@@ -78,11 +79,11 @@ export function TicketsTabsContent({
                   <div className="relative h-48 w-full bg-muted">
                     {event.flyer ? (
                       <Image
-                        src={event.flyer}
+                        src={extractSupabasePath(event.flyer)}
                         alt={event.event_name}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover"
-                        unoptimized
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
@@ -163,11 +164,11 @@ export function TicketsTabsContent({
                   <div className="relative h-48 w-full bg-muted">
                     {event.flyer ? (
                       <Image
-                        src={event.flyer}
+                        src={extractSupabasePath(event.flyer)}
                         alt={event.event_name}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover"
-                        unoptimized
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">

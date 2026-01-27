@@ -9,8 +9,8 @@ import { TicketsContainer } from "@/components/tickets-container";
 import { db } from "@/lib/drizzle";
 import { documentType, countries } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-// import { extractSupabasePath } from "@/supabase-image-loader";
-// import EventPageImage from "@/components/event-page-image";
+import { extractSupabasePath } from "@/supabase-image-loader";
+import EventPageImage from "@/components/event-page-image";
 
 interface EventPageProps {
   params: Promise<{
@@ -78,29 +78,29 @@ export default async function EventPage({ params }: EventPageProps) {
 
   // Single, reliable rule for how src is produced
   // Convert to RELATIVE PATH at render time (only for Supabase images)
-  // const safeImage =
-  //   typeof event.flyer === "string" && event.flyer.trim() !== ""
-  //     ? event.flyer
-  //     : null;
+  const safeImage =
+    typeof event.flyer === "string" && event.flyer.trim() !== ""
+      ? event.flyer
+      : null;
 
-  // const supabasePath =
-  //   safeImage && safeImage.includes("/storage/v1/object/public/")
-  //     ? extractSupabasePath(safeImage)
-  //     : "";
+  const supabasePath =
+    safeImage && safeImage.includes("/storage/v1/object/public/")
+      ? extractSupabasePath(safeImage)
+      : "";
 
-  // const isSupabaseImage = supabasePath.length > 0;
+  const isSupabaseImage = supabasePath.length > 0;
 
-  // const finalSrc = isSupabaseImage ? supabasePath : "/event-placeholder.svg";
+  const finalSrc = isSupabaseImage ? supabasePath : "/event-placeholder.svg";
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Hero Image - Full width on mobile */}
       <div className="relative w-full aspect-[3/4] sm:aspect-[16/9] lg:aspect-[21/9] bg-muted">
-        {/* <EventPageImage
+        <EventPageImage
           alt={event.name || "Evento"}
           isSupabaseImage={isSupabaseImage}
           relativePathSrc={finalSrc}
-        /> */}
+        />
         {/* Gradient overlay - only in dark mode */}
         <div className="absolute inset-0 dark:bg-gradient-to-t dark:from-background dark:via-background/60 dark:to-transparent" />
       </div>

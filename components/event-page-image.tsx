@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import supabaseLoader from "@/supabase-image-loader";
 import Image from "next/image";
 
 interface EventPageImageProps {
@@ -26,8 +25,7 @@ const EventPageImage = ({
       fill
       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
       className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-      loader={isSupabaseImage ? supabaseLoader : undefined}
-      unoptimized={!isSupabaseImage} // 🔑 THIS IS THE CRITICAL LINE
+      unoptimized={!isSupabaseImage} // Skip optimization for non-Supabase images
     />
   );
 };
