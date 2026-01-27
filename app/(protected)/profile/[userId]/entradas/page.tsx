@@ -28,6 +28,7 @@ interface TicketData {
       id: string;
       name: string;
       date: string;
+      flyer: string | null;
       venues: { name: string; city: string } | null;
     } | null;
   } | null;
@@ -37,6 +38,7 @@ interface EventData {
   id: string;
   name: string;
   date: string;
+  flyer: string | null;
   venues: { name: string; city: string } | null;
 }
 
@@ -63,7 +65,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
       created_at,
       order_id,
       ticket_types (id, name, price),
-      orders (id, total_amount, currency, paid_at, events (id, name, date, venues (name, city)))
+      orders (id, total_amount, currency, paid_at, events (id, name, date, flyer, venues (name, city)))
     `
     )
     .eq("user_id", userId)
@@ -116,7 +118,7 @@ const EntradasPage = async ({ params }: EntradasPageProps) => {
           </CardContent>
         </Card>
       ) : (
-        <TicketsList ticketsByEvent={ticketsByEvent} />
+        <TicketsList ticketsByEvent={ticketsByEvent} userId={userId} />
       )}
     </div>
   );
