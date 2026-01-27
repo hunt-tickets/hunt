@@ -94,7 +94,10 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
   }),
   ticketTypes: many(ticketTypes),
   orders: many(orders),
-  venues: one(venues),
+  venues: one(venues, {
+    fields: [events.venueId],
+    references: [venues.id],
+  }),
 }));
 
 export const ticketTypesRelations = relations(ticketTypes, ({ one }) => ({

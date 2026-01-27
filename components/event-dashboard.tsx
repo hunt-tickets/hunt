@@ -154,11 +154,11 @@ export function EventDashboard({ financialReport, orders, tickets }: EventDashbo
         />
       </div>
 
-      <SalesFunnelChart
+      {/* <SalesFunnelChart
         visits={totalVisits}
         addedToCart={totalAddedToCart}
         completed={totalCompleted}
-      />
+      /> */}
 
       {/* Financial Summary - Organization Perspective */}
       {financialReport.org_summary && (
