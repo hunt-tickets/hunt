@@ -1,12 +1,11 @@
 - Acceso a creacion de Organizaciones tiene que ser restringido (Book a demo)
 - Webhook para facturacion
 - Scanner
-- Terminar event_days y Events
+<!-- - Terminar event_days y Events
 - Palcos, silla enum.
 - Programa de referidos
-- apple wallet
+- apple wallet -->
 - Analytics de ruta de eventos (organizaciones)
-- descargar tickets
 - reembolsos con Oscar
 - en /entradas hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
 - tracking de comisiones a los vendedores en el tab de Vendedores

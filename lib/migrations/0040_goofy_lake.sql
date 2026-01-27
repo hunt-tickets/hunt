@@ -1,0 +1,1 @@
+ALTER TABLE "events" ADD CONSTRAINT "events_venue_id_organization_id_fk" FOREIGN KEY ("venue_id") REFERENCES "public"."organization"("id") ON DELETE no action ON UPDATE no action;

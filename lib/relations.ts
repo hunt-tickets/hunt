@@ -13,6 +13,7 @@ import {
   orderItems,
   refunds,
   paymentProcessorAccount,
+  venues,
 } from "./schema";
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -61,7 +62,7 @@ export const paymentProcessorAccountRelations = relations(
       fields: [paymentProcessorAccount.organizationId],
       references: [organization.id],
     }),
-  })
+  }),
 );
 
 export const memberRelations = relations(member, ({ one }) => ({
@@ -93,6 +94,7 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
   }),
   ticketTypes: many(ticketTypes),
   orders: many(orders),
+  venues: one(venues),
 }));
 
 export const ticketTypesRelations = relations(ticketTypes, ({ one }) => ({

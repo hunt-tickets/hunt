@@ -9,9 +9,9 @@ import {
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-// import Image from "next/image";
-// import { EventCard } from "@/components/event-card";
+import { db } from "@/lib/drizzle";
+import { eq } from "drizzle-orm";
+import { orders } from "@/lib/schema";
 
 interface SuccessPageProps {
   searchParams: Promise<{
@@ -34,47 +34,51 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   // Fetch order details using payment_id
   let orderData = null;
   if (payment_id) {
-    const supabase = await createClient();
-    const { data: order } = await supabase
-      .from("orders")
-      .select(
-        `
-        id,
-        total_amount,
-        created_at,
-        order_items (
-          id,
-          quantity,
-          subtotal,
-          ticket_types (
-            id,
-            name,
-            price
-          )
-        ),
-        events (
-          id,
-          name,
-          date,
-          flyer,
-          venues (
-            name,
-            city
-          )
-        )
-      `,
-      )
-      .eq("payment_session_id", payment_id)
-      .single();
-
-    orderData = order;
+    orderData = await db.query.orders.findFirst({
+      where: eq(orders.paymentSessionId, payment_id),
+      columns: {
+        id: true,
+        totalAmount: true,
+        createdAt: true,
+      },
+      with: {
+        event: {
+          columns: {
+            id: true,
+            name: true,
+            date: true,
+            flyer: true,
+          },
+          with: {
+            venues: {
+              columns: { name: true, city: true },
+            },
+          },
+        },
+        orderItems: {
+          columns: {
+            id: true,
+            quantity: true,
+            subtotal: true,
+          },
+          with: {
+            ticketType: {
+              columns: {
+                id: true,
+                name: true,
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const event = orderData?.events as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orderItems = (orderData?.order_items || []) as any[];
-  const totalTickets = orderItems.reduce(
+  // Get the foreign-key ables
+  const event = orderData?.event;
+  const orderItems = orderData?.orderItems;
+  const totalTickets = orderData?.orderItems.reduce(
     (sum: number, item: { quantity: number }) => sum + item.quantity,
     0,
   );
@@ -108,7 +112,6 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
           </h1>
           <p className="text-white/60">Tus entradas están listas</p>
         </div>
-
         {/* Event Card */}
         {event && (
           <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden mb-4">
@@ -160,7 +163,6 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             </div>
           </div>
         )}
-
         {/* Tickets Summary */}
         <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 mb-4">
           <div className="flex items-center gap-2 mb-4">
@@ -171,7 +173,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             </span>
           </div>
 
-          {orderItems.length > 0 ? (
+          {orderItems && orderItems.length > 0 ? (
             <div className="space-y-3">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {orderItems.map((item: any) => (
@@ -200,8 +202,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               <div className="flex items-center justify-between pt-3 border-t border-white/10">
                 <span className="text-white/60">Total pagado</span>
                 <span className="text-xl font-bold text-green-400">
-                  $
-                  {Number(orderData?.total_amount || 0).toLocaleString("es-CO")}
+                  ${Number(orderData?.totalAmount || 0).toLocaleString("es-CO")}
                 </span>
               </div>
             </div>
@@ -211,7 +212,6 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             </p>
           )}
         </div>
-
         {/* Info Message */}
         <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 mb-6 text-center">
           <p className="text-white/60 text-sm">
@@ -219,6 +219,11 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
           </p>
           <p className="text-white/40 text-xs mt-2">
             También puedes verlas en tu perfil en cualquier momento.
+          </p>
+          <p className="text-white/40 text-xs mt-2">
+            Ante reclamos o solicitudes por facturación electrónica o
+            reembolsos, comunicarse directamente con el Productor y/o Promotor
+            del evento, cuyos canales de comunicación son: Correo: Cel:{" "}
           </p>
         </div>
 
@@ -241,7 +246,6 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             </Link>
           )}
         </div>
-
         {/* Payment ID (subtle) */}
         {payment_id && (
           <p className="text-center text-white/20 text-xs mt-6">

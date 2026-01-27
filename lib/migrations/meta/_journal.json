@@ -281,6 +281,20 @@
       "when": 1769142320651,
       "tag": "0039_giant_bug",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1769466831943,
+      "tag": "0040_goofy_lake",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1769466906427,
+      "tag": "0041_confused_zuras",
+      "breakpoints": true
     }
   ]
 }

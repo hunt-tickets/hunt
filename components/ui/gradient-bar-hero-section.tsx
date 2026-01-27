@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Instagram } from "lucide-react";
-import { FaWhatsapp, FaGooglePlay, FaApple, FaLinkedin } from "react-icons/fa";
+import { FaWhatsapp } from "react-icons/fa";
 import { SiGmail } from "react-icons/si";
 import { HoverButton } from "@/components/ui/hover-glow-button";
 
@@ -15,7 +15,7 @@ const GLSLHills = dynamic(
     import("@/components/ui/glsl-hills").then((mod) => ({
       default: mod.GLSLHills,
     })),
-  { ssr: false }
+  { ssr: false },
 );
 
 const WaitlistForm: React.FC = () => {
@@ -135,14 +135,7 @@ export const Component: React.FC = () => {
           >
             <Instagram size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
           </a>
-          <a
-            href="https://www.linkedin.com/company/hunt-tickets-co/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
-          >
-            <FaLinkedin size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
-          </a>
+
           <a
             href="mailto:"
             className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
@@ -156,21 +149,6 @@ export const Component: React.FC = () => {
             className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
           >
             <FaWhatsapp size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
-          </a>
-          <a
-            href="#"
-            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
-          >
-            <FaApple size={20} className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
-          </a>
-          <a
-            href="#"
-            className="text-gray-600 dark:text-[#B0B0B0] hover:text-foreground transition-colors duration-300"
-          >
-            <FaGooglePlay
-              size={20}
-              className="w-5 h-5 sm:w-[22px] sm:h-[22px]"
-            />
           </a>
         </div>
       </div>

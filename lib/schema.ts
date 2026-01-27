@@ -183,7 +183,7 @@ export const countries = pgTable(
     countryCode: text("country_code"),
     currency: text("currency").notNull(),
   },
-  (table) => [unique("countries_country_name_key").on(table.countryName)]
+  (table) => [unique("countries_country_name_key").on(table.countryName)],
 );
 // Document Type table
 export const documentType = pgTable(
@@ -201,7 +201,7 @@ export const documentType = pgTable(
       foreignColumns: [countries.id],
       name: "document_type_country_id_fkey",
     }),
-  ]
+  ],
 );
 
 /**
@@ -253,7 +253,7 @@ export const user = pgTable(
       foreignColumns: [documentType.id],
       name: "user_document_type_id_fkey",
     }),
-  ]
+  ],
 );
 export const session = pgTable(
   "session",
@@ -278,7 +278,7 @@ export const session = pgTable(
       name: "session_userId_fkey",
     }).onDelete("cascade"),
     unique("session_token_key").on(table.token),
-  ]
+  ],
 );
 export const account = pgTable(
   "account",
@@ -305,7 +305,7 @@ export const account = pgTable(
       foreignColumns: [user.id],
       name: "account_userId_fkey",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 export const verification = pgTable("verification", {
   id: text().primaryKey().notNull(),
@@ -332,7 +332,7 @@ export const passkey = pgTable(
     backedUp: boolean().notNull(),
     transports: text(),
     createdAt: timestamp({ withTimezone: true }).default(
-      sql`CURRENT_TIMESTAMP`
+      sql`CURRENT_TIMESTAMP`,
     ),
     aaguid: text(),
   },
@@ -343,7 +343,7 @@ export const passkey = pgTable(
       name: "passkey_userId_fkey",
     }).onDelete("cascade"),
     unique("passkey_credentialID_key").on(table.credentialID),
-  ]
+  ],
 );
 
 /**
@@ -373,7 +373,7 @@ export const organization = pgTable(
     rutUrl: text("rut_url"),
     cerlUrl: text("cerl_url"),
   },
-  (table) => [unique("organization_slug_key").on(table.slug)]
+  (table) => [unique("organization_slug_key").on(table.slug)],
 );
 export const member = pgTable(
   "member",
@@ -397,7 +397,7 @@ export const member = pgTable(
       foreignColumns: [user.id],
       name: "member_userId_fkey",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 export const invitation = pgTable(
   "invitation",
@@ -424,7 +424,7 @@ export const invitation = pgTable(
       foreignColumns: [user.id],
       name: "invitation_inviterId_fkey",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 // Payment processor account linking (OAuth-based)
 export const paymentProcessorAccount = pgTable("payment_processor_account", {
@@ -492,7 +492,7 @@ export const legacyVenues = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [index("idx_legacy_venues_name").on(table.name)]
+  (table) => [index("idx_legacy_venues_name").on(table.name)],
 );
 // Legacy Events table - Archive of old events without organization link
 export const legacyEvents = pgTable(
@@ -548,7 +548,7 @@ export const legacyEvents = pgTable(
       foreignColumns: [legacyVenues.id],
       name: "legacy_events_legacy_venuId_fkey",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 /**
@@ -599,7 +599,7 @@ export const venues = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [index("idx_venues_name").on(table.name)]
+  (table) => [index("idx_venues_name").on(table.name)],
 );
 // Events table - NEW events linked to organizations
 export const events = pgTable(
@@ -615,6 +615,9 @@ export const events = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     category: eventCategory("category"),
     type: eventType("type").default("single"),
+    // for single-date events
+    venueId: uuid("venue_id").references(() => venues.id),
+
     // recurrence: jsonb("recurrence").$type<{
     //   pattern: "daily" | "weekly" | "biweekly" | "monthly";
     //   daysOfWeek?: number[];
@@ -631,7 +634,6 @@ export const events = pgTable(
     city: text("city"),
     country: text("country"),
     address: text("address"),
-    venueId: uuid("venue_id").references(() => venues.id),
     venueName: text("venue_name"),
     variableFee: decimal("variable_fee"),
     fixedFee: decimal("fixed_fee"),
@@ -640,25 +642,6 @@ export const events = pgTable(
     extraInfo: text("extra_info"),
     ics: text("ics"),
     flyer: text("flyer"),
-    // flyerApple: text("flyer_apple"),
-    // flyerGoogle: text("flyer_google"),
-    // flyerOverlay: text("flyer_overlay"),
-    // flyerBackground: text("flyer_background"),
-    // flyerBanner: text("flyer_banner"),
-    // posFee: decimal("pos_fee"),
-    // hex: text("hex"),
-    // priority: boolean("priority").notNull().default(false),
-    // hexText: text("hex_text"),
-    // guestList: boolean("guest_list").notNull().default(false),
-    // privateList: boolean("private_list").notNull().default(false),
-    // accessPass: boolean("access_pass").notNull().default(false),
-    // guestListMaxHour: timestamp("guest_list_max_hour", { withTimezone: true }),
-    // guestListQuantity: decimal("guest_list_quantity"),
-    // guestListInfo: text("guest_list_info"),
-    // hexTextSecondary: text("hex_text_secondary").notNull().default("A3A3A3"),
-    // lateFee: decimal("late_fee"),
-    // guestEmail: text("guest_email"),
-    // guestName: text("guest_name"),
     checkout_questions: jsonb("checkout_questions").$type<
       Array<{
         id: string;
@@ -676,7 +659,7 @@ export const events = pgTable(
     lifecycleStatus: eventLifecycleStatus("lifecycle_status")
       .default("active")
       .notNull(),
-      
+
     // Cancellation workflow fields
     cancellationReason: text("cancellation_reason"),
     cancelledBy: text("cancelled_by").references(() => user.id, {
@@ -702,15 +685,15 @@ export const events = pgTable(
     index("idx_events_org_status_date").on(
       table.organizationId,
       table.status,
-      table.date
+      table.date,
     ),
     // Indexes for lifecycle management
     index("idx_events_lifecycle_status").on(table.lifecycleStatus),
     index("idx_events_cancellation_initiated").on(
-      table.cancellationInitiatedAt
+      table.cancellationInitiatedAt,
     ),
     index("idx_events_deleted").on(table.deletedAt),
-  ]
+  ],
 );
 
 // Event Days (for multi-day events like festivals)
@@ -732,7 +715,7 @@ export const eventDays = pgTable(
     showStart: timestamp("show_start", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
-  (table) => [index("idx_event_days_event").on(table.eventId)]
+  (table) => [index("idx_event_days_event").on(table.eventId)],
 );
 
 // Ticket Types (palcos, VIP, general, etc.)
@@ -767,7 +750,7 @@ export const ticketTypes = pgTable(
     index("idx_ticket_types_event").on(table.eventId),
     // Note: The CHECK constraint (sold_count + reserved_count <= capacity)
     // will be added in the migration SQL
-  ]
+  ],
 );
 
 // The reservations table acts like a shopping cart hold:
@@ -818,7 +801,7 @@ export const reservations = pgTable(
     index("idx_reservations_event").on(table.eventId),
     index("idx_reservations_expires").on(table.expiresAt),
     index("idx_reservations_payment_session").on(table.paymentSessionId),
-  ]
+  ],
 );
 
 // Reservation items (multiple ticket types per reservation)
@@ -840,7 +823,7 @@ export const reservationItems = pgTable(
   (table) => [
     index("idx_reservation_items_reservation").on(table.reservationId),
     index("idx_reservation_items_ticket_type").on(table.ticketTypeId),
-  ]
+  ],
 );
 
 // Orders (purchases)
@@ -858,8 +841,14 @@ export const orders = pgTable(
     currency: text("currency").notNull().default("COP"),
     marketplaceFee: decimal("marketplace_fee", { precision: 10, scale: 2 }), // Hunt's fee
     processorFee: decimal("processor_fee", { precision: 10, scale: 2 }), // Mercado Pago's fee
-    taxWithholdingIca: decimal("tax_withholding_ica", { precision: 10, scale: 2 }), // Colombian ICA tax withholding
-    taxWithholdingFuente: decimal("tax_withholding_fuente", { precision: 10, scale: 2 }), // Colombian Retención en la Fuente
+    taxWithholdingIca: decimal("tax_withholding_ica", {
+      precision: 10,
+      scale: 2,
+    }), // Colombian ICA tax withholding
+    taxWithholdingFuente: decimal("tax_withholding_fuente", {
+      precision: 10,
+      scale: 2,
+    }), // Colombian Retención en la Fuente
     paymentStatus: orderPaymentStatus("payment_status")
       .notNull()
       .default("pending"),
@@ -876,7 +865,7 @@ export const orders = pgTable(
     index("idx_orders_event").on(table.eventId),
     index("idx_orders_payment_status").on(table.paymentStatus),
     index("idx_orders_sold_by").on(table.soldBy),
-  ]
+  ],
 );
 
 // Order items (line items for each ticket type in the order)
@@ -903,7 +892,7 @@ export const orderItems = pgTable(
   (table) => [
     index("idx_order_items_order").on(table.orderId),
     index("idx_order_items_ticket_type").on(table.ticketTypeId),
-  ]
+  ],
 );
 
 // Refunds (order refund)
@@ -912,7 +901,6 @@ export const refund = pgTable("refunds", {
   orderId: uuid("order_id")
     .notNull()
     .references(() => orders.id, { onDelete: "cascade" }),
-    
 });
 
 // Tickets (actual tickets issued)
@@ -948,7 +936,7 @@ export const tickets = pgTable(
     index("idx_tickets_ticket_type").on(table.ticketTypeId),
     index("idx_tickets_user").on(table.userId),
     index("idx_tickets_qr_code").on(table.qrCode),
-  ]
+  ],
 );
 
 // Refunds table (audit trail and workflow for refund processing)
@@ -990,7 +978,7 @@ export const refunds = pgTable(
     index("idx_refunds_event").on(table.eventId),
     index("idx_refunds_status").on(table.status),
     index("idx_refunds_requested_at").on(table.requestedAt),
-  ]
+  ],
 );
 
 // Event audit log (track all administrative actions on events)
@@ -1015,7 +1003,7 @@ export const eventAuditLog = pgTable(
     index("idx_event_audit_log_event").on(table.eventId),
     index("idx_event_audit_log_action").on(table.action),
     index("idx_event_audit_log_created_at").on(table.createdAt),
-  ]
+  ],
 );
 
 // Email logs (audit trail for all emails sent)
@@ -1041,7 +1029,7 @@ export const emailLogs = pgTable(
     index("idx_email_logs_event").on(table.eventId),
     index("idx_email_logs_recipient").on(table.recipientEmail),
     index("idx_email_logs_service_id").on(table.emailServiceId),
-  ]
+  ],
 );
 
 // Export schema object for Drizzle

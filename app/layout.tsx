@@ -4,8 +4,6 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { ConditionalLayout } from "@/components/conditional-layout";
 import { ChatbaseWidget } from "@/components/chatbase-widget";
-// import { Analytics } from "@vercel/analytics/react";
-// import Script from "next/script";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -95,26 +93,6 @@ export default function RootLayout({
           <ChatbaseWidget />
         </ThemeProvider>
         {/* <Analytics /> */}
-
-        {/* Chatbase Widget
-        <Script
-          id="chatbase-config"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.embeddedChatbotConfig = {
-                chatbotId: "fNQScYCO-p2DSA8hisks2",
-                domain: "www.chatbase.co"
-              };
-            `,
-          }}
-        />
-        <Script
-          src="https://www.chatbase.co/embed.min.js"
-          id="fNQScYCO-p2DSA8hisks2"
-          data-domain="www.chatbase.co"
-          strategy="afterInteractive"
-        /> */}
       </body>
     </html>
   );
