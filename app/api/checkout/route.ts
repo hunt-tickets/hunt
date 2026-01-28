@@ -13,7 +13,7 @@ import { eq, and, sql, inArray } from "drizzle-orm";
 
 function calculateMarketplaceFee(totalAmount: number): number {
   const feePercentage = parseFloat(
-    process.env.MARKETPLACE_FEE_PERCENTAGE || "5"
+    process.env.MARKETPLACE_FEE_PERCENTAGE || "5",
   );
   const fee = (totalAmount * feePercentage) / 100;
   return Math.round(fee * 100) / 100;
@@ -28,13 +28,13 @@ async function getOrgMercadoPagoCredentials(organizationId: string) {
     where: and(
       eq(paymentProcessorAccount.organizationId, organizationId),
       eq(paymentProcessorAccount.processorType, "mercadopago"),
-      eq(paymentProcessorAccount.status, "active")
+      eq(paymentProcessorAccount.status, "active"),
     ),
   });
 
   if (!account) {
     throw new Error(
-      "No active Mercado Pago account found for this organization"
+      "No active Mercado Pago account found for this organization",
     );
   }
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json(
         { success: false, error: "Debes iniciar sesión para continuar" },
-        { status: 401 }
+        { status: 401 },
       );
     }
     const userId = session.user.id;
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     if (!items || items.length === 0) {
       return NextResponse.json(
         { success: false, error: "El carrito está vacío" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     if (!event) {
       return NextResponse.json(
         { success: false, error: "Evento no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -150,6 +150,8 @@ export async function POST(request: NextRequest) {
         expiration_date_from: new Date().toISOString(),
         expiration_date_to: reservation.expires_at,
         marketplace_fee: marketplaceFee,
+
+        statement_descriptor: "Nuevo Hunt", // Max 13 characters
       },
     });
 
@@ -157,7 +159,7 @@ export async function POST(request: NextRequest) {
     await db.execute(
       sql`UPDATE reservations
           SET payment_session_id = ${preference.id}
-          WHERE id = ${reservation.reservation_id}`
+          WHERE id = ${reservation.reservation_id}`,
     );
 
     // 12. Return checkout URL
@@ -187,7 +189,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: false, error: errorMessage },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

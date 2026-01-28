@@ -7,7 +7,6 @@
 - apple wallet -->
 - Analytics de ruta de eventos (organizaciones)
 - reembolsos con Oscar
-- en /entradas hacer que salga el card del evento en vez del nombre, y al presionar salen todos los tiquetes comprados de ese tipo de evento
 - tracking de comisiones a los vendedores en el tab de Vendedores
 
 **** OPTIMIZE IMAGES AND BANDWITH TRANSFER (USE THE IMAGE COMPONENT (NEXTJS) AND THE CUSTOM SUPABASE LOADER)

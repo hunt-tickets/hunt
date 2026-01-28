@@ -1,5 +1,4 @@
 import { Payment, MercadoPagoConfig } from "mercadopago";
-import { revalidatePath } from "next/cache";
 import { convertReservationToOrder } from "@/lib/reservations";
 import {
   validateMercadoPagoSignature,
@@ -48,7 +47,7 @@ export async function POST(request: Request) {
       xSignature,
       xRequestId,
       dataId,
-      process.env.MP_WEBHOOK_SECRET
+      process.env.MP_WEBHOOK_SECRET,
     );
 
     if (!isValidSignature) {
@@ -94,7 +93,7 @@ export async function POST(request: Request) {
     });
 
     console.log(
-      `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`
+      `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`,
     );
 
     // DEBUG: Log full payment object to analyze structure for impuestos
@@ -114,7 +113,7 @@ export async function POST(request: Request) {
       console.log(
         `[Webhook] ⏭️  Payment status is '${payment.status}' (not approved), skipping`,
         `Status detail: ${payment.status_detail}`,
-        `Payment method: ${payment.payment_method_id}`
+        `Payment method: ${payment.payment_method_id}`,
       );
       return new Response(null, { status: 200 });
     }
@@ -163,10 +162,19 @@ export async function POST(request: Request) {
       marketplaceFee,
       taxWithholdingIca,
       taxWithholdingFuente,
-      totalDeductions: processorFee + marketplaceFee + taxWithholdingIca + taxWithholdingFuente,
+      totalDeductions:
+        processorFee +
+        marketplaceFee +
+        taxWithholdingIca +
+        taxWithholdingFuente,
       transactionAmount: payment.transaction_amount,
       netReceived: payment.transaction_details?.net_received_amount,
-      calculatedNet: (payment.transaction_amount || 0) - (processorFee + marketplaceFee + taxWithholdingIca + taxWithholdingFuente),
+      calculatedNet:
+        (payment.transaction_amount || 0) -
+        (processorFee +
+          marketplaceFee +
+          taxWithholdingIca +
+          taxWithholdingFuente),
     });
 
     if (!reservationId) {
@@ -177,7 +185,7 @@ export async function POST(request: Request) {
     }
 
     console.log(
-      `[Webhook] Processing reservation ${reservationId} (platform: ${platform})`
+      `[Webhook] Processing reservation ${reservationId} (platform: ${platform})`,
     );
 
     const order = await convertReservationToOrder(
@@ -189,21 +197,22 @@ export async function POST(request: Request) {
       processorFee,
       undefined, // soldBy (undefined for web/app purchases)
       taxWithholdingIca,
-      taxWithholdingFuente
+      taxWithholdingFuente,
     );
 
     console.log(
-      `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`
+      `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`,
     );
 
     // CRITICAL: Send billing info to event producer for DIAN compliance
     // This is a legal requirement - producers need this data immediately to generate factura electrónica
     if (billingInfo && eventId && organizationId) {
       console.log(
-        `[Webhook] 📧 Triggering billing notification to producer (organization: ${organizationId})`
+        `[Webhook] 📧 Triggering billing notification to producer (organization: ${organizationId})`,
       );
 
       // Fire-and-forget: Call Edge Function to send email to producer
+      // SUPER IMPORTANT
       createClient()
         .then((supabase) =>
           supabase.functions.invoke("send-facturacion", {
@@ -221,19 +230,19 @@ export async function POST(request: Request) {
                 ticket_count: order.ticket_ids.length,
               },
             },
-          })
+          }),
         )
         .catch((error) => {
           // Log but don't throw - this is critical but non-blocking for webhook
           console.error(
             "[Webhook] ⚠️ CRITICAL - Producer billing notification failed (manual follow-up needed):",
-            error
+            error,
           );
           // TODO: Add to retry queue or alert system
         });
     } else {
       console.warn(
-        "[Webhook] ⚠️ Missing billing info, event ID, or org ID - cannot notify producer"
+        "[Webhook] ⚠️ Missing billing info, event ID, or org ID - cannot notify producer",
       );
     }
 
@@ -243,19 +252,17 @@ export async function POST(request: Request) {
       .then((supabase) =>
         supabase.functions.invoke("payment-pdf-gen", {
           body: { order_id: order.order_id },
-        })
+        }),
       )
       .catch((error) => {
         // Log but don't throw - this is non-blocking background work
         console.error(
           "[Webhook] ⚠️ PDF generation failed (non-blocking):",
-          error
+          error,
         );
       });
 
-    // Revalidate relevant pages
-    revalidatePath("/");
-    revalidatePath("/tickets");
+    // Revalidate relevant pages (TODO)
 
     // Return success
     return new Response(
@@ -264,7 +271,7 @@ export async function POST(request: Request) {
         order_id: order.order_id,
         tickets_count: order.ticket_ids.length,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error) {
     console.error("[Webhook] ❌ ERROR:", error);
@@ -275,7 +282,7 @@ export async function POST(request: Request) {
       JSON.stringify({
         error: error,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
   }
 }
