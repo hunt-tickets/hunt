@@ -5,6 +5,15 @@ import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+// Document type mapping for Colombia (UUID mapping)
+const DOCUMENT_TYPE_MAP: Record<string, string> = {
+  "Cédula de Ciudadanía": "f87aaaf0-53d1-4e63-90d5-afe3c8784e31",
+  "Cédula de Extranjería": "0b548efa-0689-4935-8c42-5c219e7ffd60",
+  "Pasaporte": "ca2f187a-7fac-491f-a9b7-36fa5975855c",
+  "PEP": "76201a7e-fd86-4ba3-aba6-eabceabb983e",
+  "PPT": "bb7988e4-ee61-4776-9ef1-921fd6cd94f3",
+};
+
 const translateError = (errorMessage: string): string => {
   // Rate limiting error
   if (
@@ -41,14 +50,6 @@ export const AuthSignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
-  const [userData, setUserData] = useState<{
-    nombre: string;
-    apellido: string;
-    birthday: string;
-    tipoDocumento: string;
-    numeroDocumento: string;
-  } | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -96,6 +97,7 @@ export const AuthSignUp = () => {
     email: string;
     nombre: string;
     apellido: string;
+    phoneNumber: string;
     birthday: string;
     tipoDocumento: string;
     numeroDocumento: string;
@@ -103,8 +105,6 @@ export const AuthSignUp = () => {
     setIsLoading(true);
     setError(null);
     setMessage(null);
-    setEmail(data.email);
-    setUserData(data);
 
     try {
       await authClient.emailOtp.sendVerificationOtp({
@@ -122,7 +122,18 @@ export const AuthSignUp = () => {
     }
   };
 
-  const handleVerifyOtp = async (otp: string) => {
+  const handleVerifyOtp = async (
+    otp: string,
+    email: string,
+    userData: {
+      nombre: string;
+      apellido: string;
+      phoneNumber: string;
+      birthday: string;
+      tipoDocumento: string;
+      numeroDocumento: string;
+    }
+  ) => {
     setIsLoading(true);
     setError(null);
 
@@ -131,35 +142,29 @@ export const AuthSignUp = () => {
         { email, otp },
         {
           onSuccess: async () => {
+            console.log("Success user created, now updating the User with additional fields.")
             // Update user profile with additional data
-            if (userData) {
-              try {
-                // Map document type names to their database UUIDs (Colombia)
-                const documentTypeMapping: Record<string, string> = {
-                  "Cédula de Ciudadanía": "f87aaaf0-53d1-4e63-90d5-afe3c8784e31",
-                  "Cédula de Extranjería": "0b548efa-0689-4935-8c42-5c219e7ffd60",
-                  "Pasaporte": "ca2f187a-7fac-491f-a9b7-36fa5975855c",
-                  "PEP": "76201a7e-fd86-4ba3-aba6-eabceabb983e",
-                  "PPT": "bb7988e4-ee61-4776-9ef1-921fd6cd94f3",
-                };
+            try {
+              await authClient.updateUser({
+                name: `${userData.nombre} ${userData.apellido}`,
+                nombres: userData.nombre,
+                apellidos: userData.apellido,
+                phoneNumber: userData.phoneNumber || undefined,
+                birthdate: userData.birthday
+                  ? new Date(userData.birthday)
+                  : undefined,
+                documentId: userData.numeroDocumento || undefined,
+                documentTypeId: userData.tipoDocumento
+                  ? DOCUMENT_TYPE_MAP[userData.tipoDocumento]
+                  : undefined,
+              });
 
-                await authClient.updateUser({
-                  name: `${userData.nombre} ${userData.apellido}`,
-                  nombres: userData.nombre,
-                  apellidos: userData.apellido,
-                  birthdate: userData.birthday ? new Date(userData.birthday) : undefined,
-                  documentId: userData.numeroDocumento || undefined,
-                  documentTypeId: userData.tipoDocumento
-                    ? documentTypeMapping[userData.tipoDocumento]
-                    : undefined,
-                });
-
-                // Phone number requires separate verification flow
-                // User can add/verify it later from their profile page
-              } catch (updateError) {
-                console.error("Failed to update user profile:", updateError);
-              }
+              // Phone number stored but not verified yet
+              // User can verify it later from their profile page
+            } catch (updateError) {
+              console.error("Failed to update user profile:", updateError);
             }
+
             handleRedirect(getRedirectUrl());
           },
           onError: (error: unknown) => {
@@ -168,7 +173,7 @@ export const AuthSignUp = () => {
 
             setError(translateError(errorMsg));
           },
-        }
+        },
       );
     } catch (error: unknown) {
       const errorMsg =
@@ -179,7 +184,7 @@ export const AuthSignUp = () => {
     }
   };
 
-  const handleResendOtp = async () => {
+  const handleResendOtp = async (email: string) => {
     setIsLoading(true);
     setError(null);
     setMessage(null);

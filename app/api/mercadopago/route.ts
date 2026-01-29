@@ -67,12 +67,10 @@ export async function POST(request: Request) {
         status: 401,
       });
     }
-
     console.log("[Webhook] ✅ Security validation passed");
 
     // STEP 2: Parse webhook notification
     const body: { data: { id: string }; type: string } = await request.json();
-
     console.log(`[Webhook] Type: ${body.type}, Payment ID: ${body.data?.id}`);
 
     // Only process payment notifications
@@ -95,15 +93,12 @@ export async function POST(request: Request) {
     console.log(
       `[Webhook] Payment fetched - Status: ${payment.status}, Amount: ${payment.transaction_amount} ${payment.currency_id}`,
     );
-
     // DEBUG: Log full payment object to analyze structure for impuestos
     console.log("[Webhook] 📊 FULL PAYMENT OBJECT:");
     console.log(JSON.stringify(payment, null, 2));
-
     // DEBUG: Log fee_details specifically
     console.log("[Webhook] 💰 FEE DETAILS:");
     console.log(JSON.stringify(payment.fee_details, null, 2));
-
     // DEBUG: Log transaction_details for net_received_amount
     console.log("[Webhook] 🧾 TRANSACTION DETAILS:");
     console.log(JSON.stringify(payment.transaction_details, null, 2));
@@ -183,7 +178,6 @@ export async function POST(request: Request) {
         status: 400,
       });
     }
-
     console.log(
       `[Webhook] Processing reservation ${reservationId} (platform: ${platform})`,
     );
@@ -199,7 +193,6 @@ export async function POST(request: Request) {
       taxWithholdingIca,
       taxWithholdingFuente,
     );
-
     console.log(
       `[Webhook] ✅ SUCCESS - Order ${order.order_id} created with ${order.ticket_ids.length} tickets`,
     );

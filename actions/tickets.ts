@@ -5,98 +5,6 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-/**
- * Server actions for secure operations
- * All sensitive operations should be server actions
- */
-
-export async function createTicketPurchase(
-  ticketTierId: string,
-  quantity: number,
-  paymentMethodId: string
-) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) {
-    throw new Error("Authentication required");
-  }
-
-  const supabase = await createClient();
-
-  // Start a transaction using Supabase's RPC
-  const { data, error } = await supabase.rpc("purchase_tickets", {
-    p_user_id: session.user.id,
-    p_ticket_tier_id: ticketTierId,
-    p_quantity: quantity,
-    p_payment_method_id: paymentMethodId,
-  });
-
-  if (error) {
-    console.error("Purchase error:", error);
-
-    // Handle specific errors
-    if (error.message.includes("insufficient_tickets")) {
-      throw new Error("Not enough tickets available");
-    }
-    if (error.message.includes("payment_failed")) {
-      throw new Error("Payment processing failed");
-    }
-
-    throw new Error("Purchase failed. Please try again.");
-  }
-
-  // Revalidate relevant paths
-  revalidatePath("/tickets");
-  revalidatePath(`/events/${data.event_id}`);
-
-  return data;
-}
-
-export async function cancelTicketOrder(orderId: string) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) {
-    throw new Error("Authentication required");
-  }
-
-  const supabase = await createClient();
-
-  // Verify user owns this order
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .select("*, event:events(event_date)")
-    .eq("id", orderId)
-    .eq("user_id", session.user.id)
-    .single();
-
-  if (orderError || !order) {
-    throw new Error("Order not found");
-  }
-
-  // Check if cancellation is allowed (e.g., 24 hours before event)
-  const eventDate = new Date(order.event.event_date);
-  const now = new Date();
-  const hoursUntilEvent =
-    (eventDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-  if (hoursUntilEvent < 24) {
-    throw new Error("Cannot cancel within 24 hours of event");
-  }
-
-  // Process cancellation via RPC for atomicity
-  const { data, error } = await supabase.rpc("cancel_order", {
-    p_order_id: orderId,
-    p_user_id: session.user.id,
-  });
-
-  if (error) {
-    throw new Error("Cancellation failed");
-  }
-
-  revalidatePath("/tickets");
-  revalidatePath("/profile");
-
-  return data;
-}
-
 export async function transferTicket(ticketId: string, recipientEmail: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
@@ -148,44 +56,6 @@ export async function transferTicket(ticketId: string, recipientEmail: string) {
   return { success: true };
 }
 
-export async function getEventTickets(eventId: string) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("tickets")
-    .select(
-      `
-      *,
-      ticket_type:tickets_types(id, name)
-    `
-    )
-    .eq("event_id", eventId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching tickets:", error);
-    return null;
-  }
-
-  return data;
-}
-
-export async function getTicketTypes() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("tickets_types")
-    .select("id, name")
-    .order("name", { ascending: true });
-
-  if (error) {
-    console.error("Error fetching ticket types:", error);
-    return [];
-  }
-
-  return data || [];
-}
-
 export async function createTicket(
   eventId: string,
   ticketData: {
@@ -204,7 +74,7 @@ export async function createTicket(
     family?: string;
     reference?: string;
     ticket_type_id?: string;
-  }
+  },
 ) {
   const supabase = await createClient();
 
@@ -252,7 +122,7 @@ export async function updateTicket(
     hex?: string;
     family?: string;
     reference?: string;
-  }
+  },
 ) {
   const supabase = await createClient();
 
@@ -301,7 +171,7 @@ export async function updateTicketType(
     sale_end?: string | null;
     min_per_order?: number;
     max_per_order?: number;
-  }
+  },
 ) {
   const supabase = await createClient();
 
@@ -310,13 +180,20 @@ export async function updateTicketType(
     updated_at: new Date().toISOString(),
   };
   if (ticketTypeData.name !== undefined) updateData.name = ticketTypeData.name;
-  if (ticketTypeData.description !== undefined) updateData.description = ticketTypeData.description || null;
-  if (ticketTypeData.price !== undefined) updateData.price = ticketTypeData.price.toFixed(2);
-  if (ticketTypeData.capacity !== undefined) updateData.capacity = ticketTypeData.capacity;
-  if (ticketTypeData.sale_start !== undefined) updateData.sale_start = ticketTypeData.sale_start || null;
-  if (ticketTypeData.sale_end !== undefined) updateData.sale_end = ticketTypeData.sale_end || null;
-  if (ticketTypeData.min_per_order !== undefined) updateData.min_per_order = ticketTypeData.min_per_order;
-  if (ticketTypeData.max_per_order !== undefined) updateData.max_per_order = ticketTypeData.max_per_order;
+  if (ticketTypeData.description !== undefined)
+    updateData.description = ticketTypeData.description || null;
+  if (ticketTypeData.price !== undefined)
+    updateData.price = ticketTypeData.price.toFixed(2);
+  if (ticketTypeData.capacity !== undefined)
+    updateData.capacity = ticketTypeData.capacity;
+  if (ticketTypeData.sale_start !== undefined)
+    updateData.sale_start = ticketTypeData.sale_start || null;
+  if (ticketTypeData.sale_end !== undefined)
+    updateData.sale_end = ticketTypeData.sale_end || null;
+  if (ticketTypeData.min_per_order !== undefined)
+    updateData.min_per_order = ticketTypeData.min_per_order;
+  if (ticketTypeData.max_per_order !== undefined)
+    updateData.max_per_order = ticketTypeData.max_per_order;
 
   const { error } = await supabase
     .from("ticket_types")
@@ -325,7 +202,10 @@ export async function updateTicketType(
 
   if (error) {
     console.error("Error updating ticket type:", error);
-    return { success: false, message: "Error al actualizar el tipo de entrada" };
+    return {
+      success: false,
+      message: "Error al actualizar el tipo de entrada",
+    };
   }
 
   revalidatePath(`/profile/[userId]/administrador/event`, "page");
@@ -416,7 +296,7 @@ export async function getAllVenues() {
 
 export async function updateTicketTypeActive(
   ticketTypeId: string,
-  active: boolean
+  active: boolean,
 ): Promise<{ success: boolean; message?: string }> {
   const supabase = await createClient();
 

@@ -112,7 +112,7 @@ export async function createReservation(
   const supabase = await createClient();
 
   try {
-    const { data, error } = await supabase.rpc("create_reservation_v2", {
+    const { data, error } = await supabase.rpc("create_reservation", {
       p_user_id: userId,
       p_event_id: eventId,
       p_items: items,
@@ -240,62 +240,62 @@ export async function convertReservationToOrder(
  *
  * @returns Count of expired reservations and released tickets
  */
-export async function expireReservations(): Promise<ExpiryResult> {
-  const supabase = await createClient();
+// export async function expireReservations(): Promise<ExpiryResult> {
+//   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("expire_reservations");
+//   const { data, error } = await supabase.rpc("expire_reservations");
 
-  if (error) {
-    throw error;
-  }
+//   if (error) {
+//     throw error;
+//   }
 
-  if (!data || data.length === 0) {
-    return { expired_count: 0, released_tickets: 0 };
-  }
+//   if (!data || data.length === 0) {
+//     return { expired_count: 0, released_tickets: 0 };
+//   }
 
-  const result = data[0];
-  return {
-    expired_count: parseInt(result.expired_count) || 0,
-    released_tickets: parseInt(result.released_tickets) || 0,
-  };
-}
+//   const result = data[0];
+//   return {
+//     expired_count: parseInt(result.expired_count) || 0,
+//     released_tickets: parseInt(result.released_tickets) || 0,
+//   };
+// }
 
-// ============================================================================
-// FUNCTION 4: Cancel Reservation (User Action)
-// ============================================================================
+// // ============================================================================
+// // FUNCTION 4: Cancel Reservation (User Action)
+// // ============================================================================
 
-/**
- * User-initiated reservation cancellation
- *
- * Allows users to cancel their reservation before payment.
- * Validates user ownership to prevent unauthorized cancellations.
- *
- * @param reservationId - Reservation UUID
- * @param userId - Better Auth user ID (for authorization)
- * @returns true if successful
- *
- * @throws Error if:
- * - Reservation not found
- * - User doesn't own reservation
- * - Reservation not in 'active' status
- */
-export async function cancelReservation(
-  reservationId: string,
-  userId: string
-): Promise<boolean> {
-  const supabase = await createClient();
+// /**
+//  * User-initiated reservation cancellation
+//  *
+//  * Allows users to cancel their reservation before payment.
+//  * Validates user ownership to prevent unauthorized cancellations.
+//  *
+//  * @param reservationId - Reservation UUID
+//  * @param userId - Better Auth user ID (for authorization)
+//  * @returns true if successful
+//  *
+//  * @throws Error if:
+//  * - Reservation not found
+//  * - User doesn't own reservation
+//  * - Reservation not in 'active' status
+//  */
+// export async function cancelReservation(
+//   reservationId: string,
+//   userId: string
+// ): Promise<boolean> {
+//   const supabase = await createClient();
 
-  const { error } = await supabase.rpc("cancel_reservation", {
-    p_reservation_id: reservationId,
-    p_user_id: userId,
-  });
+//   const { error } = await supabase.rpc("cancel_reservation", {
+//     p_reservation_id: reservationId,
+//     p_user_id: userId,
+//   });
 
-  if (error) {
-    throw error;
-  }
+//   if (error) {
+//     throw error;
+//   }
 
-  return true;
-}
+//   return true;
+// }
 
 // ============================================================================
 // FUNCTION 5: Get Ticket Availability (Read-Only)

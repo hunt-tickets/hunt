@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     // 7. Create reservation for the buyer (5 min expiry for cash sales)
     const { data: reservationData, error: reservationError } =
-      await supabase.rpc("create_reservation_v2", {
+      await supabase.rpc("create_reservation", {
         p_user_id: buyer.id,
         p_event_id: eventId,
         p_items: items,

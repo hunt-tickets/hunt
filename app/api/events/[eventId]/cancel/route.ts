@@ -38,7 +38,7 @@ import { cancelEvent } from "@/lib/helpers/events";
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
+  { params }: { params: Promise<{ eventId: string }> },
 ) {
   try {
     // 1. Get authenticated user
@@ -49,7 +49,7 @@ export async function POST(
     if (!session?.user) {
       return NextResponse.json(
         { success: false, error: "Debes iniciar sesión para continuar" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -69,7 +69,7 @@ export async function POST(
           success: false,
           error: "Debes proporcionar una razón para la cancelación",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -84,39 +84,21 @@ export async function POST(
     if (eventError || !event) {
       return NextResponse.json(
         { success: false, error: "Evento no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
-
-    // 5. Check permissions
-    // TODO: Add proper permission check using Better Auth organization roles
-    // Verify user has 'cancel' permission on event (admin/owner role)
-    // Example:
-    // const { data: member } = await supabase
-    //   .from("member")
-    //   .select("role")
-    //   .eq("user_id", userId)
-    //   .eq("organization_id", event.organization_id)
-    //   .single();
-    //
-    // if (!member || !['administrator', 'owner'].includes(member.role)) {
-    //   return NextResponse.json(
-    //     { success: false, error: "No tienes permisos para cancelar este evento" },
-    //     { status: 403 }
-    //   );
-    // }
 
     // 6. Call helper function to cancel event
     const result = await cancelEvent(
       eventId,
       userId,
-      cancellationReason.trim()
+      cancellationReason.trim(),
     );
 
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -142,7 +124,7 @@ export async function POST(
 
     return NextResponse.json(
       { success: false, error: errorMessage },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

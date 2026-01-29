@@ -81,9 +81,9 @@ AS $$
       RAISE EXCEPTION 'Reservation is not active. Status: %', v_reservation.status;
     END IF;
 
-    IF v_reservation.expires_at < NOW() THEN
-      RAISE EXCEPTION 'Reservation has expired at %', v_reservation.expires_at;
-    END IF;
+    -- IF v_reservation.expires_at < NOW() THEN
+    --   RAISE EXCEPTION 'Reservation has expired at %', v_reservation.expires_at;
+    -- END IF;
 
     -- Updated INSERT to include tax withholdings
     INSERT INTO orders (

@@ -19,7 +19,7 @@ export async function DisplayEvents({ limit = 6 }: DisplayEventsProps) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 dark:text-white/70">
-          No hay eventos populares disponibles en este momento
+          No hay eventos disponibles en este momento
         </p>
       </div>
     );

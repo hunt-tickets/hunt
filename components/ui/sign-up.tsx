@@ -46,6 +46,7 @@ export interface SignUpFormData {
   email: string;
   nombre: string;
   apellido: string;
+  phoneNumber: string;
   birthday: string;
   tipoDocumento: string;
   numeroDocumento: string;
@@ -55,8 +56,8 @@ interface SignUpPageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
   onSendOtp?: (data: SignUpFormData) => void;
-  onVerifyOtp?: (otp: string) => void;
-  onResendOtp?: () => void;
+  onVerifyOtp?: (otp: string, email: string, userData: Omit<SignUpFormData, 'email'>) => void;
+  onResendOtp?: (email: string) => void;
   onLogin?: () => void;
   isOtpSent?: boolean;
   isLoading?: boolean;
@@ -124,6 +125,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
       email,
       nombre,
       apellido,
+      phoneNumber,
       birthday,
       tipoDocumento,
       numeroDocumento,
@@ -133,7 +135,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   const handleResendOtp = () => {
     setResendCountdown(60);
     setCanResend(false);
-    onResendOtp?.();
+    onResendOtp?.(email);
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -157,7 +159,14 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    onVerifyOtp?.(otp.join(""));
+    onVerifyOtp?.(otp.join(""), email, {
+      nombre,
+      apellido,
+      phoneNumber,
+      birthday,
+      tipoDocumento,
+      numeroDocumento,
+    });
   };
 
   return (

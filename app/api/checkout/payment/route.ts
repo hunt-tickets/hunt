@@ -31,7 +31,7 @@ interface BillingInfo {
 
 function calculateMarketplaceFee(totalAmount: number): number {
   const feePercentage = parseFloat(
-    process.env.MARKETPLACE_FEE_PERCENTAGE || "5"
+    process.env.MARKETPLACE_FEE_PERCENTAGE || "5",
   );
   const fee = (totalAmount * feePercentage) / 100;
   return Math.round(fee * 100) / 100;
@@ -42,13 +42,13 @@ async function getOrgMercadoPagoCredentials(organizationId: string) {
     where: and(
       eq(paymentProcessorAccount.organizationId, organizationId),
       eq(paymentProcessorAccount.processorType, "mercadopago"),
-      eq(paymentProcessorAccount.status, "active")
+      eq(paymentProcessorAccount.status, "active"),
     ),
   });
 
   if (!account) {
     throw new Error(
-      "No active Mercado Pago account found for this organization"
+      "No active Mercado Pago account found for this organization",
     );
   }
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json(
         { success: false, error: "Debes iniciar sesión para continuar" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -92,14 +92,14 @@ export async function POST(request: NextRequest) {
     const reservation = await db.query.reservations.findFirst({
       where: and(
         eq(reservations.id, reservationId),
-        eq(reservations.userId, userId)
+        eq(reservations.userId, userId),
       ),
     });
 
-    if (!reservation) {
+    if (!reservation || reservation.expiresAt < new Date()) {
       return NextResponse.json(
-        { success: false, error: "Reserva no encontrada" },
-        { status: 404 }
+        { success: false, error: "Reserva no encontrada o expirada." },
+        { status: 404 },
       );
     }
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     if (!event) {
       return NextResponse.json(
         { success: false, error: "Evento no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     await db.execute(
       sql`UPDATE reservations
           SET payment_session_id = ${preference.id}
-          WHERE id = ${reservationId}`
+          WHERE id = ${reservationId}`,
     );
 
     // 13. Return checkout URL
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: false, error: errorMessage },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -46,3 +46,4 @@ next-env.d.ts
 
 notas.txt
 .env.local.backup
+/supabase-network-compatibility.txt
