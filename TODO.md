@@ -9,13 +9,14 @@
 - reembolsos con Oscar
 - tracking de comisiones a los vendedores en el tab de Vendedores
 
-**** OPTIMIZE IMAGES AND BANDWITH TRANSFER (USE THE IMAGE COMPONENT (NEXTJS) AND THE CUSTOM SUPABASE LOADER)
+-->> finish the checkout, expires_at logic
+
+\*\*\*\* OPTIMIZE IMAGES AND BANDWITH TRANSFER (USE THE IMAGE COMPONENT (NEXTJS) AND THE CUSTOM SUPABASE LOADER)
 SUPABASE TRANSFORMATIONS COUNT ONLY 1 PER IMAGE, NO MATTER THE DIFFERENT TIMES ITS TRANSFORMED DIFFERENTLY
 
 RULES:
 IMAGE TRANSFORMATIONS DONE WITH NEXTJS LOADER (GENERATES A URL SO THAT SUPABASE CAN MAKE THE TRANSFORMATION IN THE CDN AND CACHE THE IMAGE)
-ALL COMMUNICATION WITH SUPABASE SERVER, EXCEPT PUBLIC IMAGES/FILES SHOULD BE DONE VIA THE SERVER, TO AVOID LEAKING ANON_KEY 
-
+ALL COMMUNICATION WITH SUPABASE SERVER, EXCEPT PUBLIC IMAGES/FILES SHOULD BE DONE VIA THE SERVER, TO AVOID LEAKING ANON_KEY
 
 TEST USERS FOR MERCADOPAGO
 TESTUSER4246955244978058217
@@ -27,8 +28,18 @@ marketplace
 TESTUSER2538612194358989926
 wcK8gOoSU4
 
-
 Notes
+
+Pessimistic Locking
+We prevent race conditions in a system through locking on shared data structures. Locks guarantee mutual exclusion and allow only a single thread to update the data structure.
+
+While locking works on in-memory data structures, does it work for persistent stores like database? The answer is Yes.
+
+Databases like PostgreSQL, MySQL, SQL Server, etc provide constructs to acquire a lock on a database record. The lock ensures that only a single transaction can modify the record. The lock is released when the transaction is committed, and other transactions can then acquire a lock.
+
+This approach is known as Pessimistic locking and often used to solve the double booking problem. Let’s now apply this concept and understand its working for our use case.
+
+
 <!-- 41.1.1. Advantages of Using PL/pgSQL
 SQL is the language PostgreSQL and most other relational databases use as query language. It's portable and easy to learn. But every SQL statement must be executed individually by the database server.
 
@@ -45,7 +56,6 @@ Multiple rounds of query parsing can be avoided
 This can result in a considerable performance increase as compared to an application that does not use stored functions.
 
 Also, with PL/pgSQL you can use all the data types, operators and functions of SQL. -->
-
 
 <!-- DECLARE
     v_order_id UUID;
@@ -209,75 +219,75 @@ Also, with PL/pgSQL you can use all the data types, operators and functions of S
     SELECT v_order_id, v_ticket_ids;
   END; -->
 
-
 base64 converts binary to text
-i.e.: Base64 encoded: 500 KB image = 667 KB in database (+33% larger!)                                                                                                                     
-Format: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQ..."       
- Base64 converts binary to text:                                                                                                                                                      
-  Binary:    [0xFF, 0xD8, 0xFF]  (3 bytes)                                                                                                                                             
-             ↓ Convert to Base64                                                                                                                                                       
-  Base64:    "/9j/"              (4 characters)                                                                                                                                        
-                                                                                                                                                                                       
-  Every 3 bytes becomes 4 characters = 33% size increase   
+i.e.: Base64 encoded: 500 KB image = 667 KB in database (+33% larger!)  
+Format: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQ..."  
+ Base64 converts binary to text:  
+ Binary: [0xFF, 0xD8, 0xFF] (3 bytes)  
+ ↓ Convert to Base64  
+ Base64: "/9j/" (4 characters)
 
-  saving base64 in a sql table is not efficient since to qeury a row, the entire row must be searched and loaded to memory                                                                                                               
+Every 3 bytes becomes 4 characters = 33% size increase
 
-   Database Architecture:                                                                                                                                                               
-  ┌─────────────────────────────────────────┐                                                                                                                                          
-  │  PostgreSQL                             │                                                                                                                                          
-  │                                         │                                                                                                                                          
-  │  Table: users                           │                                                                                                                                          
-  │  ┌─────────────────────────────────┐   │                                                                                                                                           
-  │  │ Row 1:                          │   │                                                                                                                                           
-  │  │ ├─ id: 1                        │   │                                                                                                                                           
-  │  │ ├─ name: "John"                 │   │                                                                                                                                           
-  │  │ └─ avatar: "/9j/4AAQSkZJ..."   │   │                                                                                                                                            
-  │  │            (667 KB TEXT)        │   │                                                                                                                                           
-  │  │                                 │   │                                                                                                                                           
-  │  │ Problem: Entire row must be     │   │                                                                                                                                           
-  │  │ loaded to query ANY field       │   │                                                                                                                                           
-  │  └─────────────────────────────────┘   │                                                                                                                                           
-  └─────────────────────────────────────────┘                                                                                                                                          
-                                                 
- Real-World Example                                                                                                                                                                   
-                                                                                                                                                                                       
-  Scenario: Fetch user's email                                                                                                                                                         
-                                                                                                                                                                                       
-  With Base64 in Database:                                                                                                                                                             
-  SELECT email FROM users WHERE id = 1;                                                                                                                                                
-                                                                                                                                                                                       
-  What PostgreSQL 
-  does:                                                                                                                                                                
-  1. Find row for user ID 1                                                                                                                                                            
-  2. Load ENTIRE row into memory (including 667 KB avatar!)                                                                                                                            
-  3. Extract just the 'email' field                                                                                                                                                    
-  4. Return "john@example.com"                                                                                                                                                         
-                                                                                                                                                                                       
-  💀 Problem: Had to load 667 KB to get 20 bytes!                                                                                                                                      
-                                                                                                                                                                                       
-  With Object Storage:                                                                                                                                                                 
-  SELECT email FROM users WHERE id = 1;                                                                                                                                                
-                                                                                                                                                                                       
-  What PostgreSQL does:                                                                                                                                                                
-  1. Find row for user ID 1                                                                                                                                                            
-  2. Load row (id, name, email, avatar_url)                                                                                                                                            
-  3. Row size: ~100 bytes (just the URL string!)                                                                                                                                       
-  4. Return "john@example.com"                                                                                                                                                         
-                                                                                                                                                                                       
-  ✅ Efficient: Only loaded 100 bytes!                                                                                                                                                 
-                                                                                                                                                                                       
-  ---                                       
+saving base64 in a sql table is not efficient since to qeury a row, the entire row must be searched and loaded to memory
+
+Database Architecture:  
+ ┌─────────────────────────────────────────┐  
+ │ PostgreSQL │  
+ │ │  
+ │ Table: users │  
+ │ ┌─────────────────────────────────┐ │  
+ │ │ Row 1: │ │  
+ │ │ ├─ id: 1 │ │  
+ │ │ ├─ name: "John" │ │  
+ │ │ └─ avatar: "/9j/4AAQSkZJ..." │ │  
+ │ │ (667 KB TEXT) │ │  
+ │ │ │ │  
+ │ │ Problem: Entire row must be │ │  
+ │ │ loaded to query ANY field │ │  
+ │ └─────────────────────────────────┘ │  
+ └─────────────────────────────────────────┘
+
+Real-World Example
+
+Scenario: Fetch user's email
+
+With Base64 in Database:  
+ SELECT email FROM users WHERE id = 1;
+
+What PostgreSQL
+does:
+
+1. Find row for user ID 1
+2. Load ENTIRE row into memory (including 667 KB avatar!)
+3. Extract just the 'email' field
+4. Return "john@example.com"  
 
 
-  Base64 encoded images are typically 33% to 37% larger than the original binary file. 
+💀 Problem: Had to load 667 KB to get 20 bytes!
 
-This increase happens because Base64 converts binary data (8 bits per byte) into an ASCII string representation (6 bits per character, effectively using 8 bits to store them), resulting in roughly 4 bytes of text for every 3 bytes of original data. 
+With Object Storage:  
+ SELECT email FROM users WHERE id = 1;
 
+What PostgreSQL does:
+
+1. Find row for user ID 1
+2. Load row (id, name, email, avatar_url)
+3. Row size: ~100 bytes (just the URL string!)
+4. Return "john@example.com"  
+
+
+✅ Efficient: Only loaded 100 bytes!
+
+---
+
+Base64 encoded images are typically 33% to 37% larger than the original binary file.
+
+This increase happens because Base64 converts binary data (8 bits per byte) into an ASCII string representation (6 bits per character, effectively using 8 bits to store them), resulting in roughly 4 bytes of text for every 3 bytes of original data.
 
 Generally no. Base64 will occupy more space than necessary to store those images. Depending on the size of your images and how frequently they’re accessed, it is generally not an optimal stress to put on the database.
 
 You should store them on the file system or in something like Azure blob storage.
-
 
 98
 metaltyphoon
